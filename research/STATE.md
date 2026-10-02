@@ -19,7 +19,8 @@
 ## 正在进行
 
 - lit-scout：核对参考文献、提取 gross code 论文细节、调度搜索新颖性调研 → `research/literature/`
-- E-002 gross code baseline（experimenter）→ `experiments/E-002-gross-baseline.yaml`
+- ~~E-002 gross code baseline~~ 已完成（待 auditor）：码参数精确匹配，d_circ ≤ 10（找到权重 10 的见证），p=0.003–0.005 与论文拟合差 0.86–1.18 倍；**p=0.006 偏高 1.37 倍且置信区间不覆盖论文值，原因未明**；p=0.003 统计量不足
+- auditor #2：复核 E-002 → `research/audits/`
 - ~~auditor 复核 E-001~~ 已完成：CONFIRMED（有条件）。关键发现：缺空闲噪声、只测 Z 基底，已转为评估器的硬性要求
 - ~~评估器第一部分~~ 已完成（未冻结）：噪声模型（sd6/si1000/gross_sd6，空闲噪声默认开启）+ L0（双基底）+ 28 个攻击测试全部拒绝；全套 121 测试通过（lead 复跑）
   - 局限：d_circ 只是上界（需 SAT/ILP 复核）；L0 拒绝辅助比特跨轮流水、flag/猫态等非标准电路，**若选交错/flag 方向需扩展 L0**
@@ -41,7 +42,9 @@
 
 ## 已知风险 / 备注
 
-- 待办：E-002 完成后，写脚本判定 IBM 原调度是否交错（影响方向建议）。
+- ~~待办：判定 IBM 原调度是否交错~~ 已完成：**是交错的**（见方向建议书风险第 4 条），方案 1 先验下调。
+- 流程事故：E-002 experimenter 执行过 `pkill -f "multiprocessing.spawn"`，可能误杀其他 agent 的进程。经检查无实际损失。
+  建议 PI 在 `.claude/agents/experimenter.md` 加一条：禁止用模式匹配批量杀进程，只能杀自己启动的 PID。
 
 - 文献数字目前均为记忆整理，未核实。
 - E-001 教训：噪声模型口径决定阈值数字。gross code 对比必须使用与 IBM 论文相同的噪声定义，并在评估器中钉死。
