@@ -1,0 +1,7 @@
+[honest] per-round P_any 1.7418e-02, counts {'shots': 40000, 'fail_Z': 1022, 'fail_X': 1128, 'fail_any': 2054, 'fail_both': 96, 'batches_used': 20}
+attacker: replaced /var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/s4_ds3kcxje/work/batch_000000000.json
+[A work_dir] status scored; counts {'shots': 10000000, 'fail_Z': 1000, 'fail_X': 1000, 'fail_any': 1999, 'fail_both': 1, 'batches_used': 1}; per-round P_any 6.66e-05; written to board: True
+attacker: replaced /var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/l2_49yexpzg/batch_000000000.json
+[B default tmp dir] status scored; counts {'shots': 10000000, 'fail_Z': 1000, 'fail_X': 1000, 'fail_any': 1999, 'fail_both': 1, 'batches_used': 1}; per-round P_any 6.66e-05; written to board: True
+verify_leaderboard(board) = []
+table: [('injected-A work_dir', 6.663777382764913e-05)]

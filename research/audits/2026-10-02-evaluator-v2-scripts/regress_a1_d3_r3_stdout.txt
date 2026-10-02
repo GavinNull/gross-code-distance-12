@@ -1,0 +1,49 @@
+fake Z circuit: 10 ticks, honest: 21 ticks
+=== honest: L0 passed=True d_circ=3
+L0 PASS [basis both] (d_circ upper bound = 3, per basis Z: 3, X: 3)
+[PASS] Z:instructions: only allowed, noiseless instructions
+[PASS] Z:qubit_count: 26 <= 26 qubits
+[PASS] Z:connectivity: all two-qubit gates on allowed edges
+[PASS] Z:tick_structure: 22 time steps, <=1 op per qubit per step
+[PASS] Z:determinism: all 24 detectors and 1 observables deterministic
+[PASS] Z:data_layout: 9 data qubits reset before first entangling layer 2 and read out in Z basis at the end
+[PASS] Z:observables: 1 independent nontrivial logical-Z observables; coordinates in the LZ basis: {0: [1]}
+[PASS] Z:logical_injection: logical X operators injected at ticks [1, 20] are undetected and flip the observables with full rank
+[PASS] Z:stabilizer_coverage: all 8 stabilizer generators measured exactly 3 time(s) in time-disjoint windows (flow analysis of the whole circuit, no clean cuts needed)
+[PASS] Z:detector_coverage: all expected Z-type comparisons and opposite-type comparisons lie in the span of the 24 detectors
+[PASS] Z:circuit_distance: d_circ upper bound = 3 under sd6(p=0.001, idle=None) [graphlike=3, stim_search=3, bposd=3, bposd_lns=3]; shortest undetectable logical error (weight 3, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: X_ERROR on [1] -> X1; tick 0: X_ERROR on [8] -> X8; tick 0: X_ERROR on [15] -> X15 (this is an upper bound from heuristic search, not a proof of d_circ)
+[PASS] X:instructions: only allowed, noiseless instructions
+[PASS] X:qubit_count: 26 <= 26 qubits
+[PASS] X:connectivity: all two-qubit gates on allowed edges
+[PASS] X:tick_structure: 22 time steps, <=1 op per qubit per step
+[PASS] X:determinism: all 24 detectors and 1 observables deterministic
+[PASS] X:data_layout: 9 data qubits reset before first entangling layer 2 and read out in X basis at the end
+[PASS] X:observables: 1 independent nontrivial logical-X observables; coordinates in the LX basis: {0: [1]}
+[PASS] X:logical_injection: logical Z operators injected at ticks [1, 20] are undetected and flip the observables with full rank
+[PASS] X:stabilizer_coverage: all 8 stabilizer generators measured exactly 3 time(s) in time-disjoint windows (flow analysis of the whole circuit, no clean cuts needed)
+[PASS] X:detector_coverage: all expected X-type comparisons and opposite-type comparisons lie in the span of the 24 detectors
+[PASS] X:circuit_distance: d_circ upper bound = 3 under sd6(p=0.001, idle=None) [graphlike=3, stim_search=3, bposd=3, bposd_lns=3]; shortest undetectable logical error (weight 3, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: Z_ERROR on [1] -> Z1; tick 0: Z_ERROR on [3] -> Z3; tick 0: Z_ERROR on [5] -> Z5 (this is an upper bound from heuristic search, not a proof of d_circ)
+=== FAKE: L0 passed=False d_circ=None
+L0 FAIL [basis both]
+[PASS] Z:instructions: only allowed, noiseless instructions
+[PASS] Z:qubit_count: 26 <= 26 qubits
+[PASS] Z:connectivity: all two-qubit gates on allowed edges
+[PASS] Z:tick_structure: 11 time steps, <=1 op per qubit per step
+[PASS] Z:determinism: all 24 detectors and 1 observables deterministic
+[PASS] Z:data_layout: 9 data qubits reset before first entangling layer 2 and read out in Z basis at the end
+[PASS] Z:observables: 1 independent nontrivial logical-Z observables; coordinates in the LZ basis: {0: [1]}
+[PASS] Z:logical_injection: logical X operators injected at ticks [1, 9] are undetected and flip the observables with full rank
+[FAIL] Z:stabilizer_coverage: 16 measurement window(s) do not re-extract the stabilizer from the data qubits (the value is only re-measured from an ancilla, e.g. a repeated ancilla measurement without new CNOTs to the data; such 'rounds' are fake): X-stabilizer #0 window 1 (layers 8..8): the comparison with window 0 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 0: 0, expected 2); X-stabilizer #0 window 2 (layers 9..9): the comparison with window 1 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 1: 0, expected 2); X-stabilizer #1 window 1 (layers 8..8): the comparison with window 0 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 0: 0, expected 4); X-stabilizer #1 window 2 (layers 9..9): the comparison with window 1 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 1: 0, expected 4); X-stabilizer #2 window 1 (layers 8..8): the comparison with window 0 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 0: 0, expected 4); X-stabilizer #2 window 2 (layers 9..9): the comparison with window 1 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 1: 0, expected 4); ... (+10 more). (A generator counts as measured once per time-disjoint window of layers whose measurements determine its value; see README §3.2)
+[SKIPPED] Z:detector_coverage: stabilizer coverage failed
+[SKIPPED] Z:circuit_distance: earlier checks failed
+[PASS] X:instructions: only allowed, noiseless instructions
+[PASS] X:qubit_count: 26 <= 26 qubits
+[PASS] X:connectivity: all two-qubit gates on allowed edges
+[PASS] X:tick_structure: 11 time steps, <=1 op per qubit per step
+[PASS] X:determinism: all 24 detectors and 1 observables deterministic
+[PASS] X:data_layout: 9 data qubits reset before first entangling layer 2 and read out in X basis at the end
+[PASS] X:observables: 1 independent nontrivial logical-X observables; coordinates in the LX basis: {0: [1]}
+[PASS] X:logical_injection: logical Z operators injected at ticks [1, 9] are undetected and flip the observables with full rank
+[FAIL] X:stabilizer_coverage: 16 measurement window(s) do not re-extract the stabilizer from the data qubits (the value is only re-measured from an ancilla, e.g. a repeated ancilla measurement without new CNOTs to the data; such 'rounds' are fake): X-stabilizer #0 window 1 (layers 8..8): the comparison with window 0 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 0: 0, expected 2); X-stabilizer #0 window 2 (layers 9..9): the comparison with window 1 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 1: 0, expected 2); X-stabilizer #1 window 1 (layers 8..8): the comparison with window 0 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 0: 0, expected 4); X-stabilizer #1 window 2 (layers 9..9): the comparison with window 1 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 1: 0, expected 4); X-stabilizer #2 window 1 (layers 8..8): the comparison with window 0 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 0: 0, expected 4); X-stabilizer #2 window 2 (layers 9..9): the comparison with window 1 is never sensitive to exactly s on the data qubits (data weight of its detecting region right after window 1: 0, expected 4); ... (+10 more). (A generator counts as measured once per time-disjoint window of layers whose measurements determine its value; see README §3.2)
+[SKIPPED] X:detector_coverage: stabilizer coverage failed
+[SKIPPED] X:circuit_distance: earlier checks failed

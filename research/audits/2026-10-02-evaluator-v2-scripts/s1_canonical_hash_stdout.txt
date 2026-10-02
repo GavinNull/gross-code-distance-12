@@ -1,0 +1,6 @@
+random free schedules (d=3 surface, D in 6..10): 200
+  same schedule_hash but >1 distinct circuits among its global shifts: 73 (of which deterministic: 8)
+example schedule: {'format': 'qec-schedule/v1', 'period': 9, 'x_checks': [{'prep': 8, 'meas': 5, 'cnots': [[0, 4], [1, 1]]}, {'prep': 2, 'meas': 7, 'cnots': [[1, 4], [2, 6], [4, 3], [5, 5]]}, {'prep': 0, 'meas': 8, 'cnots': [[3, 2], [4, 7], [6, 1], [7, 3]]}, {'prep': 4, 'meas': 1, 'cnots': [[7, 7], [8, 8]]}], 'z_checks': [{'prep': 5, 'meas': 2, 'cnots': [[0, 7], [1, 6], [3, 1], [4, 8]]}, {'prep': 7, 'meas': 4, 'cnots': [[2, 1], [5, 2]]}, {'prep': 1, 'meas': 5, 'cnots': [[3, 3], [6, 2]]}, {'prep': 8, 'meas': 4, 'cnots': [[4, 0], [5, 3], [7, 1], [8, 2]]}]}
+  circuit hash per shift: {0: 'f388ad607fc9', 1: 'f388ad607fc9', 2: 'f388ad607fc9', 3: 'af5b77db30be', 4: 'af5b77db30be', 5: 'af5b77db30be', 6: 'f388ad607fc9', 7: 'f388ad607fc9', 8: 'f388ad607fc9'}
+  submitted circuit == canonical circuit ? False
+  layers submitted 32 (sigma 2) vs canonical 32 (sigma 0)

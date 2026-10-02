@@ -19,7 +19,9 @@
 
 ## 正在进行
 
-- auditor（新会话）再攻击已合并的评估器 v2，并测可用性 → `research/audits/2026-10-02-evaluator-v2.md`
+- ~~auditor 再审评估器 v2~~ 已完成：NOT READY，但旧攻击全部挡住；新问题 6 个必修（批文件注入、BB 码合法调度误拒（lead 已复现）、哈希不唯一、正式榜路径绕过、挑种子、pyc 前缀）
+- **评估器 v2.1**（worktree 中）：修上述问题 + H-004 需要的 `kind="distance"` 任务（bb72/90/108/120/cp126/gross-dcirc）、只跑 L0+距离的 screen 入口、见证翻译成调度坐标
+- **E-005（H-004 S1）**：非交错电路的精确 d_circ（Strikis Corollary 1）
 - ~~lit-scout：保距离电路新颖性~~ 已完成：空白（邻近部分做过），证据中等偏低；抢发风险高
 - 合并后全套测试（后台）
 

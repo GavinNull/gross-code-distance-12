@@ -1,0 +1,25 @@
+project copy: /private/var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/s6freeze_zrfe1sjn/proj
+freeze: 已冻结 30 个文件，评估器哈希 a61daafc149f043d
+verify (clean): (0, '评估器完整，哈希 a61daafc149f043d（外部锚点：git 中的 research/evaluator_freeze.*；独立校验：shasum -a 256 -c research/evaluator_freeze.sha256）')
+F7 baseline sigma: 3.7169221888498383
+F7 pyc written outside evaluators/: ['private/var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/s6freeze_zrfe1sjn/proj/evaluators/stats.cpython-312.pyc']
+F7 after forging the out-of-tree pyc, sigma: 42.0
+F7 verify with the same env: (0, '评估器完整，哈希 a61daafc149f043d（外部锚点：git 中的 research/evaluator_freeze.*；独立校验：shasum -a 256 -c research/evaluator_freeze.sha256）')
+F7 evaluators/__pycache__ exists: False
+F7 pipeline.environment_check() verified/matches_frozen/ok: True True True 
+F3 in-tree forged pyc sigma: 42.0 verify: (1, '评估器与冻结时不一致：')
+F4/F8 evaluators/stats.cpython-312-darwin.so: verify -> (1, '评估器与冻结时不一致：')
+F4/F8 evaluators/.hidden.py: verify -> (1, '评估器与冻结时不一致：')
+F4/F8 evaluators/l0/__init__.py: verify -> (1, '评估器与冻结时不一致：')
+F5 tampered stats.py, verify: (1, '评估器与冻结时不一致：')
+F5 + patched freeze script, verify: (0, '评估器完整，哈希 e961bdf152093369（外部锚点：git 中的 research/evaluator_freeze.*；独立校验：shasum -a 256 -c research/evaluator_freeze.sha256）')
+F10 independent shasum -c: rc 1 ['evaluators/stats.py: FAILED', 'scripts/freeze_evaluator.py: FAILED']
+F9 hook Edit 'evaluators/l0.py': deny; same file on disk as the real one: True
+F9 hook Edit 'EVALUATORS/L0.PY': deny; same file on disk as the real one: True
+F9 hook Edit 'Scripts/freeze_evaluator.py': deny; same file on disk as the real one: True
+F9 hook Edit 'scrİpts/freeze_evaluator.py': allow; same file on disk as the real one: False
+F9 hook Edit 'tests/TEST_L0.py': deny; same file on disk as the real one: True
+F9 hook Edit 'tｅsts/test_l0.py': allow; same file on disk as the real one: False
+F9 hook Edit '.claude/settings.json': allow; same file on disk as the real one: True
+F9 hook Edit 'research/LEADERBOARD.jsonl': deny; same file on disk as the real one: False
+F9 hook Edit 'evaluators/../evaluators/noise.py': deny; same file on disk as the real one: True

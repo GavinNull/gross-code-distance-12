@@ -1,0 +1,14 @@
+=== FAKE-EARLY: L0 passed=False d_circ=None
+L0 FAIL [basis both]
+[FAIL] Z:data_layout: 216 measurement(s) after the final data readout (layer 7): M on [2] in layer 8, M on [6] in layer 8, M on [13] in layer 8, M on [15] in layer 8, M on [17] in layer 8, M on [19] in layer 8; the final data readout must be the last measurement layer
+[SKIPPED] Z:observables: data layout check failed
+[SKIPPED] Z:logical_injection: data layout check failed
+[SKIPPED] Z:stabilizer_coverage: data layout check failed
+[SKIPPED] Z:detector_coverage: data layout check failed
+[SKIPPED] Z:circuit_distance: data layout check failed
+[FAIL] X:data_layout: 216 measurement(s) after the final data readout (layer 7): M on [2] in layer 8, M on [6] in layer 8, M on [13] in layer 8, M on [15] in layer 8, M on [17] in layer 8, M on [19] in layer 8; the final data readout must be the last measurement layer
+[SKIPPED] X:observables: data layout check failed
+[SKIPPED] X:logical_injection: data layout check failed
+[SKIPPED] X:stabilizer_coverage: data layout check failed
+[SKIPPED] X:detector_coverage: data layout check failed
+[SKIPPED] X:circuit_distance: data layout check failed

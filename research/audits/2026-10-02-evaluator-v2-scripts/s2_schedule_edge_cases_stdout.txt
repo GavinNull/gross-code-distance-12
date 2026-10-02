@@ -1,0 +1,40 @@
+base: {"format": "qec-schedule/v1", "period": 6, "x_checks": [{"prep": 0, "meas": 5, "cnots": [[0, 2], [1, 1]]}, {"prep": 0, "meas": 5, "cnots": [[1, 4], [2, 3], [4, 2], [5, 1]]}, {"prep": 0, "meas": 5, "cn ...
+ACCEPT  baseline (period 6)  (hash d51d569fa5)
+REJECT  period 1: period must be an integer in 2..64, got 1
+REJECT  period 65 (> MAX_PERIOD): period must be an integer in 2..64, got 65
+REJECT  period True: period must be an integer in 2..64, got True
+REJECT  period 6.0: period must be an integer in 2..64, got 6.0
+REJECT  period '6': period must be an integer in 2..64, got '6'
+REJECT  prep -1: X-check #0: prep must be an integer time step in 0..5, got -1
+REJECT  meas = period: X-check #0: meas must be an integer time step in 0..5, got 6
+REJECT  meas == prep: X-check #0: prep and meas are in the same time step 0
+REJECT  empty cnots: X-check #0: missing CNOT(s) to data column(s) [0, 1] (row support is [0, 1])
+REJECT  duplicate column: X-check #1: data column(s) [1] have more than one CNOT (exactly one per column)
+REJECT  column outside row support: X-check #0: CNOT(s) to data column(s) [8] outside the row support [0, 1]
+REJECT  column 10**9 (beyond n): X-check #0: CNOT(s) to data column(s) [1000000000] outside the row support [0, 1]
+REJECT  column -1: X-check #0: bad CNOT entry [-1, 4] (need [data_column >= 0, time_step in 0..5])
+REJECT  time step = period: X-check #0: bad CNOT entry [0, 6] (need [data_column >= 0, time_step in 0..5])
+REJECT  CNOT at prep time: X-check #0: CNOT to data column 0 at time 0 is outside the window: reading the period cyclically from prep (t=0), CNOTs must come strictly after prep 
+REJECT  CNOT at meas time: X-check #0: CNOT to data column 0 at time 5 is outside the window: reading the period cyclically from prep (t=0), CNOTs must come strictly after prep 
+REJECT  CNOT as [col, t, extra]: X-check #0: bad CNOT entry [0, 2, 0] (need [data_column >= 0, time_step in 0..5])
+REJECT  CNOT entries as bools: X-check #0: bad CNOT entry [True, 1] (need [data_column >= 0, time_step in 0..5])
+REJECT  one X check missing: X-checks: the schedule lists 3 checks but HX has 4 rows; every row (including redundant rows) must be measured every round
+REJECT  one extra (duplicated) X check: X-checks: the schedule lists 5 checks but HX has 4 rows; every row (including redundant rows) must be measured every round
+REJECT  X and Z lists swapped: X-check #0: CNOT(s) to data column(s) [3, 4] outside the row support [0, 1]
+REJECT  extra top-level field 'rounds': unknown top-level field(s) ['rounds']: a schedule may only contain ['format', 'name', 'period', 'x_checks', 'z_checks'] (noise, gates, rounds, detecto
+REJECT  extra check field 'basis': X-check #0: fields must be exactly ['cnots', 'meas', 'prep'], got ['basis', 'cnots', 'meas', 'prep']
+REJECT  format v2: format must be 'qec-schedule/v1', got 'qec-schedule/v2'
+REJECT  name not string: name must be a string of at most 200 characters
+REJECT  name 201 chars: name must be a string of at most 200 characters
+REJECT  two checks same data same step: Z-check #0: its ancilla has two CNOTs in the same time step(s) [2]
+ACCEPT  wrap-around window: shift all X checks by +3 (prep 3, meas 2)  (hash eff9e06c4d)
+ACCEPT  JSON text with duplicate 'period' key (last wins)  (hash 4b00c3dfaf)
+REJECT  JSON text period 1e400: period must be an integer in 2..64, got inf
+REJECT  numpy int64 time steps (dict built with numpy): X-check #0: prep must be an integer time step in 0..5, got np.int64(0)
+
+-- in-process ScheduleSpec objects (bypass JSON parsing)
+ACCEPT  ScheduleSpec with prep-6, meas+6, t+12 (same mod 6)  (hash d51d569fa5)
+        circuit identical to baseline: True; hash identical: True; stored canonical is normalised: True
+ACCEPT  ScheduleSpec period=2000 (> MAX_PERIOD 64, only checked by the JSON parser): validate+hash+unroll 0.0s
+ACCEPT  ScheduleSpec period=20000 (> MAX_PERIOD 64, only checked by the JSON parser): validate+hash+unroll 0.3s
+pipeline.evaluate(ScheduleSpec period=200) -> status scored after 7.6s; diagnostics []

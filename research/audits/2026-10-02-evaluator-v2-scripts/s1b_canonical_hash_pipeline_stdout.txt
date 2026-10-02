@@ -1,0 +1,14 @@
+trial 451: found non-canonical shift whose circuit != canonical circuit; L0 passes, d_circ=3
+submitted: {'format': 'qec-schedule/v1', 'period': 9, 'x_checks': [{'prep': 5, 'meas': 3, 'cnots': [[0, 1], [1, 2]]}, {'prep': 5, 'meas': 4, 'cnots': [[1, 1], [2, 7], [4, 2], [5, 3]]}, {'prep': 8, 'meas': 5, 'cnots': [[3, 1], [4, 0], [6, 2], [7, 4]]}, {'prep': 7, 'meas': 4, 'cnots': [[7, 0], [8, 8]]}], 'z_checks': [{'prep': 4, 'meas': 1, 'cnots': [[0, 5], [1, 7], [3, 8], [4, 6]]}, {'prep': 4, 'meas': 3, 'cnots': [[2, 5], [5, 8]]}, {'prep': 4, 'meas': 8, 'cnots': [[3, 7], [6, 6]]}, {'prep': 1, 'meas': 8, 'cnots': [[4, 4], [5, 7], [7, 6], [8, 3]]}]}
+hash(submitted) == hash(canonical): True
+[canonical] status=scored circuit_hash={'3': '9df1cf0b4ed70b084ff322a0e189886797bb653416f3cde3453eaf78e621f5e8'} score={'best': 0.050085748407003416, 'low': 0.046128710954403185, 'high': 0.054250888263908115} written=yes seq 0 wall=6.52s
+Traceback (most recent call last):
+  File "/Users/ephemeral/Desktop/qec-ai-search/research/audits/2026-10-02-evaluator-v2-scripts/s1b_canonical_hash_pipeline.py", line 55, in main
+    rep = pipeline.evaluate(TASK, None, s.to_dict(), seed=101, leaderboard_path=board)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ephemeral/Desktop/qec-ai-search/evaluators/pipeline.py", line 177, in evaluate
+    return _evaluate_task(task, code_spec, schedule, seed=seed, candidate_id=candidate_id,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: refusing to append an inconsistent record: circuit hash for 3 rounds does not match the circuits generated from the schedule
+[submitted(non-canonical shift)] evaluate RAISED ValueError: refusing to append an inconsistent record: circuit hash for 3 rounds does not match the circuits generated from the schedule
+board lines: 1

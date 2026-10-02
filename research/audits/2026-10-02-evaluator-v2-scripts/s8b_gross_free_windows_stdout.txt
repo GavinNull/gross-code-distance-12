@@ -1,0 +1,6 @@
+gross free-window variant 1 (period 11): L0 passed=False (1.6s)
+   FAIL Z:stabilizer_coverage: 6 stabilizer generator(s) not measured every round: X-stabilizer #5 (data cols [0, 1, 23, 74, 83, 89]) measured 6 time(s), required 3 (measurements completed in layers [12, 13, 23, 24, 34, 35]); X-stabilizer #21 (data co
+   FAIL X:stabilizer_coverage: 6 stabilizer generator(s) not measured every round: X-stabilizer #5 (data cols [0, 1, 23, 74, 83, 89]) measured 6 time(s), required 3 (measurements completed in layers [12, 13, 23, 24, 34, 35]); X-stabilizer #21 (data co
+   X row 5 (meas t=10) is a GF(2) sum of rows measured at other time steps -> an extra disjoint 'window' for it
+gross free-window variant 2 (period 12): L0 passed=True (1.8s)
+gross free-window variant 3 (period 10): L0 passed=True (1.7s)

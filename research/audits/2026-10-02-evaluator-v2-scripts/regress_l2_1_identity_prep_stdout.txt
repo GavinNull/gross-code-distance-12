@@ -1,0 +1,4 @@
+inserted 25 I gates per basis
+padded L0 passed: True d_circ 5
+paper : honest Σprior=6.3795 (2107 mech)  I-padded Σprior=6.3795 (2107 mech)  ratio=1.0000
+flat  : honest Σprior=6.0702 (2107 mech)  I-padded Σprior=6.0702 (2107 mech)  ratio=1.0000

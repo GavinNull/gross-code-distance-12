@@ -1,0 +1,1 @@
+uv run pytest tests/test_g1_attacks.py tests/test_pipeline.py    -q -m  -p  >  150.75s user 11.33s system 159% cpu 1:41.85 total
