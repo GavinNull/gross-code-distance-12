@@ -20,7 +20,7 @@
 - 评估器·距离模块：修复 L0 距离漏报，并入 BP-OSD 见证搜索；测试下界证明（ILP/SAT）的可行性 → `evaluators/distance.py`
 - 评估器·L2 + 成绩单：X/Z 联合采样、paper/noisy 两种边界口径、leaderboard 写入 → `evaluators/l2.py`、`evaluators/leaderboard.py`
 - E-003：复现 Strikis d_circ=11 电路，作为“最好已知电路”对照 → `experiments/E-003-strikis-gross.yaml`
-- lit-scout：联合设计竞争格局与资源指标，为 H-003 指标定稿 → `research/literature/codesign-landscape.md`、`resource-metrics.md`
+- ~~lit-scout：联合设计竞争格局~~ 已完成，H-003 已定稿（指标：Q=2n/k 与每逻辑比特 LER，按已知码包络线判定）。最近的竞争者是 OmniQEC（LLM AI 科学家，调度固定）
 - 码族枚举与筛选工具（BB/2BGA，含 IBM 表 3 复现与小规模试运行）→ `search/codes/`
 
 ## P0 已完成（摘要）
@@ -31,11 +31,14 @@
 ## 下一步（按优先级）
 
 1. 收齐上述 5 项，提交并让 auditor 复核距离模块和 L2。
-2. 根据 lit-scout 结果定稿 H-003 的指标（建议同时报告“每逻辑比特物理比特数”和“每逻辑比特每轮错误率”）。
+2. ~~H-003 指标定稿~~ 已完成。
 3. auditor 对完整评估器做攻击测试 → G1 关卡报告 → PI 冻结评估器。
 4. G1 之后：联合搜索。先用模拟退火 / 穷举做对照，再上 LLM 进化（需要 PI 配置 API key 并批准预算）。
 
 ## 已知风险 / 备注
+
+- **未解疑点**：gross code 在 p=1e-3 下的块 LER，IBM Table 1 为 2e-7，Tour de gross Table 2 为 10^-8.8，相差约 125 倍，口径未核实。外推阶段之前必须查清。
+- **竞争风险**：OmniQEC（2607.28 提交）与本项目的“AI 原生”定位高度重合。差异化依赖调度联合优化 + 每逻辑比特开销 + 严格复核。
 
 - ~~待办：判定 IBM 原调度是否交错~~ 已完成：**是交错的**（见方向建议书风险第 4 条），方案 1 先验下调。
 - 流程事故：E-002 experimenter 执行过 `pkill -f "multiprocessing.spawn"`，可能误杀其他 agent 的进程。经检查无实际损失。
