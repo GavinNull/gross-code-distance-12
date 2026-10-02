@@ -1,0 +1,442 @@
+{
+ "schedule_vs_table5": {
+  "HX_equal": true,
+  "HZ_equal": true,
+  "artifact_json": {
+   "round1": [
+    true,
+    72
+   ],
+   "round2": [
+    true,
+    144
+   ],
+   "round3": [
+    true,
+    144
+   ],
+   "round4": [
+    true,
+    144
+   ],
+   "round5": [
+    true,
+    144
+   ],
+   "round6": [
+    true,
+    144
+   ],
+   "round7": [
+    true,
+    72
+   ],
+   "round8": [
+    true,
+    0
+   ]
+  },
+  "regenerated": {
+   "round1": [
+    true,
+    72
+   ],
+   "round2": [
+    true,
+    144
+   ],
+   "round3": [
+    true,
+    144
+   ],
+   "round4": [
+    true,
+    144
+   ],
+   "round5": [
+    true,
+    144
+   ],
+   "round6": [
+    true,
+    144
+   ],
+   "round7": [
+    true,
+    72
+   ],
+   "round8": [
+    true,
+    0
+   ]
+  },
+  "prep_meas": {
+   "round1_prepX_all": true,
+   "round7_measZ_all": true,
+   "round8_measX_all": true,
+   "round8_prepZ_all": true,
+   "no_other_prep_meas": true
+  }
+ },
+ "l0": {
+  "r3": {
+   "passed": true,
+   "d_circ": 12,
+   "checks": [
+    [
+     "Z:instructions",
+     "pass"
+    ],
+    [
+     "Z:qubit_count",
+     "pass"
+    ],
+    [
+     "Z:connectivity",
+     "pass"
+    ],
+    [
+     "Z:tick_structure",
+     "pass"
+    ],
+    [
+     "Z:determinism",
+     "pass"
+    ],
+    [
+     "Z:data_layout",
+     "pass"
+    ],
+    [
+     "Z:observables",
+     "pass"
+    ],
+    [
+     "Z:logical_injection",
+     "pass"
+    ],
+    [
+     "Z:stabilizer_coverage",
+     "pass"
+    ],
+    [
+     "Z:detector_coverage",
+     "pass"
+    ],
+    [
+     "Z:circuit_distance",
+     "pass"
+    ],
+    [
+     "X:instructions",
+     "pass"
+    ],
+    [
+     "X:qubit_count",
+     "pass"
+    ],
+    [
+     "X:connectivity",
+     "pass"
+    ],
+    [
+     "X:tick_structure",
+     "pass"
+    ],
+    [
+     "X:determinism",
+     "pass"
+    ],
+    [
+     "X:data_layout",
+     "pass"
+    ],
+    [
+     "X:observables",
+     "pass"
+    ],
+    [
+     "X:logical_injection",
+     "pass"
+    ],
+    [
+     "X:stabilizer_coverage",
+     "pass"
+    ],
+    [
+     "X:detector_coverage",
+     "pass"
+    ],
+    [
+     "X:circuit_distance",
+     "pass"
+    ]
+   ],
+   "wall_s": 13.9
+  },
+  "r3_both_detectors": {
+   "passed": true,
+   "fails": []
+  },
+  "r12": {
+   "passed": true,
+   "d_circ": null,
+   "checks": [
+    [
+     "Z:instructions",
+     "pass"
+    ],
+    [
+     "Z:qubit_count",
+     "pass"
+    ],
+    [
+     "Z:connectivity",
+     "pass"
+    ],
+    [
+     "Z:tick_structure",
+     "pass"
+    ],
+    [
+     "Z:determinism",
+     "pass"
+    ],
+    [
+     "Z:data_layout",
+     "pass"
+    ],
+    [
+     "Z:observables",
+     "pass"
+    ],
+    [
+     "Z:logical_injection",
+     "pass"
+    ],
+    [
+     "Z:stabilizer_coverage",
+     "pass"
+    ],
+    [
+     "Z:detector_coverage",
+     "pass"
+    ],
+    [
+     "Z:circuit_distance",
+     "skipped"
+    ],
+    [
+     "X:instructions",
+     "pass"
+    ],
+    [
+     "X:qubit_count",
+     "pass"
+    ],
+    [
+     "X:connectivity",
+     "pass"
+    ],
+    [
+     "X:tick_structure",
+     "pass"
+    ],
+    [
+     "X:determinism",
+     "pass"
+    ],
+    [
+     "X:data_layout",
+     "pass"
+    ],
+    [
+     "X:observables",
+     "pass"
+    ],
+    [
+     "X:logical_injection",
+     "pass"
+    ],
+    [
+     "X:stabilizer_coverage",
+     "pass"
+    ],
+    [
+     "X:detector_coverage",
+     "pass"
+    ],
+    [
+     "X:circuit_distance",
+     "skipped"
+    ]
+   ],
+   "wall_s": 5.1
+  },
+  "r12_both_detectors": {
+   "passed": true,
+   "fails": []
+  }
+ },
+ "noise": {
+  "init_segment": {
+   "R": 216,
+   "R_args": [],
+   "X_ERROR": 216,
+   "X_ERROR_args": [
+    0.003
+   ],
+   "DEPOLARIZE1": 72,
+   "DEPOLARIZE1_args": [
+    0.003
+   ]
+  },
+  "init_idle_on": {
+   "X": 72
+  },
+  "final_segment": {
+   "M": 144,
+   "M_args": [
+    0.003
+   ]
+  },
+  "per_cycle_first": {
+   "cyc": 0,
+   "RX": 72,
+   "Z_ERROR": 72,
+   "CX": 864,
+   "DEPOLARIZE2": 864,
+   "DEPOLARIZE1": 288,
+   "M": 72,
+   "R": 72,
+   "X_ERROR": 72,
+   "MX": 72,
+   "idle_on": {
+    "data": 288
+   }
+  },
+  "per_cycle_middle": {
+   "cyc": 5,
+   "RX": 72,
+   "Z_ERROR": 72,
+   "CX": 864,
+   "DEPOLARIZE2": 864,
+   "DEPOLARIZE1": 288,
+   "M": 72,
+   "R": 72,
+   "X_ERROR": 72,
+   "MX": 72,
+   "idle_on": {
+    "data": 288
+   }
+  },
+  "per_cycle_last": {
+   "cyc": 11,
+   "RX": 72,
+   "Z_ERROR": 72,
+   "CX": 864,
+   "DEPOLARIZE2": 864,
+   "DEPOLARIZE1": 360,
+   "M": 72,
+   "MX": 72,
+   "idle_on": {
+    "data": 288,
+    "Z": 72
+   }
+  },
+  "all_cycles_same_except_last": false,
+  "noise_args": {
+   "R_args": [
+    []
+   ],
+   "X_ERROR_args": [
+    [
+     0.003
+    ]
+   ],
+   "DEPOLARIZE1_args": [
+    [
+     0.003
+    ]
+   ],
+   "RX_args": [
+    []
+   ],
+   "Z_ERROR_args": [
+    [
+     0.003
+    ]
+   ],
+   "CX_args": [
+    []
+   ],
+   "DEPOLARIZE2_args": [
+    [
+     0.003
+    ]
+   ],
+   "M_args": [
+    [
+     0.003
+    ]
+   ],
+   "MX_args": [
+    [
+     0.003
+    ]
+   ]
+  },
+  "per_layer_idle_cycle5": [
+   {
+    "data": 72
+   },
+   {},
+   {},
+   {},
+   {},
+   {},
+   {
+    "data": 72
+   },
+   {
+    "data": 144
+   }
+  ]
+ },
+ "depolarize2_tiny_dem": "error(0.04174243050441593) D0\nerror(0.04174243050441593) D0 D1\nerror(0.04174243050441593) D1",
+ "witness": {
+  "as_found": {
+   "detectors_fired": 0,
+   "obs_flipped": [
+    1,
+    3,
+    6,
+    8,
+    11
+   ],
+   "deterministic_over_shots": true
+  },
+  "bulk_shifted_one_cycle": {
+   "detectors_fired": 0,
+   "obs_flipped": [
+    1,
+    3,
+    6,
+    8,
+    11
+   ]
+  },
+  "bulk_init_qubits_are_idle_in_round8_cycle0": true,
+  "dem_columns_check": {
+   "D_xi_zero": true,
+   "L_xi": [
+    1,
+    3,
+    6,
+    8,
+    11
+   ],
+   "weight": 10
+  }
+ }
+}

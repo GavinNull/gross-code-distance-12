@@ -1,0 +1,35 @@
+{
+ "variant": "e002",
+ "p": 0.006,
+ "shots": 320,
+ "seed": 2027,
+ "decoder": {
+  "max_bp_iters": 10000,
+  "bp_method": "min_sum",
+  "osd_order": 7,
+  "osd_method": "osd_cs",
+  "ms_scaling_factor": 0
+ },
+ "zero_noise_sum": 0,
+ "selfcheck_rates": {
+  "Z": {
+   "num_det_manual": 936,
+   "num_det_circuit": 936,
+   "mean_fire_manual": 0.185108152210203,
+   "mean_fire_circuit": 0.18493913177751067,
+   "max_abs_diff_per_detector_rate": 0.02685546875,
+   "obs_rate_manual": 0.999755859375,
+   "obs_rate_circuit": 0.999755859375
+  },
+  "X": {
+   "num_det_manual": 936,
+   "num_det_circuit": 936,
+   "mean_fire_manual": 0.1854675814636752,
+   "mean_fire_circuit": 0.18519031492053953,
+   "max_abs_diff_per_detector_rate": 0.03564453125,
+   "obs_rate_manual": 0.999755859375,
+   "obs_rate_circuit": 0.999267578125
+  }
+ },
+ "exact_check": {}
+}

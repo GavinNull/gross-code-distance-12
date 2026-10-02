@@ -1,0 +1,100 @@
+{
+ "variant": "paper1",
+ "p": 0.006,
+ "shots": 320,
+ "seed": 2026,
+ "decoder": {
+  "max_bp_iters": 10000,
+  "bp_method": "min_sum",
+  "osd_order": 7,
+  "osd_method": "osd_cs",
+  "ms_scaling_factor": 0
+ },
+ "zero_noise_sum": 0,
+ "selfcheck_rates": {
+  "Z": {
+   "num_det_manual": 1008,
+   "num_det_circuit": 1008,
+   "mean_fire_manual": 0.16807459271143352,
+   "mean_fire_circuit": 0.16776917472718253,
+   "max_abs_diff_per_detector_rate": 0.03466796875,
+   "obs_rate_manual": 0.999755859375,
+   "obs_rate_circuit": 1.0
+  },
+  "X": {
+   "num_det_manual": 1008,
+   "num_det_circuit": 1008,
+   "mean_fire_manual": 0.1678985111297123,
+   "mean_fire_circuit": 0.1681610591827877,
+   "max_abs_diff_per_detector_rate": 0.033203125,
+   "obs_rate_manual": 0.999755859375,
+   "obs_rate_circuit": 0.999755859375
+  }
+ },
+ "exact_check": {
+  "Z": {
+   "det_equal": true,
+   "obs_equal": true,
+   "shots_with_events": 200,
+   "shots_with_obs_flip": 200
+  },
+  "X": {
+   "det_equal": true,
+   "obs_equal": true,
+   "shots_with_events": 200,
+   "shots_with_obs_flip": 200
+  }
+ }
+}
+{
+ "variant": "paper1",
+ "p": 0.006,
+ "shots": 320,
+ "seed": 2026,
+ "decoder": {
+  "max_bp_iters": 10000,
+  "bp_method": "min_sum",
+  "osd_order": 7,
+  "osd_method": "osd_cs",
+  "ms_scaling_factor": 0
+ },
+ "zero_noise_sum": 0,
+ "exact_check": {
+  "Z": {
+   "det_equal": true,
+   "obs_equal": true,
+   "shots_with_events": 200,
+   "shots_with_obs_flip": 200
+  },
+  "X": {
+   "det_equal": true,
+   "obs_equal": true,
+   "shots_with_events": 200,
+   "shots_with_obs_flip": 200
+  }
+ },
+ "errors_Z": 95,
+ "errors_X": 100,
+ "errors_either": 155,
+ "errors_both": 40,
+ "PZ": 0.296875,
+ "PX": 0.3125,
+ "P_either": 0.484375,
+ "P_both": 0.125,
+ "P_indep_approx": 0.5166015625,
+ "P_both_if_indep": 0.0927734375,
+ "pL_either": 0.05370219985141578,
+ "pL_indep": 0.05877792683513672,
+ "paper_fit_pL": 0.05108670208698462,
+ "ratio_either_to_fit": 1.0511972325005006,
+ "decoder_cpu_s": 1411.2,
+ "wall_s": 528.1,
+ "pL_either_boot95": [
+  0.04593759191451163,
+  0.06276763018006792
+ ],
+ "indep_over_joint_boot95": [
+  1.022089646906299,
+  1.173001295271388
+ ]
+}

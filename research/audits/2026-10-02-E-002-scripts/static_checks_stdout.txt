@@ -1,0 +1,483 @@
+{
+ "HX_equal": true,
+ "HZ_equal": true,
+ "artifact_json": {
+  "round1": [
+   true,
+   72
+  ],
+  "round2": [
+   true,
+   144
+  ],
+  "round3": [
+   true,
+   144
+  ],
+  "round4": [
+   true,
+   144
+  ],
+  "round5": [
+   true,
+   144
+  ],
+  "round6": [
+   true,
+   144
+  ],
+  "round7": [
+   true,
+   72
+  ],
+  "round8": [
+   true,
+   0
+  ]
+ },
+ "regenerated": {
+  "round1": [
+   true,
+   72
+  ],
+  "round2": [
+   true,
+   144
+  ],
+  "round3": [
+   true,
+   144
+  ],
+  "round4": [
+   true,
+   144
+  ],
+  "round5": [
+   true,
+   144
+  ],
+  "round6": [
+   true,
+   144
+  ],
+  "round7": [
+   true,
+   72
+  ],
+  "round8": [
+   true,
+   0
+  ]
+ },
+ "prep_meas": {
+  "round1_prepX_all": true,
+  "round7_measZ_all": true,
+  "round8_measX_all": true,
+  "round8_prepZ_all": true,
+  "no_other_prep_meas": true
+ }
+}
+L0 PASS [basis both] (d_circ upper bound = 12, per basis Z: 12, X: 12)
+[PASS] Z:instructions: only allowed, noiseless instructions
+[PASS] Z:qubit_count: 288 <= 288 qubits
+[PASS] Z:connectivity: no connectivity constraint
+[PASS] Z:tick_structure: 26 time steps, <=1 op per qubit per step
+[PASS] Z:determinism: all 288 detectors and 12 observables deterministic
+[PASS] Z:data_layout: 144 data qubits reset before first entangling layer 1 and read out in Z basis at the end
+[PASS] Z:observables: 12 independent nontrivial logical-Z observables; coordinates in the LZ basis: {0: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], 4: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], 5: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], 6: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], 7: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], 8: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], 9: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 10: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], 11: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]}
+[PASS] Z:logical_injection: logical X operators injected at ticks [0, 24] are undetected and flip the observables with full rank
+[PASS] Z:stabilizer_coverage: all 144 stabilizer generators measured exactly 3 time(s) (3 segments)
+[PASS] Z:detector_coverage: all expected Z-type comparisons lie in the span of the 288 detectors (modulo 18 segment-local deterministic parities such as meta-checks)
+[PASS] Z:circuit_distance: d_circ upper bound = 12 under sd6(p=0.001, idle=None) (search=12, graphlike=n/a); a minimum-weight undetectable logical error: tick 0: X_ERROR on [138] -> X138; tick 0: X_ERROR on [75] -> X75; tick 0: X_ERROR on [81] -> X81; tick 0: X_ERROR on [78] -> X78; tick 0: X_ERROR on [87] -> X87; tick 0: X_ERROR on [93] -> X93; tick 0: X_ERROR on [102] -> X102; tick 0: X_ERROR on [111] -> X111; tick 0: X_ERROR on [117] -> X117; tick 0: X_ERROR on [114] -> X114; tick 0: X_ERROR on [123] -> X123; tick 0: X_ERROR on [129] -> X129
+[PASS] X:instructions: only allowed, noiseless instructions
+[PASS] X:qubit_count: 288 <= 288 qubits
+[PASS] X:connectivity: no connectivity constraint
+[PASS] X:tick_structure: 26 time steps, <=1 op per qubit per step
+[PASS] X:determinism: all 288 detectors and 12 observables deterministic
+[PASS] X:data_layout: 144 data qubits reset before first entangling layer 1 and read out in X basis at the end
+[PASS] X:observables: 12 independent nontrivial logical-X observables; coordinates in the LX basis: {0: [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1], 1: [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0], 2: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1], 3: [0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0], 4: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 5: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0], 6: [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], 7: [0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0], 8: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], 9: [1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], 10: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], 11: [0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 
+L0 PASS [basis both]
+[PASS] Z:instructions: only allowed, noiseless instructions
+[PASS] Z:qubit_count: 288 <= 288 qubits
+[PASS] Z:connectivity: no connectivity constraint
+[PASS] Z:tick_structure: 98 time steps, <=1 op per qubit per step
+[PASS] Z:determinism: all 936 detectors and 12 observables deterministic
+[PASS] Z:data_layout: 144 data qubits reset before first entangling layer 1 and read out in Z basis at the end
+[PASS] Z:observables: 12 independent nontrivial logical-Z observables; coordinates in the LZ basis: {0: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 1: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], 4: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], 5: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], 6: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], 7: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], 8: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], 9: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 10: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], 11: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]}
+[PASS] Z:logical_injection: logical X operators injected at ticks [0, 96] are undetected and flip the observables with full rank
+[PASS] Z:stabilizer_coverage: all 144 stabilizer generators measured exactly 12 time(s) (12 segments)
+[PASS] Z:detector_coverage: all expected Z-type comparisons lie in the span of the 936 detectors (modulo 72 segment-local deterministic parities such as meta-checks)
+[SKIPPED] Z:circuit_distance: no minimum distance configured
+[PASS] X:instructions: only allowed, noiseless instructions
+[PASS] X:qubit_count: 288 <= 288 qubits
+[PASS] X:connectivity: no connectivity constraint
+[PASS] X:tick_structure: 98 time steps, <=1 op per qubit per step
+[PASS] X:determinism: all 936 detectors and 12 observables deterministic
+[PASS] X:data_layout: 144 data qubits reset before first entangling layer 1 and read out in X basis at the end
+[PASS] X:observables: 12 independent nontrivial logical-X observables; coordinates in the LX basis: {0: [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1], 1: [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0], 2: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1], 3: [0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0], 4: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 5: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0], 6: [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], 7: [0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0], 8: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], 9: [1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], 10: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], 11: [0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0]}
+[PASS] X:logical_injection: logical Z operators injected at ticks [0, 96] are undetected and flip the observables with full rank
+[PASS] X:stabilizer_coverage: all 144 stabilizer generators measured exactly 12 time(s) (12 segments)
+[PASS] X:detector_coverage: all expected X-type comparisons lie in the span of the 936 detectors (modulo 72 segment-local deterministic parities such as meta-checks)
+[SKIPPED] X:circuit_distance: no minimum distance configured
+{
+ "r3": {
+  "passed": true,
+  "d_circ": 12,
+  "checks": [
+   [
+    "Z:instructions",
+    "pass"
+   ],
+   [
+    "Z:qubit_count",
+    "pass"
+   ],
+   [
+    "Z:connectivity",
+    "pass"
+   ],
+   [
+    "Z:tick_structure",
+    "pass"
+   ],
+   [
+    "Z:determinism",
+    "pass"
+   ],
+   [
+    "Z:data_layout",
+    "pass"
+   ],
+   [
+    "Z:observables",
+    "pass"
+   ],
+   [
+    "Z:logical_injection",
+    "pass"
+   ],
+   [
+    "Z:stabilizer_coverage",
+    "pass"
+   ],
+   [
+    "Z:detector_coverage",
+    "pass"
+   ],
+   [
+    "Z:circuit_distance",
+    "pass"
+   ],
+   [
+    "X:instructions",
+    "pass"
+   ],
+   [
+    "X:qubit_count",
+    "pass"
+   ],
+   [
+    "X:connectivity",
+    "pass"
+   ],
+   [
+    "X:tick_structure",
+    "pass"
+   ],
+   [
+    "X:determinism",
+    "pass"
+   ],
+   [
+    "X:data_layout",
+    "pass"
+   ],
+   [
+    "X:observables",
+    "pass"
+   ],
+   [
+    "X:logical_injection",
+    "pass"
+   ],
+   [
+    "X:stabilizer_coverage",
+    "pass"
+   ],
+   [
+    "X:detector_coverage",
+    "pass"
+   ],
+   [
+    "X:circuit_distance",
+    "pass"
+   ]
+  ],
+  "wall_s": 13.9
+ },
+ "r3_both_detectors": {
+  "passed": true,
+  "fails": []
+ },
+ "r12": {
+  "passed": true,
+  "d_circ": null,
+  "checks": [
+   [
+    "Z:instructions",
+    "pass"
+   ],
+   [
+    "Z:qubit_count",
+    "pass"
+   ],
+   [
+    "Z:connectivity",
+    "pass"
+   ],
+   [
+    "Z:tick_structure",
+    "pass"
+   ],
+   [
+    "Z:determinism",
+    "pass"
+   ],
+   [
+    "Z:data_layout",
+    "pass"
+   ],
+   [
+    "Z:observables",
+    "pass"
+   ],
+   [
+    "Z:logical_injection",
+    "pass"
+   ],
+   [
+    "Z:stabilizer_coverage",
+    "pass"
+   ],
+   [
+    "Z:detector_coverage",
+    "pass"
+   ],
+   [
+    "Z:circuit_distance",
+    "skipped"
+   ],
+   [
+    "X:instructions",
+    "pass"
+   ],
+   [
+    "X:qubit_count",
+    "pass"
+   ],
+   [
+    "X:connectivity",
+    "pass"
+   ],
+   [
+    "X:tick_structure",
+    "pass"
+   ],
+   [
+    "X:determinism",
+    "pass"
+   ],
+   [
+    "X:data_layout",
+    "pass"
+   ],
+   [
+    "X:observables",
+    "pass"
+   ],
+   [
+    "X:logical_injection",
+    "pass"
+   ],
+   [
+    "X:stabilizer_coverage",
+    "pass"
+   ],
+   [
+    "X:detector_coverage",
+    "pass"
+   ],
+   [
+    "X:circuit_distance",
+    "skipped"
+   ]
+  ],
+  "wall_s": 5.1
+ },
+ "r12_both_detectors": {
+  "passed": true,
+  "fails": []
+ }
+}
+segments (TICK count): 97
+{
+ "init_segment": {
+  "R": 216,
+  "R_args": [],
+  "X_ERROR": 216,
+  "X_ERROR_args": [
+   0.003
+  ],
+  "DEPOLARIZE1": 72,
+  "DEPOLARIZE1_args": [
+   0.003
+  ]
+ },
+ "init_idle_on": {
+  "X": 72
+ },
+ "final_segment": {
+  "M": 144,
+  "M_args": [
+   0.003
+  ]
+ },
+ "per_cycle_first": {
+  "cyc": 0,
+  "RX": 72,
+  "Z_ERROR": 72,
+  "CX": 864,
+  "DEPOLARIZE2": 864,
+  "DEPOLARIZE1": 288,
+  "M": 72,
+  "R": 72,
+  "X_ERROR": 72,
+  "MX": 72,
+  "idle_on": {
+   "data": 288
+  }
+ },
+ "per_cycle_middle": {
+  "cyc": 5,
+  "RX": 72,
+  "Z_ERROR": 72,
+  "CX": 864,
+  "DEPOLARIZE2": 864,
+  "DEPOLARIZE1": 288,
+  "M": 72,
+  "R": 72,
+  "X_ERROR": 72,
+  "MX": 72,
+  "idle_on": {
+   "data": 288
+  }
+ },
+ "per_cycle_last": {
+  "cyc": 11,
+  "RX": 72,
+  "Z_ERROR": 72,
+  "CX": 864,
+  "DEPOLARIZE2": 864,
+  "DEPOLARIZE1": 360,
+  "M": 72,
+  "MX": 72,
+  "idle_on": {
+   "data": 288,
+   "Z": 72
+  }
+ },
+ "all_cycles_same_except_last": false,
+ "noise_args": {
+  "R_args": [
+   []
+  ],
+  "X_ERROR_args": [
+   [
+    0.003
+   ]
+  ],
+  "DEPOLARIZE1_args": [
+   [
+    0.003
+   ]
+  ],
+  "RX_args": [
+   []
+  ],
+  "Z_ERROR_args": [
+   [
+    0.003
+   ]
+  ],
+  "CX_args": [
+   []
+  ],
+  "DEPOLARIZE2_args": [
+   [
+    0.003
+   ]
+  ],
+  "M_args": [
+   [
+    0.003
+   ]
+  ],
+  "MX_args": [
+   [
+    0.003
+   ]
+  ]
+ },
+ "per_layer_idle_cycle5": [
+  {
+   "data": 72
+  },
+  {},
+  {},
+  {},
+  {},
+  {},
+  {
+   "data": 72
+  },
+  {
+   "data": 144
+  }
+ ]
+}
+faults: [(0, [('Z', 73)], 'Z_ERROR(0.001) 73'), (2, [('Z', 246)], 'DEPOLARIZE2(0.001) 178 246'), (0, [('Z', 95)], 'Z_ERROR(0.001) 95'), (0, [('Z', 96)], 'Z_ERROR(0.001) 96'), (0, [('Z', 171)], 'Z_ERROR(0.001) 171'), (2, [('Z', 270)], 'DEPOLARIZE2(0.001) 202 270'), (0, [('Z', 119)], 'Z_ERROR(0.001) 119'), (0, [('Z', 120)], 'Z_ERROR(0.001) 120'), (0, [('Z', 121)], 'Z_ERROR(0.001) 121'), (0, [('Z', 195)], 'Z_ERROR(0.001) 195')]
+{
+ "as_found": {
+  "detectors_fired": 0,
+  "obs_flipped": [
+   1,
+   3,
+   6,
+   8,
+   11
+  ],
+  "deterministic_over_shots": true
+ },
+ "bulk_shifted_one_cycle": {
+  "detectors_fired": 0,
+  "obs_flipped": [
+   1,
+   3,
+   6,
+   8,
+   11
+  ]
+ },
+ "bulk_init_qubits_are_idle_in_round8_cycle0": true,
+ "dem_columns_check": {
+  "D_xi_zero": true,
+  "L_xi": [
+   1,
+   3,
+   6,
+   8,
+   11
+  ],
+  "weight": 10
+ }
+}

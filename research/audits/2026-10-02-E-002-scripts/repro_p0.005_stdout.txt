@@ -1,0 +1,3 @@
+=== stage sample ===
+{'basis': 'Z', 'p': 0.005, 'shots': 1071, 'errors': 106, 'discards': 0, 'decoder_seconds': 940.2, 'cumulative_decoder_seconds': 940.2}
+{'basis': 'X', 'p': 0.005, 'shots': 961, 'errors': 107, 'discards': 0, 'decoder_seconds': 1491.4, 'cumulative_decoder_seconds': 2431.7}
