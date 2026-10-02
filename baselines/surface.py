@@ -32,8 +32,10 @@ def per_round(p_shot: float, rounds: int) -> float:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
-    cfg = yaml.safe_load(Path(ap.parse_args().config).read_text())
-    out = Path("results") / cfg["id"]
+    ap.add_argument("--out", help="输出目录，默认 results/<id>。注意：目录里已有 stats.csv 时 sinter 会续跑而不是重算，独立复现请指定新目录")
+    args = ap.parse_args()
+    cfg = yaml.safe_load(Path(args.config).read_text())
+    out = Path(args.out) if args.out else Path("results") / cfg["id"]
     out.mkdir(parents=True, exist_ok=True)
 
     max_errors, max_shots = cfg["max_errors"], cfg.get("max_shots", 20_000_000)
