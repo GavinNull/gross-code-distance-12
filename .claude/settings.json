@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run *)",
+      "Bash(uv sync*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Edit(research/**)",
+      "Edit(search/**)",
+      "Edit(baselines/**)",
+      "Edit(experiments/**)",
+      "Edit(notebooks/**)",
+      "WebSearch",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:export.arxiv.org)",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(rm -rf *)",
+      "Read(.env)",
+      "Bash(uv run python scripts/freeze_evaluator.py freeze*)",
+      "Bash(rm *evaluators/FROZEN*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_frozen.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

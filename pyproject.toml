@@ -1,0 +1,35 @@
+[project]
+name = "qec-ai-search"
+version = "0.1.0"
+description = "AI-driven search for quantum error-correcting codes and fault-tolerant circuits"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # QEC 模拟与解码
+    "stim",
+    "sinter",
+    "pymatching",
+    "ldpc",
+    "beliefmatching",
+    "stimbposd",
+    # 数值与图
+    "numpy",
+    "scipy",
+    "networkx",
+    "galois",
+    "sympy",
+    # LLM 驱动的进化搜索
+    "anthropic",
+    # RL
+    "gymnasium",
+    "torch",
+    # 实验管理与可视化
+    "pandas",
+    "matplotlib",
+    "tqdm",
+    "pyyaml",
+    "jupyterlab",
+    "ipykernel",
+]
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
