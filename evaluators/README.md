@@ -1,13 +1,15 @@
 # evaluators/：评估器第一部分（噪声模型 + L0 合法性检查）
 
 状态：未冻结（P1 进行中）。冻结前需 auditor 攻击测试（G1）。
-测试：`uv run pytest tests/test_l0.py tests/test_noise.py tests/test_codes.py tests/test_stats.py -q`（约 10 秒，单核）。
+测试：`uv run pytest tests/test_l0.py tests/test_noise.py tests/test_codes.py tests/test_stats.py -q`（约 1 分钟，单核；距离检查改用 `distance.upper_bound` 后变慢，测试里用轻量预算 `FAST_DIST`）。
+距离：`uv run pytest tests/test_distance.py -q -m "not slow"`（约 20 秒）；gross code 回归 `-m slow`（2 个测试，各约 2 分钟，3 进程）。
 
 | 文件 | 内容 |
 |---|---|
 | `codes.py` | `CSSCode`（HX/HZ/LX/LZ，GF(2)）、自检、`code_dimension`、`compute_logicals`、GF(2) 工具、测试用 `rotated_surface_code_from_stim` |
 | `noise.py` | `add_noise(circuit, model, p, ...)`，命名噪声模型 |
 | `l0.py` | `check_l0(circuit, code, basis, constraints) -> L0Report` |
+| `distance.py` | 电路级距离：`upper_bound(...) -> DistanceResult`（多方法取经注入验证的最短见证）、`lower_bound(...)`（CP-SAT / MaxSAT / HiGHS 精确法）、`verify_faults`，见 §3.1 |
 | `stats.py` | 置信区间与统计口径约定（似然比因子 ↔ σ） |
 | `l2.py` | `sample_l2(...) -> L2Result`：X/Z 联合采样的逻辑错误率（sinter 多进程、显式种子、可逐位复现），见 §7 |
 | `leaderboard.py` | `build_entry` / `submit` / `verify_leaderboard`：`research/leaderboard.jsonl` 的唯一写入口（只追加、文件锁、哈希链），见 §8 |
@@ -81,7 +83,7 @@ report.per_basis["X"].get("circuit_distance").details
 | `logical_injection` | 用 `circuit.detecting_regions(ticks=[t])` 取出 t 时刻每个 detector / observable 的敏感区域（Pauli 串）。在两个时刻注入每个逻辑算符（Z memory 注入 LX_j，X memory 注入 LZ_j，作用在 `data_qubits` 上）：t_start = 第一个数据双比特门之前的 TICK，t_end = 最终读出之前的 TICK。要求：不与任何 detector 反对易（逻辑算符对 detector 不可见），且 observable × 逻辑算符的翻转矩阵满秩。t_start 的检查保证逻辑信息**从头到尾**被保存，能抓住“中途测量并重置数据比特”这种 detector、observable 都确定但信息已被摧毁的电路。 |
 | `stabilizer_coverage` | 在“干净切口”处把电路切段：对每个非数据比特追踪状态 idle（未用/测量后）、prepped（复位后只有单比特门）、busy（复位后做过双比特门、尚未测量）；没有 busy 比特的 TICK 是干净切口（从第一个数据双比特门所在层开始，排除最终读出）。每段单独成一条电路，开头重放 prepped 比特的复位与单比特门（MR 重放成 R），再对每个稳定子生成元 s 调用 `solve_flow_measurements([P_s -> 1])`（P_s = s 在数据比特上的 Pauli）：有非空解 = 本段测量了 s（输入时刻的 s 值等于这些测量的奇偶）；解为空 = s 被本段的复位抹掉；无解 = 未测。要求每个生成元（含冗余行，含非 basis 型）被测次数 = `rounds`（未给则全部相等且 ≥1）。 |
 | `detector_coverage` | 用上一步每段的测量集合 M_r(s) 构造“应有的比较”：basis 型 s 的首轮 M_1（数据在 basis 基制备，确定）、相邻轮 M_r ⊕ M_{r+1}、末轮与数据读出 M_last ⊕ readout(supp s)；`require_opposite_type_detectors=True` 时非 basis 型的相邻轮比较也要。用 GF(2) 增量基（Python int 位集）检查每个比较都在 detector 记录集合的张成里。因为 `solve_flow_measurements` 的解不唯一（可相差段内确定的测量组合，例如冗余稳定子行的 meta-check），先用每段的 `flow_generators()` 取出“输入输出都为恒等”的段内确定奇偶，一并放进张成里再判断（它们不要求被声明为 detector）。 |
-| `circuit_distance` | 对 `add_noise(circuit, distance_noise_model)`（默认 sd6，含空闲噪声）先生成 DEM（确认加噪声后也不报错），再取 `search_for_undetectable_logical_errors`（截断参数可配，默认 4/4/False）与 `shortest_graphlike_error` 两者中较短的那个错误集合的大小，作为 d_circ **上界**；要求 ≥ `min_circuit_distance`。在子进程里运行，`distance_timeout_s`（默认 120 s）到时杀掉进程并判为不通过。诊断列出这条最小权重逻辑错误的每个组成部分（tick、噪声指令、比特、Pauli），例如 `tick 4: DEPOLARIZE2 on [8, 9] -> X8*Y9`，可直接告诉 LLM 哪一步的 hook 错误降低了距离。 |
+| `circuit_distance` | 对 `add_noise(circuit, distance_noise_model)`（默认 sd6，含空闲噪声）先生成 DEM（确认加噪声后也不报错），再调用 `distance.upper_bound`（§3.1）：`shortest_graphlike_error`、`search_for_undetectable_logical_errors`（截断 4/4/False）、BP-OSD 随机 η 见证搜索 + CP-SAT 邻域精修，取**经注入验证**的最短逻辑错误的权重作为 d_circ **上界**；要求 ≥ `min_circuit_distance`。种子 `distance_seed`（默认 0），预算 `distance_bposd_trials`/`distance_lns_starts`/`distance_lns_det_time`，并行 `distance_num_workers`（结果与它无关）。`distance_early_stop=True`（默认）时一旦找到低于门槛的见证就停止（判定不变）。在子进程里运行，`distance_timeout_s`（默认 1800 s）到时杀掉进程并判为不通过。诊断列出最短见证的每个故障（tick、噪声指令、比特、Pauli）、找到它的方法和注入验证结果，例如 `tick 2: DEPOLARIZE2 on [160, 228] -> Z228`，可直接告诉 LLM 哪一步的 hook 错误降低了距离；没通过注入验证的见证不计入，并在诊断里给出警告。 |
 
 在旋转表面码（stim 生成，d=3,5，X/Z）上全部通过且 d_circ = d；我也手动在 `baselines/` 的 gross code（IBM depth-8 调度，3 轮，X/Z，`detectors="basis"`/`"both"`）无噪声电路上跑过语法层 + 语义层（不含距离），全部通过，每次约 0.5 s（只读调用，没有改 baselines，也没有把它写进测试，因为那边的代码还在开发中）。
 
@@ -113,17 +115,64 @@ report.per_basis["X"].get("circuit_distance").details
 | 距离计算超时 | circuit_distance |
 | `REPEAT 1000000000 {TICK}` | instructions（不展开就拒绝） |
 
+### 3.1 电路级距离（`distance.py`）
+
+起因：旧版距离检查只取 `search_for_undetectable_logical_errors`（截断 4/4）与 `shortest_graphlike_error` 的较小值，对 IBM gross code 电路报 12，而 E-002 已有经验证的权重 10 见证（`research/evaluator_issues.md` 2026-10-02 条）。
+
+```python
+from evaluators.distance import upper_bound, lower_bound, verify_faults
+r = upper_bound(noisy_circuit, seed=0, num_workers=1)   # -> DistanceResult
+r.weight, r.witness.describe(), r.summary(), r.methods   # 最短见证、每种方法的结果与耗时
+lb = lower_bound(noisy_circuit, method="cpsat", time_limit_s=600, target=10)   # 证明 d_circ >= 10？
+```
+
+**上界 `upper_bound`**：依次运行（`methods` 可选）
+1. `graphlike`：`shortest_graphlike_error`（BB 码上没有 graphlike 逻辑错误，直接 `none`）；
+2. `stim_search`：`search_for_undetectable_logical_errors`（默认 4/4/False；`stim_search_timeout_s` 可放进子进程限时）。在 gross 上 (5,4) 4 分钟内存涨到 6 GB 仍没结束，`increasing=True` 则什么都找不到，所以这条路走不远；
+3. `bposd`：arXiv 2308.07915 Eq.(12) 的随机 η 方法：η = a·L + b·D（a≠0 随机），BP-OSD（min-sum，osd_cs，order 2）解 [D; ηᵀ]ξ = (0,…,0,1)，默认 1500 次；
+4. `bposd_lns`：对 BP-OSD 得到的低权重解（权重 ≤ 最好解 + 3，最多 96 个起点）做大邻域搜索：取解的支撑及与其共享 detector 的全部机制（1 跳邻域，约 300–600 列），以当前解为可行提示，用 CP-SAT（单线程，确定性时间 1.0）最小化；有改进就以新解为中心继续（最多 4 次）。gross 上找到 10 的正是这一步（BP-OSD 本身 1500 次一般停在 11–12）。
+
+每个见证都先**注入验证**才计入：去掉全部噪声，在每个故障的原指令位置插入概率 1 的 Pauli 通道（测量翻转则把那一次测量改成 `M(1)`），用 detector 采样器确认 0 个 detector 触发、至少一个 observable 翻转；故障位置与电路对不上（指令名不符）直接判失败，不会被静默忽略。权重口径：DEM（`decompose_errors=False`）中症状相同的机制合并为一列，最少列数 = 最少故障数。
+
+随机性只来自 `seed`：BP-OSD 按 25 次一块，用 `SeedSequence(seed).spawn` 给每块独立的流；LNS 每个起点的 CP-SAT 种子由 (seed, 起点序号) 决定；CP-SAT 用确定性时间上限而不是墙钟。所以结果只取决于 seed 和预算参数，与 `num_workers`（进程池并行）无关（测试覆盖）。`max_seconds` 是墙钟软上限，触发时结果依赖机器速度（`stopped_early=True`）。
+
+**gross code 实测**（IBM depth-8 调度，3 轮，sd6，默认预算，3 个进程）：
+
+| 基底 | seed | 结果 | 耗时 |
+|---|---|---|---|
+| X | 0–8（9 个） | 全部 **10**（stim_search 12；BP-OSD 本身 10–12） | 81–127 s |
+| Z | 0–2 | 全部 **10**（E-002 的 BP-OSD 在 Z 基底只找到 11） | 120–130 s |
+
+见证结构与 E-002 相同：8 个数据比特制备后的 Z 错误 + 2 个 tick 2 的 CNOT 故障（Z 辅助比特目标端的 Z，经后续 CNOT 扩散到数据比特）。E-002 文件里的见证本身也被 `verify_faults` 独立确认（`test_e002_witness_is_confirmed_by_injection`）。单进程约 4–6 分钟/基底。默认预算较小时（600 次 BP-OSD）9 个种子里有 1–2 个停在 11，所以默认值不要随便调低。表面码 d=3、5 上各方法都给出 d。
+
+**下界 `lower_bound`（精确方法，可行性测试）**：同一个 0-1 问题 min |ξ|, Dξ=0, Lξ≠0。
+`cpsat`（OR-tools CP-SAT，原生 XOR）、`maxsat`（`stim.Circuit.shortest_error_sat_problem` + pysat RC2，子进程限时）、`milp`（HiGHS，奇偶用整数松弛）。`target=w` 只问“有没有权重 ≤ w−1 的逻辑错误”，CP-SAT 的目标界在超时时仍是有效下界。新依赖 `ortools`、`python-sat`（pyproject 已加）。
+
+| 电路（sd6） | 列 / detector | MILP（1 线程，300 s） | MaxSAT RC2（300 s） | CP-SAT（3 线程，300 s） |
+|---|---|---|---|---|
+| 表面码 d=3，3 轮 | 221 / 24 | 3，1.3 s | 3，1.3 s | 3，<1 s |
+| 表面码 d=5，5 轮 | 1679 / 120 | **5，37–50 s** | 5，94 s | 5，116 s（1 线程 60 s 无进展） |
+| 表面码 d=7，7 轮 | 5473 / 336 | 下界 3 | 超时 | 下界 4 |
+| BB [[72,12,6]]，1 轮，X | 432 / 72 | 6，299 s | 6，84 s | **6，57 s** |
+| BB [[72,12,6]]，1 轮，Z | 432 / 72 | 6，154 s | 6，94 s | – |
+| BB72，2 轮，X | 792 / 108 | 下界 3 | 超时 | 下界 5（求最优与 target=6 都是 5） |
+| BB72，3 轮，X | 1152 / 144 | 下界 2 | 超时 | 下界 5（target=6） |
+| gross，1 轮，X | 864 / 144 | – | – | 下界 6（target=10，600 s） |
+| gross，3 轮，X | 2304 / 288 | （E-002：1 轮 Z 120 s 下界 4） | – | 下界 5（target=10，600 s） |
+
+结论：通用精确求解器只能证明到“约 400–1700 列、距离 ≤6”的规模；BB72 从 1 轮到 2 轮（列数 ×1.8）就从 1 分钟内证明变成 5 分钟证明不了，下界停在 5。gross code 3 轮（2304 列，目标 10）在 10 分钟、3 线程下只证到 5，差距 5，按上面的增长看在本机上不可行。**所以目前不能声称 gross 类电路的 d_circ = X，只能说 d_circ ≤ X（有经注入验证的见证）**。要证明需要利用结构：例如 BB 码的平移对称（DEM 在 ℓm 个平移下不变，可加“解至少含一个代表元”的对称破缺约束，搜索空间约缩小 ℓm 倍）、按时间切片的分解、或更强的 MaxSAT 求解器；都没做。小电路（表面码 d≤5、BB72 1 轮、以及 `target` 很小的“距离掉到 2–3”的坏调度）可以在秒到分钟级证明，测试里用到了。
+
 ## 4. 与 lead 转达的 5 点补充要求的对应
 
 1. **空闲噪声必须是默认口径**：`DEFAULT_MODEL = "sd6"`，打分模型 `SCORING_MODELS = ("sd6","si1000")` 都含逐层空闲噪声且不可关闭；L0 距离检查默认用 sd6；无空闲噪声的口径只叫 `legacy_no_idle`，只用于与 E-001 对照。
 2. **X、Z 两个基底**：`check_l0(..., basis="both")` 要求 `{"Z": ..., "X": ...}` 两条电路，都通过才通过，`d_circ` 取较差者，诊断带 `Z:`/`X:` 前缀；有“牺牲一个基底”的攻击测试。L2 用 X/Z 联合采样，报告 P_Z、P_X、P_any（同一 shot 任一失败），见 §7。
 3. **噪声模型**：实现了 `gross_sd6`、`sd6`、`si1000`（含 ResonatorIdle 2p，歧义处理见 §2），另有 `legacy_no_idle` 与通用 `uniform_depolarizing`。
 4. **统计约定**：`stats.py` 规定区间一律用似然比因子并标 σ（`likelihood_factor_to_sigma(1000) ≈ 3.72`；95% ↔ 因子 6.83），`BinomialInterval.label()` 输出“LR=1000 interval, ≈3.72σ”，不再写 95%；`MIN_LOGICAL_ERRORS_FOR_COMPARISON = 1000`。L2（§7）按这些约定报告区间，并在任一 sector 少于 1000 次错误时给出警告。
-5. **种子**：L0、噪声模块和 stats 都没有随机性：确定性用 DEM 反向传播精确判定，不靠采样；距离搜索是确定性算法。测试 `test_report_is_deterministic` 验证同一输入两次报告相同。L2 的种子是必填参数，结果对给定 (seed, batch_size, 停止规则) 逐位可复现，与 worker 数无关（§7.3）。
+5. **种子**：噪声模块和 stats 没有随机性；L0 的确定性检查用 DEM 反向传播精确判定，不靠采样。距离上界搜索有随机性（BP-OSD 的 η、CP-SAT），种子由 `L0Constraints.distance_seed`（默认 0）显式给出，结果只取决于种子和预算，与进程数无关（§3.1）。测试 `test_report_is_deterministic` 验证同一输入两次报告相同。L2 的种子是必填参数，结果对给定 (seed, batch_size, 停止规则) 逐位可复现，与 worker 数无关（§7.3）。
 
 ## 5. 已知局限
 
-- **电路级距离只是上界。** stim 文档明说 `search_for_undetectable_logical_errors` 是启发式（截断后可能漏掉更短的错误），`shortest_graphlike_error` 只看 graphlike 机制。所以 L0 的判定是“找到的最短逻辑错误 ≥ 下限”，真实距离可能更低。冻结前的最终结果应提高截断参数，或用 SAT/ILP（`shortest_error_sat_problem`，或 baselines 里的方法）独立复核。gross code 上默认截断参数的耗时没测过（只测了表面码 d≤5，<1 s）。
+- **电路级距离只是上界。** L0 的判定是“多种启发式找到的、经注入验证的最短逻辑错误 ≥ 下限”，真实距离可能更低（旧版在 gross 上报 12、实际 ≤10 就是这样漏的；新版在 gross 上 12 个种子都找到 10，但这仍不是证明）。精确下界只在小电路上可行（§3.1）：gross 规模不能声称 d_circ = X。L0 距离检查在 gross 上单进程约 4–6 分钟/基底（`distance_num_workers=3` 约 2 分钟），搜索内循环若嫌慢，只能调低预算并接受漏报风险。
 - **要求“干净切口”**：每轮之间必须有一个时刻，所有辅助比特都不在纠缠中（允许已复位、只做过单比特门的“预制备”状态，因此 IBM 把 Z 检查的复位提前到上一周期的做法可以通过）。辅助比特跨轮流水（一个辅助比特还没测完，下一轮的另一个辅助比特已经和数据纠缠）、测量后不复位直接复用、辅助比特之间先做纠缠（猫态、flag 预处理）、一个稳定子的值由两个分属不同段的测量合成，这些合法电路目前都会被 `stabilizer_coverage` 误拒，诊断会写“cannot split ... / not measured”。如果搜索空间要包含这类电路，需要改成“按测量逐个求解 flow”或“用 detector 的时空结构”来判定覆盖。
 - **observable 只能由最终数据读出构成**（按任务说明的定义）。“逻辑算符 ⊕ 若干辅助比特测量”的合法写法会被拒。
 - **数据比特读出必须直接用 basis 基测量指令**（X memory 用 MX/MRX，不接受 H+M）。
@@ -138,7 +187,7 @@ report.per_basis["X"].get("circuit_distance").details
 1. **L1 未实现**：深度、CNOT 数、低权重逻辑错误计数。（L2 已实现，见 §7。）
 2. **候选程序沙箱**：§5.2 的“候选不能读写文件/网络、种子由评估器控制”属于搜索框架，不在 L0。
 3. **schedule → 电路的生成应由评估器完成**：现在 L0 接收现成电路，`data_qubits`、轮数、比特布局由任务给定。最稳妥的做法是候选只交 schedule，评估器自己生成两个基底的 memory 电路再过 L0，候选就碰不到 detector 与 observable 的声明。
-4. **距离的独立复核路径**（SAT/ILP），至少用于榜单上的结果。
+4. **距离的独立复核路径**：`distance.lower_bound`（CP-SAT/MaxSAT/MILP）已有，但只对小电路可行（§3.1）；gross 规模需要利用对称性等结构的专门方法。
 5. **跨轮数一致性**：同一调度在 rounds = d 与 rounds = 2d 下都应通过（防止只对特定轮数成立的“巧合”电路）。
 6. **噪声模型与门集的绑定**：SI1000 打分要求 CZ 电路，需要约定 CX 调度如何编译成 CZ+H（编译方式会改变分数）。
 

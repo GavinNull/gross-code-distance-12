@@ -16,6 +16,9 @@ dependencies = [
     "scipy",
     "networkx",
     "galois",
+    # 电路级距离的精确/下界求解（evaluators/distance.py）
+    "python-sat",
+    "ortools",
     "sympy",
     # LLM 驱动的进化搜索
     "anthropic",
@@ -33,3 +36,6 @@ dependencies = [
 
 [dependency-groups]
 dev = ["pytest", "ruff"]
+
+[tool.pytest.ini_options]
+markers = ["slow: 慢测试（gross code 距离回归等，单个约 2 分钟）；用 -m \"not slow\" 跳过"]

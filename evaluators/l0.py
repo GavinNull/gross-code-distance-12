@@ -28,15 +28,13 @@
     detector_coverage  basis 型生成元相邻两次测量的比较、首轮、末轮与数据读出的比较
                        都必须落在 detector 记录集合的 GF(2) 张成里
   距离层（以上全部通过才运行）：
-    circuit_distance   对 add_noise 后的电路求 search_for_undetectable_logical_errors 与
-                       shortest_graphlike_error 的较小值（上界），要求 >= min_circuit_distance
+    circuit_distance   对 add_noise 后的电路调用 distance.upper_bound：stim 截断搜索、
+                       shortest_graphlike_error、BP-OSD 随机 η 见证搜索 + CP-SAT 邻域精修，
+                       取经注入验证的最短逻辑错误（上界），要求 >= min_circuit_distance
 """
 from __future__ import annotations
 
-import json
-import os
 import subprocess
-import sys
 import time
 from dataclasses import dataclass, field
 from typing import Iterable, Mapping, Sequence
@@ -44,6 +42,7 @@ from typing import Iterable, Mapping, Sequence
 import numpy as np
 import stim
 
+from evaluators import distance
 from evaluators.codes import CSSCode, GF2Basis, bits_to_int, in_rowspace, rank
 from evaluators.noise import add_noise, find_noise_instructions
 
@@ -79,13 +78,24 @@ class L0Constraints:
     distance_noise_model: str = "sd6"
     distance_noise_p: float = 1e-3
     distance_noise_idle: bool | None = None  # None = 模型默认（uniform_depolarizing 默认有空闲噪声）
+    # 距离上界搜索（evaluators/distance.py 的 upper_bound；多种方法取经注入验证的最短见证）
+    distance_methods: tuple[str, ...] = ("graphlike", "stim_search", "bposd")
+    distance_seed: int = 0
     # search_for_undetectable_logical_errors 的截断参数（启发式；见 README）
     dont_explore_detection_event_sets_with_size_above: int = 4
     dont_explore_edges_with_degree_above: int = 4
     dont_explore_edges_increasing_symptom_degree: bool = False
     use_graphlike_bound: bool = True
-    # 距离计算超时（秒）。None = 在本进程直接计算（无超时）。超时 = 不通过。
-    distance_timeout_s: float | None = 120.0
+    # BP-OSD 随机 η 见证搜索 + CP-SAT 邻域精修（LNS）的预算（试验次数/确定性时间，结果只取决于 seed）
+    distance_bposd_trials: int = 1500
+    distance_lns_starts: int = 96
+    distance_lns_det_time: float = 1.0
+    distance_num_workers: int = 1
+    # True：一旦找到权重 < min_circuit_distance 的见证就停止（判定不变，省时间；报告的 d_circ 只保证低于门槛）
+    distance_early_stop: bool = True
+    # 距离计算的硬超时（秒，子进程）。None = 在本进程直接计算（无超时）。超时 = 不通过。
+    # gross code 3 轮单基底在默认预算下单进程约 3–5 分钟。
+    distance_timeout_s: float | None = 1800.0
     # 规模保护：展开后的指令数上限
     max_flat_instructions: int = 2_000_000
 
@@ -740,71 +750,16 @@ def _check_coverage(parsed: _Parsed, code: CSSCode, basis: str, layout: _Layout,
 # 电路级距离
 # ---------------------------------------------------------------------------
 
-def _pauli_name(t: stim.GateTarget) -> str:
-    for letter, flag in (("X", t.is_x_target), ("Y", t.is_y_target), ("Z", t.is_z_target)):
-        if flag:
-            return f"{letter}{t.value}"
-    return str(t.value)
-
-
-def _distance_compute(circ_text: str, params: dict) -> dict:
-    c = stim.Circuit(circ_text)
-    out: dict = {}
-    best = None
-    try:
-        errs = c.search_for_undetectable_logical_errors(
-            dont_explore_detection_event_sets_with_size_above=params["size"],
-            dont_explore_edges_with_degree_above=params["degree"],
-            dont_explore_edges_increasing_symptom_degree=params["increasing"],
-            canonicalize_circuit_errors=True,
-        )
-        out["search"] = len(errs)
-        best = errs
-    except ValueError as e:
-        out["search_error"] = str(e).splitlines()[0]
-    if params["graphlike"]:
-        try:
-            g = c.shortest_graphlike_error(ignore_ungraphlike_errors=True, canonicalize_circuit_errors=True)
-            out["graphlike"] = len(g)
-            if best is None or len(g) < len(best):
-                best = g
-        except ValueError as e:
-            out["graphlike_error"] = str(e).splitlines()[0]
-    if best is None:
-        raise RuntimeError("no undetectable logical error found by either method "
-                           f"({out.get('search_error')}; {out.get('graphlike_error', 'graphlike disabled')}); "
-                           "either the observable is never flipped by any error or the search was truncated too hard")
-    out["d"] = len(best)
-    desc = []
-    for e in best:
-        if not e.circuit_error_locations:
-            desc.append(str(e.dem_error_terms))
-            continue
-        loc = e.circuit_error_locations[0]
-        qs = [t.gate_target.value for t in loc.instruction_targets.targets_in_range]
-        flips = "*".join(_pauli_name(p.gate_target) for p in loc.flipped_pauli_product) or "measurement flip"
-        desc.append(f"tick {loc.tick_offset}: {loc.instruction_targets.gate} on {qs} -> {flips}")
-    out["errors"] = desc
-    return out
-
-
-_WORKER_SNIPPET = (
-    "import sys, json; sys.path.insert(0, sys.argv[1]); "
-    "from evaluators.l0 import _distance_compute; "
-    "d = json.loads(sys.stdin.read()); "
-    "print(json.dumps(_distance_compute(d['circuit'], d['params'])))"
-)
-
-
-def _distance_subprocess(circ_text: str, params: dict, timeout_s: float) -> dict:
-    """在子进程中运行距离搜索，超时即杀掉（stim 的 C++ 搜索无法在本进程内中断）。"""
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    proc = subprocess.run([sys.executable, "-c", _WORKER_SNIPPET, root],
-                          input=json.dumps({"circuit": circ_text, "params": params}),
-                          capture_output=True, text=True, timeout=timeout_s)
-    if proc.returncode != 0:
-        raise RuntimeError(proc.stderr.strip().splitlines()[-1] if proc.stderr.strip() else "worker failed")
-    return json.loads(proc.stdout)
+def _distance_kwargs(cons: L0Constraints) -> dict:
+    methods = [m for m in cons.distance_methods if cons.use_graphlike_bound or m != "graphlike"]
+    stop = cons.min_circuit_distance if (cons.distance_early_stop and cons.min_circuit_distance is not None) else None
+    return dict(seed=cons.distance_seed, methods=methods,
+                stim_search_size=cons.dont_explore_detection_event_sets_with_size_above,
+                stim_search_degree=cons.dont_explore_edges_with_degree_above,
+                stim_search_increasing=cons.dont_explore_edges_increasing_symptom_degree,
+                bposd_trials=cons.distance_bposd_trials, lns_starts=cons.distance_lns_starts,
+                lns_det_time=cons.distance_lns_det_time, num_workers=cons.distance_num_workers,
+                stop_below=stop)
 
 
 def _check_distance(circuit: stim.Circuit, cons: L0Constraints) -> tuple[CheckResult, int | None]:
@@ -813,35 +768,42 @@ def _check_distance(circuit: stim.Circuit, cons: L0Constraints) -> tuple[CheckRe
         noisy.detector_error_model(allow_gauge_detectors=False)
     except Exception as e:  # noqa: BLE001
         return CheckResult("circuit_distance", "fail", f"could not build noisy DEM: {e}"), None
-    params = dict(size=cons.dont_explore_detection_event_sets_with_size_above,
-                  degree=cons.dont_explore_edges_with_degree_above,
-                  increasing=cons.dont_explore_edges_increasing_symptom_degree,
-                  graphlike=cons.use_graphlike_bound)
+    kwargs = _distance_kwargs(cons)
     t0 = time.time()
-    if cons.distance_timeout_s is None:
-        try:
-            res = _distance_compute(str(noisy), params)
-        except Exception as e:  # noqa: BLE001
-            return CheckResult("circuit_distance", "fail", f"distance search failed: {e}"), None
-    else:
-        try:
-            res = _distance_subprocess(str(noisy), params, cons.distance_timeout_s)
-        except subprocess.TimeoutExpired:
-            return CheckResult("circuit_distance", "fail",
-                               f"distance search did not finish within {cons.distance_timeout_s}s; cannot certify "
-                               f"d_circ >= {cons.min_circuit_distance}"), None
-        except Exception as e:  # noqa: BLE001
-            return CheckResult("circuit_distance", "fail", f"distance search failed: {e}"), None
-    d = res["d"]
-    noise_desc = (f"{cons.distance_noise_model}(p={cons.distance_noise_p}, idle={cons.distance_noise_idle})")
-    detail = {**res, "seconds": round(time.time() - t0, 3), "noise": noise_desc}
-    msg = (f"d_circ upper bound = {d} under {noise_desc} (search={res.get('search')}, "
-           f"graphlike={res.get('graphlike', 'n/a')}); a minimum-weight undetectable logical error: "
-           + "; ".join(res["errors"][:12]))
+    try:
+        if cons.distance_timeout_s is None:
+            res = distance.upper_bound(noisy, **kwargs)
+        else:
+            res = distance.DistanceResult.from_dict(distance.run_in_subprocess(
+                "evaluators.distance", "upper_bound_json", {"circuit": str(noisy), "kwargs": kwargs},
+                cons.distance_timeout_s))
+    except subprocess.TimeoutExpired:
+        return CheckResult("circuit_distance", "fail",
+                           f"distance search did not finish within {cons.distance_timeout_s}s; cannot certify "
+                           f"d_circ >= {cons.min_circuit_distance}"), None
+    except Exception as e:  # noqa: BLE001
+        return CheckResult("circuit_distance", "fail", f"distance search failed: {e}"), None
+    noise_desc = f"{cons.distance_noise_model}(p={cons.distance_noise_p}, idle={cons.distance_noise_idle})"
+    detail = {**res.to_dict(), "wall_seconds": round(time.time() - t0, 3), "noise": noise_desc}
+    rejected = [m for m in res.methods if m.status == "rejected"]
+    rej = ("; WARNING: unverified witnesses discarded: "
+           + ", ".join(f"{m.method} (weight {m.extra.get('unverified_weight')})" for m in rejected)) if rejected else ""
+    if res.weight is None:
+        return CheckResult("circuit_distance", "fail",
+                           f"no method found an injection-verified undetectable logical error under {noise_desc} "
+                           f"({res.summary()}); cannot bound d_circ" + rej, detail), None
+    d = res.weight
+    w = res.witness
+    early = (" (search stopped as soon as a witness below the threshold was found)"
+             if res.stopped_early and cons.min_circuit_distance is not None and d < cons.min_circuit_distance else "")
+    msg = (f"d_circ upper bound = {d} under {noise_desc} [{res.summary()}]{early}; shortest undetectable logical "
+           f"error (weight {d}, found by {w.method}, injection-verified: 0 detectors fire, observables "
+           f"{w.flipped_observables} flip): " + "; ".join(w.describe(limit=24)) + rej)
     if cons.min_circuit_distance is not None and d < cons.min_circuit_distance:
         return CheckResult("circuit_distance", "fail",
                            f"circuit-level distance too low (< {cons.min_circuit_distance}): " + msg, detail), d
-    return CheckResult("circuit_distance", "pass", msg, detail), d
+    return CheckResult("circuit_distance", "pass",
+                       msg + " (this is an upper bound from heuristic search, not a proof of d_circ)", detail), d
 
 
 # ---------------------------------------------------------------------------

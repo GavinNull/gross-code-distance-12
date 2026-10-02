@@ -10,6 +10,8 @@ from evaluators.l0 import L0Constraints, check_l0
 from memory_builder import build_memory
 
 ANNOT = ("TICK", "DETECTOR", "OBSERVABLE_INCLUDE", "QUBIT_COORDS", "SHIFT_COORDS")
+# 小电路的距离搜索用轻量预算（默认预算是为 gross code 定的，见 tests/test_distance.py）
+FAST_DIST = dict(distance_bposd_trials=100, distance_lns_starts=8)
 
 
 def _edges(c: stim.Circuit):
@@ -19,7 +21,7 @@ def _edges(c: stim.Circuit):
 def _surface(d: int, basis: str = "Z", rounds: int | None = None):
     code, data, c = rotated_surface_code_from_stim(d, basis, rounds)
     cons = L0Constraints(data_qubits=data, max_qubits=c.num_qubits, allowed_edges=_edges(c),
-                         rounds=d if rounds is None else rounds)
+                         rounds=d if rounds is None else rounds, **FAST_DIST)
     return code, data, c, cons
 
 
@@ -336,7 +338,7 @@ def test_attack_sacrifice_one_basis():
     # 两个基底用同一个构造器布局（与 stim 的比特编号不同），Z 基底的调度恰好保住距离 5
     cx, data = build_memory(code, "X", 5)
     cz, _ = build_memory(code, "Z", 5)
-    cons = L0Constraints(data_qubits=data, rounds=5, min_circuit_distance=5)
+    cons = L0Constraints(data_qubits=data, rounds=5, min_circuit_distance=5, **FAST_DIST)
     assert check_l0(cz, code, "Z", cons).passed  # 单看 Z 基底是合格的
     r = check_l0({"Z": cz, "X": cx}, code, "both", cons)
     assert not r.passed and r.per_basis["Z"].passed and not r.per_basis["X"].passed
