@@ -3,12 +3,11 @@
 > 由 lead agent 在每个会话结束前更新。这是“现在在哪”的唯一来源。
 
 **最后更新**：2026-10-02
-**当前阶段**：P1 完善评估器 + 联合设计准备（G0 已批准，方向：码 + 电路联合设计）
+**当前阶段**：P1 收尾（评估器再审）+ H-004 S1（主线：为 BB 码恢复电路距离）
 **下一个关卡**：G1（冻结评估器）——**受阻**：auditor 判 NOT READY（伪轮次等严重漏洞），评估器 v2 修复中
 
 ## 待人决策
 
-- **主线调整 H-003 → H-004（为 BB 码恢复电路距离）** → `research/proposals/2026-10-02-H004-恢复电路距离.md`
 0. **是否加强 Bash 侧的防护**（auditor F2）：目前 hook 只拦截 Edit/Write 工具，agent 用 Bash 写 `evaluators/` 拦不住，只能靠冻结后的哈希校验和文件系统锁事后发现。
    可选：(a) 在 `.claude/settings.json` 加一个检查 Bash 命令的 hook；(b) 把 `.claude/settings.json` 纳入冻结清单。这两项都是项目配置，由 PI 决定，lead 不自行修改。
 1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。

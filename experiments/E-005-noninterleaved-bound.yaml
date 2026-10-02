@@ -1,0 +1,14 @@
+id: E-005-noninterleaved-bound
+hypothesis: H-004（S1）
+question: >
+  对 [[90,8,10]]、[[108,8,10]]（以及 [[120,8,12]]、coprime [[126,12,10]]），在单辅助比特、非交错的 syndrome 提取电路中，
+  最大可达的电路级距离是多少？利用 Strikis–Browne–Beverland（arXiv 2603.05481）Prop. 3 / Corollary 1：非交错电路的 d_circ 等于扩展码 E 的距离 d_ext(E)，可以精确计算。
+prediction: >
+  （跑前写下）
+  1) 方法验证：用同一套计算复现 2603.05481 对 gross code 的结论：Fig. 12 电路的 d_ext = 11，且在搜索的非交错电路中没有 12。
+  2) [[90,8,10]] 和 [[108,8,10]] 的非交错最大 d_circ ≥ 9（至少比 IBM 原电路的 ≤8 高）；
+     达到 10 的把握约五成。
+  3) d_ext 的精确计算（MILP / CP-SAT）在 n=90、108 规模上每个电路可在 10 分钟内完成。
+codes: ["[[90,8,10]]", "[[108,8,10]]", "[[120,8,12]]", "coprime [[126,12,10]]", "gross [[144,12,12]]（验证用）"]
+method: 按原文定义构造扩展码 E；在非交错电路空间内搜索使 d_ext 最大的电路（项顺序穷举 + 退火，或原文的 left-right 构造）；精确计算 d_ext；对得到的最好电路再用评估器的距离模块做电路级交叉验证
+budget: {cpu_hours: 15, llm_tokens: 0, num_workers: 5}
