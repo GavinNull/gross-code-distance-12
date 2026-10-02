@@ -8,6 +8,8 @@
 
 ## 待人决策
 
+0. **是否加强 Bash 侧的防护**（auditor F2）：目前 hook 只拦截 Edit/Write 工具，agent 用 Bash 写 `evaluators/` 拦不住，只能靠冻结后的哈希校验和文件系统锁事后发现。
+   可选：(a) 在 `.claude/settings.json` 加一个检查 Bash 命令的 hook；(b) 把 `.claude/settings.json` 纳入冻结清单。这两项都是项目配置，由 PI 决定，lead 不自行修改。
 1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。
 2. （未答复）SI1000 ResonatorIdle 的处理：lead 选择“不作用于正在做门的比特”，PI 未表态，暂按此执行。
 
@@ -18,6 +20,7 @@
 ## 正在进行（P1 后半，2026-10-02）
 
 - ~~评估器 G1 前修补~~ 已完成（108 测试通过，lead 复跑）：L0 flows 覆盖检查支持流水电路；L2 diff/flat 口径。IBM vs Strikis 用 diff 口径比值 0.84 [0.64, 1.10]，原先的 1.3 倍来自边界
+- **评估器 v2**（已完成，**待合并**）：分支 `worktree-agent-ad3344517947afa89`（5 个提交）。候选只提交调度、评估器用模板生成电路；单一入口 `pipeline.evaluate`；成绩单只能由 pipeline 写；L0 修复伪轮次；冻结机制覆盖全部文件和固定的库版本。E-004 结束后合并，然后漏斗填配置、auditor 再审
 - **E-004 代理指标保序性与评估成本**（30 CPU 小时）：决定联合搜索在本机是否可行、漏斗怎么设计 → `experiments/E-004-proxy-fidelity.yaml`
 
 ## P1 已完成（摘要）
