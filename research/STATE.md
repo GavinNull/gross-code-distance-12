@@ -17,7 +17,7 @@
 
 ## 正在进行（P1 后半，2026-10-02）
 
-- 评估器 G1 前修补：L0 支持跨轮流水电路（flows 覆盖检查）+ L2 `boundary="diff"` 口径 → `evaluators/`
+- ~~评估器 G1 前修补~~ 已完成（108 测试通过，lead 复跑）：L0 flows 覆盖检查支持流水电路；L2 diff/flat 口径。IBM vs Strikis 用 diff 口径比值 0.84 [0.64, 1.10]，原先的 1.3 倍来自边界
 - **E-004 代理指标保序性与评估成本**（30 CPU 小时）：决定联合搜索在本机是否可行、漏斗怎么设计 → `experiments/E-004-proxy-fidelity.yaml`
 
 ## P1 已完成（摘要）
