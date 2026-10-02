@@ -22,7 +22,7 @@
 - E-002 gross code baseline（experimenter）→ `experiments/E-002-gross-baseline.yaml`
 - auditor：独立复现 E-001/E-001b → `research/audits/2026-10-02-E-001.md`
 - 评估器构建（P1 提前开工，未冻结）：噪声模型 + L0 合法性检查 + 攻击测试 → `evaluators/`、`tests/`
-- LLM 进化搜索框架（mock LLM + 玩具问题，不花 token）→ `search/llm_evolve/`
+- ~~LLM 进化搜索框架~~ 已完成：35 个测试通过（lead 复跑确认），含模拟退火对照；未调用真实 API。真实调用前需 PI 配置 key 并做小额冒烟
 - ~~lit-scout #3~~ 已完成：交错电路达到 d_circ=12 属于空白（证据中等），开放问题已在原文核实
 - lit-scout #2：噪声模型精确定义、E-001 阈值文献核对、qLDPC 码目录 → `research/literature/`
 - ~~E-001 表面码 baseline~~ 已完成 → `research/journal/2026-10-02-E-001-surface-baseline.md`：流水线可用，阈值约 1.2%；初始预测因噪声口径错误未命中
