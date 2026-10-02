@@ -3,43 +3,37 @@
 > 由 lead agent 在每个会话结束前更新。这是“现在在哪”的唯一来源。
 
 **最后更新**：2026-10-02
-**当前阶段**：P0 完成，**停在 G0 关卡等待 PI 决定**
-**下一个关卡**：G0（报告已提交）
+**当前阶段**：P1 完善评估器 + 联合设计准备（G0 已批准，方向：码 + 电路联合设计）
+**下一个关卡**：G1（冻结评估器）
 
 ## 待人决策
 
-0. **G0 关卡** → `research/gates/G0-2026-10-02.md`（建议批准；需与方向调整一并决定）
-1. **研究方向调整** → 建议书：`research/proposals/2026-10-02-方向调整.md`
-   建议：攻 2603.05481 原文列出的开放问题“交错电路能否让 gross code 达到 d_circ=12”；
-   第一步先做公平基准 + 精确电路距离验证（含独立验证 Strikis 的 d_circ=11 猜想），H-002 作为方法论贡献。
+1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。
+2. （未答复）SI1000 ResonatorIdle 的处理：lead 选择“不作用于正在做门的比特”，PI 未表态，暂按此执行。
 
 ## 已确认结果
 
 （无。只有经 auditor 复核通过的结果才能写在这里。）
 
-## 正在进行
+## 正在进行（P1，2026-10-02 派发）
 
-- lit-scout：核对参考文献、提取 gross code 论文细节、调度搜索新颖性调研 → `research/literature/`
-- ~~E-002 gross code baseline~~ 已完成（待 auditor）：码参数精确匹配，d_circ ≤ 10（找到权重 10 的见证），p=0.003–0.005 与论文拟合差 0.86–1.18 倍；**p=0.006 偏高 1.37 倍且置信区间不覆盖论文值，原因未明**；p=0.003 统计量不足
-- ~~auditor #2 复核 E-002~~ 已完成：CONFIRMED（附条件）。p=0.006 偏差源于口径（论文口径下为论文值的 1.05 倍）；发现 L0 距离检查漏报（已登记 evaluator_issues）
-- ~~auditor 复核 E-001~~ 已完成：CONFIRMED（有条件）。关键发现：缺空闲噪声、只测 Z 基底，已转为评估器的硬性要求
-- ~~评估器第一部分~~ 已完成（未冻结）：噪声模型（sd6/si1000/gross_sd6，空闲噪声默认开启）+ L0（双基底）+ 28 个攻击测试全部拒绝；全套 121 测试通过（lead 复跑）
-  - 局限：d_circ 只是上界（需 SAT/ILP 复核）；L0 拒绝辅助比特跨轮流水、flag/猫态等非标准电路，**若选交错/flag 方向需扩展 L0**
-  - 技术决定（lead）：SI1000 的 ResonatorIdle 默认不作用于正在做门的比特；候选只提交调度，由评估器生成两个基底的电路（采纳 agent 建议）
-  - 还缺：L1/L2 采样、距离精确复核、跨轮数一致性检查
-- ~~LLM 进化搜索框架~~ 已完成：35 个测试通过（lead 复跑确认），含模拟退火对照；未调用真实 API。真实调用前需 PI 配置 key 并做小额冒烟
-- ~~lit-scout #3~~ 已完成：交错电路达到 d_circ=12 属于空白（证据中等），开放问题已在原文核实
-- lit-scout #2：噪声模型精确定义、E-001 阈值文献核对、qLDPC 码目录 → `research/literature/`
-- ~~E-001 表面码 baseline~~ 已完成 → `research/journal/2026-10-02-E-001-surface-baseline.md`：流水线可用，阈值约 1.2%；初始预测因噪声口径错误未命中
+- 评估器·距离模块：修复 L0 距离漏报，并入 BP-OSD 见证搜索；测试下界证明（ILP/SAT）的可行性 → `evaluators/distance.py`
+- 评估器·L2 + 成绩单：X/Z 联合采样、paper/noisy 两种边界口径、leaderboard 写入 → `evaluators/l2.py`、`evaluators/leaderboard.py`
+- E-003：复现 Strikis d_circ=11 电路，作为“最好已知电路”对照 → `experiments/E-003-strikis-gross.yaml`
+- lit-scout：联合设计竞争格局与资源指标，为 H-003 指标定稿 → `research/literature/codesign-landscape.md`、`resource-metrics.md`
+- 码族枚举与筛选工具（BB/2BGA，含 IBM 表 3 复现与小规模试运行）→ `search/codes/`
+
+## P0 已完成（摘要）
+- E-001/E-001b 表面码、E-002 gross code baseline，均经 auditor 有条件确认；G0 报告：`research/gates/G0-2026-10-02.md`
+- 评估器第一部分（噪声 + 双基底 L0 + 28 个攻击测试）；LLM 进化框架（35 测试，mock）
+- 文献：参考文献核对、gross code 细节、新颖性（H-001 已被先发表）、噪声模型、qLDPC 码目录、交错电路
 
 ## 下一步（按优先级）
 
-1. ~~lit-scout #1：参考文献核对 + 新颖性调研~~ 已完成 → `research/literature/` 三份笔记。关键结论：H-001 已被先发表。
-2. 复现表面码 baseline：rotated surface code d=3,5,7，均匀去极化，p 扫 1e-3 ~ 5e-3，
-   结果与 Stim/PyMatching 文献中的阈值行为吻合。
-3. 复现 gross code [[144,12,12]] 的标准 syndrome 提取电路（IBM 深度-8 调度），
-   用 BP-OSD 估逻辑错误率，与原论文数字对比。
-4. 2 和 3 完成后写 G0 关卡报告。
+1. 收齐上述 5 项，提交并让 auditor 复核距离模块和 L2。
+2. 根据 lit-scout 结果定稿 H-003 的指标（建议同时报告“每逻辑比特物理比特数”和“每逻辑比特每轮错误率”）。
+3. auditor 对完整评估器做攻击测试 → G1 关卡报告 → PI 冻结评估器。
+4. G1 之后：联合搜索。先用模拟退火 / 穷举做对照，再上 LLM 进化（需要 PI 配置 API key 并批准预算）。
 
 ## 已知风险 / 备注
 
