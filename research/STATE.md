@@ -8,7 +8,10 @@
 
 ## 待人决策
 
-（无）
+1. **研究方向调整**（2026-10-02 提出，建议书待 interleaved 新颖性调研完成后补全）：
+   原 H-001（gross code 非交错调度改进）已被 arXiv 2603.05481 / 2601.12509 覆盖。
+   lead 初步倾向：主攻“交错 / 多辅助比特电路让 gross code 达到 d_circ=12”（已证明非交错电路做不到），
+   H-002（LLM vs 经典搜索）作为方法论贡献。正在核实该方向是否空白。
 
 ## 已确认结果
 
@@ -21,14 +24,13 @@
 - auditor：独立复现 E-001/E-001b → `research/audits/2026-10-02-E-001.md`
 - 评估器构建（P1 提前开工，未冻结）：噪声模型 + L0 合法性检查 + 攻击测试 → `evaluators/`、`tests/`
 - LLM 进化搜索框架（mock LLM + 玩具问题，不花 token）→ `search/llm_evolve/`
+- lit-scout #3：交错电路 / d_circ=12 / 码+调度联合搜索的新颖性核查 → `research/literature/novelty-interleaved-circuits.md`
 - lit-scout #2：噪声模型精确定义、E-001 阈值文献核对、qLDPC 码目录 → `research/literature/`
 - ~~E-001 表面码 baseline~~ 已完成 → `research/journal/2026-10-02-E-001-surface-baseline.md`：流水线可用，阈值约 1.2%；初始预测因噪声口径错误未命中
 
 ## 下一步（按优先级）
 
-1. `lit-scout`：核对 `docs/课题说明.md` §9 的参考文献，补全 arXiv 编号；
-   检索 2025 年以来 “syndrome extraction schedule / qLDPC / bivariate bicycle / AlphaEvolve QEC” 相关工作，
-   写进 `research/literature/`，重点回答：调度搜索这个方向是否已被人做过、做到什么程度。
+1. ~~lit-scout #1：参考文献核对 + 新颖性调研~~ 已完成 → `research/literature/` 三份笔记。关键结论：H-001 已被先发表。
 2. 复现表面码 baseline：rotated surface code d=3,5,7，均匀去极化，p 扫 1e-3 ~ 5e-3，
    结果与 Stim/PyMatching 文献中的阈值行为吻合。
 3. 复现 gross code [[144,12,12]] 的标准 syndrome 提取电路（IBM 深度-8 调度），
