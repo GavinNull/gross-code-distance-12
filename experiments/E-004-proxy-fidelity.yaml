@@ -1,0 +1,22 @@
+id: E-004-proxy-fidelity
+hypothesis: H-003（搜索可行性前提）
+question: >
+  便宜的代理指标能否复现昂贵 L2（每逻辑比特每轮 LER，E-002 解码器设置，≥300 次失败/sector）对“码 + 电路”组合的排序？
+  每个评估层级在 gross 规模上的成本是多少？本机预算下，一次联合搜索能评估多少个候选？
+prediction: >
+  （跑前写下）
+  1) 码级代理（k·d²/n、Q=2n/k）单独使用时与 L2 排序的 Spearman 相关 < 0.6：电路和解码器效应占主导（E-003 的教训）。
+  2) “降配解码器（BP-OSD osd_order 0–2、max_iter ≤ 200）+ 少量 shot（每 sector 约 50 次失败）”的代理与完整 L2 排序相关 ≥ 0.8，单候选成本降至 1/10 以下。
+  3) 电路距离上界（低预算）对排序的解释力弱于第 2 项。
+  4) 本机 8 核下，完整 L2 每天只能评估 ≤ 10 个 gross 规模的候选；降配代理可达 100–300 个。
+candidates: >
+  约 8–12 个 (码, 电路) 组合，覆盖 Q 与 d 的范围：
+  [[72,12,6]]、[[90,8,10]]、[[108,8,10]]、[[126,12,10]]（coprime，Wang–Mueller）、gross [[144,12,12]] × IBM 默认调度；
+  gross × Strikis 电路；以及 2–3 个故意变差的调度（如交换项顺序导致距离下降），用来检验代理能否识别坏调度；
+  试运行中不在文献清单里的 [[120,8,12]]。
+noise: {model: sd6, p: [0.004]}
+boundary: rounds-difference 或拉平口径（流水电路必须如此，见 evaluator_issues）；非流水电路同时报告 paper 口径
+rounds: 码距 d
+decoder_full: E-002 设置（BP-OSD min_sum, max_iter 10000, osd_cs order 7）
+budget: {cpu_hours: 30, llm_tokens: 0, num_workers: 6}
+stop_rule: 完整 L2 每 sector ≥300 次失败；代理按各自设定
