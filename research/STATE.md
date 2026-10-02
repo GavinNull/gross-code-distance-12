@@ -18,7 +18,7 @@
 ## 正在进行（P1，2026-10-02 派发）
 
 - 评估器·距离模块：修复 L0 距离漏报，并入 BP-OSD 见证搜索；测试下界证明（ILP/SAT）的可行性 → `evaluators/distance.py`
-- 评估器·L2 + 成绩单：X/Z 联合采样、paper/noisy 两种边界口径、leaderboard 写入 → `evaluators/l2.py`、`evaluators/leaderboard.py`
+- ~~评估器·L2 + 成绩单~~ 已完成（22 测试通过，lead 复跑）：X/Z 真联合采样；gross code p=0.006 paper 口径 0.0508（论文 0.0511）；独立近似偏高约 15%；seed 可复现（与 worker 数无关）；leaderboard 带哈希链和文件锁
 - E-003：复现 Strikis d_circ=11 电路，作为“最好已知电路”对照 → `experiments/E-003-strikis-gross.yaml`
 - ~~lit-scout：联合设计竞争格局~~ 已完成，H-003 已定稿（指标：Q=2n/k 与每逻辑比特 LER，按已知码包络线判定）。最近的竞争者是 OmniQEC（LLM AI 科学家，调度固定）
 - 码族枚举与筛选工具（BB/2BGA，含 IBM 表 3 复现与小规模试运行）→ `search/codes/`
@@ -36,6 +36,10 @@
 4. G1 之后：联合搜索。先用模拟退火 / 穷举做对照，再上 LLM 进化（需要 PI 配置 API key 并批准预算）。
 
 ## 已知风险 / 备注
+
+- **算力瓶颈（影响搜索设计）**：gross code 的 BP-OSD（IBM 参数）在 p=0.006 下约 5 CPU 秒/shot。
+  每个候选要采到 1000 次错误需要数十 CPU 小时，**L2 不可能用在搜索内循环里**。
+  搜索必须主要靠 L1 代理（电路距离、最低权重失败数、深度），L2 只用于少量入围者；还要评估更快的解码器设置（例如降低 OSD 阶数或迭代次数）是否保持排序。
 
 - **未解疑点**：gross code 在 p=1e-3 下的块 LER，IBM Table 1 为 2e-7，Tour de gross Table 2 为 10^-8.8，相差约 125 倍，口径未核实。外推阶段之前必须查清。
 - **竞争风险**：OmniQEC（2607.28 提交）与本项目的“AI 原生”定位高度重合。差异化依赖调度联合优化 + 每逻辑比特开销 + 严格复核。
