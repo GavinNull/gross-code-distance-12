@@ -8,6 +8,7 @@
 
 ## 待人决策
 
+- **主线调整 H-003 → H-004（为 BB 码恢复电路距离）** → `research/proposals/2026-10-02-H004-恢复电路距离.md`
 0. **是否加强 Bash 侧的防护**（auditor F2）：目前 hook 只拦截 Edit/Write 工具，agent 用 Bash 写 `evaluators/` 拦不住，只能靠冻结后的哈希校验和文件系统锁事后发现。
    可选：(a) 在 `.claude/settings.json` 加一个检查 Bash 命令的 hook；(b) 把 `.claude/settings.json` 纳入冻结清单。这两项都是项目配置，由 PI 决定，lead 不自行修改。
 1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。
@@ -20,7 +21,7 @@
 ## 正在进行
 
 - auditor（新会话）再攻击已合并的评估器 v2，并测可用性 → `research/audits/2026-10-02-evaluator-v2.md`
-- lit-scout：非 gross BB 码（[[90,8,10]]、[[108,8,10]] 等）的保距离电路是否已有人做过 → `research/literature/novelty-distance-preserving-bb.md`
+- ~~lit-scout：保距离电路新颖性~~ 已完成：空白（邻近部分做过），证据中等偏低；抢发风险高
 - 合并后全套测试（后台）
 
 ## 最新结论（E-004，2026-10-02）
