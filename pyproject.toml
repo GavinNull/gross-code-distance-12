@@ -4,21 +4,22 @@ version = "0.1.0"
 description = "AI-driven search for quantum error-correcting codes and fault-tolerant circuits"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    # QEC 模拟与解码
-    "stim",
-    "sinter",
-    "pymatching",
-    "ldpc",
+    # QEC 模拟与解码。评估器依赖的库固定到 == 版本（评估器 v2，auditor G1 F6）：库版本是裁判的一部分，
+    # 与 evaluators/tasks.py 的 PINNED_VERSIONS 一致；pyproject.toml 与 uv.lock 都在冻结哈希里。升级 = 重新冻结。
+    "stim==1.16.0",
+    "sinter==1.16.0",
+    "pymatching==2.4.0",
+    "ldpc==2.4.1",
     "beliefmatching",
     "stimbposd",
     # 数值与图
-    "numpy",
-    "scipy",
+    "numpy==2.2.6",
+    "scipy==1.18.1",
     "networkx",
     "galois",
     # 电路级距离的精确/下界求解（evaluators/distance.py）
-    "python-sat",
-    "ortools",
+    "python-sat==1.9.dev15",
+    "ortools==9.15.6755",
     "sympy",
     # LLM 驱动的进化搜索
     "anthropic",
