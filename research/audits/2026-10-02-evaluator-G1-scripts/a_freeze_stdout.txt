@@ -1,0 +1,20 @@
+copy at /private/var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/g1freeze_qtv5zaja
+freeze: 已冻结 8 个文件，评估器哈希 45f17a9022aa52b3
+F1 hook decision for Edit 'evaluators/l0.py': deny  (exists: True)
+F1 hook decision for Edit 'Evaluators/l0.py': allow  (exists: True)
+F1 hook decision for Edit 'EVALUATORS/noise.py': allow  (exists: True)
+F1 hook decision for Edit 'research/Leaderboard.jsonl': allow  (exists: False)
+F1 hook decision for Edit 'evaluators/FROZEN': deny  (exists: True)
+F1 hook decision for Edit 'Evaluators/FROZEN': allow  (exists: True)
+F2 hook decision for Bash sed on evaluators/l0.py: allow (and settings.json only routes Edit|Write|NotebookEdit to the hook)
+F3 before: 3.7169221888498383
+F3 after forged pyc: 42.0
+F3 verify: 评估器完整，哈希 45f17a9022aa52b3
+F3 leaderboard evaluator_hash(): {'hash': '45f17a9022aa52b3', 'frozen': True, 'frozen_hash': '45f17a9022aa52b3', 'matches_frozen': True}
+F4 hashed files: ['evaluators/__init__.py', 'evaluators/codes.py', 'evaluators/distance.py', 'evaluators/l0.py', 'evaluators/l2.py', 'evaluators/leaderboard.py', 'evaluators/noise.py', 'evaluators/stats.py']
+F4 import order per directory (first wins): ['.cpython-312-darwin.so', '.abi3.so'] before ['.py'] -> an evaluators/noise.cpython-312-darwin.so would shadow noise.py and is not hashed
+F5 verify after tampering stats.py: 评估器被修改，以下文件与冻结时不一致：
+F5 verify after also editing scripts/freeze_evaluator.py: 评估器完整，哈希 45f17a9022aa52b3
+F5 leaderboard evaluator_hash(): {'hash': '45f17a9022aa52b3', 'frozen': True, 'frozen_hash': '45f17a9022aa52b3', 'matches_frozen': True}
+F6 library versions (not in the evaluator hash; pyproject has no pins): {'stim': '1.16.0', 'sinter': '1.16.0', 'ldpc': '2.4.1', 'pymatching': '2.4.0', 'ortools': '9.15.6755', 'numpy': '2.2.6'}
+F6 uv.lock exists: True

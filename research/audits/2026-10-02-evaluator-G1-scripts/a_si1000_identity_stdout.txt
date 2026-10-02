@@ -1,0 +1,5 @@
+honest: Σprior=3.6369
+I-padded: Σprior=3.2388
+=== honest: 1547/257843 = 5.9998e-03
+=== I-padded: 1647/522786 = 3.1504e-03
+uv run python a_si1000_identity.py --direct 5  10.09s user 1.07s system 203% cpu 5.483 total

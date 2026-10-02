@@ -1,0 +1,23 @@
+inserted 25 I gates per basis
+padded L0 passed: True d_circ 5
+paper : honest Σprior=6.3795 (2107 mech)  I-padded Σprior=6.2248 (2107 mech)  ratio=0.9758
+flat  : honest Σprior=6.0702 (2107 mech)  I-padded Σprior=6.0702 (2107 mech)  ratio=1.0000
+=== honest
+L2 [sd6 p=0.007 rounds=5 boundary=paper decoder=pymatching seed=7] shots=12000
+  P_Z = 9.608e-02 [8.639e-02, 1.064e-01] (LR=1000 interval, ≈3.72σ; 1153/12000)
+     per round 2.0001e-02 [1.7909e-02, 2.2247e-02]
+  P_X = 9.075e-02 [8.132e-02, 1.008e-01] (LR=1000 interval, ≈3.72σ; 1089/12000)
+     per round 1.8847e-02 [1.6820e-02, 2.1028e-02]
+  P_any = 1.748e-01 [1.622e-01, 1.880e-01] (LR=1000 interval, ≈3.72σ; 2098/12000)
+     per round 3.7705e-02 [3.4776e-02, 4.0788e-02]
+  P_indep_approx (reference only) = 1.7811e-01
+=== I-padded
+L2 [sd6 p=0.007 rounds=5 boundary=paper decoder=pymatching seed=7] shots=16000
+  P_Z = 8.912e-02 [8.099e-02, 9.773e-02] (LR=1000 interval, ≈3.72σ; 1426/16000)
+     per round 1.8497e-02 [1.6750e-02, 2.0359e-02]
+  P_X = 8.775e-02 [7.967e-02, 9.630e-02] (LR=1000 interval, ≈3.72σ; 1404/16000)
+     per round 1.8201e-02 [1.6468e-02, 2.0048e-02]
+  P_any = 1.648e-01 [1.540e-01, 1.758e-01] (LR=1000 interval, ≈3.72σ; 2636/16000)
+     per round 3.5364e-02 [3.2904e-02, 3.7940e-02]
+  P_indep_approx (reference only) = 1.6905e-01
+uv run python a_l2_identity_prep.py 5 5 --l2  52.63s user 3.42s system 117% cpu 47.533 total

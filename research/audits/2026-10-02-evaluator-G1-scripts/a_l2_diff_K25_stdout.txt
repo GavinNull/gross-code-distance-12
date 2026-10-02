@@ -1,0 +1,5 @@
+=== honest: diff per-round P_any best=3.4890e-02 [3.1876e-02, 3.8021e-02] low_unclipped=3.1876e-02; candidate_hash={'3': '20851b48b93272aa11479bda700e89e3282f6e3363058a46c9adc0c9c8292128', '9': 'cd892207baf20ca2f7e9a728b9cdbe5a0b06a6d77fd23d972952b7e85706ec0c'}
+    warnings: []
+=== r1 circuit padded with 25 idle layers: diff per-round P_any best=-5.9468e-03 [0.0000e+00, -9.9096e-04] low_unclipped=-1.1007e-02; candidate_hash={'3': '2edefec48c1b91e8e5d10353a1f46fc7fc3fa4c42b5abb034b930d4feeefdda0', '9': 'cd892207baf20ca2f7e9a728b9cdbe5a0b06a6d77fd23d972952b7e85706ec0c'}
+    warnings: ['P_Z: P(r2) < P(r1) after correction: negative point estimate (statistical fluctuation)', 'P_X: P(r2) < P(r1) after correction: negative point estimate (statistical fluctuation)', 'P_any: P(r2) < P(r1) after correction: negative point estimate (statistical fluctuation)']
+uv run python a_l2_diff.py 25  27.68s user 3.65s system 209% cpu 14.960 total

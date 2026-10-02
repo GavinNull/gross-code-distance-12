@@ -1,0 +1,15 @@
+=== FAKE-EARLY: L0 passed=True d_circ=5
+L0 PASS [basis both] (d_circ upper bound = 5, per basis Z: 5, X: 5)
+[PASS] Z:circuit_distance: d_circ upper bound = 5 under sd6(p=0.001, idle=None) [graphlike=5, stim_search=5, bposd=5, bposd_lns=5]; shortest undetectable logical error (weight 5, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: X_ERROR on [1] -> X1; tick 0: X_ERROR on [12] -> X12; tick 0: X_ERROR on [23] -> X23; tick 0: X_ERROR on [34] -> X34; tick 0: X_ERROR on [45] -> X45 (this is an upper bound from heuristic search, not a proof of d_circ)
+[PASS] X:circuit_distance: d_circ upper bound = 5 under sd6(p=0.001, idle=None) [graphlike=5, stim_search=5, bposd=5, bposd_lns=5]; shortest undetectable logical error (weight 5, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: Z_ERROR on [1] -> Z1; tick 0: Z_ERROR on [3] -> Z3; tick 0: Z_ERROR on [5] -> Z5; tick 0: Z_ERROR on [7] -> Z7; tick 0: Z_ERROR on [9] -> Z9 (this is an upper bound from heuristic search, not a proof of d_circ)
+=== FAKE-EARLY L2
+L2 [sd6 p=0.005 rounds=10 boundary=paper decoder=pymatching seed=20261002] shots=360000
+  P_Z = 1.386e-03 [1.168e-03, 1.630e-03] (LR=1000 interval, ≈3.72σ; 499/360000)
+     per round 1.3870e-04 [1.1688e-04, 1.6307e-04]
+  P_X = 1.433e-03 [1.212e-03, 1.681e-03] (LR=1000 interval, ≈3.72σ; 516/360000)
+     per round 1.4343e-04 [1.2122e-04, 1.6819e-04]
+  P_any = 2.803e-03 [2.488e-03, 3.143e-03] (LR=1000 interval, ≈3.72σ; 1009/360000)
+     per round 2.8063e-04 [2.4907e-04, 3.1476e-04]
+  P_indep_approx (reference only) = 2.8175e-03
+  WARNING: fewer than 1000 logical errors in a sector (Z 499, X 516); below the comparison threshold of evaluators/stats.py
+uv run python a1b_fake_rounds_early_readout.py 5 10 --l2  19.44s user 2.46s system 126% cpu 17.297 total

@@ -1,0 +1,10 @@
+LB1 same 3-round circuit: rounds=3 -> per-round P_any 2.399e-02; rounds=30 claimed -> 2.425e-03 (same counts 1405 / 1405)
+LB1 accepted: 30 0.0024250397013870773
+LB2 forged l0/l2 dict accepted: {'basis': None, 'checks': {}, 'd_circ': 99, 'passed': True} 1e-10
+LB3 non-scoring noise model accepted: gross_sd6 warnings: ['fewer than 1000 logical errors in a sector (Z 136, X 109); below the comparison threshold of evaluators/stats.py', "noise model 'gross_sd6' is not a scoring model"]
+LB4 schedule_hash != l2.circuit.candidate_hash accepted: 55ce74bb5e34 vs 20851b48b932
+LB7 different p on same board accepted: 0.001
+verify (intact): []
+LB5 after deleting the last 3 lines, verify: []
+LB6 after rewriting line 1 and re-chaining, verify: []
+uv run python a_leaderboard.py  18.50s user 2.48s system 96% cpu 21.744 total

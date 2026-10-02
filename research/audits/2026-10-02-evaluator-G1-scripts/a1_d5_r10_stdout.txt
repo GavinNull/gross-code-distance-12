@@ -1,0 +1,69 @@
+fake Z circuit: 17 ticks, honest: 70 ticks
+=== honest: L0 passed=True d_circ=5
+L0 PASS [basis both] (d_circ upper bound = 5, per basis Z: 5, X: 5)
+[PASS] Z:instructions: only allowed, noiseless instructions
+[PASS] Z:qubit_count: 64 <= 64 qubits
+[PASS] Z:connectivity: all two-qubit gates on allowed edges
+[PASS] Z:tick_structure: 71 time steps, <=1 op per qubit per step
+[PASS] Z:determinism: all 240 detectors and 1 observables deterministic
+[PASS] Z:data_layout: 25 data qubits reset before first entangling layer 2 and read out in Z basis at the end
+[PASS] Z:observables: 1 independent nontrivial logical-Z observables; coordinates in the LZ basis: {0: [1]}
+[PASS] Z:logical_injection: logical X operators injected at ticks [1, 69] are undetected and flip the observables with full rank
+[PASS] Z:stabilizer_coverage: all 24 stabilizer generators measured exactly 10 time(s) in time-disjoint windows (flow analysis of the whole circuit, no clean cuts needed)
+[PASS] Z:detector_coverage: all expected Z-type comparisons and opposite-type comparisons lie in the span of the 240 detectors
+[PASS] Z:circuit_distance: d_circ upper bound = 5 under sd6(p=0.001, idle=None) [graphlike=5, stim_search=5, bposd=5, bposd_lns=5]; shortest undetectable logical error (weight 5, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: X_ERROR on [1] -> X1; tick 0: X_ERROR on [12] -> X12; tick 0: X_ERROR on [23] -> X23; tick 0: X_ERROR on [34] -> X34; tick 0: X_ERROR on [45] -> X45 (this is an upper bound from heuristic search, not a proof of d_circ)
+[PASS] X:instructions: only allowed, noiseless instructions
+[PASS] X:qubit_count: 64 <= 64 qubits
+[PASS] X:connectivity: all two-qubit gates on allowed edges
+[PASS] X:tick_structure: 71 time steps, <=1 op per qubit per step
+[PASS] X:determinism: all 240 detectors and 1 observables deterministic
+[PASS] X:data_layout: 25 data qubits reset before first entangling layer 2 and read out in X basis at the end
+[PASS] X:observables: 1 independent nontrivial logical-X observables; coordinates in the LX basis: {0: [1]}
+[PASS] X:logical_injection: logical Z operators injected at ticks [1, 69] are undetected and flip the observables with full rank
+[PASS] X:stabilizer_coverage: all 24 stabilizer generators measured exactly 10 time(s) in time-disjoint windows (flow analysis of the whole circuit, no clean cuts needed)
+[PASS] X:detector_coverage: all expected X-type comparisons and opposite-type comparisons lie in the span of the 240 detectors
+[PASS] X:circuit_distance: d_circ upper bound = 5 under sd6(p=0.001, idle=None) [graphlike=5, stim_search=5, bposd=5, bposd_lns=5]; shortest undetectable logical error (weight 5, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: Z_ERROR on [1] -> Z1; tick 0: Z_ERROR on [3] -> Z3; tick 0: Z_ERROR on [5] -> Z5; tick 0: Z_ERROR on [7] -> Z7; tick 0: Z_ERROR on [9] -> Z9 (this is an upper bound from heuristic search, not a proof of d_circ)
+=== FAKE: L0 passed=True d_circ=5
+L0 PASS [basis both] (d_circ upper bound = 5, per basis Z: 5, X: 5)
+[PASS] Z:instructions: only allowed, noiseless instructions
+[PASS] Z:qubit_count: 64 <= 64 qubits
+[PASS] Z:connectivity: all two-qubit gates on allowed edges
+[PASS] Z:tick_structure: 18 time steps, <=1 op per qubit per step
+[PASS] Z:determinism: all 240 detectors and 1 observables deterministic
+[PASS] Z:data_layout: 25 data qubits reset before first entangling layer 2 and read out in Z basis at the end
+[PASS] Z:observables: 1 independent nontrivial logical-Z observables; coordinates in the LZ basis: {0: [1]}
+[PASS] Z:logical_injection: logical X operators injected at ticks [1, 16] are undetected and flip the observables with full rank
+[PASS] Z:stabilizer_coverage: all 24 stabilizer generators measured exactly 10 time(s) in time-disjoint windows (flow analysis of the whole circuit, no clean cuts needed)
+[PASS] Z:detector_coverage: all expected Z-type comparisons and opposite-type comparisons lie in the span of the 240 detectors
+[PASS] Z:circuit_distance: d_circ upper bound = 5 under sd6(p=0.001, idle=None) [graphlike=5, stim_search=5, bposd=5, bposd_lns=5]; shortest undetectable logical error (weight 5, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: X_ERROR on [1] -> X1; tick 0: X_ERROR on [12] -> X12; tick 0: X_ERROR on [23] -> X23; tick 0: X_ERROR on [34] -> X34; tick 0: X_ERROR on [45] -> X45 (this is an upper bound from heuristic search, not a proof of d_circ)
+[PASS] X:instructions: only allowed, noiseless instructions
+[PASS] X:qubit_count: 64 <= 64 qubits
+[PASS] X:connectivity: all two-qubit gates on allowed edges
+[PASS] X:tick_structure: 18 time steps, <=1 op per qubit per step
+[PASS] X:determinism: all 240 detectors and 1 observables deterministic
+[PASS] X:data_layout: 25 data qubits reset before first entangling layer 2 and read out in X basis at the end
+[PASS] X:observables: 1 independent nontrivial logical-X observables; coordinates in the LX basis: {0: [1]}
+[PASS] X:logical_injection: logical Z operators injected at ticks [1, 16] are undetected and flip the observables with full rank
+[PASS] X:stabilizer_coverage: all 24 stabilizer generators measured exactly 10 time(s) in time-disjoint windows (flow analysis of the whole circuit, no clean cuts needed)
+[PASS] X:detector_coverage: all expected X-type comparisons and opposite-type comparisons lie in the span of the 240 detectors
+[PASS] X:circuit_distance: d_circ upper bound = 5 under sd6(p=0.001, idle=None) [graphlike=5, stim_search=5, bposd=5, bposd_lns=5]; shortest undetectable logical error (weight 5, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: Z_ERROR on [1] -> Z1; tick 0: Z_ERROR on [3] -> Z3; tick 0: Z_ERROR on [5] -> Z5; tick 0: Z_ERROR on [7] -> Z7; tick 0: Z_ERROR on [9] -> Z9 (this is an upper bound from heuristic search, not a proof of d_circ)
+=== honest L2
+L2 [sd6 p=0.005 rounds=10 boundary=paper decoder=pymatching seed=20261002] shots=10000
+  P_Z = 9.630e-02 [8.571e-02, 1.076e-01] (LR=1000 interval, ≈3.72σ; 963/10000)
+     per round 1.0075e-02 [8.9204e-03, 1.1324e-02]
+  P_X = 9.760e-02 [8.694e-02, 1.090e-01] (LR=1000 interval, ≈3.72σ; 976/10000)
+     per round 1.0217e-02 [9.0541e-03, 1.1475e-02]
+  P_any = 1.813e-01 [1.673e-01, 1.959e-01] (LR=1000 interval, ≈3.72σ; 1813/10000)
+     per round 1.9805e-02 [1.8139e-02, 2.1568e-02]
+  P_indep_approx (reference only) = 1.8450e-01
+  WARNING: fewer than 1000 logical errors in a sector (Z 963, X 976); below the comparison threshold of evaluators/stats.py
+=== FAKE L2
+L2 [sd6 p=0.005 rounds=10 boundary=paper decoder=pymatching seed=20261002] shots=25000
+  P_Z = 2.184e-02 [1.858e-02, 2.545e-02] (LR=1000 interval, ≈3.72σ; 546/25000)
+     per round 2.2058e-03 [1.8736e-03, 2.5750e-03]
+  P_X = 2.276e-02 [1.943e-02, 2.644e-02] (LR=1000 interval, ≈3.72σ; 569/25000)
+     per round 2.2997e-03 [1.9600e-03, 2.6763e-03]
+  P_any = 4.308e-02 [3.847e-02, 4.802e-02] (LR=1000 interval, ≈3.72σ; 1077/25000)
+     per round 4.3939e-03 [3.9157e-03, 4.9092e-03]
+  P_indep_approx (reference only) = 4.4103e-02
+  WARNING: fewer than 1000 logical errors in a sector (Z 546, X 569); below the comparison threshold of evaluators/stats.py

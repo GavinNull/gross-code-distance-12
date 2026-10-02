@@ -1,0 +1,9 @@
+detectors: original 72, padded 648
+=== bad schedule: passed=False d_circ=3
+circuit-level distance too low (< 5): d_circ upper bound = 3 under sd6(p=0.001, idle=None) [graphlike=3, stim_search=3, bposd=3, bposd_lns=3]; shortest undetectable logical error (weight 3, found by graphlike, injection-verified: 0 detectors fire, observables [0] flip): tick 0: Z_ERROR on [4] -> Z4; tick 4: DEPOLARIZE2 on [1, 25] -> Z25; tick 4: DEPOLARIZE2 on [3, 26] -> Z26
+    circuit_distance fail circuit-level distance too low (< 5): d_circ upper bound = 3 under sd6(p=0.001, idle=None) [graphlike=3, stim_search=3, bposd=3, bposd_lns=3]; shortest undetectable logical error (weight 3, found by g
+=== bad schedule + redundant detectors: passed=False d_circ=3
+circuit-level distance too low (< 5): d_circ upper bound = 3 under sd6(p=0.001, idle=None) [graphlike:none, stim_search:none, bposd=3, bposd_lns=3]; shortest undetectable logical error (weight 3, found by bposd, injection-verified: 0 detectors fire, observables [0] flip): tick 44: DEPOLARIZE2 on [40, 4] -> Z4; tick 52: DEPOLARIZE2 on [1, 25] -> Z25; tick 52: DEPOLARIZE2 on [3, 26] -> Z26
+    circuit_distance fail circuit-level distance too low (< 5): d_circ upper bound = 3 under sd6(p=0.001, idle=None) [graphlike:none, stim_search:none, bposd=3, bposd_lns=3]; shortest undetectable logical error (weight 3, foun
+exact check on padded circuit (target=5): feasible_below_target lower_bound 3 ub 3
+uv run python a_dist_redundant_detectors.py 8 0  75.82s user 1.43s system 98% cpu 1:18.05 total

@@ -1,0 +1,4 @@
+Z all rows: L0 passed=False d_circ=2 CX count=108 counts={'X0': 3, 'X1': 3, 'X2': 3, 'X3': 3, 'X4': 3, 'Z0': 3, 'Z1': 3, 'Z2': 3, 'Z3': 3, 'Z4': 3}
+Z redundant rows never measured: L0 passed=True d_circ=3 CX count=72 counts={'X0': 3, 'X1': 3, 'X2': 3, 'X3': 3, 'X4': 3, 'Z0': 3, 'Z1': 3, 'Z2': 3, 'Z3': 3, 'Z4': 3}
+X all rows: L0 passed=False d_circ=1 CX count=108 counts={'X0': 3, 'X1': 3, 'X2': 3, 'X3': 3, 'X4': 3, 'Z0': 3, 'Z1': 3, 'Z2': 3, 'Z3': 3, 'Z4': 3}
+X redundant rows never measured: L0 passed=False d_circ=2 CX count=72 counts={'X0': 3, 'X1': 3, 'X2': 3, 'X3': 3, 'X4': 3, 'Z0': 3, 'Z1': 3, 'Z2': 3, 'Z3': 3, 'Z4': 3}

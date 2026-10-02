@@ -1,0 +1,5 @@
+=== honest: diff per-round P_any best=3.4890e-02 [3.1876e-02, 3.8021e-02] low_unclipped=3.1876e-02; candidate_hash={'3': '20851b48b93272aa11479bda700e89e3282f6e3363058a46c9adc0c9c8292128', '9': 'cd892207baf20ca2f7e9a728b9cdbe5a0b06a6d77fd23d972952b7e85706ec0c'}
+    warnings: []
+=== r1 circuit padded with 6 idle layers: diff per-round P_any best=2.7449e-02 [2.4215e-02, 3.0778e-02] low_unclipped=2.4215e-02; candidate_hash={'3': 'a473b328a64d84b134576c74297998e67270afdf9141fefa323095ba58bfbc20', '9': 'cd892207baf20ca2f7e9a728b9cdbe5a0b06a6d77fd23d972952b7e85706ec0c'}
+    warnings: []
+uv run python a_l2_diff.py 6  27.38s user 3.65s system 209% cpu 14.840 total
