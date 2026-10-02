@@ -94,7 +94,9 @@ SI1000_SPEC_STATUS = ("checked against research/literature/noise-models.md §1.3
 
 NOISE_MODELS = ("sd6", "si1000", "gross_sd6", "uniform_depolarizing", "legacy_no_idle")
 # 评估器打分/比较的默认口径：必须含逐层空闲噪声（auditor E-001 H1：无空闲噪声会让调度搜索白拿深度）。
-SCORING_MODELS = ("sd6", "si1000")
+# 评估器 v2（2026-10-02）：si1000 移出打分模型。N1（I 门躲 ResonatorIdle）已修，但 N2（SI1000 原生 CZ+H 电路被
+# L0 / L2 误拒）未修，且评估器的模板电路只用 CX；在 N2 修好、并约定 CX 调度如何编译成 CZ+H 之前不得用于打分。
+SCORING_MODELS = ("sd6",)
 DEFAULT_MODEL = "sd6"
 # 只用于与 E-001 / stim 生成器对照，不得用于给候选打分。
 LEGACY_MODELS = ("legacy_no_idle",)
@@ -243,16 +245,26 @@ def add_noise(circuit: stim.Circuit, model: str, p: float, *, idle: bool | None 
         if li > 0:
             out.append("TICK")
         touched: set[int] = set()
+        explicit_idle: set[int] = set()
         measured_or_reset: set[int] = set()
         for inst in layer:
             kind = _classify(inst)
             qs = _qubits_of(inst)
             if kind != "annotation":
-                dup = touched.intersection(qs) | {q for q in qs if qs.count(q) > 1}
+                dup = touched.intersection(qs) | {q for q in qs if qs.count(q) > 1} | explicit_idle.intersection(qs)
                 if dup:
                     raise ValueError(
                         f"layer {li}: qubit(s) {sorted(dup)} acted on more than once in the same time step "
                         f"(instruction {inst}); insert TICKs")
+            if (kind == "1q" and inst.name == "I" and prm["implicit_idle"]
+                    and (prm["resonator"] > 0 or prm["p1"] != prm["idle"])):
+                # 评估器 v2（auditor G1 N1）：有隐式空闲噪声的模型里，I 门就是空闲——按空闲比特处理
+                # （空闲噪声 + si1000 的 ResonatorIdle），不能当作“门”来躲开 ResonatorIdle。
+                # sd6 / uniform_depolarizing 里 I 门噪声与空闲噪声相同（都是 DEPOLARIZE1(p)），输出保持原样。
+                out.append(inst)
+                explicit_idle.update(qs)
+                continue
+            if kind != "annotation":
                 touched.update(qs)
             if kind == "annotation":
                 out.append(inst)

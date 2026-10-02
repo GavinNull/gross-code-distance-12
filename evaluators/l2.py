@@ -84,7 +84,7 @@ import numpy as np
 import stim
 
 from evaluators.codes import CSSCode, GF2Basis, bits_to_int, solve_left
-from evaluators.noise import DEFAULT_MODEL, NOISE_MODELS, add_noise
+from evaluators.noise import DEFAULT_MODEL, NOISE_MODELS, SCORING_MODELS, add_noise
 from evaluators.stats import (
     DEFAULT_LIKELIHOOD_FACTOR,
     MIN_LOGICAL_ERRORS_FOR_COMPARISON,
@@ -321,7 +321,10 @@ def _parse_memory(circuit: stim.Circuit, basis: str, data_qubits: list[int]) -> 
             if gd.produces_measurements or not (gd.is_reset or gd.is_unitary):
                 raise ValueError(f"{basis}: data qubit {q}: only resets and unitaries allowed before the first "
                                  f"two-qubit gate, got {nm}")
-        prep_end[q] = lst[first2 - 1][0]
+        # 评估器 v2（auditor G1 L2-1）：只有复位本身算制备。复位之后、第一个双比特门之前的单比特门（含 I）与空闲
+        # 照常带噪声，不能用插入的 I 把复位后的空闲噪声变成“制备”而被 paper 口径去掉。
+        resets = [i for i, (_, nm, _) in enumerate(lst[:first2]) if stim.gate_data(nm).is_reset]
+        prep_end[q] = lst[resets[-1]][0]
         prep_ops[q] = [nm for _, nm, _ in lst[:first2]]
         tail = lst[last2 + 1:]
         if len(tail) != 1 or tail[0][1] != want_meas:
@@ -1004,7 +1007,7 @@ def diff_per_round(e1: int, n1: int, r1: int, e2: int, n2: int, r2: int, *, num_
            "counts": {"r1": [e1, n1], "r2": [e2, n2]}, "likelihood_factor": likelihood_factor,
            "sigma": math.sqrt(2 * math.log(likelihood_factor)), "formula": DIFF_FORMULA}
     if c * P1 >= 1 or c * P2 >= 1:
-        out.update(best=None, low=None, high=None, low_unclipped=None,
+        out.update(best=None, low=None, high=None, low_unclipped=None, high_unclipped=None, valid=False,
                    warning="failure probability at or beyond saturation (c*P >= 1); cannot difference")
         return out
     delta = math.log1p(-c * P2) - math.log1p(-c * P1)
@@ -1060,11 +1063,18 @@ def diff_per_round(e1: int, n1: int, r1: int, e2: int, n2: int, r2: int, *, num_
             low = brentq(g, nx, lo_x, xtol=1e-12 * scale, rtol=1e-10)
             break
         lo_x, step = nx, step * 2
-    out.update(best=eps_hat, low=(max(low, 0.0) if low is not None else None), high=high, low_unclipped=low,
-               delta_log=delta, boundary_factor_B=(1 - c * P1) / q_hat ** r1,
+    # 评估器 v2（auditor G1 L2-2）：区间与 [0, ∞) 取交，两端分别截断，保证 low <= high（旧版只截断 low，
+    # 点估计为负时出现 low=0 > high 的倒置区间）。点估计为负说明 P(r2) < P(r1)，与模型矛盾：valid=False，
+    # 评估入口（pipeline）把它判为失败而不是给分。
+    low_c = max(low, 0.0) if low is not None else None
+    high_c = max(high, 0.0) if high is not None else None
+    out.update(best=eps_hat, low=low_c, high=high_c, low_unclipped=low, high_unclipped=high,
+               valid=bool(eps_hat >= 0), delta_log=delta, boundary_factor_B=(1 - c * P1) / q_hat ** r1,
                paper_per_round_r1=per_round(P1, r1), paper_per_round_r2=per_round(P2, r2))
     if eps_hat < 0:
-        out["warning"] = "P(r2) < P(r1) after correction: negative point estimate (statistical fluctuation)"
+        out["warning"] = ("P(r2) < P(r1) after correction: negative point estimate; inconsistent with the "
+                          "per-round model (boundary differs between the two runs, or statistical fluctuation); "
+                          "not a valid score")
     return out
 
 
@@ -1309,7 +1319,7 @@ def sample_l2(code: CSSCode,
     if boundary == "flat":
         warnings.append("boundary='flat' (auditor E-003 trim) is for pipelined vs non-pipelined comparisons; "
                         "do not compare with literature")
-    if noise_model not in ("sd6", "si1000"):
+    if noise_model not in SCORING_MODELS:
         warnings.append(f"noise model {noise_model!r} is not a scoring model")
 
     inputs = {"code": {"name": code.name, "n": code.n, "k": code.k,
