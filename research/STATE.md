@@ -21,7 +21,10 @@
 - lit-scout：核对参考文献、提取 gross code 论文细节、调度搜索新颖性调研 → `research/literature/`
 - E-002 gross code baseline（experimenter）→ `experiments/E-002-gross-baseline.yaml`
 - ~~auditor 复核 E-001~~ 已完成：CONFIRMED（有条件）。关键发现：缺空闲噪声、只测 Z 基底，已转为评估器的硬性要求
-- 评估器构建（P1 提前开工，未冻结）：噪声模型 + L0 合法性检查 + 攻击测试 → `evaluators/`、`tests/`
+- ~~评估器第一部分~~ 已完成（未冻结）：噪声模型（sd6/si1000/gross_sd6，空闲噪声默认开启）+ L0（双基底）+ 28 个攻击测试全部拒绝；全套 121 测试通过（lead 复跑）
+  - 局限：d_circ 只是上界（需 SAT/ILP 复核）；L0 拒绝辅助比特跨轮流水、flag/猫态等非标准电路，**若选交错/flag 方向需扩展 L0**
+  - 技术决定（lead）：SI1000 的 ResonatorIdle 默认不作用于正在做门的比特；候选只提交调度，由评估器生成两个基底的电路（采纳 agent 建议）
+  - 还缺：L1/L2 采样、距离精确复核、跨轮数一致性检查
 - ~~LLM 进化搜索框架~~ 已完成：35 个测试通过（lead 复跑确认），含模拟退火对照；未调用真实 API。真实调用前需 PI 配置 key 并做小额冒烟
 - ~~lit-scout #3~~ 已完成：交错电路达到 d_circ=12 属于空白（证据中等），开放问题已在原文核实
 - lit-scout #2：噪声模型精确定义、E-001 阈值文献核对、qLDPC 码目录 → `research/literature/`
