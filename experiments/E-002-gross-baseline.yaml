@@ -1,0 +1,14 @@
+id: E-002-gross-baseline
+hypothesis: H-001
+question: 复现 IBM gross code [[144,12,12]] 的标准 syndrome 提取电路（Bravyi et al. 2024，深度-8 调度），得到电路级距离和逻辑错误率，作为 H-001 的对照基线。
+prediction: >
+  （跑前写下）码参数验证为 [[144,12,12]]；该调度的电路级距离 ≤ 10（凭记忆：原论文称电路级距离上界为 10，未核实）；
+  无噪声下所有 detector 确定；均匀去极化 p=3e-3~6e-3 区间逻辑错误率可在本机测量，并与原论文图中曲线量级一致。
+command: uv run python -m baselines.gross --config experiments/E-002-gross-baseline.yaml
+code: {family: bivariate_bicycle, l: 12, m: 6, A: [x^3, y, y^2], B: [y^3, x, x^2]}
+schedule: ibm_depth8
+rounds: 12
+noise: {model: uniform_depolarizing, p: [0.003, 0.004, 0.005, 0.006]}
+decoder: bposd
+budget: {cpu_hours: 4, llm_tokens: 0, num_workers: 5}
+stop_rule: 每个点 ≥100 次逻辑错误或 1e5 shots
