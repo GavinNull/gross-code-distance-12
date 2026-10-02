@@ -22,11 +22,13 @@
     logical_injection  用 detecting_regions 在“数据制备完成后”与“最终读出前”两个时刻注入
                        每个逻辑算符（Z memory 注入 LX），要求不触发任何 detector、且对
                        observable 的翻转矩阵满秩
-    stabilizer_coverage 在“干净切口”（没有辅助比特处于纠缠中）处把电路切段，对每段用
-                       solve_flow_measurements 判定每个稳定子生成元是否被该段测量；
-                       每个生成元被测量次数必须 = rounds（或全部相等）
+    stabilizer_coverage 默认（coverage_method="flows"）：对去掉数据制备与读出的整条电路求
+                       flow_generators，得到每个稳定子生成元 s 的“测量集合陪集” A_s = M_s + D；
+                       s 的测量次数 = 时间上不重叠、各含 A_s 一个元素的层区间的最大个数（最小跨度基 +
+                       区间调度），不需要干净切口，支持辅助比特跨轮流水（README §3.2）；
+                       必须 = rounds（或全部相等）。旧方法 "segments"（在干净切口处切段）只为对照保留
     detector_coverage  basis 型生成元相邻两次测量的比较、首轮、末轮与数据读出的比较
-                       都必须落在 detector 记录集合的 GF(2) 张成里
+                       都必须落在 detector 记录集合的 GF(2) 张成里（模掉单个窗口内的确定奇偶）
   距离层（以上全部通过才运行）：
     circuit_distance   对 add_noise 后的电路调用 distance.upper_bound：stim 截断搜索、
                        shortest_graphlike_error、BP-OSD 随机 η 见证搜索 + CP-SAT 邻域精修，
@@ -98,6 +100,10 @@ class L0Constraints:
     distance_timeout_s: float | None = 1800.0
     # 规模保护：展开后的指令数上限
     max_flat_instructions: int = 2_000_000
+    # 覆盖检查（stabilizer_coverage / detector_coverage）的方法（2026-10-02 新增）：
+    #   "flows"（默认）：对整条电路求 stim flow 生成元，不切段，支持辅助比特跨轮流水（README §3.2）；
+    #   "segments"：旧方法，在“干净切口”处切段（流水电路会被误拒），只为对照保留。
+    coverage_method: str = "flows"
 
 
 @dataclass
@@ -648,7 +654,327 @@ def _segments(parsed: _Parsed, layout: _Layout, nq: int):
 
 
 def _check_coverage(parsed: _Parsed, code: CSSCode, basis: str, layout: _Layout, rounds: int | None,
-                    require_opposite: bool, nq: int) -> tuple[CheckResult, CheckResult]:
+                    require_opposite: bool, nq: int, method: str = "flows") -> tuple[CheckResult, CheckResult]:
+    if method == "flows":
+        return _check_coverage_flows(parsed, code, basis, layout, rounds, require_opposite, nq)
+    if method != "segments":
+        raise ValueError(f"unknown coverage_method {method!r} (use 'flows' or 'segments')")
+    return _check_coverage_segments(parsed, code, basis, layout, rounds, require_opposite, nq)
+
+
+# ---------------------------------------------------------------------------
+# 覆盖检查（flow 方法，不切段；README §3.2）
+# ---------------------------------------------------------------------------
+
+def _lowbit(v: int) -> int:
+    return (v & -v).bit_length() - 1
+
+
+def _pauli_int(ps: stim.PauliString, nq: int) -> int:
+    xs, zs = ps.to_numpy()
+    arr = np.zeros(2 * nq, dtype=np.uint8)
+    arr[0:2 * len(xs):2] = xs
+    arr[1:2 * len(zs):2] = zs
+    return int.from_bytes(np.packbits(arr, bitorder="little").tobytes(), "little")
+
+
+def _int_bits(v: int) -> list[int]:
+    out = []
+    while v:
+        b = _lowbit(v)
+        out.append(b)
+        v ^= 1 << b
+    return out
+
+
+class _MinSpanBasis:
+    """GF(2) 子空间的“最小跨度”基（trellis 理论里的 MSGM）：所有基向量的最低位互不相同、最高位也互不相同。
+
+    性质：任意非零组合 c 的最低位 = 所用基向量最低位的最小值，最高位 = 最高位的最大值（两端都不会被消掉）。
+    所以“子空间里支撑落在区间 [a, b] 内的向量” = 跨度落在 [a, b] 内的基向量张成的子空间。
+    phi 标记每个基向量是否含奇数个“额外向量”（用于陪集 M + D：phi=1 的向量属于陪集）。
+    """
+
+    def __init__(self) -> None:
+        self.ends: dict[int, int] = {}   # 最高位 -> 向量
+        self.phi: set[int] = set()       # phi=1 的向量的最高位
+
+    def copy(self) -> "_MinSpanBasis":
+        b = _MinSpanBasis()
+        b.ends = dict(self.ends)
+        b.phi = set(self.phi)
+        return b
+
+    def _put(self, e: int, v: int, p: int) -> None:
+        self.ends[e] = v
+        if p:
+            self.phi.add(e)
+        else:
+            self.phi.discard(e)
+
+    def insert_left_reduced(self, x: int, px: int) -> None:
+        """插入一个最低位与现有基向量都不同的向量，按最高位去重（只改动最低位较小者，最低位保持不变）。"""
+        while True:
+            e = x.bit_length() - 1
+            y = self.ends.get(e)
+            if y is None:
+                self._put(e, x, px)
+                return
+            py = 1 if e in self.phi else 0
+            if _lowbit(x) < _lowbit(y):
+                x ^= y
+                px ^= py
+            else:
+                self._put(e, x, px)
+                x, px = y ^ x, py ^ px
+
+    def starts(self) -> dict[int, int]:
+        return {_lowbit(v): v for v in self.ends.values()}
+
+    @classmethod
+    def from_vectors(cls, vecs: Iterable[int]) -> "_MinSpanBasis":
+        starts: dict[int, int] = {}
+        for v in vecs:
+            while v:
+                s = _lowbit(v)
+                w = starts.get(s)
+                if w is None:
+                    starts[s] = v
+                    break
+                v ^= w
+        b = cls()
+        for v in starts.values():
+            b.insert_left_reduced(v, 0)
+        return b
+
+    def with_coset(self, m: int) -> "_MinSpanBasis | None":
+        """D + span{m} 的最小跨度基，phi=1 的基向量属于陪集 m + D。m ∈ D 时返回 None。"""
+        st = self.starts()
+        while m:
+            w = st.get(_lowbit(m))
+            if w is None:
+                break
+            m ^= w
+        if not m:
+            return None
+        b = self.copy()
+        b.insert_left_reduced(m, 1)
+        return b
+
+
+@dataclass
+class _Body:
+    circuit: stim.Circuit
+    local_to_global: list[int]   # body 测量序号 -> 全局测量记录序号
+    rec_layer: list[int]         # body 测量序号 -> 所在层
+
+
+def _build_body(parsed: _Parsed, layout: _Layout, nq: int) -> tuple[_Body | None, str | None]:
+    """去掉数据比特的制备（首个数据双比特门所在层之前作用在数据比特上的复位/单比特门）和最终读出后的电路。
+
+    数据比特的输入因此是自由的；辅助比特的复位全部保留。
+    """
+    dset = set(layout.data)
+    first = layout.first_data_2q_layer
+    if first is None:
+        return None, "no two-qubit gate ever touches a data qubit"
+    c = stim.Circuit()
+    l2g: list[int] = []
+    rec_layer: list[int] = []
+    layer = 0
+    for op in parsed.ops:
+        if id(op) in layout.final_ops:
+            continue
+        if op.layer < first and any(q in dset for q in op.qubits):
+            continue
+        if op.kind == "other":
+            return None, f"unsupported instruction {op.name} (layer {op.layer}) for flow analysis"
+        while layer < op.layer:
+            c.append("TICK")
+            layer += 1
+        c.append(op.name, list(op.qubits))
+        for m in op.meas:
+            l2g.append(m)
+            rec_layer.append(op.layer)
+    if c.num_qubits < nq:
+        c.append("I", [nq - 1])
+    return _Body(c, l2g, rec_layer), None
+
+
+def _check_coverage_flows(parsed: _Parsed, code: CSSCode, basis: str, layout: _Layout, rounds: int | None,
+                          require_opposite: bool, nq: int) -> tuple[CheckResult, CheckResult]:
+    """不依赖切段的覆盖检查（适用于辅助比特跨轮流水的电路）。
+
+    1. body = 去掉数据制备和最终读出的电路（数据输入自由）。用 stim `flow_generators()` 求出全部 flow，
+       在 GF(2) 上消元得到：D = 所有“输入输出都为恒等”的测量奇偶（与数据输入无关的确定奇偶），以及每个
+       稳定子生成元 s 的一个特解 M_s（flow  s_in -> 1，即这组测量的奇偶 = 输入时刻 s 的值）。
+       所有“测量了 s”的测量集合恰好是陪集 A_s = M_s + D。
+    2. 计数：s 被测了 r 次 = 能找到 r 个时间上互不重叠的层区间，每个区间里都有 A_s 的一个元素
+       （区间只限制“用哪些测量记录”，区间之前的门全部算在内，所以不需要干净切口）。
+       用 D + span{M_s} 的最小跨度基求解：区间里有 A_s 的元素 ⇔ 有一个 phi=1 的基向量的跨度落在区间内，
+       于是最大不相交区间数 = 区间调度的贪心解（按结束层排序）。
+    3. detector 覆盖：取每个区间里选中的代表 c_1..c_r，要求首轮 c_1（basis 型）、相邻轮 c_j ⊕ c_{j+1}、
+       末轮与读出 c_r ⊕ readout(s) 都在 detector 张成里，允许模掉“落在 s 的某一个区间之内的确定奇偶”
+       （D 中跨度在单个区间内的部分，例如冗余行的 meta-check；它们不跨轮，不会让检查变成空话）。
+    """
+    body, why = _build_body(parsed, layout, nq)
+    if body is None:
+        r = CheckResult("stabilizer_coverage", "fail", f"cannot analyse the syndrome-extraction circuit: {why}")
+        return r, CheckResult("detector_coverage", "skipped", "stabilizer coverage failed")
+    Mb = len(body.local_to_global)
+    P2 = 2 * nq
+    # flow -> 位向量：低 Mb 位 = 测量；之上 2nq 位 = 输入 Pauli；再之上 2nq 位 = 输出 Pauli
+    basis_vecs: dict[int, int] = {}
+    for f in body.circuit.flow_generators():
+        v = (_pauli_int(f.output_copy(), nq) << (Mb + P2)) | (_pauli_int(f.input_copy(), nq) << Mb)
+        for m in f.measurements_copy():
+            v ^= 1 << m
+        while v:
+            hb = v.bit_length() - 1
+            w = basis_vecs.get(hb)
+            if w is None:
+                basis_vecs[hb] = v
+                break
+            v ^= w
+    D = _MinSpanBasis.from_vectors(v for hb, v in basis_vecs.items() if hb < Mb)
+
+    gens = [("X", i, code.HX[i]) for i in range(code.HX.shape[0])] + \
+           [("Z", i, code.HZ[i]) for i in range(code.HZ.shape[0])]
+    gens = [g for g in gens if g[2].any()]
+    layer_of = body.rec_layer
+
+    def span_layers(v: int) -> tuple[int, int]:
+        return layer_of[_lowbit(v)], layer_of[v.bit_length() - 1]
+
+    instances: list[list[tuple[int, int, int]]] = []   # 每个生成元：[(起始层, 结束层, 代表向量)]
+    never: list[str] = []
+    for typ, idx, row in gens:
+        ps = stim.PauliString(nq)
+        for c in np.flatnonzero(row):
+            ps[layout.data[c]] = 1 if typ == "X" else 3
+        x = _pauli_int(ps, nq) << Mb
+        while x.bit_length() - 1 >= Mb:
+            w = basis_vecs.get(x.bit_length() - 1)
+            if w is None:
+                break
+            x ^= w
+        if x.bit_length() - 1 >= Mb:
+            instances.append([])   # 没有任何测量组合确定 s 的值
+            continue
+        Bs = D.with_coset(x)
+        if Bs is None:
+            never.append(f"{typ}-stabilizer #{idx}")
+            instances.append([])
+            continue
+        cands = sorted((span_layers(Bs.ends[e]) + (Bs.ends[e],) for e in Bs.phi), key=lambda t: (t[1], t[0]))
+        chosen: list[tuple[int, int, int]] = []
+        last_end = -1
+        for lo, hi, v in cands:
+            if lo > last_end:
+                chosen.append((lo, hi, v))
+                last_end = hi
+        instances.append(chosen)
+
+    counts = [len(m) for m in instances]
+    target = rounds if rounds is not None else (max(counts) if counts else 0)
+    issues: list[str] = []
+    if never:
+        issues.append("internal: deterministic stabilizer measurement for " + _fmt_list(never, 4))
+    if target < 1:
+        issues.append("no stabilizer is ever measured")
+    bad = []
+    for gi, (typ, idx, row) in enumerate(gens):
+        if counts[gi] != target:
+            where = [hi for _, hi, _ in instances[gi]]
+            bad.append(f"{typ}-stabilizer #{idx} (data cols {np.flatnonzero(row).tolist()}) measured "
+                       f"{counts[gi]} time(s), required {target} (measurements completed in layers "
+                       f"{where or 'none'})")
+    if bad:
+        issues.append(f"{len(bad)} stabilizer generator(s) not measured every round: " + "; ".join(bad[:6])
+                      + (f"; ... (+{len(bad) - 6} more)" if len(bad) > 6 else ""))
+    details = {"method": "flows", "counts": {f"{t}{i}": c for (t, i, _), c in zip(gens, counts)},
+               "measurement_layers": {f"{t}{i}": [hi for _, hi, _ in inst]
+                                      for (t, i, _), inst in zip(gens, instances)}}
+    if issues:
+        cov = CheckResult("stabilizer_coverage", "fail",
+                          "; ".join(issues) + ". (A generator counts as measured once per time-disjoint window of "
+                          "layers whose measurements determine its value; see README §3.2)", details)
+        return cov, CheckResult("detector_coverage", "skipped", "stabilizer coverage failed")
+    cov = CheckResult("stabilizer_coverage", "pass",
+                      f"all {len(gens)} stabilizer generators measured exactly {target} time(s) in time-disjoint "
+                      f"windows (flow analysis of the whole circuit, no clean cuts needed)", details)
+
+    # ---- detector coverage
+    l2g = body.local_to_global
+
+    def to_global(v: int) -> int:
+        out = 0
+        for b in _int_bits(v):
+            out ^= 1 << l2g[b]
+        return out
+
+    span = GF2Basis()
+    for d in parsed.detectors:
+        span.add(bits_to_int(d))
+    D_rows = [(span_layers(v), v) for v in D.ends.values()]
+    in_span_cache: dict[int, bool] = {}
+    missing = []
+    slack_vecs: set[int] = set()
+    for gi, (typ, idx, row) in enumerate(gens):
+        is_basis = typ == basis
+        if not is_basis and not require_opposite:
+            continue
+        inst = instances[gi]
+        bounds = []
+        prev = -1
+        for _, hi, _ in inst:
+            bounds.append((prev, hi))   # 窗口 = (prev, hi]
+            prev = hi
+        local_span = span
+        extra = []
+        for (lo, hi), v in D_rows:
+            if any(a < lo and hi <= b for a, b in bounds):
+                key = v
+                if key not in in_span_cache:
+                    in_span_cache[key] = span.contains(to_global(v))
+                if not in_span_cache[key]:
+                    extra.append(to_global(v))
+        if extra:
+            local_span = GF2Basis()
+            local_span._basis = dict(span._basis)
+            for v in extra:
+                if local_span.add(v):
+                    slack_vecs.add(v)
+        reps = [to_global(v) for _, _, v in inst]
+        expect: list[tuple[str, int]] = []
+        if is_basis:
+            expect.append(("first round vs. preparation", reps[0]))
+        for r in range(1, len(reps)):
+            expect.append((f"round {r - 1} vs. round {r}", reps[r - 1] ^ reps[r]))
+        if is_basis:
+            fin = bits_to_int(layout.final_rec[layout.data[c]] for c in np.flatnonzero(row))
+            expect.append(("last round vs. final data readout", reps[-1] ^ fin))
+        for label, s in expect:
+            if not local_span.contains(s):
+                missing.append(f"{typ}-stabilizer #{idx} ({label})")
+    if missing:
+        det = CheckResult("detector_coverage", "fail",
+                          f"{len(missing)} expected syndrome comparison(s) are not in the span of the declared "
+                          f"detectors, so the decoder never sees them: " + _fmt_list(missing, 8),
+                          {"missing": missing})
+    else:
+        det = CheckResult("detector_coverage", "pass",
+                          f"all expected {basis}-type comparisons"
+                          + (" and opposite-type comparisons" if require_opposite else "")
+                          + f" lie in the span of the {len(parsed.detectors)} detectors"
+                          + (f" (allowing {len(slack_vecs)} undeclared window-local deterministic parities such as "
+                             f"meta-checks of redundant rows)" if slack_vecs else ""), {"slack": len(slack_vecs)})
+    return cov, det
+
+
+def _check_coverage_segments(parsed: _Parsed, code: CSSCode, basis: str, layout: _Layout, rounds: int | None,
+                             require_opposite: bool, nq: int) -> tuple[CheckResult, CheckResult]:
+    """旧方法（干净切口切段），只为对照保留：coverage_method="segments"。"""
     segs, why = _segments(parsed, layout, nq)
     if why is not None:
         r = CheckResult("stabilizer_coverage", "fail",
@@ -891,7 +1217,7 @@ def _check_l0_single(circuit: stim.Circuit, code: CSSCode, basis: str,
     else:
         checks.append(CheckResult("logical_injection", "skipped", "requires deterministic detectors"))
     cov, dcov = _check_coverage(parsed, code, basis, layout, cons.rounds, cons.require_opposite_type_detectors,
-                                circuit.num_qubits)
+                                circuit.num_qubits, cons.coverage_method)
     checks.extend([cov, dcov])
 
     d = None

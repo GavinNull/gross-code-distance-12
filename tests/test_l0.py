@@ -7,7 +7,7 @@ import stim
 
 from evaluators.codes import CSSCode, rotated_surface_code_from_stim
 from evaluators.l0 import L0Constraints, check_l0
-from memory_builder import build_memory
+from memory_builder import build_memory, build_pipelined_memory
 
 ANNOT = ("TICK", "DETECTOR", "OBSERVABLE_INCLUDE", "QUBIT_COORDS", "SHIFT_COORDS")
 # 小电路的距离搜索用轻量预算（默认预算是为 gross code 定的，见 tests/test_distance.py）
@@ -366,3 +366,153 @@ def test_attack_huge_repeat_block_is_rejected_without_expanding():
     bad = c.copy()
     bad += stim.Circuit("REPEAT 1000000000 {\n  TICK\n}")
     _assert_rejected(check_l0(bad, code, "Z", cons), "instructions", "too large")
+
+
+# ---------------------------------------------------------------------------
+# 跨轮流水电路（没有“干净切口”）：flow 覆盖检查（README §3.2）
+# ---------------------------------------------------------------------------
+
+def _pipe_cons(data, rounds=3, **kw):
+    return L0Constraints(data_qubits=data, rounds=rounds, **kw)
+
+
+@pytest.mark.parametrize("basis", ["Z", "X"])
+@pytest.mark.parametrize("name,HX,HZ", [
+    ("surface d=3", None, None),
+    ("Steane", [[1, 0, 1, 0, 1, 0, 1], [0, 1, 1, 0, 0, 1, 1], [0, 0, 0, 1, 1, 1, 1]],
+     [[1, 0, 1, 0, 1, 0, 1], [0, 1, 1, 0, 0, 1, 1], [0, 0, 0, 1, 1, 1, 1]]),
+    ("[[4,2,2]]", [[1, 1, 1, 1]], [[1, 1, 1, 1]]),
+])
+def test_pipelined_circuit_passes_with_flows_but_not_segments(name, HX, HZ, basis):
+    """辅助比特跨轮流水：flow 方法通过；旧的切段方法找不到干净切口而误拒（对照）。"""
+    code = rotated_surface_code_from_stim(3, "Z")[0] if HX is None else \
+        CSSCode.from_checks(np.array(HX), np.array(HZ), name=name)
+    c, data = build_pipelined_memory(code, basis, 3)
+    r = check_l0(c, code, basis, _pipe_cons(data, compute_distance=True, **FAST_DIST))
+    assert r.passed, r.to_text()
+    assert r.d_circ is not None and r.d_circ >= 1
+    old = check_l0(c, code, basis, _pipe_cons(data, coverage_method="segments"))
+    assert not old.passed and old.get("stabilizer_coverage").status == "fail"
+
+
+def test_flows_and_segments_agree_on_clean_cut_circuits():
+    """有干净切口的电路上，两种方法给出相同的计数。"""
+    code, data, c, cons = _surface(3)
+    a = check_l0(c, code, "Z", cons).get("stabilizer_coverage")
+    b = check_l0(c, code, "Z", _with(cons, coverage_method="segments")).get("stabilizer_coverage")
+    assert a.passed and b.passed
+    assert a.details["counts"] == b.details["counts"]
+
+
+def _gross():
+    bb = pytest.importorskip("baselines.bb_code")
+    from baselines.circuit import memory_circuit, pipelined_memory_circuit
+    from baselines.gross import parse_poly
+    from baselines.schedule import ibm_depth8
+    from baselines.strikis import strikis_fig12
+    code = bb.BBCode(12, 6, parse_poly(["x^3", "y", "y^2"]), parse_poly(["y^3", "x", "x^2"]))
+    css = CSSCode.from_checks(code.HX, code.HZ)
+    strikis, _ = strikis_fig12(code)
+
+    def circuits(kind, rounds):
+        sched, gen = (strikis, pipelined_memory_circuit) if kind == "strikis" else (ibm_depth8(code),
+                                                                                    memory_circuit)
+        circ = {b: gen(sched, code.HX, code.HZ, code.logical_z() if b == "Z" else code.logical_x(), rounds, b, 0.0)
+                for b in "ZX"}
+        return circ, sched
+    return css, circuits
+
+
+@pytest.mark.parametrize("rounds", [3, 12])
+@pytest.mark.parametrize("kind", ["strikis", "ibm"])
+def test_gross_code_strikis_and_ibm_pass_l0(kind, rounds):
+    """E-003 的 Strikis 流水电路（arXiv:2603.05481 Fig. 12）与 IBM 非流水电路都通过 L0（不含距离检查，太慢）。"""
+    css, circuits = _gross()
+    circ, sched = circuits(kind, rounds)
+    cons = L0Constraints(data_qubits=sched.data, max_qubits=sched.num_qubits, rounds=rounds)
+    r = check_l0(circ, css, "both", cons)
+    assert r.passed, r.to_text()
+    assert r.get("Z:circuit_distance").status == "skipped"
+    if kind == "strikis":   # 对照：旧方法误拒（evaluator_issues.md 2026-10-02 E-003 条）
+        old = check_l0(circ, css, "both", _with(cons, coverage_method="segments"))
+        assert not old.passed and "Z:stabilizer_coverage" in [c.name for c in old.failures]
+
+
+def test_attack_strikis_missing_fill_detectors():
+    """Strikis 电路删掉灌入阶段（第 0 轮）Z 检查的 detector：仍确定，必须被 detector_coverage 拒绝。
+
+    注意：gross code 的 HZ 有 6 个冗余关系（72 行、秩 66），只删 1 个第 0 轮 detector 时，它等于其余行的
+    detector ⊕ 一个第 0 轮内部的 meta-check，而 meta-check 不要求声明（README §3.2），所以单删 1 个会被接受
+    （与旧方法相同，只是让译码器少一条信息）；这里删掉全部 72 个。"""
+    css, circuits = _gross()
+    circ, sched = circuits("strikis", 3)
+    bad = _filtered(circ["Z"], lambda i, inst: not (inst.name == "DETECTOR"
+                                                    and list(inst.gate_args_copy())[1:] == [0, 1]))
+    assert bad.num_detectors == circ["Z"].num_detectors - 72
+    r = check_l0(bad, css, "Z", L0Constraints(data_qubits=sched.data, rounds=3))
+    assert r.get("determinism").passed and r.get("stabilizer_coverage").passed
+    _assert_rejected(r, "detector_coverage", "first round vs. preparation")
+
+
+def test_attack_pipelined_missing_cnot_still_deterministic():
+    """流水电路第 0 轮某个 Z 检查少做一个 CNOT（测到的是 s 去掉一个比特，仍确定；detector 相应改写，
+    全部确定，逻辑注入也通过）——该稳定子只被测了 2 次，必须被覆盖检查拒绝。"""
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    lx = set(np.flatnonzero(code.LX[0]).tolist())
+    i, col = next((i, q) for i in range(code.HZ.shape[0]) for q in np.flatnonzero(code.HZ[i]) if q not in lx)
+    c, data = build_pipelined_memory(code, "Z", 3, drop_cnot=(0, "Z", i, int(col)))
+    r = check_l0(c, code, "Z", _pipe_cons(data))
+    assert r.get("determinism").passed and r.get("logical_injection").passed, r.to_text()
+    _assert_rejected(r, "stabilizer_coverage", f"z-stabilizer #{i}", "measured 2 time(s), required 3")
+
+
+@pytest.mark.parametrize("basis", ["Z", "X"])
+def test_attack_pipelined_drain_skips_last_round(basis):
+    """排空阶段少测一轮：最后一轮的 X 辅助比特做完 CNOT 却不测量（Z memory 里是对面类型；X memory 里
+    末轮 detector 改为与倒数第二轮比较），全部确定——X 型稳定子只测了 2 次，必须被拒绝。"""
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    c, data = build_pipelined_memory(code, basis, 3, drop_final_flush=True)
+    r = check_l0(c, code, basis, _pipe_cons(data))
+    assert r.get("determinism").passed, r.to_text()
+    _assert_rejected(r, "stabilizer_coverage", "x-stabilizer", "measured 2 time(s), required 3")
+
+
+def test_attack_pipelined_missing_fill_detectors():
+    """灌入阶段的 detector 缺失：流水电路第 0 轮的 basis 型 detector 全部删掉（仍确定）。"""
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    c, data = build_pipelined_memory(code, "Z", 3, drop_first_round_detectors=True)
+    r = check_l0(c, code, "Z", _pipe_cons(data))
+    assert r.get("determinism").passed and r.get("stabilizer_coverage").passed
+    _assert_rejected(r, "detector_coverage", "first round vs. preparation")
+
+
+def test_attack_pipelined_skip_one_stabilizer_in_one_round():
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    c, data = build_pipelined_memory(code, "Z", 3, skip={(1, "Z", 0)})
+    r = check_l0(c, code, "Z", _pipe_cons(data))
+    assert r.get("determinism").passed
+    _assert_rejected(r, "stabilizer_coverage", "z-stabilizer #0", "measured 2 time(s), required 3")
+
+
+def test_attack_pipelined_fewer_rounds():
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    c, data = build_pipelined_memory(code, "Z", 2)
+    _assert_rejected(check_l0(c, code, "Z", _pipe_cons(data, rounds=3)), "stabilizer_coverage", "required 3")
+
+
+def test_attack_pipelined_missing_final_detectors():
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    c, data = build_pipelined_memory(code, "Z", 3)
+    flat = c.flattened()
+    last_m = max(i for i, inst in enumerate(flat) if inst.name == "M")
+    bad = _filtered(flat, lambda i, inst: not (inst.name == "DETECTOR" and i > last_m))
+    _assert_rejected(check_l0(bad, code, "Z", _pipe_cons(data)), "detector_coverage",
+                     "last round vs. final data readout")
+
+
+def test_attack_extra_measurement_round_is_rejected():
+    """多测一轮也不行（轮数必须恰好等于 rounds）。"""
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    c, data = build_pipelined_memory(code, "Z", 4)
+    _assert_rejected(check_l0(c, code, "Z", _pipe_cons(data, rounds=3)), "stabilizer_coverage",
+                     "measured 4 time(s), required 3")

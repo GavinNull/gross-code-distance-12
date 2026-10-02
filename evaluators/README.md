@@ -1,7 +1,7 @@
 # evaluators/：评估器第一部分（噪声模型 + L0 合法性检查）
 
 状态：未冻结（P1 进行中）。冻结前需 auditor 攻击测试（G1）。
-测试：`uv run pytest tests/test_l0.py tests/test_noise.py tests/test_codes.py tests/test_stats.py -q`（约 1 分钟，单核；距离检查改用 `distance.upper_bound` 后变慢，测试里用轻量预算 `FAST_DIST`）。
+测试：`uv run pytest tests/test_l0.py tests/test_noise.py tests/test_codes.py tests/test_stats.py -q`（约 2 分钟，单核；距离检查改用 `distance.upper_bound` 后变慢，测试里用轻量预算 `FAST_DIST`；`test_l0.py` 含 gross code 的 Strikis / IBM 电路，读 `baselines/`）。
 距离：`uv run pytest tests/test_distance.py -q -m "not slow"`（约 20 秒）；gross code 回归 `-m slow`（2 个测试，各约 2 分钟，3 进程）。
 
 | 文件 | 内容 |
@@ -81,8 +81,8 @@ report.per_basis["X"].get("circuit_distance").details
 | `data_layout` | 每个数据比特：第一个操作是复位（R/RX/MR/MRX），且在任何涉及数据比特的双比特门之前只有复位和单比特门；最后一个操作是 basis 基测量（Z：M/MR；X：MX/MRX），即“最终读出”。不允许依赖 stim 的隐式 \|0⟩ 初态。 |
 | `observables` | 结构检查：observable 数量 = k（或 `num_observables`）、编号 0..k-1；每个 observable 非空，只含数据比特最终读出的记录；对应向量 v 满足 H_other·v = 0（是逻辑算符）、v ∉ rowspace(H_basis)（不是稳定子），所有 observable 模稳定子线性无关。诊断里给出 v 在 L_basis 基下的坐标（`v·L_dualᵀ`）。 |
 | `logical_injection` | 用 `circuit.detecting_regions(ticks=[t])` 取出 t 时刻每个 detector / observable 的敏感区域（Pauli 串）。在两个时刻注入每个逻辑算符（Z memory 注入 LX_j，X memory 注入 LZ_j，作用在 `data_qubits` 上）：t_start = 第一个数据双比特门之前的 TICK，t_end = 最终读出之前的 TICK。要求：不与任何 detector 反对易（逻辑算符对 detector 不可见），且 observable × 逻辑算符的翻转矩阵满秩。t_start 的检查保证逻辑信息**从头到尾**被保存，能抓住“中途测量并重置数据比特”这种 detector、observable 都确定但信息已被摧毁的电路。 |
-| `stabilizer_coverage` | 在“干净切口”处把电路切段：对每个非数据比特追踪状态 idle（未用/测量后）、prepped（复位后只有单比特门）、busy（复位后做过双比特门、尚未测量）；没有 busy 比特的 TICK 是干净切口（从第一个数据双比特门所在层开始，排除最终读出）。每段单独成一条电路，开头重放 prepped 比特的复位与单比特门（MR 重放成 R），再对每个稳定子生成元 s 调用 `solve_flow_measurements([P_s -> 1])`（P_s = s 在数据比特上的 Pauli）：有非空解 = 本段测量了 s（输入时刻的 s 值等于这些测量的奇偶）；解为空 = s 被本段的复位抹掉；无解 = 未测。要求每个生成元（含冗余行，含非 basis 型）被测次数 = `rounds`（未给则全部相等且 ≥1）。 |
-| `detector_coverage` | 用上一步每段的测量集合 M_r(s) 构造“应有的比较”：basis 型 s 的首轮 M_1（数据在 basis 基制备，确定）、相邻轮 M_r ⊕ M_{r+1}、末轮与数据读出 M_last ⊕ readout(supp s)；`require_opposite_type_detectors=True` 时非 basis 型的相邻轮比较也要。用 GF(2) 增量基（Python int 位集）检查每个比较都在 detector 记录集合的张成里。因为 `solve_flow_measurements` 的解不唯一（可相差段内确定的测量组合，例如冗余稳定子行的 meta-check），先用每段的 `flow_generators()` 取出“输入输出都为恒等”的段内确定奇偶，一并放进张成里再判断（它们不要求被声明为 detector）。 |
+| `stabilizer_coverage` | **默认（`coverage_method="flows"`，2026-10-02 起）：对整条电路求 flow，不切段，支持辅助比特跨轮流水，方法见 §3.2。** 旧方法（`coverage_method="segments"`，只为对照保留）：在“干净切口”处把电路切段：对每个非数据比特追踪状态 idle（未用/测量后）、prepped（复位后只有单比特门）、busy（复位后做过双比特门、尚未测量）；没有 busy 比特的 TICK 是干净切口（从第一个数据双比特门所在层开始，排除最终读出）。每段单独成一条电路，开头重放 prepped 比特的复位与单比特门（MR 重放成 R），再对每个稳定子生成元 s 调用 `solve_flow_measurements([P_s -> 1])`（P_s = s 在数据比特上的 Pauli）：有非空解 = 本段测量了 s（输入时刻的 s 值等于这些测量的奇偶）；解为空 = s 被本段的复位抹掉；无解 = 未测。要求每个生成元（含冗余行，含非 basis 型）被测次数 = `rounds`（未给则全部相等且 ≥1）。 |
+| `detector_coverage` | 用上一步每段的测量集合 M_r(s) 构造“应有的比较”：basis 型 s 的首轮 M_1（数据在 basis 基制备，确定）、相邻轮 M_r ⊕ M_{r+1}、末轮与数据读出 M_last ⊕ readout(supp s)；`require_opposite_type_detectors=True` 时非 basis 型的相邻轮比较也要。用 GF(2) 增量基（Python int 位集）检查每个比较都在 detector 记录集合的张成里。因为 `solve_flow_measurements` 的解不唯一（可相差段内确定的测量组合，例如冗余稳定子行的 meta-check），先用每段的 `flow_generators()` 取出“输入输出都为恒等”的段内确定奇偶，一并放进张成里再判断（它们不要求被声明为 detector）。默认的 flow 方法用同样的比较，代表元与“窗口内确定奇偶”的定义见 §3.2。 |
 | `circuit_distance` | 对 `add_noise(circuit, distance_noise_model)`（默认 sd6，含空闲噪声）先生成 DEM（确认加噪声后也不报错），再调用 `distance.upper_bound`（§3.1）：`shortest_graphlike_error`、`search_for_undetectable_logical_errors`（截断 4/4/False）、BP-OSD 随机 η 见证搜索 + CP-SAT 邻域精修，取**经注入验证**的最短逻辑错误的权重作为 d_circ **上界**；要求 ≥ `min_circuit_distance`。种子 `distance_seed`（默认 0），预算 `distance_bposd_trials`/`distance_lns_starts`/`distance_lns_det_time`，并行 `distance_num_workers`（结果与它无关）。`distance_early_stop=True`（默认）时一旦找到低于门槛的见证就停止（判定不变）。在子进程里运行，`distance_timeout_s`（默认 1800 s）到时杀掉进程并判为不通过。诊断列出最短见证的每个故障（tick、噪声指令、比特、Pauli）、找到它的方法和注入验证结果，例如 `tick 2: DEPOLARIZE2 on [160, 228] -> Z228`，可直接告诉 LLM 哪一步的 hook 错误降低了距离；没通过注入验证的见证不计入，并在诊断里给出警告。 |
 
 在旋转表面码（stim 生成，d=3,5，X/Z）上全部通过且 d_circ = d；我也手动在 `baselines/` 的 gross code（IBM depth-8 调度，3 轮，X/Z，`detectors="basis"`/`"both"`）无噪声电路上跑过语法层 + 语义层（不含距离），全部通过，每次约 0.5 s（只读调用，没有改 baselines，也没有把它写进测试，因为那边的代码还在开发中）。
@@ -114,6 +114,51 @@ report.per_basis["X"].get("circuit_distance").details
 | 单个基底合格、另一个基底距离降到 3（“牺牲一个基底”） | X:circuit_distance（basis="both"） |
 | 距离计算超时 | circuit_distance |
 | `REPEAT 1000000000 {TICK}` | instructions（不展开就拒绝） |
+| **流水电路**（`memory_builder.build_pipelined_memory`，没有干净切口）：第 0 轮某 Z 检查少一个 CNOT，detector 相应改写，全部确定、逻辑注入通过 | stabilizer_coverage（该稳定子只测 2 次） |
+| 流水电路排空阶段少测一轮（最后一轮 X 辅助比特做完 CNOT 不测量），Z / X memory | stabilizer_coverage（X 型只测 2 次） |
+| 流水电路灌入阶段（第 0 轮）detector 全部缺失 | detector_coverage（first round vs. preparation） |
+| 流水电路某轮跳过一个稳定子 / 轮数少一轮 / 多一轮 / 删掉末轮与读出的比较 | stabilizer_coverage / detector_coverage |
+| Strikis gross 电路（arXiv:2603.05481 Fig. 12）删掉第 0 轮全部 72 个 Z detector | detector_coverage |
+
+正面：表面码、Steane、[[4,2,2]] 的流水电路两个基底都通过（旧的切段方法误拒，测试里作为对照）；gross code 的
+Strikis 流水电路（E-003）与 IBM 电路在 3 轮、12 轮、两个基底下都通过 L0（不含距离；Strikis 12 轮两个基底约 8 s，
+IBM 约 6 s）。有干净切口的电路上两种方法的计数相同（测试）。
+
+### 3.2 覆盖检查的 flow 方法（`coverage_method="flows"`，默认；修复 evaluator_issues 2026-10-02 E-003 条）
+
+旧方法要在“干净切口”处切段，辅助比特跨轮流水的电路（Strikis，arXiv:2603.05481 Fig. 12）没有切口，整条电路只切出一段，
+每个生成元被判“只测了 1 次”。新方法不切段：
+
+1. **body**：去掉数据比特的制备（首个数据双比特门之前作用在数据比特上的复位 / 单比特门）和最终读出，辅助比特的复位全部保留；
+   数据比特的输入因此是自由的。
+2. **一次 `flow_generators()`**：把每个 flow 写成位向量（测量 ‖ 输入 Pauli ‖ 输出 Pauli），GF(2) 消元（最高位为主元）。
+   得到 D = 所有“输入、输出都是恒等”的 flow 的测量集合（与数据输入无关的确定奇偶，包括所有合法的 detector），以及每个
+   稳定子生成元 s 的一个特解 M_s（flow `s ⊗ I → 1`：这组测量的奇偶 = 输入时刻 s 的值）。“测量了 s 的测量集合”恰好是陪集
+   A_s = M_s + D。无解 = 输入时刻的 s 从未被确定（例如被测量了反对易的东西扰乱，或根本没测）。
+3. **计数**：s 被测 r 次 ⇔ 存在 r 个时间上互不重叠的层区间，每个区间里都有 A_s 的一个元素。区间只限制“用哪些测量记录”，
+   区间之前的门全部算在内（反向传播一直走到 body 开头），所以不需要干净切口：流水电路里 X 辅助比特跨过 Z 检查的窗口起点，
+   这些项在全电路里自然抵消。求解：对 D 求**最小跨度基**（trellis 理论的 MSGM：所有基向量的最低位互不相同、最高位也互不相同），
+   插入 M_s 得到 D + span{M_s} 的最小跨度基，并标记含 M_s 的基向量（phi=1）。性质：任意组合的最低 / 最高位就是所用基向量的
+   最低 / 最高位中的最小 / 最大者，所以“区间里有 A_s 的元素 ⇔ 有一个 phi=1 的基向量跨度落在区间内”，最大不相交区间数 =
+   这些跨度的区间调度贪心解（按结束层排序）。要求计数 = `rounds`（未给则全部相等且 ≥1）；多测一轮也拒绝。
+4. **detector 覆盖**：每个区间选中的基向量就是该轮的代表 c_j。要求首轮 c_1（basis 型）、相邻轮 c_j ⊕ c_{j+1}、末轮与读出
+   c_r ⊕ readout(s) 在 detector 张成里；允许模掉 **“完全落在 s 的某一个区间之内”的确定奇偶**（D 中跨度在单个区间内的基向量，
+   例如冗余行的 meta-check、对面类型的 meta-check；它们是代表元不唯一带来的歧义）。这不会让检查变空：c_j ⊕ c_{j+1} 若是若干
+   窗口内确定奇偶之和，限制到第 j 个窗口就得到 c_j ∈ D，与 c_j ∈ A_s 矛盾。
+
+代价：gross code 12 轮每个基底约 2000 个 flow 生成元，`flow_generators` 0.2 s；整个覆盖检查与旧方法耗时相当（同机同负载下每个基底约 6 s，两种方法相差 <10%）。
+
+**这一方法能接受、旧方法误拒的电路**：辅助比特跨轮流水；一个稳定子的值由多个测量合成（猫态 / flag 式的组合测量，只要这些
+测量在同一个时间窗内）。**仍然不支持**：测量后不复位直接复用辅助比特（第 j 轮的值是 m_{j-1} ⊕ m_j，与上一轮的窗口重叠，
+3 轮会被数成 2 次而拒绝，已用 stim 表面码电路把 MR 换成 M 验证）。
+
+**语义与可接受的“软”情形**（auditor 请复核）：
+- 计数的是“时间上不重叠的、能确定 s 输入值的测量”，不是“每个 cycle 恰好一次”。在一轮里连测两次、另一轮不测，计数仍是 r，
+  会被接受（与旧方法不同，旧方法按段计）。这不是对候选有利的作弊：测量次数和噪声都没有减少，只是把时间分布弄得更差。
+- 冗余行 s3 = s1 + s2：某轮不测 s3、只测 s1 和 s2，s3 在该轮仍算“被测了”（它的值确定）。与旧方法相同。
+- 冗余关系下单个 detector 可以省略：例如 gross code 的 HZ 有 6 个冗余关系，删掉一个第 0 轮的 Z detector，它等于其余行的
+  detector ⊕ 一个该轮内部的 meta-check，而 meta-check 不要求声明，所以被接受（与旧方法相同）。这只让译码器少一条信息，
+  不能降低逻辑错误率或抬高距离；测试里删掉全部 72 个第 0 轮 detector 才会被拒。
 
 ### 3.1 电路级距离（`distance.py`）
 
@@ -173,7 +218,8 @@ lb = lower_bound(noisy_circuit, method="cpsat", time_limit_s=600, target=10)   #
 ## 5. 已知局限
 
 - **电路级距离只是上界。** L0 的判定是“多种启发式找到的、经注入验证的最短逻辑错误 ≥ 下限”，真实距离可能更低（旧版在 gross 上报 12、实际 ≤10 就是这样漏的；新版在 gross 上 12 个种子都找到 10，但这仍不是证明）。精确下界只在小电路上可行（§3.1）：gross 规模不能声称 d_circ = X。L0 距离检查在 gross 上单进程约 4–6 分钟/基底（`distance_num_workers=3` 约 2 分钟），搜索内循环若嫌慢，只能调低预算并接受漏报风险。
-- **要求“干净切口”**：每轮之间必须有一个时刻，所有辅助比特都不在纠缠中（允许已复位、只做过单比特门的“预制备”状态，因此 IBM 把 Z 检查的复位提前到上一周期的做法可以通过）。辅助比特跨轮流水（一个辅助比特还没测完，下一轮的另一个辅助比特已经和数据纠缠）、测量后不复位直接复用、辅助比特之间先做纠缠（猫态、flag 预处理）、一个稳定子的值由两个分属不同段的测量合成，这些合法电路目前都会被 `stabilizer_coverage` 误拒，诊断会写“cannot split ... / not measured”。如果搜索空间要包含这类电路，需要改成“按测量逐个求解 flow”或“用 detector 的时空结构”来判定覆盖。
+- ~~要求“干净切口”~~（2026-10-02 已改为 flow 方法，§3.2，流水电路可以通过）。仍不支持：**测量后不复位直接复用辅助比特**（会被数少一次而拒绝）。
+  覆盖计数的语义是“时间上不重叠的测量窗口数”，一轮测两次、另一轮不测会被接受（不减少噪声，见 §3.2）。
 - **observable 只能由最终数据读出构成**（按任务说明的定义）。“逻辑算符 ⊕ 若干辅助比特测量”的合法写法会被拒。
 - **数据比特读出必须直接用 basis 基测量指令**（X memory 用 MX/MRX，不接受 H+M）。
 - 逻辑注入只在两个时刻做（制备后、读出前）。中间时刻不查：轮中注入逻辑算符本来就可能被合法地检测到。
@@ -189,6 +235,7 @@ lb = lower_bound(noisy_circuit, method="cpsat", time_limit_s=600, target=10)   #
 3. **schedule → 电路的生成应由评估器完成**：现在 L0 接收现成电路，`data_qubits`、轮数、比特布局由任务给定。最稳妥的做法是候选只交 schedule，评估器自己生成两个基底的 memory 电路再过 L0，候选就碰不到 detector 与 observable 的声明。
 4. **距离的独立复核路径**：`distance.lower_bound`（CP-SAT/MaxSAT/MILP）已有，但只对小电路可行（§3.1）；gross 规模需要利用对称性等结构的专门方法。
 5. **跨轮数一致性**：同一调度在 rounds = d 与 rounds = 2d 下都应通过（防止只对特定轮数成立的“巧合”电路）。
+   `boundary="diff"`（§7.2.1）本身就要求候选在两个轮数下都能生成电路；用它打分时建议两个轮数都过 L0。
 6. **噪声模型与门集的绑定**：SI1000 打分要求 CZ 电路，需要约定 CX 调度如何编译成 CZ+H（编译方式会改变分数）。
 
 ## 7. L2：逻辑错误率（`l2.py`）
@@ -236,6 +283,12 @@ k=2 的 [[4,2,2]] 码 1、3 轮）；p=0 时联合电路所有 detector / observ
 |---|---|---|---|
 | `"paper"`（默认） | 完美码态 | 完美（等价于论文的 1 个无噪声收尾 cycle + 无噪声读出） | **与文献比较**（arXiv:2308.07915 §6 口径）；也是榜单默认 |
 | `"noisy"` | 带噪声复位（Z sector 有 R 后 X_ERROR，X sector 有 RX 后 Z_ERROR） | 带噪声测量 | 项目内部口径（E-002 的边界），每个 sector 的边缘分布与单基底带噪声 memory 实验完全一致；只用于同一管线内比较，**不可与论文数字直接比较** |
+| `"flat"`（2026-10-02） | 同 paper，并去掉每个数据比特**第一个双比特门之前、最后一个之后**的全部单比特噪声（灌入 / 排空层的数据空闲） | 同 paper | auditor E-003 的“拉平”口径（`trim.py`），单次运行即可比较流水与非流水电路；gross 上与 auditor 逐项一致（Strikis 去掉 720 个位置、IBM 288 个；Z 基底 DEM Σ先验 58.28 / 57.85，测试覆盖）。辅助比特噪声和全部双比特门噪声保留，所以流水电路首末轮 CNOT 之间的等待（gross 上 144 个位置）仍然多出来 |
+| `"diff"`（2026-10-02，**推荐用于流水 vs 非流水**） | 两次采样（轮数 r1 < r2，各自用 `diff_inner_boundary`，默认 paper） | 同左 | 用差分消去边界，估计**体内每轮错误率**，对所有电路一致，见 §7.2.1 |
+
+`paper` 不能消除流水电路的边界差异（evaluator_issues 2026-10-02 auditor E-003 条）：它只去掉数据比特的制备与读出，
+灌入 / 排空层里数据比特的空闲噪声还在。gross code 12 轮、p=0.005、sd6 的 Z 基底 DEM Σ先验：IBM 60.22（noisy）→ 58.80（paper）→ 57.85（flat），
+Strikis 62.02 → 60.62 → 58.28，即 paper 下 Strikis 仍多 3.1%，flat 下多 0.7%。
 
 细节：`paper` 只去掉**数据比特**在其制备结束（含）之前、最终读出所在层（含）之后的噪声；辅助比特的噪声一律保留，
 包括第一轮前预先复位的辅助比特（IBM 调度第 0 层的 Z 辅助比特复位翻转）。auditor 的 paper1 变体把第 0 层整层的噪声都去掉了，
@@ -245,6 +298,91 @@ basis 基复位（R / RX），否则报错。
 每轮换算：`per_round[P] = 1−(1−P)^(1/rounds)`（论文 §3），区间是对 LR 区间端点做单调变换；另附 sinter 公式
 `(1−(1−2P)^(1/r))/2` 的点估计（P≥0.5 时为 None）。区间用 `stats.binomial_interval`（默认 LR=1000，≈3.72σ），
 标签写明 LR 因子和 σ。任一 sector 失败数 < `MIN_LOGICAL_ERRORS_FOR_COMPARISON`（1000）时结果带警告。
+
+### 7.2.1 `boundary="diff"`：两种轮数之差
+
+```python
+res = sample_l2(code, lambda b, r: make_circuit(b, r), data_qubits, p=0.005, rounds=12, boundary="diff",
+                diff_rounds=4, diff_inner_boundary="paper", seed=..., stop=StopRule(...))
+res.per_round["P_any"]          # {"best", "low", "high", "diff": {...}}：体内每轮错误率（分数）
+res.rates                       # 较长那次（rounds=r2）的原始失败概率，只作参考
+res.components["4"], ["12"]     # 两次子采样的完整 L2Result（种子 SeedSequence([seed, r, 0xD1FF])）
+```
+
+`circuits` 必须能给出两个轮数的电路：`callable(basis, rounds)` 或 `{r1: {"Z","X"}, r2: {...}}`。
+
+**推导。** 设每轮的逻辑错误独立、以概率 ε 发生，发生时把失败事件涉及的 K 个 observable 的取值均匀打乱到 V−1 个非零类之一
+（V = 2^K）；边界（初态、读出、灌入 / 排空）贡献一个与轮数无关的独立错误。对 GF(2)^K 上的随机游走取特征函数：每轮对任一非零
+特征 χ 的期望是 1 − cε（c = V/(V−1)），边界是常数 B，且“没有失败”的概率 = 2^{−K} Σ_χ E[χ]，于是
+`1 − c·P(r) = B·(1 − cε)^r`。取对数、两个轮数相减，B 消掉：
+
+  Δ = log(1 − c·P(r2)) − log(1 − c·P(r1)) = (r2 − r1)·log(1 − cε)，  ε = (1 − exp(Δ/(r2 − r1)))/c。
+
+- **k=1、单个 sector**：K=1，c=2，就是 `(log(1−2P(r2)) − log(1−2P(r1)))/(r2−r1) = log(1−2ε)`，在独立翻转模型下精确
+  （与 sinter 的 `(1−(1−2P)^{1/r})/2` 同一模型）。
+- **k>1**：一个 sector 的失败事件涉及 K=k 个 observable，P_any 涉及 K=2k 个。gross code（k=12）c = 1 + 2.4e-4（sector）/
+  1 + 6e-8（P_any），实际上就是存活率之比 `ε = 1 − ((1−P2)/(1−P1))^{1/(r2−r1)}`，与论文的每轮定义 `1−(1−P)^{1/r}` 同一模型
+  （只差边界因子 B）。均匀打乱是近似：真实的每轮错误集中在少数逻辑类上，“两轮错误恰好抵消”的概率与模型不同，偏差是
+  O(ε·P) 量级；K 大时这个抵消本来就可忽略。所以对 k>1 用存活率形式，对 k=1 用 1−2P 形式，由 `num_observables` 自动选择。
+- **前提**：r1 足够大，使两次运行的边界结构完全相同、且边界与体内的相关可以忽略（流水电路的灌入 / 排空层数与轮数无关：
+  `unroll_schedule` 选的全局平移不依赖轮数）。建议 r1 ≥ 流水深度对应的轮数，并取 r2 − r1 尽量大（方差 ∝ 1/(r2−r1)²）。
+- **置信区间**：两个独立二项样本，两个参数 (ε, B)，模型恰好饱和。对 B 取剖面似然，
+  `{ε : max_B LL(ε, B) ≥ LL_max − ln F}`，F = `likelihood_factor`（默认 1000），按 Wilks（1 个感兴趣参数）对应 √(2 ln F) σ，
+  与 `stats.py` 的约定一致。数值上与 delta 法吻合（100/1000 与 200/1000 时 95% 区间两端差 <5%），模拟 200 次的 95% 区间覆盖率
+  在 0.90–0.99 之间（测试；独立的 300 次模拟为 95.3%）。low 截断到 0（原始值在 `diff.low_unclipped`）；P(r2) < P(r1) 时点估计
+  为负并给出警告。
+
+**表面码验证**（d=3，sd6，p=0.005，pymatching，每个 sector ≥2000 次失败；`results/evaluator-fix-diff/surface_d3_p0.005.json`）：
+
+| 口径 | P_Z 每轮 | P_X 每轮 |
+|---|---|---|
+| diff(3, 9) | 0.0185 [0.0163, 0.0208] | 0.0189 [0.0167, 0.0213] |
+| diff(9, 27) | 0.0180 [0.0154, 0.0210] | 0.0184 [0.0157, 0.0214] |
+| diff(6, 30) | 0.0176 [0.0155, 0.0201] | 0.0182 [0.0160, 0.0207] |
+| paper 9 轮，单次，`(1−(1−2P)^{1/r})/2` | 0.0163 | 0.0162 |
+| paper 27 轮，单次，同上 | 0.0178 | 0.0183 |
+| paper 54 轮，单次，同上 | 0.0170 | 0.0188 |
+| paper 9 / 27 / 54 / 90 轮，`1−(1−P)^{1/r}` | 0.0152 / 0.0137 / 0.0101 / 0.0071 | 0.0151 / 0.0140 / 0.0106 / 0.0074 |
+
+（区间均为 LR=1000，≈3.72σ。）三组 diff 互相一致，并与 paper 口径长 memory（27、54 轮）的每轮错误率在误差内一致，满足
+“同一电路上 diff 与 paper 的体内每轮错误率一致”。两个要注意的现象：(1) paper 9 轮的每轮值低 12–20%：paper 的完美初态 /
+读出让首末轮比体内“轻”，单次运行的每轮值被边界稀释；(2) k=1 时论文公式 `1−(1−P)^{1/r}` 在 P 接近 0.5 时严重低估
+（90 轮只剩 0.0071），因为它不考虑偶数次翻转抵消。这也是 diff 对 k=1 用 1−2P 形式的原因。
+测试 `tests/test_l2.py::test_diff_boundary_agrees_with_paper_long_memory_on_surface_code` 用 diff(3, 9) 对 paper 27 轮做同样的比较。
+
+**IBM vs Strikis（gross code，p=0.005）**：见 §7.2.2。
+
+### 7.2.2 IBM vs Strikis 小规模对照（diff 口径，2026-10-02）
+
+设置与 auditor E-003 §3 相同：gross code，sd6，p=0.005，BP-OSD IBM 参数（auditor 的解码器 A），X/Z 联合采样；
+`boundary="diff"`，`diff_rounds=4`、`rounds=12`，`diff_inner_boundary="flat"`（所以 12 轮那次同时给出一个 flat 口径的单次结果），
+StopRule(max_errors=100, min_sector_errors=100, batch_size=25)，seed 20261003，3 个 worker。
+IBM 用 `baselines.circuit.memory_circuit`，Strikis 用 `pipelined_memory_circuit`（无噪声电路，噪声由评估器加）。
+墙钟 IBM 1970 s、Strikis 1727 s，解码 CPU 合计约 10,000 s。脚本与结果：`results/evaluator-fix-diff/`
+（`gross_{ibm,strikis}_diff4-12_flat_p0.005.json`、`ibm_vs_strikis_summary.json`）。
+
+| | 4 轮失败 Z / X / any | 12 轮失败 Z / X / any | diff 体内每轮 P_any [LR=1000] | flat 12 轮单次每轮 P_any |
+|---|---|---|---|---|
+| IBM | 128 / 100 / 219 （7025 shot） | 104 / 108 / 185 （1075） | 0.0195 [0.0136, 0.0264] | 0.0156 |
+| Strikis | 101 / 114 / 206 （3925） | 101 / 106 / 186 （1100） | 0.0163 [0.0103, 0.0232] | 0.0153 |
+
+Strikis / IBM 比值（参数 bootstrap 95%，与 auditor 的区间同口径）：
+
+| | diff（体内） | flat 12 轮单次 | auditor 拉平（trim，12 轮，600 shot/基底） |
+|---|---|---|---|
+| Z sector | 0.84 [0.58, 1.21] | 0.95 [0.72, 1.25] | 1.06 |
+| X sector | 0.79 [0.54, 1.11] | 0.96 [0.73, 1.25] | 1.18 |
+| P_any（真联合） | **0.84 [0.64, 1.10]** | 0.98 [0.80, 1.20] | — |
+| X+Z 合并（独立近似） | 0.81 | 0.95 | **1.12 [0.87, 1.45]** |
+
+读法：
+- 三种拉平 / 去边界的口径都与 1 没有显著差异，区间互相重叠；与 auditor 的 1.12 [0.87, 1.45] 一致。E-003 未拉平时的 1.3 倍
+  不出现。
+- 边界效应直接可见：4 轮时 Strikis 的失败率是 IBM 的约 1.8 倍（P_any 5.2% 对 3.1%），12 轮时两者几乎相同。也就是说，
+  Strikis 的额外失败主要集中在与轮数无关的边界上，diff 把它消掉后体内点估计反而略低于 IBM（0.84，不显著）。
+- 每个 sector 只有约 100 次失败，diff 的比值区间约 ±30%，不足以区分 0.85 与 1.0。要下结论需要每点 ≥1000 次失败（stats.py
+  约定），本次只是口径验证，**不是** H-003 的结论，也不上榜。
+- 和 auditor 一样，p=0.005 下大部分失败是 BP-OSD 没找到最优解造成的（E-003 审计 §2），比值反映“电路 + 解码器”。
 
 ### 7.3 解码器
 
@@ -304,6 +442,12 @@ X/Z 同时失败 0.138，独立时应为 0.091，正相关与 auditor 的发现�
 - 解码按 sector 分开（丢掉 Y 相关性），与 IBM 一致；用相关解码会更好，但会改变分数口径。
 - BP-OSD 逐 shot 在 Python 里循环调用（gross code p=0.006 约 4–5 CPU 秒/shot，两 sector 合计），全零 syndrome 跳过。
 - 每次 `sample_l2` 都会新开 sinter 进程池并在每个 worker 里重建解码器（gross code 约 10–20 s）。
+- `diff` 依赖“每轮独立、边界与轮数无关”的模型；解码器在短电路上的时间边界效应（例如 r1 小于解码器需要的时间窗）会被算进
+  “边界”，只要两个轮数下边界相同就会消掉，但 r1 太小时这一前提不成立。代价是两次采样，且差分放大相对误差：每个 sector 各
+  100 次失败时 ε 的相对误差约 ±20%（1σ 约 ±10%），比单次运行大得多。
+- `diff` 的分数是体内每轮错误率，与 paper / noisy / flat 的“单次运行每轮值”不是同一个量，榜单上不能混排（`boundary_detail`
+  记录了口径）。
+- `flat` 只去掉数据比特的单比特噪声；流水电路首末轮 CNOT 之间的数据等待和辅助比特的灌入 / 排空噪声仍在，不是完全拉平。
 
 ## 8. 成绩单（`leaderboard.py`）
 
@@ -316,7 +460,8 @@ assert verify_leaderboard() == []
 ```
 
 - 每行字段：`candidate_id`、`code`（n、k、行数、校验矩阵 sha256）、`schedule_hash`（两条无噪声候选电路的 sha256）、
-  `noise_model`、`p`、`rounds`、`boundary`、`l0`（passed、d_circ、各检查状态、各基底 d_circ）、`distance_upper_bound`、
+  `noise_model`、`p`、`rounds`、`boundary`、`boundary_detail`（口径、分数字段 `l2.per_round` 的定义；diff 另记两个轮数和子采样口径，
+  2026-10-02 新增）、`l0`（passed、d_circ、各检查状态、各基底 d_circ）、`distance_upper_bound`、
   `l2`（完整 L2Result）、`extra`，以及由 `submit` 自动填写的 `time`（UTC）、`evaluator`（`scripts/freeze_evaluator.py`
   的同一哈希函数算出的评估器哈希、是否冻结、是否与 FROZEN 记录一致）、`git`（commit、evaluators/ 是否有未提交修改）、
   `versions`、`prev_hash`、`entry_hash`。

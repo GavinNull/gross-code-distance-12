@@ -2,7 +2,9 @@
 
 公开入口：
     sample_l2(code, circuits, data_qubits, *, p, rounds, noise_model="sd6", boundary="paper",
-              decoder=DecoderConfig(), seed=..., stop=StopRule(...), num_workers=4) -> L2Result
+              decoder=DecoderConfig(), seed=..., stop=StopRule(...), num_workers=4,
+              diff_rounds=None, diff_inner_boundary="paper") -> L2Result
+    diff_per_round(e1, n1, r1, e2, n2, r2, num_observables=...) -> dict   （boundary="diff" 的估计与区间）
     build_joint_circuit(...) -> JointCircuit          （测试 / 诊断用）
 
 ## X/Z 联合采样的做法（对任意 CSS 码 + 任意调度）
@@ -39,6 +41,13 @@ syndrome 提取 → 数据比特在 basis 基下测量；observable 只由最终
     X sector 同理（测试逐机制比对 DEM）：联合电路里同时加上 Z 电路的复位后翻转 / 读出前翻转
     （X_ERROR）与 X 电路的（Z_ERROR）。这是项目内部口径（E-002 的边界），只能在同一管线内比较候选，
     不可直接与论文数字比较。要求每个数据比特的制备恰好是一个 basis 基复位（Z: R，X: RX）。
+
+  - "flat"：paper，再去掉每个数据比特在第一个双比特门之前、最后一个之后的全部单比特噪声（灌入 / 排空层的
+    数据空闲；auditor E-003 的“拉平”口径）。用于单次运行比较流水与非流水电路；不可与论文数字比较。
+  - "diff"：不是单条电路的口径，而是两次采样（rounds=r1=diff_rounds 与 rounds=r2，各用 diff_inner_boundary，
+    默认 paper）的差分：1 - cP(r) = B (1 - c eps)^r（c = 2^K/(2^K-1)，K = 失败事件涉及的 observable 数），
+    两个轮数相减消去边界因子 B，得到体内每轮错误率 eps；区间是对 B 取剖面似然的似然比区间。
+    对所有电路一致，推荐用于流水 vs 非流水的比较（README §7.2.1）。
 
 ## 随机性与可复现性
   sinter 本身不接受种子：它的默认采样器调用 `circuit.compile_detector_sampler()`（系统熵），
@@ -85,6 +94,8 @@ from evaluators.stats import (
 __all__ = [
     "BOUNDARIES",
     "DEFAULT_BOUNDARY",
+    "JOINT_BOUNDARIES",
+    "diff_per_round",
     "IBM_BPOSD_PARAMS",
     "DecoderConfig",
     "JointCircuit",
@@ -97,8 +108,12 @@ __all__ = [
     "sample_l2",
 ]
 
-BOUNDARIES = ("paper", "noisy")
+BOUNDARIES = ("paper", "noisy", "flat", "diff")
+JOINT_BOUNDARIES = ("paper", "noisy", "flat")   # build_joint_circuit 能直接构造的口径；"diff" 是两次采样的组合
 DEFAULT_BOUNDARY = "paper"
+DIFF_FORMULA = ("eps = (V-1)/V * (1 - exp((log(1 - c*P(r2)) - log(1 - c*P(r1))) / (r2 - r1))), c = V/(V-1), "
+                "V = 2^K (K observables in the failure event: k per sector, 2k for P_any); K=1: "
+                "(log(1-2P(r2)) - log(1-2P(r1)))/(r2-r1) = log(1-2 eps)  (README §7.2.1)")
 
 # E-002 / IBM 仓库 decoder_run.py 的设置（arXiv:2308.07915 代码）。ms_scaling_factor=0 在 ldpc 2.x 里是
 # 自适应缩放 alpha_t = 1-2^-t（auditor E-002 §3 经验确认），不是字面上的 0。
@@ -247,6 +262,8 @@ class _Parsed:
     detectors: list[list[int]]        # 每个 detector 的绝对记录编号
     observables: dict[int, list[int]]
     num_layers: int
+    first_2q_layer: dict[int, int] = field(default_factory=dict)   # 数据比特 -> 第一个双比特门所在层
+    last_2q_layer: dict[int, int] = field(default_factory=dict)    # 数据比特 -> 最后一个双比特门所在层
 
 
 def _parse_memory(circuit: stim.Circuit, basis: str, data_qubits: list[int]) -> _Parsed:
@@ -287,6 +304,7 @@ def _parse_memory(circuit: stim.Circuit, basis: str, data_qubits: list[int]) -> 
             if t.is_qubit_target and t.value in data:
                 ops[t.value].append((layer, name, idx))
     prep_end, prep_ops, readout_layer, readout_rec = {}, {}, {}, {}
+    first2_layer, last2_layer = {}, {}
     want_meas = "M" if basis == "Z" else "MX"
     for q, lst in ops.items():
         if not lst:
@@ -295,6 +313,7 @@ def _parse_memory(circuit: stim.Circuit, basis: str, data_qubits: list[int]) -> 
         if not two_q:
             raise ValueError(f"{basis}: data qubit {q} takes part in no two-qubit gate")
         first2, last2 = two_q[0], two_q[-1]
+        first2_layer[q], last2_layer[q] = lst[first2][0], lst[last2][0]
         if first2 == 0 or not stim.gate_data(lst[0][1]).is_reset:
             raise ValueError(f"{basis}: data qubit {q} must start with an explicit reset (got {lst[0][1]})")
         for _, nm, _ in lst[:first2]:
@@ -323,7 +342,8 @@ def _parse_memory(circuit: stim.Circuit, basis: str, data_qubits: list[int]) -> 
         if q in data:
             raise ValueError(f"{basis}: unexpected data measurement record {r}")
     return _Parsed(basis, prep_end, prep_ops, readout_layer, readout_rec, rec_owner, detectors,
-                   dict(observables), num_layers=(items[-1][0] + 1 if items else 1))
+                   dict(observables), num_layers=(items[-1][0] + 1 if items else 1),
+                   first_2q_layer=first2_layer, last_2q_layer=last2_layer)
 
 
 def _is_boundary(parsed: _Parsed, layer: int, q: int) -> bool:
@@ -393,8 +413,11 @@ def build_joint_circuit(code: CSSCode, circuits: Mapping[str, stim.Circuit], dat
                         *, noise_model: str = DEFAULT_MODEL, p: float, boundary: str = DEFAULT_BOUNDARY,
                         noise_kwargs: Mapping | None = None) -> JointCircuit:
     """把两条无噪声 memory 电路合成为一条带噪声的联合电路（见模块说明）。"""
-    if boundary not in BOUNDARIES:
-        raise ValueError(f"boundary must be one of {BOUNDARIES}, got {boundary!r}")
+    if boundary == "diff":
+        raise ValueError("boundary='diff' combines two sample_l2 runs (rounds r1 < r2); build_joint_circuit "
+                         "only builds one circuit: use boundary='paper' (the diff default inner boundary)")
+    if boundary not in JOINT_BOUNDARIES:
+        raise ValueError(f"boundary must be one of {JOINT_BOUNDARIES}, got {boundary!r}")
     if noise_model not in NOISE_MODELS:
         raise ValueError(f"unknown noise model {noise_model!r}")
     if set(circuits) != {"Z", "X"}:
@@ -429,6 +452,7 @@ def build_joint_circuit(code: CSSCode, circuits: Mapping[str, stim.Circuit], dat
     nrec = 0
     boundary_noise: dict[str, list[tuple[str, int, float]]] = {"init": [], "readout": []}
     stripped = 0
+    stripped_flat = 0
     items, _ = _layers_with_records(noisy["Z"])
     cur_layer = 0
     for layer, inst, _ in items:
@@ -440,9 +464,14 @@ def build_joint_circuit(code: CSSCode, circuits: Mapping[str, stim.Circuit], dat
             continue
         args = inst.gate_args_copy()
         keep = []
+        flat_strip = boundary == "flat" and _is_noise(name)
         for grp in inst.target_groups():
             qs = [t.value for t in grp]
             bnd = [q for q in qs if _is_boundary(pz, layer, q)]
+            if not bnd and flat_strip and len(qs) == 1 and qs[0] in pz.first_2q_layer and (
+                    layer < pz.first_2q_layer[qs[0]] or layer > pz.last_2q_layer[qs[0]]):
+                stripped_flat += 1   # "flat"：数据比特在第一个双比特门之前、最后一个之后的单比特噪声
+                continue
             if not bnd:
                 keep.extend(grp)
                 continue
@@ -580,6 +609,7 @@ def build_joint_circuit(code: CSSCode, circuits: Mapping[str, stim.Circuit], dat
 
     info = {"num_body_layers": num_body_layers, "num_body_measurements": nrec,
             "num_generators_measured": len(gen_meta), "stripped_boundary_targets": stripped,
+            "stripped_flat_noise_targets": stripped_flat,
             "boundary_noise_init": len(boundary_noise["init"]),
             "boundary_noise_readout": len(boundary_noise["readout"]),
             "encoder_gates": len(encoder)}
@@ -898,6 +928,7 @@ class L2Result:
     versions: dict
     timing: dict
     warnings: list = field(default_factory=list)
+    components: dict = field(default_factory=dict)   # boundary="diff"：两次子采样的完整结果（按轮数）
 
     def to_dict(self) -> dict:
         return dataclasses.asdict(self)
@@ -910,7 +941,14 @@ class L2Result:
         for key in ("P_Z", "P_X", "P_any"):
             lines.append(f"  {key} = {r[key]['label']}")
             q = pr[key]
-            lines.append(f"     per round {q['best']:.4e} [{q['low']:.4e}, {q['high']:.4e}]")
+            if q["best"] is None:
+                lines.append("     per round: n/a")
+            else:
+                lines.append(f"     per round{' (diff, bulk)' if self.inputs['boundary'] == 'diff' else ''} "
+                             f"{q['best']:.4e} [{q['low']:.4e}, {q['high']:.4e}]")
+        if self.inputs["boundary"] == "diff":
+            lines.append(f"  (rates above: rounds={self.inputs['rounds']} run; diff rounds "
+                         f"{self.inputs['diff_rounds']}, inner boundary '{self.inputs['diff_inner_boundary']}')")
         lines.append(f"  P_indep_approx (reference only) = {r['P_indep_approx']:.4e}")
         for w in self.warnings:
             lines.append(f"  WARNING: {w}")
@@ -921,6 +959,183 @@ def _interval_dict(errors: int, shots: int, lf: float) -> dict:
     iv = binomial_interval(errors, shots, lf)
     return {"errors": errors, "shots": shots, "best": iv.best, "low": iv.low, "high": iv.high,
             "likelihood_factor": lf, "sigma": iv.sigma, "label": iv.label()}
+
+
+
+
+# ---------------------------------------------------------------------------
+# boundary="diff"：两种轮数之差估计体内每轮错误率（README §7.2.1）
+# ---------------------------------------------------------------------------
+
+def _binom_ll(e: int, n: int, P: float) -> float:
+    if P <= 0:
+        return 0.0 if e == 0 else -math.inf
+    if P >= 1:
+        return 0.0 if e == n else -math.inf
+    return e * math.log(P) + (n - e) * math.log1p(-P)
+
+
+def diff_per_round(e1: int, n1: int, r1: int, e2: int, n2: int, r2: int, *, num_observables: int = 1,
+                   likelihood_factor: float = DEFAULT_LIKELIHOOD_FACTOR) -> dict:
+    """由 r1 < r2 两种轮数的失败计数（独立样本）估计体内每轮错误率 eps，并给出剖面似然区间。
+
+    模型：每轮的逻辑错误独立，以概率 eps 发生，发生时把 K 个 observable 的取值均匀打乱到 V-1 = 2^K-1 个
+    非零类之一；边界（灌入/排空、初态、读出）贡献一个与轮数无关的因子 B。于是
+        1 - c P(r) = B (1 - c eps)^r,   c = V/(V-1)
+    取对数相减，B 消掉：  eps = (1 - exp(Δ/(r2-r1))) / c,  Δ = log(1-cP(r2)) - log(1-cP(r1))。
+    K=1（单个 observable）时 c=2，即 (log(1-2P(r2)) - log(1-2P(r1)))/(r2-r1) = log(1-2eps)（翻转模型下精确）；
+    K 很大（gross code 一个 sector K=12，P_any K=24）时 c→1，退化为存活率之比 1-((1-P2)/(1-P1))^(1/(r2-r1))，
+    与论文的每轮定义 1-(1-P)^(1/r) 一致。
+
+    区间：两个二项样本、两个参数 (eps, B) 的模型恰好饱和；对 B 取剖面似然，
+    {eps : max_B LL(eps, B) >= LL_max - ln(likelihood_factor)}，按 Wilks（1 个感兴趣参数）对应
+    sqrt(2 ln F) σ，与 stats.py 的约定相同。low 截断到 0（原始值放在 low_unclipped）。
+    """
+    if not (0 < r1 < r2):
+        raise ValueError(f"need 0 < r1 < r2, got r1={r1}, r2={r2}")
+    for e, n in ((e1, n1), (e2, n2)):
+        if n <= 0 or not 0 <= e <= n:
+            raise ValueError(f"invalid counts {e}/{n}")
+    V = 2.0 ** num_observables
+    c = V / (V - 1) if num_observables < 60 else 1.0
+    P1, P2 = e1 / n1, e2 / n2
+    dr = r2 - r1
+    out = {"r1": r1, "r2": r2, "num_observables": num_observables, "c": c,
+           "counts": {"r1": [e1, n1], "r2": [e2, n2]}, "likelihood_factor": likelihood_factor,
+           "sigma": math.sqrt(2 * math.log(likelihood_factor)), "formula": DIFF_FORMULA}
+    if c * P1 >= 1 or c * P2 >= 1:
+        out.update(best=None, low=None, high=None, low_unclipped=None,
+                   warning="failure probability at or beyond saturation (c*P >= 1); cannot difference")
+        return out
+    delta = math.log1p(-c * P2) - math.log1p(-c * P1)
+    q_hat = math.exp(delta / dr)
+    eps_hat = (1 - q_hat) / c
+    ll_max = _binom_ll(e1, n1, P1) + _binom_ll(e2, n2, P2)
+    from scipy.optimize import brentq, minimize_scalar
+
+    def profile(eps: float) -> float:
+        q = 1 - c * eps
+        if q <= 0:
+            return -math.inf
+        lq1, lq2 = r1 * math.log(q), r2 * math.log(q)
+        # B ∈ (0, Bmax]：P_i = (1 - B q^{r_i})/c >= 0
+        log_bmax = -max(lq1, lq2)
+
+        def nll(t: float) -> float:       # B = exp(log_bmax) * t, t ∈ (0, 1]
+            lb = log_bmax + math.log(t)
+            Pa = (1 - math.exp(lb + lq1)) / c
+            Pb = (1 - math.exp(lb + lq2)) / c
+            v = _binom_ll(e1, n1, Pa) + _binom_ll(e2, n2, Pb)
+            return -v if math.isfinite(v) else 1e300
+
+        res = minimize_scalar(nll, bounds=(1e-12, 1.0), method="bounded", options={"xatol": 1e-13})
+        best = min(res.fun, nll(1.0))
+        return -best
+
+    thr = math.log(likelihood_factor)
+
+    def g(eps: float) -> float:
+        return ll_max - profile(eps) - thr
+
+    scale = max(abs(eps_hat), 1e-9)
+    # 上端
+    cap = (1 - 1e-12) / c
+    hi_x, step = eps_hat, 0.05 * scale
+    high = None
+    while True:
+        nx = min(hi_x + step, cap)
+        if g(nx) > 0:
+            high = brentq(g, hi_x, nx, xtol=1e-12 * scale, rtol=1e-10)
+            break
+        if nx >= cap:
+            high = cap
+            break
+        hi_x, step = nx, step * 2
+    # 下端
+    lo_x, step = eps_hat, 0.05 * scale
+    low = None
+    for _ in range(200):
+        nx = lo_x - step
+        if g(nx) > 0:
+            low = brentq(g, nx, lo_x, xtol=1e-12 * scale, rtol=1e-10)
+            break
+        lo_x, step = nx, step * 2
+    out.update(best=eps_hat, low=(max(low, 0.0) if low is not None else None), high=high, low_unclipped=low,
+               delta_log=delta, boundary_factor_B=(1 - c * P1) / q_hat ** r1,
+               paper_per_round_r1=per_round(P1, r1), paper_per_round_r2=per_round(P2, r2))
+    if eps_hat < 0:
+        out["warning"] = "P(r2) < P(r1) after correction: negative point estimate (statistical fluctuation)"
+    return out
+
+
+def _diff_seed(seed: int, r: int) -> int:
+    return int(np.random.SeedSequence([int(seed), int(r), 0xD1FF]).generate_state(1, dtype=np.uint32)[0])
+
+
+def _sample_l2_diff(code, circuits, data_qubits, *, p, rounds, diff_rounds, inner, kwargs) -> "L2Result":
+    r1 = int(diff_rounds)
+    r2 = int(rounds)
+    if not 0 < r1 < r2:
+        raise ValueError(f"boundary='diff' needs 0 < diff_rounds < rounds, got diff_rounds={r1}, rounds={r2}")
+    if inner not in JOINT_BOUNDARIES:
+        raise ValueError(f"diff_inner_boundary must be one of {JOINT_BOUNDARIES}")
+
+    def circs_for(r):
+        if callable(circuits):
+            return {b: circuits(b, r) for b in "ZX"}
+        if r in circuits:
+            return {b: circuits[r][b] for b in "ZX"}
+        raise ValueError("boundary='diff' needs circuits for two round counts: pass circuits=callable(basis, rounds) "
+                         "or {r1: {'Z':..,'X':..}, r2: {...}}")
+
+    seed = kwargs.pop("seed")
+    work_dir = kwargs.pop("work_dir", None)
+    t0 = time.time()
+    subs = {}
+    for r in (r1, r2):
+        wd = None if work_dir is None else Path(work_dir) / f"rounds_{r}"
+        subs[r] = sample_l2(code, circs_for(r), data_qubits, p=p, rounds=r, boundary=inner,
+                            seed=_diff_seed(seed, r), work_dir=wd, **kwargs)
+    a, b = subs[r1], subs[r2]
+    lf = b.inputs["likelihood_factor"]
+    k_obs = {"P_Z": a.joint["num_observables"]["Z"], "P_X": a.joint["num_observables"]["X"]}
+    k_obs["P_any"] = k_obs["P_Z"] + k_obs["P_X"]
+    ckey = {"P_Z": "fail_Z", "P_X": "fail_X", "P_any": "fail_any"}
+    pr = {}
+    for key in ("P_Z", "P_X", "P_any"):
+        d = diff_per_round(a.counts[ckey[key]], a.counts["shots"], r1, b.counts[ckey[key]], b.counts["shots"], r2,
+                           num_observables=k_obs[key], likelihood_factor=lf)
+        pr[key] = {"best": d["best"], "low": d["low"], "high": d["high"], "sinter_formula_best": None, "diff": d}
+    pr["formula"] = DIFF_FORMULA
+    pr["interval"] = (f"profile-likelihood interval over the boundary factor B (LR={lf:g}, "
+                      f"≈{math.sqrt(2 * math.log(lf)):.2f}σ); low clipped at 0")
+    pr["method"] = f"diff: bulk per-round rate from rounds {r1} and {r2} (inner boundary '{inner}')"
+    warnings = [f"[r={r}] {w}" for r, s in subs.items() for w in s.warnings]
+    for key in ("P_Z", "P_X", "P_any"):
+        if pr[key]["diff"].get("warning"):
+            warnings.append(f"{key}: {pr[key]['diff']['warning']}")
+    rates = dict(b.rates)
+    rates["note"] = (f"raw failure probabilities of the longer run (rounds={r2}, boundary '{inner}'); the diff score "
+                     f"is per_round; the rounds={r1} run is in components")
+    inputs = dict(b.inputs)
+    inputs.update(boundary="diff", rounds=r2, seed=int(seed), diff_rounds=[r1, r2], diff_inner_boundary=inner,
+                  sub_seeds={str(r): _diff_seed(seed, r) for r in (r1, r2)})
+    counts = {"shots": a.counts["shots"] + b.counts["shots"], f"rounds_{r1}": a.counts, f"rounds_{r2}": b.counts}
+    return L2Result(
+        inputs=inputs, counts=counts, rates=rates, per_round=pr,
+        joint=dict(b.joint), decoder=b.decoder,
+        reproducibility={"deterministic": True,
+                         "scheme": f"two independent sample_l2 runs, seeds SeedSequence([seed, r, 0xD1FF]) for r in "
+                                   f"({r1}, {r2}); each reproducible as documented in §7.4",
+                         "runs": {str(r): s.reproducibility for r, s in subs.items()}},
+        circuit={"candidate_hash": {str(r): s.circuit["candidate_hash"] for r, s in subs.items()},
+                 "joint_hash": {str(r): s.circuit["joint_hash"] for r, s in subs.items()}},
+        versions=b.versions,
+        timing={"wall_s": round(time.time() - t0, 2),
+                "runs": {str(r): s.timing for r, s in subs.items()}},
+        warnings=warnings,
+        components={str(r): s.to_dict() for r, s in subs.items()},
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -942,7 +1157,9 @@ def sample_l2(code: CSSCode,
               noise_kwargs: Mapping | None = None,
               likelihood_factor: float = DEFAULT_LIKELIHOOD_FACTOR,
               work_dir: str | os.PathLike | None = None,
-              keep_batches: bool = False) -> L2Result:
+              keep_batches: bool = False,
+              diff_rounds: int | None = None,
+              diff_inner_boundary: str = "paper") -> L2Result:
     """X/Z 联合采样的逻辑错误率。
 
     Args:
@@ -952,7 +1169,10 @@ def sample_l2(code: CSSCode,
         data_qubits: 码第 j 列对应的电路比特编号。
         p, noise_model, noise_kwargs: 传给 evaluators.noise.add_noise。
         rounds: 带噪声的 syndrome 提取轮数（用于每轮换算；必须与电路一致）。
-        boundary: "paper"（默认）或 "noisy"，见模块说明。
+        boundary: "paper"（默认）、"noisy"、"flat" 或 "diff"，见模块说明与 README §7.2。
+        diff_rounds: boundary="diff" 时较短的轮数 r1（rounds 是较长的 r2）；circuits 需为
+            callable(basis, rounds) 或 {r1: {...}, r2: {...}}。
+        diff_inner_boundary: boundary="diff" 时两次子采样各自用的口径（默认 "paper"）。
         decoder: DecoderConfig，默认 BP-OSD + IBM 参数。
         seed: 整数种子（必填）。
         stop: StopRule。
@@ -965,6 +1185,17 @@ def sample_l2(code: CSSCode,
         raise ValueError("num_workers must be >= 1")
     decoder = decoder or DecoderConfig()
     dparams = decoder.resolved_params()
+    if boundary == "diff":
+        if diff_rounds is None:
+            raise ValueError("boundary='diff' requires diff_rounds (the shorter round count r1 < rounds)")
+        return _sample_l2_diff(code, circuits, data_qubits, p=p, rounds=rounds, diff_rounds=diff_rounds,
+                               inner=diff_inner_boundary,
+                               kwargs=dict(noise_model=noise_model, decoder=decoder, seed=seed, stop=stop,
+                                           num_workers=num_workers, noise_kwargs=noise_kwargs,
+                                           likelihood_factor=likelihood_factor, work_dir=work_dir,
+                                           keep_batches=keep_batches))
+    if boundary not in JOINT_BOUNDARIES:
+        raise ValueError(f"boundary must be one of {BOUNDARIES}, got {boundary!r}")
     if callable(circuits):
         circuits = {b: circuits(b, rounds) for b in "ZX"}
     circuits = {b: circuits[b] for b in "ZX"}
@@ -1075,6 +1306,9 @@ def sample_l2(code: CSSCode,
                         f"(Z {fz}, X {fx}); below the comparison threshold of evaluators/stats.py")
     if boundary == "noisy":
         warnings.append("boundary='noisy' is the project-internal convention; do not compare with literature")
+    if boundary == "flat":
+        warnings.append("boundary='flat' (auditor E-003 trim) is for pipelined vs non-pipelined comparisons; "
+                        "do not compare with literature")
     if noise_model not in ("sd6", "si1000"):
         warnings.append(f"noise model {noise_model!r} is not a scoring model")
 

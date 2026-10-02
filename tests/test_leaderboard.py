@@ -52,6 +52,7 @@ def test_submit_appends_with_hashes(tmp_path, entry):
     for f in lb.REQUIRED_FIELDS + lb.SYSTEM_FIELDS:
         assert f in r1, f
     assert r1["boundary"] == "paper" and r1["rounds"] == 3 and r1["p"] == 0.005
+    assert r1["boundary_detail"]["boundary"] == "paper" and "1-(1-P)" in r1["boundary_detail"]["definition"]
     assert r1["l2"]["rates"]["P_any"]["best"] >= r1["l2"]["rates"]["P_Z"]["best"]
     assert r1["versions"]["stim"] and r1["versions"]["ldpc"] and r1["versions"]["pymatching"]
     assert len(r1["schedule_hash"]) == 64
@@ -127,3 +128,20 @@ def test_concurrent_submits_do_not_corrupt(tmp_path, entry):
 
 def test_real_leaderboard_untouched():
     assert _real_board_digest() == _REAL_BEFORE
+
+
+def test_diff_boundary_is_recorded(tmp_path):
+    """boundary="diff" 的成绩记录口径、两个轮数和子采样口径。"""
+    code, data, _ = rotated_surface_code_from_stim(3, "Z")
+    circ = lambda b, r: rotated_surface_code_from_stim(3, b, r)[2]   # noqa: E731
+    l2 = sample_l2(code, circ, data, p=0.006, rounds=6, boundary="diff", diff_rounds=3,
+                   decoder=DecoderConfig("pymatching"), seed=2, stop=StopRule(max_shots=4000, batch_size=2000),
+                   num_workers=1)
+    e = lb.build_entry("surface-d3-diff", code=code, circuits={b: circ(b, 6) for b in "ZX"}, l0_report=FAKE_L0,
+                       distance_upper_bound=3, l2=l2)
+    rec = lb.submit(e, tmp_path / "board.jsonl")
+    assert rec["boundary"] == "diff" and rec["rounds"] == 6
+    assert rec["boundary_detail"]["diff_rounds"] == [3, 6]
+    assert rec["boundary_detail"]["inner_boundary"] == "paper"
+    assert rec["l2"]["per_round"]["P_any"]["diff"]["r1"] == 3
+    assert lb.verify_leaderboard(tmp_path / "board.jsonl") == []

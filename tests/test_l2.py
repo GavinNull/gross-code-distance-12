@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import sinter
 import stim
-from memory_builder import build_memory
+from memory_builder import build_memory, build_pipelined_memory
 
 from evaluators.codes import CSSCode, rotated_surface_code_from_stim
 from evaluators.l2 import (
@@ -13,6 +13,7 @@ from evaluators.l2 import (
     StopRule,
     _BatchRunner,
     build_joint_circuit,
+    diff_per_round,
     per_round,
     sample_l2,
     split_dem,
@@ -231,3 +232,124 @@ def test_seed_must_be_given():
     code, data, circs = _surface(3)
     with pytest.raises(TypeError):
         sample_l2(code, circs, data, p=0.001, rounds=3, stop=StopRule(max_shots=10))   # type: ignore[call-arg]
+
+
+
+# ---------------------------------------------------------------------------
+# boundary="flat" 与 boundary="diff"（README §7.2）
+# ---------------------------------------------------------------------------
+
+def test_flat_boundary_strips_data_idle_outside_cnot_window():
+    """flat ⊂ paper：只多去掉数据比特在第一个双比特门之前、最后一个之后的单比特噪声；流水电路去掉得更多。"""
+    code, _, _ = rotated_surface_code_from_stim(3, "Z")
+    circs = {b: build_pipelined_memory(code, b, 3)[0] for b in "ZX"}
+    data = list(range(code.n))
+    paper = build_joint_circuit(code, circs, data, p=0.004, boundary="paper")
+    flat = build_joint_circuit(code, circs, data, p=0.004, boundary="flat")
+    assert paper.info["stripped_flat_noise_targets"] == 0 and flat.info["stripped_flat_noise_targets"] > 0
+    flat.circuit.detector_error_model()
+    mp = split_dem(paper.circuit.detector_error_model(), paper.num_detectors_z, paper.num_observables_z)
+    mf = split_dem(flat.circuit.detector_error_model(), flat.num_detectors_z, flat.num_observables_z)
+    for b in "ZX":
+        assert sum(mf[b].values()) < sum(mp[b].values())
+        assert set(mf[b]) <= set(mp[b])
+
+
+def test_flat_boundary_reproduces_auditor_trim_on_gross():
+    """auditor E-003 §3 的“拉平”变体：Strikis 去掉 720 个数据空闲位置、IBM 288 个，Z 基底 DEM Σ先验
+    62.02 → 58.28、60.22 → 57.85（noisy 口径 → 拉平）。"""
+    pytest.importorskip("baselines.bb_code")
+    from baselines.bb_code import BBCode
+    from baselines.circuit import memory_circuit, pipelined_memory_circuit
+    from baselines.gross import parse_poly
+    from baselines.schedule import ibm_depth8
+    from baselines.strikis import strikis_fig12
+    code = BBCode(12, 6, parse_poly(["x^3", "y", "y^2"]), parse_poly(["y^3", "x", "x^2"]))
+    css = CSSCode.from_checks(code.HX, code.HZ)
+    expect = {"ibm": (288, 60.22, 57.85), "strikis": (720, 62.02, 58.28)}
+    for name, (sched, gen) in {"ibm": (ibm_depth8(code), memory_circuit),
+                               "strikis": (strikis_fig12(code)[0], pipelined_memory_circuit)}.items():
+        circs = {b: gen(sched, code.HX, code.HZ, code.logical_z() if b == "Z" else code.logical_x(), 12, b, 0.0)
+                 for b in "ZX"}
+        mass = {}
+        for bnd in ("noisy", "flat"):
+            jc = build_joint_circuit(css, circs, sched.data, p=0.005, boundary=bnd)
+            mass[bnd] = sum(split_dem(jc.circuit.detector_error_model(), jc.num_detectors_z,
+                                      jc.num_observables_z)["Z"].values())
+            if bnd == "flat":
+                assert jc.info["stripped_flat_noise_targets"] == expect[name][0]
+        assert mass["noisy"] == pytest.approx(expect[name][1], abs=0.006)
+        assert mass["flat"] == pytest.approx(expect[name][2], abs=0.006)
+
+
+def test_diff_per_round_closed_form_and_interval():
+    """k=1：eps 满足 (log(1-2P2) - log(1-2P1))/(r2-r1) = log(1-2eps)；95% 剖面似然区间与 delta 法接近；
+    K 很大时退化为存活率之比。"""
+    import math
+    d = diff_per_round(100, 1000, 4, 200, 1000, 12, likelihood_factor=math.exp(1.96 ** 2 / 2))
+    D = math.log(1 - 0.4) - math.log(1 - 0.2)
+    assert d["best"] == pytest.approx((1 - math.exp(D / 8)) / 2, rel=1e-12)
+    s = math.sqrt((2 / 0.6) ** 2 * 0.2 * 0.8 / 1000 + (2 / 0.8) ** 2 * 0.1 * 0.9 / 1000)
+    assert d["low"] == pytest.approx((1 - math.exp((D + 1.96 * s) / 8)) / 2, rel=0.05)
+    assert d["high"] == pytest.approx((1 - math.exp((D - 1.96 * s) / 8)) / 2, rel=0.05)
+    big = diff_per_round(100, 1000, 4, 200, 1000, 12, num_observables=24)
+    assert big["best"] == pytest.approx(1 - (0.8 / 0.9) ** (1 / 8), rel=1e-6)
+    assert big["low"] < big["best"] < big["high"]
+    neg = diff_per_round(50, 1000, 4, 40, 1000, 12)
+    assert neg["best"] < 0 and neg["low"] == 0 and "negative" in neg["warning"]
+    with pytest.raises(ValueError):
+        diff_per_round(1, 10, 5, 1, 10, 5)
+
+
+def test_diff_per_round_interval_coverage():
+    """模拟：真实 eps 与边界因子已知时，95% 区间的覆盖率约 95%。"""
+    import math
+    rng = np.random.default_rng(1)
+    eps, B, r1, r2, n = 0.01, 0.97, 4, 12, 2000
+    P = lambda r: (1 - B * (1 - 2 * eps) ** r) / 2   # noqa: E731
+    lf = math.exp(1.96 ** 2 / 2)
+    hits = 0
+    T = 200
+    for _ in range(T):
+        d = diff_per_round(int(rng.binomial(n, P(r1))), n, r1, int(rng.binomial(n, P(r2))), n, r2,
+                           likelihood_factor=lf)
+        hits += d["low_unclipped"] <= eps <= d["high"]
+    assert 0.90 <= hits / T <= 0.99
+
+
+def test_diff_boundary_agrees_with_paper_long_memory_on_surface_code():
+    """表面码 d=3、sd6、p=0.005：diff(3, 9) 的体内每轮错误率与 paper 口径 27 轮单次实验的每轮错误率一致
+    （k=1，用 (1-(1-2P)^(1/r))/2；27 轮时边界的影响已被稀释，见 README §7.2.1 的表）。"""
+    code, data, _ = _surface(3)
+    circ = lambda b, r: rotated_surface_code_from_stim(3, b, r)[2]   # noqa: E731
+    stop = StopRule(max_shots=10 ** 6, max_errors=1500, min_sector_errors=1500, batch_size=2000)
+    rd = sample_l2(code, circ, data, p=0.005, rounds=9, boundary="diff", diff_rounds=3,
+                   decoder=DecoderConfig("pymatching"), seed=5, stop=stop, num_workers=2)
+    assert rd.inputs["boundary"] == "diff" and rd.inputs["diff_rounds"] == [3, 9]
+    assert set(rd.components) == {"3", "9"}
+    rp = sample_l2(code, circ, data, p=0.005, rounds=27, boundary="paper", decoder=DecoderConfig("pymatching"),
+                   seed=6, stop=stop, num_workers=2)
+    for key in ("P_Z", "P_X"):
+        a = rd.per_round[key]
+        iv = rp.rates[key]
+        f = lambda P: (1 - (1 - 2 * P) ** (1 / 27)) / 2   # noqa: E731
+        lo, best, hi = f(iv["low"]), f(iv["best"]), f(iv["high"])
+        assert a["low"] <= a["best"] <= a["high"]
+        assert a["low"] <= hi and lo <= a["high"], (key, a, (lo, best, hi))   # 3.72σ 区间重叠
+        assert 0.85 < a["best"] / best < 1.15, (key, a["best"], best)
+        assert 0.01 < a["best"] < 0.03
+    assert rd.per_round["P_any"]["best"] > max(rd.per_round["P_Z"]["best"], rd.per_round["P_X"]["best"])
+
+
+def test_diff_boundary_argument_errors():
+    code, data, circs = _surface(3)
+    stop = StopRule(max_shots=100, batch_size=100)
+    with pytest.raises(ValueError, match="diff_rounds"):
+        sample_l2(code, circs, data, p=0.001, rounds=3, boundary="diff", seed=1, stop=stop)
+    with pytest.raises(ValueError, match="two round counts"):
+        sample_l2(code, circs, data, p=0.001, rounds=3, boundary="diff", diff_rounds=1, seed=1, stop=stop)
+    with pytest.raises(ValueError, match="0 < diff_rounds < rounds"):
+        sample_l2(code, lambda b, r: circs[b], data, p=0.001, rounds=3, boundary="diff", diff_rounds=3, seed=1,
+                  stop=stop)
+    with pytest.raises(ValueError, match="two sample_l2 runs"):
+        build_joint_circuit(code, circs, data, p=0.001, boundary="diff")

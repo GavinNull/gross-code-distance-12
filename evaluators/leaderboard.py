@@ -110,6 +110,27 @@ def _l0_summary(l0) -> dict:
     return summ
 
 
+_SCORE_DEFINITION = {
+    "paper": "per_round = 1-(1-P)^(1/rounds) of one run; perfect code-state init and readout (arXiv:2308.07915 §6); "
+             "boundary rounds included (pipelined circuits keep their fill/drain data idle noise)",
+    "noisy": "per_round = 1-(1-P)^(1/rounds) of one run; noisy data reset and readout (project-internal)",
+    "flat": "per_round = 1-(1-P)^(1/rounds) of one run; paper + data-qubit noise before the first / after the last "
+            "two-qubit gate removed (auditor E-003 trim)",
+    "diff": "per_round = bulk per-round rate from two runs (rounds r1 < r2), boundary cancels: "
+            "eps = (1-exp((log(1-cP2)-log(1-cP1))/(r2-r1)))/c, c = 2^K/(2^K-1)",
+}
+
+
+def _boundary_detail(l2d: Mapping) -> dict:
+    """成绩用的边界口径（README §7.2）。不同口径的分数不可直接比较。"""
+    inp = l2d["inputs"]
+    b = inp["boundary"]
+    out = {"boundary": b, "score_field": "l2.per_round", "definition": _SCORE_DEFINITION.get(b, "unknown")}
+    if b == "diff":
+        out.update(diff_rounds=inp.get("diff_rounds"), inner_boundary=inp.get("diff_inner_boundary"))
+    return out
+
+
 def build_entry(candidate_id: str, *, code, l2, l0_report, distance_upper_bound,
                 circuits: Mapping | None = None, schedule_hash: str | None = None,
                 extra: Mapping | None = None) -> dict:
@@ -137,6 +158,7 @@ def build_entry(candidate_id: str, *, code, l2, l0_report, distance_upper_bound,
         "p": inp["p"],
         "rounds": inp["rounds"],
         "boundary": inp["boundary"],
+        "boundary_detail": _boundary_detail(l2d),
         "l0": _l0_summary(l0_report),
         "distance_upper_bound": distance_upper_bound,
         "l2": l2d,

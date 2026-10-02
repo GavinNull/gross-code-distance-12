@@ -35,11 +35,44 @@
   最小复现：`baselines/strikis.py` 生成的 3 轮无噪声电路 → `check_l0(..., basis="both")`。
   影响范围：H-003 的对照包络线需要这个电路，不修就无法在评估器下比较；联合搜索如果允许流水调度，同样会被误拒。
   这是 `evaluators/README.md` 已知局限中写明的一类。G1 冻结前必须扩展（例如用 stim flows 对整条电路做覆盖检查，不依赖切段）。
-  状态：open
+  状态：fixed-pending-audit
+  **修复说明（2026-10-02，评估器修补 agent）**：
+  - `evaluators/l0.py` 的 `stabilizer_coverage` / `detector_coverage` 默认改为 flow 方法（新参数 `L0Constraints.coverage_method="flows"`；
+    旧的切段方法保留为 `"segments"`，只作对照；已有参数含义不变）。去掉数据制备与最终读出后，对整条电路求一次 `flow_generators()`，
+    GF(2) 消元得到确定奇偶空间 D 和每个生成元 s 的测量陪集 A_s = M_s + D（flow `s_in -> 1`）。s 的测量次数 = 时间上不重叠、各含 A_s
+    一个元素的层区间的最大个数，用 D 的最小跨度基（MSGM）+ 区间调度精确求解；区间之前的门全部计入，所以不需要干净切口。
+    detector 覆盖用每个区间的代表元构造首轮 / 相邻轮 / 末轮与读出的比较，允许模掉“完全落在 s 的单个区间内”的确定奇偶（meta-check 等），
+    并证明这不会让检查变空。细节见 `evaluators/README.md` §3.2。
+  - 结果：Strikis 电路（`baselines/strikis.py`，3 轮、12 轮，两个基底）通过 L0（不含距离检查）；IBM 电路照样通过；有干净切口的电路上
+    新旧方法计数相同。已有的全部 L0 攻击测试仍被拒绝。
+  - 新增攻击测试（全部被拒）：流水电路第 0 轮某 Z 检查少一个 CNOT（全部确定、逻辑注入通过）→ stabilizer_coverage；排空阶段最后一轮
+    X 辅助比特不测（Z / X memory）→ stabilizer_coverage；灌入阶段 detector 缺失 → detector_coverage；流水电路跳过一个稳定子 / 少一轮 /
+    多一轮 / 删末轮 detector；Strikis gross 电路删掉第 0 轮全部 Z detector → detector_coverage。测试用流水电路生成器
+    `tests/memory_builder.py:build_pipelined_memory`。
+  - **请 auditor 复核的语义变化**：计数是“不重叠的测量窗口数”，一轮测两次、另一轮不测会被接受（旧方法按段计会拒绝；这不减少噪声）；
+    冗余关系下可以省略一个 detector（等价于不声明 meta-check，与旧方法相同；gross 上单删 1 个第 0 轮 Z detector 会被接受）；
+    测量后不复位直接复用辅助比特仍被误拒（3 轮数成 2 次）。
 
 - 2026-10-02 · auditor（E-003 复核）· **L2 的 `boundary="paper"` 对流水电路不能消除边界差异** ·
   对辅助比特跨轮流水的电路（Strikis），`paper` 口径只去掉数据比特的制备/读出噪声，灌入/排空层里数据比特的空闲噪声仍在。
   流水与非流水电路相比，边界故障质量相差约 3%；在 pL 对 p 斜率约 8 的区间，这会被放大成约 1.25 倍的假差异。
   影响范围：H-003 包络线的对照（IBM 非流水 vs Strikis 流水），以及联合搜索中允许流水的调度。
   建议：比较时使用“两种轮数之差”（例如 24 轮减 12 轮）估计体内每轮错误率，或实现对所有电路一致的“拉平边界”口径。
-  状态：open
+  状态：fixed-pending-audit
+  **修复说明（2026-10-02，评估器修补 agent）**：
+  - `evaluators/l2.py` 新增两种口径（`paper` 默认不变，只新增参数）：
+    `boundary="diff"`（推荐）：`sample_l2(..., rounds=r2, boundary="diff", diff_rounds=r1, diff_inner_boundary="paper")` 做两次独立采样，
+    按 `1 - cP(r) = B(1 - c·eps)^r`（c = 2^K/(2^K-1)，K = 失败事件涉及的 observable 数）相减消去边界因子 B，得到体内每轮错误率 eps；
+    K=1 时就是 `(log(1-2P(r2)) - log(1-2P(r1)))/(r2-r1) = log(1-2eps)`，k>1 时 c≈1，退化为存活率之比。区间为对 B 取剖面似然的
+    LR 区间（默认 LR=1000），与 delta 法吻合，模拟覆盖率正确。公开函数 `diff_per_round`。推导见 README §7.2.1。
+    `boundary="flat"`：auditor 的拉平口径（paper + 去掉数据比特第一个 / 最后一个双比特门之外的单比特噪声）；gross 上与 auditor 的
+    trim 逐项一致（去掉 720 / 288 个位置，Z 基底 Σ先验 58.28 / 57.85）。
+  - 表面码 d=3（sd6，p=0.005，每 sector ≥2000 次失败）：diff(3,9)、diff(9,27)、diff(6,30) 的体内每轮 P_Z = 0.0185 / 0.0180 / 0.0176，
+    与 paper 口径 27、54 轮单次运行的每轮值（1−2P 形式）0.0178 / 0.0170 在误差内一致；paper 9 轮单次的值低约 15%（完美边界稀释）。
+  - IBM vs Strikis（gross，p=0.005，sd6，解码器 A，diff 4/12 轮、inner=flat，每 sector ≥100 次失败，3 workers）：
+    Strikis/IBM 体内每轮比值 P_any 0.84 [bootstrap 95%: 0.64, 1.10]，Z 0.84 [0.58, 1.21]，X 0.79 [0.54, 1.11]；同一批的 flat 12 轮
+    单次比值 P_any 0.98 [0.80, 1.20]（X+Z 独立近似 0.95）。与 auditor 拉平结果 1.12 [0.87, 1.45] 区间重叠，都与 1 无显著差异；
+    4 轮时 Strikis 失败率是 IBM 的约 1.8 倍、12 轮时几乎相同，说明额外失败主要来自边界。统计量小（±30%），只作口径验证，不上榜。
+    结果在 `results/evaluator-fix-diff/`。
+  - `evaluators/leaderboard.py`：条目新增 `boundary_detail`（口径、分数定义；diff 另记两个轮数与子采样口径）。
+  - 已知局限：diff 假设边界与轮数无关、每轮独立，r1 太小时不成立；差分放大误差；diff 的分数与单次运行的每轮值不是同一个量，不能混排。
