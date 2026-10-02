@@ -69,10 +69,12 @@ import collections
 import dataclasses
 import fcntl
 import hashlib
+import hmac
 import json
 import math
 import os
 import platform
+import secrets
 import shutil
 import tempfile
 import time
@@ -99,6 +101,7 @@ __all__ = [
     "IBM_BPOSD_PARAMS",
     "DecoderConfig",
     "JointCircuit",
+    "L2IntegrityError",
     "L2Result",
     "StopRule",
     "build_joint_circuit",
@@ -184,7 +187,7 @@ def library_versions() -> dict:
     import importlib.metadata as md
     out = {"python": platform.python_version(), "platform": platform.platform(),
            "machine": platform.machine()}
-    for pkg in ("stim", "sinter", "ldpc", "pymatching", "numpy", "scipy"):
+    for pkg in ("stim", "sinter", "ldpc", "pymatching", "numpy", "scipy", "ortools", "python-sat"):
         try:
             out[pkg] = md.version(pkg)
         except md.PackageNotFoundError:
@@ -839,6 +842,60 @@ def _write_json_atomic(path: Path, obj: dict) -> None:
     os.replace(tmp, path)
 
 
+class L2IntegrityError(RuntimeError):
+    """批结果文件被篡改或与重算结果不一致（评估器 v2.1，auditor v2 S4）。评估失败，结果不能使用。"""
+
+
+_BATCH_FIELDS = ("index", "stim_seed", "shots", "fail_Z", "fail_X", "fail_any", "fail_both", "bits_Z", "bits_X",
+                 "cpu_s")
+
+
+def _batch_mac(key: bytes, res: Mapping) -> str:
+    body = json.dumps({k: res[k] for k in _BATCH_FIELDS}, sort_keys=True, separators=(",", ":"))
+    return hmac.new(key, body.encode(), hashlib.sha256).hexdigest()
+
+
+def _sign(key: bytes, res: dict) -> dict:
+    res = dict(res)
+    res["mac"] = _batch_mac(key, res)
+    return res
+
+
+def _unpack_bits(hexstr, shots: int) -> np.ndarray:
+    raw = bytes.fromhex(hexstr)
+    if len(raw) != (shots + 7) // 8:
+        raise ValueError("bit vector length does not match shots")
+    bits = np.unpackbits(np.frombuffer(raw, dtype=np.uint8))
+    if bits[shots:].any():
+        raise ValueError("non-zero padding bits")
+    return bits[:shots].astype(bool)
+
+
+def _check_batch(r: Mapping, *, index: int, key: bytes, seed: int, batch_size: int) -> str | None:
+    """逐批核对（auditor v2 S4 (a)）：HMAC、index 与文件名、shots == batch_size、stim 种子、失败数 == bits 的 popcount。
+    返回问题描述（None = 通过）。"""
+    try:
+        if set(r) != set(_BATCH_FIELDS) | {"mac"}:
+            return f"unexpected fields {sorted(set(r) ^ (set(_BATCH_FIELDS) | {'mac'}))}"
+        if not hmac.compare_digest(str(r["mac"]), _batch_mac(key, r)):
+            return "HMAC signature invalid (file not written by this run's workers)"
+        if r["index"] != index:
+            return f"index {r['index']} does not match the file name ({index})"
+        if r["shots"] != batch_size:
+            return f"shots {r['shots']} != batch_size {batch_size}"
+        if r["stim_seed"] != _batch_seed(seed, index):
+            return "stim seed is not SeedSequence([seed, index])"
+        fz, fx = _unpack_bits(r["bits_Z"], r["shots"]), _unpack_bits(r["bits_X"], r["shots"])
+        want = {"fail_Z": int(fz.sum()), "fail_X": int(fx.sum()), "fail_any": int((fz | fx).sum()),
+                "fail_both": int((fz & fx).sum())}
+        bad = [k for k, v in want.items() if r[k] != v]
+        if bad:
+            return f"failure counts {bad} disagree with the per-shot failure bits"
+    except (KeyError, TypeError, ValueError) as e:
+        return f"malformed batch record: {e}"
+    return None
+
+
 def _next_index(state_dir: Path) -> int:
     path = state_dir / "counter"
     with open(path, "a+") as f:
@@ -864,9 +921,11 @@ try:
         """sinter 自定义采样器：固定批大小、按批编号设种子、每批结果落盘。"""
 
         def __init__(self, state_dir: str, seed: int, batch_size: int, num_det_z: int, num_obs_z: int,
-                     decoder: DecoderConfig):
+                     decoder: DecoderConfig, mac_key: bytes):
             self.state_dir, self.seed, self.batch_size = state_dir, seed, batch_size
             self.num_det_z, self.num_obs_z, self.decoder = num_det_z, num_obs_z, decoder
+            # 每次运行随机生成的 HMAC 密钥（auditor v2 S4 (b)）：只在内存里，经 sinter 的 pickle 传给 worker，不落盘
+            self.mac_key = mac_key
 
         def compiled_sampler_for_task(self, task):
             return _CompiledJointSampler(self, task)
@@ -884,7 +943,7 @@ try:
             d = Path(self.p.state_dir)
             idx = _next_index(d)
             res = self.runner.run(self.p.seed, idx, self.p.batch_size)
-            _write_json_atomic(d / f"batch_{idx:09d}.json", res)
+            _write_json_atomic(d / f"batch_{idx:09d}.json", _sign(self.p.mac_key, res))
             return _sinter.AnonTaskStats(
                 shots=res["shots"], errors=res["fail_any"], seconds=time.monotonic() - t0,
                 custom_counts=collections.Counter({"fail_Z": res["fail_Z"], "fail_X": res["fail_X"],
@@ -893,11 +952,22 @@ except ImportError:  # pragma: no cover
     _JointSampler = None
 
 
-def _load_batches(state_dir: Path) -> dict[int, dict]:
+def _load_batches(state_dir: Path, *, key: bytes, seed: int, batch_size: int) -> dict[int, dict]:
+    """读取并逐批核对（auditor v2 S4）。任何一个文件不合格都抛 L2IntegrityError（不跳过、不重算：被篡改的
+    运行整体作废）。"""
     out = {}
     for f in state_dir.glob("batch_*.json"):
-        r = json.loads(f.read_text())
-        out[r["index"]] = r
+        try:
+            index = int(f.stem.split("_", 1)[1])
+            r = json.loads(f.read_text())
+        except (ValueError, IndexError, json.JSONDecodeError) as e:
+            raise L2IntegrityError(f"batch file {f.name} unreadable: {e}") from e
+        if not isinstance(r, dict):
+            raise L2IntegrityError(f"batch file {f.name} is not a JSON object")
+        why = _check_batch(r, index=index, key=key, seed=seed, batch_size=batch_size)
+        if why:
+            raise L2IntegrityError(f"batch file {f.name} rejected: {why}")
+        out[index] = r
     return out
 
 
@@ -1168,6 +1238,7 @@ def sample_l2(code: CSSCode,
               likelihood_factor: float = DEFAULT_LIKELIHOOD_FACTOR,
               work_dir: str | os.PathLike | None = None,
               keep_batches: bool = False,
+              spot_checks: int = 2,
               diff_rounds: int | None = None,
               diff_inner_boundary: str = "paper") -> L2Result:
     """X/Z 联合采样的逻辑错误率。
@@ -1187,7 +1258,9 @@ def sample_l2(code: CSSCode,
         seed: 整数种子（必填）。
         stop: StopRule。
         num_workers: sinter 进程数（≥1）。
-        work_dir: 存放批文件的目录（默认临时目录，结束后删除，除非 keep_batches=True）。
+        work_dir: 存放批文件的目录（默认临时目录，权限 0700，结束后删除，除非 keep_batches=True）。
+            批文件逐个核对 HMAC（每次运行随机密钥）、index、shots、种子与失败位（评估器 v2.1，auditor v2 S4）。
+        spot_checks: 主进程随机抽查重算的批数（默认 2；0 = 不抽查）。抽查不一致抛 L2IntegrityError。
     """
     if not isinstance(seed, (int, np.integer)) or seed < 0:
         raise ValueError("seed must be a non-negative int")
@@ -1203,7 +1276,7 @@ def sample_l2(code: CSSCode,
                                kwargs=dict(noise_model=noise_model, decoder=decoder, seed=seed, stop=stop,
                                            num_workers=num_workers, noise_kwargs=noise_kwargs,
                                            likelihood_factor=likelihood_factor, work_dir=work_dir,
-                                           keep_batches=keep_batches))
+                                           keep_batches=keep_batches, spot_checks=spot_checks))
     if boundary not in JOINT_BOUNDARIES:
         raise ValueError(f"boundary must be one of {BOUNDARIES}, got {boundary!r}")
     if callable(circuits):
@@ -1215,22 +1288,31 @@ def sample_l2(code: CSSCode,
     t_build = time.time() - t_wall
 
     own_dir = work_dir is None
-    state_dir = Path(tempfile.mkdtemp(prefix="l2_")) if own_dir else Path(work_dir)
+    state_dir = Path(tempfile.mkdtemp(prefix="l2_")) if own_dir else Path(work_dir)   # mkdtemp: 0700
     state_dir.mkdir(parents=True, exist_ok=True)
+    os.chmod(state_dir, 0o700)
     if any(state_dir.glob("batch_*.json")) or (state_dir / "counter").exists():
         raise ValueError(f"work_dir {state_dir} is not empty")
+    if not isinstance(spot_checks, (int, np.integer)) or spot_checks < 0:
+        raise ValueError("spot_checks must be a non-negative int")
     import sinter
 
+    mac_key = secrets.token_bytes(32)
     sampler = _JointSampler(str(state_dir), int(seed), stop.batch_size, jc.num_detectors_z,
-                            jc.num_observables_z, decoder)
+                            jc.num_observables_z, decoder, mac_key)
     task = sinter.Task(circuit=jc.circuit, decoder="l2_joint",
                        json_metadata={"p": p, "boundary": boundary, "noise": noise_model})
     sinter_waves = []
     fill_ins = []
+    spot = []
     runner_main = None
+
+    def load():
+        return _load_batches(state_dir, key=mac_key, seed=int(seed), batch_size=stop.batch_size)
+
     try:
         while True:
-            batches = _load_batches(state_dir)
+            batches = load()
             need, contiguous = _prefix(batches, stop)
             if need is not None:
                 break
@@ -1241,7 +1323,8 @@ def sample_l2(code: CSSCode,
                 if runner_main is None:
                     runner_main = _BatchRunner(jc.circuit, jc.num_detectors_z, jc.num_observables_z, decoder)
                 for i in missing:
-                    _write_json_atomic(state_dir / f"batch_{i:09d}.json", runner_main.run(int(seed), i, stop.batch_size))
+                    _write_json_atomic(state_dir / f"batch_{i:09d}.json",
+                                       _sign(mac_key, runner_main.run(int(seed), i, stop.batch_size)))
                     fill_ins.append(i)
                 continue
             done_shots = sum(r["shots"] for r in batches.values())
@@ -1270,12 +1353,24 @@ def sample_l2(code: CSSCode,
                                  "shots": int(sum(s.shots for s in stats)),
                                  "errors": int(sum(s.errors for s in stats)),
                                  "wall_s": round(time.time() - t0, 2)})
-            if len(_load_batches(state_dir)) == len(batches):
+            if len(load()) == len(batches):
                 raise RuntimeError("sinter wave produced no new batches (worker failure?)")
-        batches = _load_batches(state_dir)
+        batches = load()
         need, _ = _prefix(batches, stop)
         used = [batches[i] for i in range(need)]
         discarded = sorted(i for i in batches if i >= need)
+        # 主进程随机抽查重算（auditor v2 S4 (b)）：抽哪几批由系统熵决定（事先不可预测），重算结果必须逐位相同
+        candidates_spot = [i for i in range(need) if i not in fill_ins]
+        if spot_checks and candidates_spot:
+            if runner_main is None:
+                runner_main = _BatchRunner(jc.circuit, jc.num_detectors_z, jc.num_observables_z, decoder)
+            for i in sorted(secrets.SystemRandom().sample(candidates_spot, min(int(spot_checks),
+                                                                                 len(candidates_spot)))):
+                re = runner_main.run(int(seed), i, stop.batch_size)
+                diff = [k for k in _BATCH_FIELDS if k != "cpu_s" and re[k] != batches[i][k]]
+                if diff:
+                    raise L2IntegrityError(f"spot check: batch {i} recomputed in the main process differs in {diff}")
+                spot.append(i)
         decoder_effective = {}
         if decoder.name == "bposd":
             probe = runner_main or _BatchRunner(jc.circuit, jc.num_detectors_z, jc.num_observables_z, decoder)
@@ -1350,6 +1445,9 @@ def sample_l2(code: CSSCode,
             "caveat": "bit-identical only with the same stim version and CPU SIMD width (stim seed semantics)",
             "batches_completed": len(batches), "batches_discarded_beyond_prefix": discarded,
             "batches_recomputed_in_main_process": fill_ins, "sinter_waves": sinter_waves,
+            "integrity": "every batch file checked: per-run HMAC, index == file name, shots == batch_size, stim seed, "
+                         "failure counts == popcount of the per-shot bits",
+            "spot_checked_batches": spot,
         },
         circuit={"candidate_hash": circuit_hash(circuits),
                  "joint_hash": hashlib.sha256(str(jc.circuit).encode()).hexdigest(),

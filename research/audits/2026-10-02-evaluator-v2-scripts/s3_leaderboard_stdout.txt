@@ -1,0 +1,30 @@
+-- LB-API
+  submit: PermissionError (leaderboard.submit was removed in evaluator v2: only evaluat...)
+  build_entry: PermissionError (leaderboard.build_entry was removed in evaluator v2: use eva...)
+  _append with a fake credential: PermissionError
+honest paper run: status scored, score 1.7418e-02, written seq 0, wall 5.59 s
+-- LB1/3/4/7 with the real credential (in-process), inconsistent records
+  LB1 rounds=30: rejected (unds=30 but task selftest-surface-d3-sd6-paper has 3)
+  LB3 noise_model=gross_sd6: rejected (ise_model='gross_sd6' but task selftest-surface-d3-sd6-paper has 'sd6')
+  LB4 schedule_hash=deadbeef: rejected (hedule_hash is not the hash of the stored schedule)
+  LB7 p=1e-3: rejected (0.001 but task selftest-surface-d3-sd6-paper has 0.005)
+  LB2 per_round faked: rejected ( per-round P_any is not what the counts give; score does not equal the L2 per-round P_any)
+-- LB2c count-consistent forgery (shots x3): entry_problems = []; forged score 5.7384e-03
+-- W1 no credential: append the forged record directly to the file
+  verify_leaderboard(board) = []
+  table: [('honest', 0.01742)]
+-- W2 evaluator field says 'not frozen / other hash'
+  verify_leaderboard(board) = []
+-- LB5 / LB6
+  LB5 tail deleted, no anchor: []
+  LB5 tail deleted, anchor lines=3: ['anchor lines=3: the leaderboard has only 2 lines (tail deleted)']
+  LB6 line 1 rewritten + re-chained, no anchor: []
+  LB6 with anchor lines=3: ['anchor lines=3: line 3 hash changed (history rewritten)']
+-- R1 reproduce_entry on the W1 forgery
+  ["L2 counts differ: {'shots': 40000, 'fail_Z': 1022, 'fail_X': 1128, 'fail_any': 2054, 'fail_both': 96, 'batches_used': 20} vs {'batches_used': 20, 'fail_X': 1128, 'fail_Z': 1022, 'fail_any': 2054, 'fail_both': 96, 'shots': 120000}"]
+-- R2 diff task: forge only components[r1] counts + per_round
+  honest diff score 2.4553e-02 -> forged 2.2248e-02
+  top-level counts untouched: True
+  entry_problems(forged) = []
+  reproduce_entry(forged) = []
+temp dir: /var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/s3lb_7ewy87fb

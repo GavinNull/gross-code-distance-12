@@ -104,6 +104,11 @@ class DistanceResult:
     seed: int
     params: dict
     stopped_early: bool = False     # 因 stop_below 或 max_seconds 提前停止
+    # 评估器 v2.1：BP-OSD 解与 LNS 终点中**不同的** DEM 逻辑错误（Dξ=0、Lξ≠0 的列集合）按权重计数，
+    # {权重: 个数}（只列最小的 8 个权重）。min_weight_count = 权重等于 weight 的个数（见证来自其他方法而这里
+    # 一个也没有时记 1）。只取决于 seed 和预算，用作“低权重见证数”。
+    low_weight_histogram: dict = field(default_factory=dict)
+    min_weight_count: int | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -115,7 +120,9 @@ class DistanceResult:
             w = Witness(**{**w, "faults": [Fault(**f) for f in w["faults"]]})
         return DistanceResult(weight=d["weight"], witness=w, methods=[MethodResult(**m) for m in d["methods"]],
                               seconds=d["seconds"], seed=d["seed"], params=d["params"],
-                              stopped_early=d.get("stopped_early", False))
+                              stopped_early=d.get("stopped_early", False),
+                              low_weight_histogram={int(k): v for k, v in (d.get("low_weight_histogram") or {}).items()},
+                              min_weight_count=d.get("min_weight_count"))
 
     def summary(self) -> str:
         parts = []
@@ -549,6 +556,7 @@ def upper_bound(circuit_with_noise: stim.Circuit, *, seed: int = 0,
         return w
 
     stopped = False
+    pool_sets: set = set()
     for name in ("graphlike", "stim_search", "bposd"):
         if name not in methods:
             continue
@@ -579,14 +587,22 @@ def upper_bound(circuit_with_noise: stim.Circuit, *, seed: int = 0,
             except (ValueError, RuntimeError) as e:
                 results.append(MethodResult(name, "none", None, round(time.time() - t1, 3), str(e).splitlines()[0]))
         else:
-            stopped |= _run_bposd(flat, seed, params, deadline, stop_below, num_workers, results, record, hit, late)
+            stopped |= _run_bposd(flat, seed, params, deadline, stop_below, num_workers, results, record, hit, late,
+                                  pool_sets)
     stopped = stopped or late()
     w = best[0]
+    hist: dict[int, int] = {}
+    for k in pool_sets:
+        hist[len(k)] = hist.get(len(k), 0) + 1
+    hist = {a: hist[a] for a in sorted(hist)[:8]}
+    mwc = None if w is None else max(1, hist.get(w.weight, 0))
     return DistanceResult(weight=None if w is None else w.weight, witness=w, methods=results,
-                          seconds=round(time.time() - t0, 3), seed=seed, params=params, stopped_early=bool(stopped))
+                          seconds=round(time.time() - t0, 3), seed=seed, params=params, stopped_early=bool(stopped),
+                          low_weight_histogram=hist, min_weight_count=mwc)
 
 
-def _run_bposd(flat, seed, params, deadline, stop_below, num_workers, results, record, hit, late) -> bool:
+def _run_bposd(flat, seed, params, deadline, stop_below, num_workers, results, record, hit, late,
+               pool_sets: set | None = None) -> bool:
     t1 = time.time()
     try:
         cols = dem_columns(_dem(flat))
@@ -620,6 +636,8 @@ def _run_bposd(flat, seed, params, deadline, stop_below, num_workers, results, r
             for trial, key in sols_c:
                 pool.setdefault(key, (c, trial))
     sols = sorted(pool, key=lambda k: (len(k), pool[k]))
+    if pool_sets is not None:
+        pool_sets.update(tuple(sorted(k)) for k in sols)
     hist: dict[int, int] = {}
     for k in sols:
         hist[len(k)] = hist.get(len(k), 0) + 1
@@ -650,6 +668,8 @@ def _run_bposd(flat, seed, params, deadline, stop_below, num_workers, results, r
     else:
         outs = _pmap(_lns_chain, jobs, num_workers)
     best_i = min(range(len(outs)), key=lambda i: (len(outs[i][0]), i)) if outs else None
+    if pool_sets is not None:
+        pool_sets.update(tuple(sorted(int(j) for j in o[0])) for o in outs if _is_logical(D, L, np.asarray(o[0])))
     extra2 = {"starts": len(outs), "start_weights": [len(k) for k in starts[:len(outs)]],
               "final_weights": [len(o[0]) for o in outs],
               "improvement_chains": {i: o[1] for i, o in enumerate(outs) if o[1]}}

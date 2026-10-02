@@ -1,0 +1,3 @@
+gross IBM depth-8: distinct circuits over 8 global shifts = 1; submitted == canonical circuit: True
+gross Strikis Fig.12: distinct circuits over 8 global shifts = 2; submitted == canonical circuit: True
+BB72 free-window variants: 0/20 have shift-dependent circuits (same hash, different circuits)

@@ -1,0 +1,14 @@
+seed 1000: per-round P_any 1.8234e-02 [1.6787e-02, 1.9760e-02] fails Z/X 1042/1079 shots 38000
+seed 1001: per-round P_any 1.8152e-02 [1.6708e-02, 1.9675e-02] fails Z/X 1027/1092 shots 38000
+seed 1002: per-round P_any 1.7770e-02 [1.6342e-02, 1.9278e-02] fails Z/X 1008/1063 shots 38000
+seed 1003: per-round P_any 1.7934e-02 [1.6499e-02, 1.9448e-02] fails Z/X 1050/1077 shots 38000
+seed 1004: per-round P_any 1.7752e-02 [1.6324e-02, 1.9259e-02] fails Z/X 1046/1057 shots 38000
+seed 1005: per-round P_any 1.8815e-02 [1.7305e-02, 2.0408e-02] fails Z/X 1000/1100 shots 36000
+seed 1006: per-round P_any 1.7761e-02 [1.6333e-02, 1.9268e-02] fails Z/X 1068/1028 shots 38000
+seed 1007: per-round P_any 1.8079e-02 [1.6638e-02, 1.9599e-02] fails Z/X 1047/1079 shots 38000
+seed 1008: per-round P_any 1.8070e-02 [1.6630e-02, 1.9590e-02] fails Z/X 1054/1061 shots 38000
+seed 1009: per-round P_any 1.8571e-02 [1.7110e-02, 2.0111e-02] fails Z/X 1053/1151 shots 38000
+seed 1010: per-round P_any 1.7185e-02 [1.5816e-02, 1.8630e-02] fails Z/X 1023/1111 shots 40000
+seed 1011: per-round P_any 1.8016e-02 [1.6577e-02, 1.9533e-02] fails Z/X 1015/1105 shots 38000
+best seed 1010: 1.7185e-02; worst seed 1005: 1.8815e-02; best/worst = 0.913; best/median = 0.951
+submitted with the best seed: attempt=0, table=[('seed-shopped', 0.017185, 1)]

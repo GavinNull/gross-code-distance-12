@@ -1,0 +1,1 @@
+surface d=3: 120 random template circuits (+std), layers with a qubit lacking exactly one noise location: 0 circuits; std: []

@@ -1,0 +1,4 @@
+honest: Σprior=3.6369
+I-padded: Σprior=3.6369
+=== I-padded: 1975/322082 = 6.1320e-03
+=== honest: 2044/330547 = 6.1837e-03

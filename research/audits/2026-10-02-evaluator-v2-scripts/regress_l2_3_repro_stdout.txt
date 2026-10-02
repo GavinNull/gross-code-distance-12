@@ -1,0 +1,5 @@
+workers 1: {'shots': 7500, 'fail_Z': 272, 'fail_X': 295, 'fail_any': 539, 'fail_both': 28, 'batches_used': 15} discarded []
+workers 3: {'shots': 7500, 'fail_Z': 272, 'fail_X': 295, 'fail_any': 539, 'fail_both': 28, 'batches_used': 15} discarded [15, 16, 17, 18, 19]
+identical: True
+seed shopping with 2000-shot runs (per-round P_any, seed, failures): [('0.0213', 4, 125), ('0.0229', 3, 134), ('0.0244', 2, 143), ('0.0246', 0, 144), ('0.0253', 6, 148), ('0.0258', 5, 151), ('0.0258', 7, 151), ('0.0308', 1, 179)]
+best/worst ratio: 0.6916731859564059 | the leaderboard accepts any of them (warning only)

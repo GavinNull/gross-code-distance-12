@@ -1,0 +1,9 @@
+DEFAULT_PATH: /private/var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/s10_e1i7ux6o/proj/research/leaderboard.jsonl
+leaderboard_path=None: status scored, written=False, ineligible=["task purpose 'selftest' is never written to the official leaderboard"]
+leaderboard_path='research/leaderboard.jsonl': status scored, written=True, ineligible=[]
+leaderboard_path='research/../research/leaderboard.jsonl': status scored, written=True, ineligible=[]
+official board (copy) lines: 2 [('selftest-surface-d3-sd6-paper', 'selftest', False), ('selftest-surface-d3-sd6-paper', 'selftest', False)]
+verify_leaderboard() = []
+
+
+copy: /private/var/folders/xm/f93q0pwx7gnb40s6z4wwr0hm0000gn/T/s10_e1i7ux6o/proj
