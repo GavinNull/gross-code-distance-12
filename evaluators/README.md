@@ -1,6 +1,29 @@
-# evaluators/：评估器第一部分（噪声模型 + L0 合法性检查）
+# evaluators/：评估器（v2：候选只交调度，评估器生成电路、跑 L0 / L2、写成绩单）
 
-状态：未冻结（P1 进行中）。冻结前需 auditor 攻击测试（G1）。
+状态：未冻结。评估器 v2（2026-10-02）修复了 auditor G1 前全面攻击（`research/audits/2026-10-02-evaluator-G1.md`）
+的全部问题，需 auditor 再审后由 PI 冻结（§10）。
+
+## 0. 评估器 v2 一览（先读这里）
+
+```python
+from evaluators.pipeline import evaluate
+rep = evaluate("gross-sd6-p4e-3", None, schedule_json, seed=20261002, candidate_id="cand-0007")
+print(rep.to_text())     # 逐项诊断（可直接喂给 LLM）；rep.status / rep.score / rep.leaderboard_record
+```
+
+- **候选只提交调度 JSON，不提交电路**（§9.1）。评估器用固定模板生成双基底、任意轮数的无噪声 memory 电路，噪声按任务
+  由 `noise.py` 加。伪轮次、轮数造假、读出后再测、`I` 门把空闲变“制备”、自带噪声 / 指令等攻击在结构上不可能。
+- **唯一入口** `pipeline.evaluate(task_id, code_spec, schedule, *, seed)`（§9.2）：任务注册表（`tasks.py`）冻结码族、
+  噪声（只允许 sd6）、p、解码器、边界、轮数、停止规则、L0 距离门槛与预算、分层漏斗（等 E-004）。
+- **只有 pipeline 能写成绩单**（§8）：`leaderboard.submit` / `build_entry` 已删除；记录带 task_id、task_hash、规范化
+  调度及其哈希、每个轮数的电路哈希、L0 实测轮数；写入前和 `verify_leaderboard` 都做语义核对；哈希链需要 git 外部锚点。
+- L0 仍保留作为第二道防线，并修了伪轮次（§3.2.1）。底层接口 `check_l0` / `sample_l2` 仍可单独调用（诊断、实验），
+  但它们的结果不能上榜。
+- 冻结：`scripts/freeze_evaluator.py` 哈希 evaluators/ 下全部文件 + 冻结脚本 + hook + pyproject.toml + uv.lock + 评估器测试，
+  拒绝清单外文件、伪造 .pyc、扩展模块；关键库版本固定（§10）。
+
+测试（评估器 v2）：`uv run pytest tests -q`（全部；含 `test_candidate.py`、`test_pipeline.py`、`test_g1_attacks.py`、
+`test_freeze.py`、`test_leaderboard.py`）；慢测试 `-m slow`。
 测试：`uv run pytest tests/test_l0.py tests/test_noise.py tests/test_codes.py tests/test_stats.py -q`（约 2 分钟，单核；距离检查改用 `distance.upper_bound` 后变慢，测试里用轻量预算 `FAST_DIST`；`test_l0.py` 含 gross code 的 Strikis / IBM 电路，读 `baselines/`）。
 距离：`uv run pytest tests/test_distance.py -q -m "not slow"`（约 20 秒）；gross code 回归 `-m slow`（2 个测试，各约 2 分钟，3 进程）。
 
@@ -12,7 +35,10 @@
 | `distance.py` | 电路级距离：`upper_bound(...) -> DistanceResult`（多方法取经注入验证的最短见证）、`lower_bound(...)`（CP-SAT / MaxSAT / HiGHS 精确法）、`verify_faults`，见 §3.1 |
 | `stats.py` | 置信区间与统计口径约定（似然比因子 ↔ σ） |
 | `l2.py` | `sample_l2(...) -> L2Result`：X/Z 联合采样的逻辑错误率（sinter 多进程、显式种子、可逐位复现），见 §7 |
-| `leaderboard.py` | `build_entry` / `submit` / `verify_leaderboard`：`research/leaderboard.jsonl` 的唯一写入口（只追加、文件锁、哈希链），见 §8 |
+| `leaderboard.py` | 成绩单：只接受 pipeline 的写入（私有 `_append` + 凭证）、语义核对 `entry_problems`、`verify_leaderboard`（哈希链 + git 锚点）、`table(task_id)`、`reproduce_entry`，见 §8 |
+| `candidate.py` | 候选调度 JSON 规范、模板约束 `validate_schedule`、模板电路 `memory_circuit` / `build_circuits`，见 §9.1（v2） |
+| `tasks.py` | 任务注册表 `TASKS`（码族、噪声、p、解码器、边界、轮数、停止规则、L0 门槛、漏斗）、`PINNED_VERSIONS`，见 §9.3（v2） |
+| `pipeline.py` | 唯一评估入口 `evaluate(task_id, code_spec, schedule, *, seed) -> Report`，见 §9.2（v2） |
 
 ---
 
@@ -40,7 +66,8 @@ report.per_basis["X"].get("circuit_distance").details
 - 候选电路必须**无噪声**、用 TICK 分时间步。它是一个 memory 实验：数据比特显式复位 → 若干轮 syndrome 提取 → 数据比特在 basis 基下测量；observable 由最后的数据读出构成。
 - `basis` 可为 `"Z"`、`"X"`、`"both"`。评估器打分一律用 `"both"`，两个基底都通过才算通过，距离取较差者（auditor E-001 H2）。
 - `CSSCode` 支持冗余校验行（BB 码 HX 72 行秩 66）和 k>1。`compute_logicals` 给出配对好的 LX、LZ（LX·LZᵀ = I）。
-- 搜索代码只应调用 `check_l0` / `add_noise` 这两个公开入口。
+- ~~搜索代码只应调用 `check_l0` / `add_noise` 这两个公开入口。~~ 评估器 v2 起，搜索代码只应调用
+  `evaluators.pipeline.evaluate`（提交调度 JSON）；`check_l0` 是 pipeline 内部的第二道防线，也可用于诊断。
 
 ## 2. 噪声模型（`noise.py`）
 
@@ -55,7 +82,10 @@ report.per_basis["X"].get("circuit_distance").details
 | `uniform_depolarizing` | 通用 | DEP1(p) | DEP2(p) | p | 测量前翻转 p | `idle=True`（默认，= sd6）或 `idle=False` |
 | `legacy_no_idle` | 只与 E-001 对照 | 同上 | 同上 | p | 测量前翻转 p | 无 |
 
-- `SCORING_MODELS = ("sd6", "si1000")`，`DEFAULT_MODEL = "sd6"`；两者都有逐层空闲噪声，**不可关闭**（`sd6`/`si1000` 传 `idle=False` 直接报错）。
+- **评估器 v2：`SCORING_MODELS = ("sd6",)`**，`DEFAULT_MODEL = "sd6"`。si1000 移出打分模型：auditor G1 N1（`I` 门躲开
+  ResonatorIdle）已修——在有隐式空闲噪声且 I 门噪声与空闲不同的模型（si1000）里，`I` 按空闲比特处理（空闲 + ResonatorIdle）；
+  但 N2（SI1000 原生 CZ+H 电路被 L0 / L2 误拒）没修，且模板电路只用 CX，CX→CZ+H 的编译约定也没定。修好之前任务注册表只允许 sd6。
+  sd6 / si1000 都有逐层空闲噪声，**不可关闭**（传 `idle=False` 直接报错）。
 - `gross_sd6` 不在打分模型里：它的空闲噪声只来自显式 I 门，候选只要不写 I 就能躲开空闲噪声。
 - `legacy_no_idle`（= `uniform_depolarizing(idle=False)`）与 `stim.Circuit.generated(after_clifford_depolarization=p, before_measure_flip_probability=p, after_reset_flip_probability=p)` 的 DEM 逐机制完全相同（测试覆盖 d=3,5，X/Z）。E-001 的口径还多一项 `before_round_data_depolarization=p`（每轮开头只对数据比特），需要知道“轮”的边界，本模块不实现；测试验证了两者差别正是这一项（我们的每个机制概率 ≤ E-001，且有严格更小的）。
 - 共同规则：输入里有任何噪声指令（含概率为 0 的通道、`M(0.01)`、`HERALDED_*`、`MPAD(p)`、藏在 REPEAT 里的）→ `NoisyCircuitError`；没有 TICK、同一层同一比特被作用两次 → `ValueError`；MPP、经典控制等 → `NotImplementedError`；输出展开 REPEAT。
@@ -152,9 +182,25 @@ IBM 约 6 s）。有干净切口的电路上两种方法的计数相同（测试
 测量在同一个时间窗内）。**仍然不支持**：测量后不复位直接复用辅助比特（第 j 轮的值是 m_{j-1} ⊕ m_j，与上一轮的窗口重叠，
 3 轮会被数成 2 次而拒绝，已用 stim 表面码电路把 MR 换成 M 验证）。
 
+### 3.2.1 重提取判据（评估器 v2，修复 auditor G1 A1/A1b “伪轮次”）
+
+上面的计数只要求“窗口里的测量奇偶等于输入时刻 s 的值”。auditor 发现：1 轮真提取之后反复重测同一个（测量后不复位的）
+辅助比特，每次重测都等于 s_in，于是被数成很多轮，分数虚高 4.5–70 倍。现在额外要求**每个窗口都从数据比特重新提取 s**：
+
+- 对相邻窗口的代表元之差 d_j = c_{j−1} ⊕ c_j（属于 D，确定），在 body 上加成 detector，用 `detecting_regions` 求它在
+  每个时刻的敏感区域；要求在 [窗口 j−1 结束层, 窗口 j 结束层) 之间存在某个时刻，区域限制到数据比特上**恰好是 s**
+  （s 支撑上的数据错误在这段时间里会翻转这次比较）。伪轮次的区域只在辅助比特上，被拒（诊断写明 “fake”）。
+- 代表元不唯一：严格判据不成立时，允许加上完全落在窗口 j 内的确定奇偶（D 的最小跨度基中跨度在窗口内的向量，例如冗余行的
+  meta-check）的区域再比较（GF(2) 张成判定）。另外，区间调度在结束层相同时优先选跨度最短的候选，使代表元是“自然的”单次提取。
+  两条措施各自都能让 Strikis 流水电路通过（测试过）。
+- `data_layout` 新增：最终数据读出之后不允许再有任何测量（A1b）。
+- 回归：`tests/test_g1_attacks.py::test_A1_*`、`test_A1b_*`（d=3/3 轮、d=5/10 轮，两个基底，含距离门槛时也被拒）；
+  已有全部 L0 测试（表面码、Steane、[[4,2,2]] 流水、冗余行、gross IBM / Strikis 3 与 12 轮）照常通过。
+
 **语义与可接受的“软”情形**（auditor 请复核）：
-- 计数的是“时间上不重叠的、能确定 s 输入值的测量”，不是“每个 cycle 恰好一次”。在一轮里连测两次、另一轮不测，计数仍是 r，
-  会被接受（与旧方法不同，旧方法按段计）。这不是对候选有利的作弊：测量次数和噪声都没有减少，只是把时间分布弄得更差。
+- 计数的是“时间上不重叠的、能确定 s 输入值的测量”，不是“每个 cycle 恰好一次”。在一轮里用新的 CNOT 连续提取两次、另一轮不测，
+  计数仍是 r，会被接受（每次都是真提取）。~~这不是对候选有利的作弊~~——auditor G1 指出旧版的这一说法对“只重测辅助比特”是错的；
+  v2 的重提取判据已堵住。模板电路（pipeline）里每个校验每轮恰好一次，这一情形不会出现。
 - 冗余行 s3 = s1 + s2：某轮不测 s3、只测 s1 和 s2，s3 在该轮仍算“被测了”（它的值确定）。与旧方法相同。
 - 冗余关系下单个 detector 可以省略：例如 gross code 的 HZ 有 6 个冗余关系，删掉一个第 0 轮的 Z detector，它等于其余行的
   detector ⊕ 一个该轮内部的 meta-check，而 meta-check 不要求声明，所以被接受（与旧方法相同）。这只让译码器少一条信息，
@@ -219,7 +265,12 @@ lb = lower_bound(noisy_circuit, method="cpsat", time_limit_s=600, target=10)   #
 
 - **电路级距离只是上界。** L0 的判定是“多种启发式找到的、经注入验证的最短逻辑错误 ≥ 下限”，真实距离可能更低（旧版在 gross 上报 12、实际 ≤10 就是这样漏的；新版在 gross 上 12 个种子都找到 10，但这仍不是证明）。精确下界只在小电路上可行（§3.1）：gross 规模不能声称 d_circ = X。L0 距离检查在 gross 上单进程约 4–6 分钟/基底（`distance_num_workers=3` 约 2 分钟），搜索内循环若嫌慢，只能调低预算并接受漏报风险。
 - ~~要求“干净切口”~~（2026-10-02 已改为 flow 方法，§3.2，流水电路可以通过）。仍不支持：**测量后不复位直接复用辅助比特**（会被数少一次而拒绝）。
-  覆盖计数的语义是“时间上不重叠的测量窗口数”，一轮测两次、另一轮不测会被接受（不减少噪声，见 §3.2）。
+  覆盖计数的语义是“时间上不重叠、且每个都从数据比特重新提取的测量窗口数”（v2，§3.2.1）。
+- **冗余校验行（L0-2，PI 未裁决）**：在原始电路上，L0 仍把“冗余行 s3 = s1 + s2 从不单独测量”视为每轮都测了（它的值确定）。
+  pipeline 不受影响：模板要求每一行（含冗余行）都有自己的辅助比特、每轮测一次；任务的 `allow_redundant_row_omission`
+  在 PI 裁决前不能为 True。
+- **冗余 / 复合 detector 会让 graphlike 与 stim_search 失明**（auditor G1 D1），此时距离只靠 BP-OSD（+LNS）一条路径；
+  模板电路的 detector 由评估器生成（每个 basis 型校验每轮一个），不存在这一情形。
 - **observable 只能由最终数据读出构成**（按任务说明的定义）。“逻辑算符 ⊕ 若干辅助比特测量”的合法写法会被拒。
 - **数据比特读出必须直接用 basis 基测量指令**（X memory 用 MX/MRX，不接受 H+M）。
 - 逻辑注入只在两个时刻做（制备后、读出前）。中间时刻不查：轮中注入逻辑算符本来就可能被合法地检测到。
@@ -232,10 +283,9 @@ lb = lower_bound(noisy_circuit, method="cpsat", time_limit_s=600, target=10)   #
 
 1. **L1 未实现**：深度、CNOT 数、低权重逻辑错误计数。（L2 已实现，见 §7。）
 2. **候选程序沙箱**：§5.2 的“候选不能读写文件/网络、种子由评估器控制”属于搜索框架，不在 L0。
-3. **schedule → 电路的生成应由评估器完成**：现在 L0 接收现成电路，`data_qubits`、轮数、比特布局由任务给定。最稳妥的做法是候选只交 schedule，评估器自己生成两个基底的 memory 电路再过 L0，候选就碰不到 detector 与 observable 的声明。
+3. ~~schedule → 电路的生成应由评估器完成~~：评估器 v2 已实现（§9）。
 4. **距离的独立复核路径**：`distance.lower_bound`（CP-SAT/MaxSAT/MILP）已有，但只对小电路可行（§3.1）；gross 规模需要利用对称性等结构的专门方法。
-5. **跨轮数一致性**：同一调度在 rounds = d 与 rounds = 2d 下都应通过（防止只对特定轮数成立的“巧合”电路）。
-   `boundary="diff"`（§7.2.1）本身就要求候选在两个轮数下都能生成电路；用它打分时建议两个轮数都过 L0。
+5. ~~跨轮数一致性~~：pipeline 对每个打分轮数（diff 时两个）与距离轮数都由同一调度生成电路，打分轮数的电路都过 L0（v2）。
 6. **噪声模型与门集的绑定**：SI1000 打分要求 CZ 电路，需要约定 CX 调度如何编译成 CZ+H（编译方式会改变分数）。
 
 ## 7. L2：逻辑错误率（`l2.py`）
@@ -290,7 +340,10 @@ k=2 的 [[4,2,2]] 码 1、3 轮）；p=0 时联合电路所有 detector / observ
 灌入 / 排空层里数据比特的空闲噪声还在。gross code 12 轮、p=0.005、sd6 的 Z 基底 DEM Σ先验：IBM 60.22（noisy）→ 58.80（paper）→ 57.85（flat），
 Strikis 62.02 → 60.62 → 58.28，即 paper 下 Strikis 仍多 3.1%，flat 下多 0.7%。
 
-细节：`paper` 只去掉**数据比特**在其制备结束（含）之前、最终读出所在层（含）之后的噪声；辅助比特的噪声一律保留，
+细节：`paper` 只去掉**数据比特**在其制备结束（含）之前、最终读出所在层（含）之后的噪声。**评估器 v2（auditor G1 L2-1）：
+“制备结束”= 数据比特第一个双比特门之前的最后一个复位所在层**；复位之后的单比特门（含 `I`）与空闲照常带噪声（旧版把
+“首个双比特门之前的复位 + 单比特门”整段算作制备，在第一个 CNOT 前插一个 `I` 就能把复位后的空闲噪声去掉，Σ先验 −2.4%）。
+回归 `tests/test_g1_attacks.py::test_L2_1_*`。辅助比特的噪声一律保留，
 包括第一轮前预先复位的辅助比特（IBM 调度第 0 层的 Z 辅助比特复位翻转）。auditor 的 paper1 变体把第 0 层整层的噪声都去掉了，
 所以本实现每 shot 多 72 个复位翻转位置（相当于首轮的测量错误），影响很小。`noisy` 要求每个数据比特的制备恰好是一个
 basis 基复位（R / RX），否则报错。
@@ -329,8 +382,10 @@ res.components["4"], ["12"]     # 两次子采样的完整 L2Result（种子 See
 - **置信区间**：两个独立二项样本，两个参数 (ε, B)，模型恰好饱和。对 B 取剖面似然，
   `{ε : max_B LL(ε, B) ≥ LL_max − ln F}`，F = `likelihood_factor`（默认 1000），按 Wilks（1 个感兴趣参数）对应 √(2 ln F) σ，
   与 `stats.py` 的约定一致。数值上与 delta 法吻合（100/1000 与 200/1000 时 95% 区间两端差 <5%），模拟 200 次的 95% 区间覆盖率
-  在 0.90–0.99 之间（测试；独立的 300 次模拟为 95.3%）。low 截断到 0（原始值在 `diff.low_unclipped`）；P(r2) < P(r1) 时点估计
-  为负并给出警告。
+  在 0.90–0.99 之间（测试；独立的 300 次模拟为 95.3%）。**评估器 v2（auditor G1 L2-2）**：区间与 [0, ∞) 取交，low、high 分别
+  截断到 0（原始值在 `diff.low_unclipped` / `diff.high_unclipped`），不再出现 low > high 的倒置区间；P(r2) < P(r1) 时点估计为负，
+  `diff.valid = False` 并给出警告，pipeline 把它判为失败（`rejected_l2`），不给分。两个轮数的电路只能由评估器从同一调度生成
+  （§9.2），候选无法单独操纵短轮数电路的边界。
 
 **表面码验证**（d=3，sd6，p=0.005，pymatching，每个 sector ≥2000 次失败；`results/evaluator-fix-diff/surface_d3_p0.005.json`）：
 
@@ -449,27 +504,174 @@ X/Z 同时失败 0.138，独立时应为 0.091，正相关与 auditor 的发现�
   记录了口径）。
 - `flat` 只去掉数据比特的单比特噪声；流水电路首末轮 CNOT 之间的数据等待和辅助比特的灌入 / 排空噪声仍在，不是完全拉平。
 
-## 8. 成绩单（`leaderboard.py`）
+## 8. 成绩单（`leaderboard.py`，评估器 v2）
+
+**只有 `pipeline.evaluate` 能写成绩单。** 修复 auditor G1 LB1–LB7：
+
+| 攻击 | v2 的处理 |
+|---|---|
+| LB1 `sample_l2(rounds=30)` 用在 3 轮电路上 | 结构性排除：候选不能给轮数；轮数来自任务，电路由评估器按该轮数生成，L0 实测每个生成元的测量次数并核对（`rounds_verified`），记录与 verify 都检查 |
+| LB2 伪造 L0 / L2 字典 | `submit` / `build_entry` 删除（调用即 `PermissionError`）；私有 `_append` 只认 pipeline 的凭证对象；记录由 pipeline 自己组装；即使拿到凭证，`entry_problems` 也会拒绝不一致的记录（L0 未过、分数 ≠ 由计数重算的每轮值、失败数 < 1000、距离低于门槛……） |
+| LB3 非打分噪声模型 | 任务只允许 `SCORING_MODELS = ("sd6",)`；记录的噪声必须等于任务的 |
+| LB4 schedule_hash 与采样电路不符 | schedule_hash 由评估器对规范化调度计算；记录保存调度本身、每个轮数的电路哈希；verify 从调度重新生成电路核对，L2 的 candidate_hash 必须等于它 |
+| LB5 删末行 / LB6 改后重算整条链 | 链本身发现不了（写明）。外部锚点：`anchor_line()` 写进 git commit message；`verify_leaderboard()` 对默认路径自动读 git 历史里的全部锚点，锚定过的第 N 行必须仍在且哈希不变 |
+| LB7 不同 p / 解码器 / 码混榜 | 记录带 task_id + task_hash；p、噪声、解码器参数、停止规则、码哈希都必须等于任务；`table(task_id)` 只看一个任务 |
+| L2-4 换种子挑结果、小样本 | 任务的停止规则要求每个 sector ≥ 1000 次失败，预算耗尽仍不足的结果 `insufficient_statistics`、不上榜；同一调度的重复提交记 `attempt`，`table` 只按第一次提交排名 |
 
 ```python
-from evaluators.leaderboard import build_entry, submit, verify_leaderboard
-entry = build_entry("cand-0007", code=code, circuits={"Z": cz, "X": cx}, l0_report=l0_report,
-                    distance_upper_bound=l0_report.d_circ, l2=res)
-rec = submit(entry)                 # 默认追加到 research/leaderboard.jsonl；测试必须传临时路径
-assert verify_leaderboard() == []
+from evaluators import leaderboard as lb
+lb.table("gross-sd6-p4e-3")                 # 一个任务的排名（同一调度只按第一次提交）
+lb.verify_leaderboard()                     # 哈希链 + git 锚点 + 每条记录的语义核对（会重新生成电路），[] = 完整
+lb.anchor_line()                            # 'leaderboard-anchor: lines=N head=<sha256>'，写进 commit message
+lb.reproduce_entry(rec)                     # 按记录的 (task, code, schedule, seed) 重跑，L2 计数必须逐位相同（慢，抽查用）
 ```
 
-- 每行字段：`candidate_id`、`code`（n、k、行数、校验矩阵 sha256）、`schedule_hash`（两条无噪声候选电路的 sha256）、
-  `noise_model`、`p`、`rounds`、`boundary`、`boundary_detail`（口径、分数字段 `l2.per_round` 的定义；diff 另记两个轮数和子采样口径，
-  2026-10-02 新增）、`l0`（passed、d_circ、各检查状态、各基底 d_circ）、`distance_upper_bound`、
-  `l2`（完整 L2Result）、`extra`，以及由 `submit` 自动填写的 `time`（UTC）、`evaluator`（`scripts/freeze_evaluator.py`
-  的同一哈希函数算出的评估器哈希、是否冻结、是否与 FROZEN 记录一致）、`git`（commit、evaluators/ 是否有未提交修改）、
-  `versions`、`prev_hash`、`entry_hash`。
-- **只追加**：`open(..., "a+")` + `fcntl.flock` 排他锁，锁内读最后一行取 `prev_hash`、追加、`fsync`。文件不以换行结尾
-  （疑似被截断）或最后一行不是合法记录时拒绝追加。
-- **哈希链**：`entry_hash` = 除自身外所有字段规范 JSON 的 sha256；`prev_hash` = 上一行的 `entry_hash`（首行 64 个 0）。
-  `verify_leaderboard` 能发现改写任何一行或删行。注意哈希链防的是“事后悄悄改”，不防“有人连同后续所有行一起重算”；
-  配合 git 历史使用。
-- 拒绝：缺必备字段；调用方自带系统字段（如伪造 `evaluator`）；L0 未通过；L2 结果标注为近似。
-- 测试（`tests/test_leaderboard.py`）：追加与哈希链、评估器哈希与 `freeze_evaluator.py hash` 一致、篡改 / 删行 / 截断被发现、
-  6 个进程并发各写 5 行不损坏，并检查真正的 `research/leaderboard.jsonl` 在测试前后不变。
+记录字段：`candidate_id`、`task_id`、`task_hash`、`purpose`、`code`（规范化 spec、n、k、校验矩阵 sha256）、`schedule`
+（规范化调度）、`schedule_hash`、`circuit_hashes`（轮数 → 两个基底无噪声电路的 sha256）、`rounds_verified`、`noise_model`、
+`p`、`rounds`、`boundary`、`boundary_options`、`seed`、`l0`（每次 L0 的 passed / d_circ / 各项状态）、`distance_upper_bound`、
+`score`（每轮 P_any 与每逻辑比特每轮值）、`l2`（完整 L2Result），以及系统字段 `seq`、`attempt`、`time`、`evaluator`
+（哈希、是否冻结、是否与冻结清单一致）、`git`、`versions`、`prev_hash`、`entry_hash`。
+
+写入规则：
+- 只追加；`fcntl.flock` 排他锁内读末行取 `prev_hash`、`seq`，追加、fsync；末行不完整（不以换行结尾）则拒绝追加。
+- 正式成绩单（默认路径）只接受 `purpose="score"` 的任务，且评估器必须**已冻结并与清单一致**；自检任务（`selftest-*`）永远
+  不进正式成绩单。测试一律写临时路径（有测试检查正式文件前后不变）。
+- 库版本必须等于 `tasks.PINNED_VERSIONS`，否则不写榜。
+
+**外部锚点（PI / lead 的操作约定）**：每次有新成绩写进 `research/leaderboard.jsonl` 后提交 git，并在 commit message
+里带上锚点：
+
+```bash
+uv run python -c "from evaluators.leaderboard import anchor_line; print(anchor_line())"
+git add research/leaderboard.jsonl && git commit -m "leaderboard: <说明>
+
+<上一条命令输出的 leaderboard-anchor: lines=N head=...>"
+```
+
+**防伪的边界**：凭证与语义核对挡住的是“绕过入口、拼字典”的误用和数字不一致的伪造；与评估器在同一进程里的恶意代码
+仍可以构造计数自洽的假记录。这一层靠：搜索程序在沙箱里运行，只把调度 JSON 交给评估器进程；auditor 用 `reproduce_entry`
+抽查（同一种子逐位复现）；git 锚点防事后改写。
+
+## 9. 候选调度、评估入口与任务注册表（评估器 v2）
+
+### 9.1 调度规范与模板（`candidate.py`）
+
+候选**只提交调度，不提交电路**。JSON 规范（完整说明见 `candidate.py` 文件头）：
+
+```json
+{"format": "qec-schedule/v1", "period": 8,
+ "x_checks": [{"prep": 0, "meas": 7, "cnots": [[data_col, t], ...]}, ...],   // 每个 HX 行一项（含冗余行）
+ "z_checks": [{"prep": 7, "meas": 6, "cnots": [[data_col, t], ...]}, ...],   // 每个 HZ 行一项
+ "name": "可选，不参与哈希"}
+```
+
+- 时间步是周期内的 0..D−1，**按周期循环解释**：从 prep 循环读，CNOT 必须严格在 prep 之后、meas 之前；窗口可以跨越周期边界
+  （IBM 的 Z 校验、Strikis 的流水电路）。每个校验的窗口短于一个周期（一个辅助比特同一时刻只服务一个实例）。
+- 能表达：IBM depth-8（`baselines.schedule.ibm_depth8` 转换，测试）、Strikis Fig. 12（跨周期流水，测试）、逐检查完全自由的
+  调度（每个校验自己的 prep / CNOT / meas 时间与窗口长度，测试用 Steane 码）。转换器见 `tests/schedule_helpers.py:from_baseline`。
+- 模板强制约束（违反即拒绝，逐条可读诊断）：每个周期内每个校验恰好一次“复位辅助比特 → 与其全部数据比特各一次 CNOT →
+  测量”；cnots 的列集合 = 该行支撑；同一时间步每个比特至多一个操作；**所有行（含冗余行）每轮都测**（PI 对 L0-2 答复前）；
+  数据比特只在第 0 层复位、最后单独一层读出；不允许任何其他字段（噪声、门、轮数、detector、observable、电路一律拒绝）。
+- 电路生成（`memory_circuit(spec, code, basis, rounds)`）：比特布局、展开规则（与 `baselines.circuit.unroll_schedule` 相同，
+  代码搬进评估器，评估器不 import baselines）、detector（basis 型：首轮、相邻轮、末轮与读出）、observable（评估器从
+  HX/HZ 计算的 k 个逻辑算符）全部由评估器决定。噪声之后由 `noise.add_noise` 按任务加。
+- **与 baselines 逐机制一致**（`tests/test_candidate.py`）：IBM 调度生成的电路加 sd6 后，DEM 与 `baselines.circuit.memory_circuit`
+  （E-002 的电路生成器，噪声口径相同）逐机制相同（合并相同症状后最大概率差 < 1e-12；1、3 轮，两个基底）；Strikis 调度与
+  `pipelined_memory_circuit`（E-003）同样逐机制相同。
+- `ScheduleSpec.hash()`：规范化调度的 sha256（全局时间平移不改变生成的电路，取字典序最小的平移代表；name 不参与）。
+
+### 9.2 评估入口（`pipeline.py`）
+
+`evaluate(task_id, code_spec, schedule, *, seed, candidate_id=None, leaderboard_path=None, submit=True) -> Report`：
+
+1. 取任务（导入时记录注册表哈希，运行时被改动的任务对象拒绝评估）；按任务码族把 `code_spec` 变成 `CSSCode`（fixed 码的任务传 None）。
+2. 解析、校验调度 → 不合法：`rejected_schedule`，`Report.diagnostics` 逐条列出。
+3. 评估器生成每个需要的轮数的两个基底电路：打分轮数（paper：`rounds`；diff：`diff_rounds` 与 `rounds`）与距离轮数
+   （`l0.distance_rounds`；gross 12 轮算距离太慢，用 3 轮电路，同一调度同一模板）。
+4. L0：每个打分轮数都过完整 L0（门集 {R, RX, M, MX, CX}、连接 = Tanner 图、比特数、轮数 = 该轮数），距离门槛在距离轮数的
+   电路上检查；并核对 L0 实测的测量次数 = 轮数。任一不过：`rejected_l0`，附 L0 诊断。
+5. 分层漏斗（`task.funnel.tiers`，见 §9.3）：每层一次小预算 paper 采样，不达标 `filtered`。
+6. L2：任务的噪声、p、解码器、边界、停止规则、`seed`；diff 的两个子采样都用评估器生成的电路。diff 估计无效（负 / 饱和）：
+   `rejected_l2`。否则 `scored`，`score.per_round_P_any`（{best, low, high}）与 `per_round_per_logical`（÷k，H-003 指标 B）。
+7. 上榜资格：每个 sector（diff 时两次运行各自）≥ 1000 次失败，否则 `insufficient_statistics`；库版本一致；正式成绩单还要求
+   评估器已冻结且完整、任务 `purpose="score"`。满足才由 pipeline 写入（§8）。
+
+`Report.to_text()` 给出状态、诊断、每次 L0 的逐项结果、漏斗决定、分数和不上榜的原因，可直接喂给 LLM。
+状态集合：`scored`、`rejected_code`、`rejected_schedule`、`rejected_l0`、`filtered`、`rejected_l2`、`insufficient_statistics`。
+自检任务上的耗时（d=3 表面码，3 worker，机器满载时）：paper 约 18 s，diff 约 19 s。gross 任务（IBM / Strikis 调度）
+L0（12 轮两个基底 + 3 轮距离门槛 10）加一个 50 shot 的 L2 约 7–7.5 分钟（3 worker，机器被 E-004 占满时；
+慢测试 `tests/test_pipeline.py::test_gross_task_end_to_end_small_budget`，两者 d_circ 上界都 ≥ 10、实测轮数 12）。
+正式 L2（每 sector ≥1000 次失败）的代价远大于此，这正是漏斗要解决的问题（§9.3）。
+
+### 9.3 任务注册表（`tasks.py`）
+
+`TASKS` 就是文件里的列表，随评估器冻结；没有运行时注册接口（新增 / 修改任务 = 修改 evaluators/ = 重新冻结）。
+`Task.validate()` 在导入时检查：噪声 ∈ SCORING_MODELS（只有 sd6）、边界 ∈ {paper, diff}、`stop.min_sector_errors ≥ 1000`、
+`num_workers ≤ 3`、`allow_redundant_row_omission` 为 False。
+
+| task_id | 码 | 噪声 / p | 解码器 | 边界 / 轮数 | 停止规则 | L0 | 漏斗 |
+|---|---|---|---|---|---|---|---|
+| `gross-sd6-p4e-3` | gross [[144,12,12]]（固定，BB l=12 m=6 A=x³+y+y² B=y³+x+x²） | sd6 / 4e-3 | BP-OSD，IBM 参数 | paper / 12 | 每 sector ≥1000，max_shots 2e6，batch 25 | d_circ 上界 ≥ 10（3 轮电路，默认预算，暂定，待 PI 确认） | **待 E-004**（空） |
+| `selftest-surface-d3-sd6-paper` | 旋转表面码 d=3 | sd6 / 5e-3 | pymatching | paper / 3 | 每 sector ≥1000 | ≥ 3 | 无 |
+| `selftest-surface-d3-sd6-diff` | 同上 | 同上 | pymatching | diff 3→9（inner paper） | 每 sector ≥1000（两次运行各自） | ≥ 3 | 无 |
+
+- 码族：`{"kind": "bb", "fixed": {...}}` 或 `{"kind": "bb", "constraints": {"max_n", "max_row_weight", "min_k"}}`
+  （H-003 自由搜码时用；thickness ≤ 2 还没有在评估器里检查，见 §11），以及自检用的 `rotated_surface`。BB 码与
+  `baselines/bb_code.py` 逐元素相同（测试）。
+- **分层漏斗（留成配置，等 E-004）**：`funnel = {"status": ..., "tiers": [{"name", "stop": {StopRule 覆盖}, 
+  "promote_if_per_round_P_any_below": 阈值 | None}, ...]}`。每层在打分轮数上做一次 paper 采样（种子由 seed 与层号派生），
+  每轮 P_any 的区间下端 ≥ 阈值则 `filtered`；全部通过才做正式 L2。gross 任务目前 `tiers = []`（直接做正式 L2，代价很高：
+  p=4e-3 下每 sector 1000 次失败约需 10⁵ shot × 数 CPU 秒）。E-004 给出代理指标的保真度后，由 lead 填层级与预算并重新冻结。
+
+## 10. 冻结流程（PI 执行；agent 不得执行 freeze）
+
+`scripts/freeze_evaluator.py`（修复 auditor G1 F3–F6）：
+- 哈希范围：evaluators/ 下**全部文件**（任何扩展名）+ `scripts/freeze_evaluator.py` + `.claude/hooks/guard_frozen.py` +
+  `pyproject.toml` + `uv.lock` + 评估器测试（`EXTRA_FILES`：`tests/test_{l0,l2,noise,distance,leaderboard,stats,codes,candidate,pipeline,g1_attacks,freeze}.py`、
+  `tests/{conftest,memory_builder,schedule_helpers}.py`）。`uv run python scripts/freeze_evaluator.py list` 列出全部。
+- 清单外出现的任何文件 = 篡改；`.so` / `.pyd` / `.dylib`、符号链接、`__pycache__` 里的非 .pyc 文件一律拒绝；
+  `__pycache__/*.pyc` 只有在“与对应受保护源文件重新编译的代码对象逐项相等”时才允许（伪造 pyc 头部的 mtime / size 无用）。
+  有这些文件时 `freeze` 拒绝执行。
+- 关键库固定到 `==`（pyproject.toml：stim 1.16.0、sinter 1.16.0、ldpc 2.4.1、pymatching 2.4.0、numpy 2.2.6、scipy 1.18.1、
+  ortools 9.15.6755、python-sat 1.9.dev15），与 `tasks.PINNED_VERSIONS` 一致（测试），pipeline 写榜前核对已安装版本。
+- `freeze` 写 `evaluators/MANIFEST.sha256`、`evaluators/FROZEN`，并在 evaluators/ 之外写 `research/evaluator_freeze.sha256`
+  （`shasum -a 256 -c` 格式）与 `research/evaluator_freeze.json`（哈希、文件数、时间、库版本）。`verify` 核对四者一致。
+- hook（`.claude/hooks/guard_frozen.py`，F1）：路径解析符号链接后**大小写不敏感**比较；冻结后禁止编辑 evaluators/ 与清单里的
+  全部文件，硬链接也拒绝；成绩单与冻结记录永远不能由 agent 编辑。hook 只拦截 Edit / Write / NotebookEdit，Bash 写不经过它（F2）。
+
+**PI 冻结时执行的命令**（agent 不执行；按顺序）：
+
+```bash
+cd /Users/ephemeral/Desktop/qec-ai-search
+find evaluators -name __pycache__ -type d -prune -exec rm -r {} +     # 清掉字节码缓存（可选；verify 会核对它们）
+uv sync --locked                                                      # 环境与 uv.lock 一致
+uv run pytest tests -q                                                # 全部测试通过
+uv run python scripts/freeze_evaluator.py freeze
+git add evaluators/FROZEN evaluators/MANIFEST.sha256 research/evaluator_freeze.sha256 research/evaluator_freeze.json
+git commit -m "冻结评估器 <evaluator_hash>"
+git tag evaluator-frozen-<evaluator_hash>                             # 外部锚点（可选）
+chmod -R a-w evaluators                                               # 文件系统层面锁定（Python 也无法再写 __pycache__）
+chflags -R uchg evaluators                                            # macOS：用户不可变标志（解锁：chflags -R nouchg evaluators）
+```
+
+之后每次实验前：`uv run python scripts/freeze_evaluator.py verify`；独立于本脚本的校验：
+`shasum -a 256 -c research/evaluator_freeze.sha256`，再用 `git diff evaluator-frozen-<hash> -- research/evaluator_freeze.*`
+确认冻结记录没被改；清单外新文件：`comm -13 <(cut -d' ' -f3- research/evaluator_freeze.sha256 | grep '^evaluators/' | sort) <(find evaluators -type f ! -path '*/__pycache__/*' ! -name FROZEN ! -name MANIFEST.sha256 | sort)`。
+建议（需改 `.claude/settings.json`，本次未改）：给 Bash 加一个 PreToolUse hook，拒绝提到 `evaluators/`、`leaderboard.jsonl` 的写命令
+（只能减少误操作，挡不住故意绕过）；并考虑把 `.claude/settings.json` 也纳入冻结清单（它决定 hook 是否生效）。
+
+## 11. 已知局限（评估器 v2）
+
+- 能改评估器的人也能改冻结脚本，脚本自报“完整”不是证明；外部锚点是 git 里的 `research/evaluator_freeze.*`、git tag 与
+  `shasum -c`，以及文件系统锁。
+- 写榜凭证只防误用；同进程恶意代码可伪造计数自洽的记录，需沙箱 + `reproduce_entry` 抽查 + git 锚点（§8）。
+- 哈希链本身挡不住删末行与整链重算，需要每次写榜后把锚点写进 commit message（§8）；`verify_leaderboard` 只能核对已有锚点之前的部分。
+- 同一调度换种子重交只记 attempt、按第一次排名；但候选可以对调度做无关紧要的改动（不同的哈希）来“重抽”。每 sector ≥1000 次
+  失败时单次抽样的相对误差约 ±3–6%，这一操纵的收益有限，但没有被完全排除。
+- 距离仍只是上界（§3.1），且 gross 任务在 3 轮电路上算距离（12 轮太慢）；门槛 10 是暂定值。
+- 码族约束只实现了 n、行重、k；H-003 的 thickness ≤ 2 没有在评估器里检查（`search/codes/constraints.py` 有实现，未搬进来）。
+- si1000 不能用于打分（N2 未修，CX→CZ+H 编译约定未定）。
+- L0-2（冗余行可否不测）等 PI 裁决；在此之前模板要求每行每轮都测。
+- 漏斗层级与预算等 E-004。
+- `__pycache__` 校验依赖“同一 Python 版本重新编译得到相等的代码对象”；版本不同或源文件改过会报错（偏保守：删掉 __pycache__ 即可）。
+- 底层 `check_l0` / `sample_l2` 仍接受任意电路（诊断用）；它们的结果不能上榜。原始电路上 L0 的已知局限见 §5。

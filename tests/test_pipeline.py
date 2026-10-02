@@ -175,6 +175,28 @@ def test_selftest_never_written_to_official_board(monkeypatch):
     assert any("never written to the official leaderboard" in x for x in rep.ineligible_reasons)
 
 
+@pytest.mark.slow
+@pytest.mark.parametrize("kind", ["ibm", "strikis"])
+def test_gross_task_end_to_end_small_budget(kind, tmp_path):
+    """gross 示例任务的完整流程（L0 12 轮 + 3 轮距离门槛 10 + L2），只把 L2 预算缩到很小：
+    IBM 与 Strikis 调度都通过 L0（d_circ 上界 ≥ 10），结果因样本太小不上榜。"""
+    pytest.importorskip("baselines.bb_code")
+    from baselines.bb_code import BBCode
+    from baselines.gross import parse_poly
+    from baselines.schedule import ibm_depth8
+    from baselines.strikis import strikis_fig12
+    from schedule_helpers import from_baseline
+    code = BBCode(12, 6, parse_poly(["x^3", "y", "y^2"]), parse_poly(["y^3", "x", "x^2"]))
+    sched = ibm_depth8(code) if kind == "ibm" else strikis_fig12(code)[0]
+    t = dataclasses.replace(tasks.get_task("gross-sd6-p4e-3"),
+                            stop={"max_shots": 50, "max_errors": 1000, "min_sector_errors": 1000, "batch_size": 25})
+    rep = pipeline._evaluate_task(t, None, from_baseline(sched).to_dict(), seed=5, leaderboard_path=tmp_path / "b")
+    assert rep.status == "insufficient_statistics", rep.to_text()
+    assert rep.distance_upper_bound is not None and rep.distance_upper_bound >= 10
+    assert rep.rounds_verified == {"12": {"Z": [12], "X": [12]}}
+    assert not (tmp_path / "b").exists()
+
+
 def test_funnel_tier_can_filter(tmp_path):
     """分层漏斗接口（配置等 E-004）：一层小预算采样，门槛不达标就停止。"""
     _, spec = surface_schedule(3)

@@ -87,3 +87,41 @@
   6. **中 L0-2 冗余校验行**：冗余行可以每轮不测而仍被视为测过（需 PI 决定规则）。
   7. **中 L2-4**：小样本下换种子挑结果（最好/最差 0.69），成绩单只给警告。
   8. **高 F1–F6 冻结机制**：hook 大小写敏感；Bash 写绕过 hook；伪造 `.pyc` / 同名 `.so` 不被哈希发现；冻结脚本自身、`uv.lock`、库版本不在哈希范围内。
+  状态：fixed-pending-audit（评估器 v2，分支 worktree-agent-ad3344517947afa89，未合并，未冻结）
+  **修复说明（2026-10-02，评估器 v2 agent）**——总体设计：候选**只提交调度 JSON，不提交电路**（`evaluators/candidate.py`），
+  评估器用固定模板生成电路；唯一入口 `evaluators/pipeline.py:evaluate(task_id, code_spec, schedule, *, seed)`；任务注册表
+  `evaluators/tasks.py`；只有 pipeline 能写成绩单。L0 保留为第二道防线。逐项：
+  1. **A1/A1b 伪轮次** → 修复 + 结构性排除。模板电路每个校验每轮恰好一次“复位 → 全部 CNOT → 测量”，数据读出单独在最后一层，
+     候选无法写出重测。L0 `stabilizer_coverage` 新增重提取判据（README §3.2.1）：相邻窗口代表元之差的 detecting region 在
+     [窗口 j−1 结束, 窗口 j 结束) 内某时刻限制到数据比特上恰为 s（不成立时模掉窗口内确定奇偶再判）；`data_layout` 拒绝最终数据
+     读出之后的任何测量。回归 `tests/test_g1_attacks.py::test_A1_fake_rounds_rejected[3-3 / 5-10]`、`test_A1b_*`（含
+     min_circuit_distance=d 的配置），诚实电路（表面码、Steane、[[4,2,2]] 流水、冗余行、gross IBM / Strikis 3 / 12 轮）仍通过。
+     README 中“一轮测两次另一轮不测无害”的错误说法已改正。
+  2. **LB1–LB7 成绩单** → 修复 + 结构性排除。`leaderboard.submit` / `build_entry` 删除（调用报 PermissionError），私有 `_append`
+     只认 pipeline 的凭证对象，记录由 pipeline 组装；记录带 task_id / task_hash、规范化调度及评估器算的 schedule_hash、每个轮数的
+     电路哈希、L0 实测轮数（rounds_verified）；`entry_problems` 在写入前与 `verify_leaderboard` 时核对任务一致性（噪声、p、轮数、
+     边界、解码器、停止规则、码哈希）、从调度重新生成电路核对哈希、L2 采样电路 = 评估器电路、分数可由计数重算、每 sector ≥1000
+     次失败。LB5/LB6：链本身仍挡不住，新增 git 外部锚点（`anchor_line()` 写进 commit message，`verify_leaderboard()` 自动读取
+     git 历史中的锚点核对）。LB7：`table(task_id)` 按任务分榜。回归 `tests/test_leaderboard.py`（19 种伪造变体，即使持有凭证也被拒；
+     删末行 / 整链重算在有锚点时被发现）、`tests/test_pipeline.py`（候选给 rounds / noise 字段被拒）。
+     局限（已写 README §8/§11）：同进程恶意代码可伪造计数自洽的记录，需沙箱 + `reproduce_entry` 抽查。
+  3. **N1/N2 SI1000** → N1 修复：有隐式空闲噪声且 I 门噪声 ≠ 空闲噪声的模型（si1000）里 `I` 按空闲处理（空闲 + ResonatorIdle），
+     回归 `test_N1_identity_gate_no_longer_dodges_resonator_idle`。N2 未修 → si1000 **移出打分模型**（`SCORING_MODELS = ("sd6",)`），
+     任务注册表只允许 sd6（`Task.validate`）。
+  4. **L2-2 diff** → 修复 + 结构性排除。diff 的两个轮数的电路都由评估器从同一调度生成且都过 L0；`diff_per_round` 两端分别截断
+     （不再倒置），新增 `valid` 标记，负估计在 pipeline 判 `rejected_l2`。回归 `test_diff_selftest_*`、`test_negative_diff_estimate_is_a_failure`、
+     `tests/test_l2.py::test_diff_per_round_closed_form_and_interval`。
+  5. **L2-1 paper 边界** → 修复：制备结束 = 首个双比特门之前最后一个复位所在层，复位后的 I / 单比特门 / 空闲照常带噪声；模板里也没有
+     I 门。回归 `test_L2_1_identity_before_first_cnot_no_longer_removes_noise`（I 填充前后 Σ先验相等）。副作用：两个基底复位之后的
+     单比特门必须相同（R+H 对 R+I 的组合现在被拒，test_l2 已相应修改）。
+  6. **L0-2 冗余行** → 结构性排除（待 PI 裁决）：模板要求每一行（含冗余行）每轮都测，少列一行即拒；任务字段
+     `allow_redundant_row_omission` 在裁决前不能为 True。原始电路上的 L0 仍接受“冗余行不测”，写进 README §5 局限。
+  7. **L2-4 选择性报告 / 小样本** → 修复：任务停止规则要求每 sector ≥1000 次失败，预算耗尽仍不足 → `insufficient_statistics`，
+     不上榜；同一调度重复提交记 attempt，排名只用第一次。局限：对调度做无关改动可“重抽”（±3–6%），写进 README §11。
+  8. **F1–F6 冻结机制** → 修复（F2 只能缓解）。哈希覆盖 evaluators/ 全部文件 + 冻结脚本 + hook + pyproject.toml + uv.lock + 评估器测试；
+     清单外文件、.so/.pyd/.dylib、符号链接即篡改；__pycache__/*.pyc 必须与对应源文件重新编译的代码对象逐项相等（F3）；冻结记录另写
+     `research/evaluator_freeze.{sha256,json}`（shasum -c 可独立校验）；hook 解析符号链接、大小写不敏感、拒绝硬链接（F1）；关键库
+     `==` 固定并与 `tasks.PINNED_VERSIONS` 一致，pipeline 写榜前核对（F6）；正式成绩单只接受已冻结且完整的评估器。F2（Bash 绕过 hook）
+     未改 settings.json，冻结后靠 PI 用 chmod / chflags 锁目录（README §10 列出命令，未执行）。回归 `tests/test_freeze.py`。
+  - 另：模板电路与 baselines 逐机制一致（IBM、Strikis，1 / 3 轮，两个基底，`tests/test_candidate.py`）；示例任务 `gross-sd6-p4e-3`
+    的漏斗层级与预算为空，等 E-004；距离门槛 10 暂定。需要 auditor 再审。
