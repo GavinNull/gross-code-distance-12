@@ -1,0 +1,16 @@
+id: E-003-strikis-gross
+hypothesis: H-003（提供“最好已知电路”对照）
+question: 复现 Strikis–Browne–Beverland（arXiv 2603.05481）为 gross code 给出的猜想 d_circ=11 电路，并在与 E-002 相同的管线下比较 IBM 电路。
+prediction: >
+  （跑前写下）在能找到的最强上界搜索下，该电路的最小不可检测逻辑错误权重为 11（找不到 ≤10 的见证）；
+  在 E-002 的项目内部口径、p=0.003–0.005 下，每轮逻辑错误率低于 IBM 电路，比值在 0.3–0.7 之间
+  （依据：d_circ 10→11 使主导项从 p^5 变为 p^6，p 较大时优势会缩小）。
+command: uv run python -m baselines.strikis --config experiments/E-003-strikis-gross.yaml
+code: {family: bivariate_bicycle, l: 12, m: 6, A: [x^3, y, y^2], B: [y^3, x, x^2]}
+schedule: strikis_conjectured_d11
+rounds: 12
+noise: {model: e002_internal, p: [0.003, 0.004, 0.005]}
+decoder: bposd   # 与 E-002 完全相同的参数
+budget: {cpu_hours: 3, llm_tokens: 0, num_workers: 4}
+max_errors: 200
+stop_rule: 每个基底每点 ≥200 次逻辑错误或 5e4 shots
