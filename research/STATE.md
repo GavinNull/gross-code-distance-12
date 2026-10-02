@@ -8,10 +8,9 @@
 
 ## 待人决策
 
-1. **研究方向调整**（2026-10-02 提出，建议书待 interleaved 新颖性调研完成后补全）：
-   原 H-001（gross code 非交错调度改进）已被 arXiv 2603.05481 / 2601.12509 覆盖。
-   lead 初步倾向：主攻“交错 / 多辅助比特电路让 gross code 达到 d_circ=12”（已证明非交错电路做不到），
-   H-002（LLM vs 经典搜索）作为方法论贡献。正在核实该方向是否空白。
+1. **研究方向调整** → 建议书：`research/proposals/2026-10-02-方向调整.md`
+   建议：攻 2603.05481 原文列出的开放问题“交错电路能否让 gross code 达到 d_circ=12”；
+   第一步先做公平基准 + 精确电路距离验证（含独立验证 Strikis 的 d_circ=11 猜想），H-002 作为方法论贡献。
 
 ## 已确认结果
 
@@ -24,7 +23,7 @@
 - auditor：独立复现 E-001/E-001b → `research/audits/2026-10-02-E-001.md`
 - 评估器构建（P1 提前开工，未冻结）：噪声模型 + L0 合法性检查 + 攻击测试 → `evaluators/`、`tests/`
 - LLM 进化搜索框架（mock LLM + 玩具问题，不花 token）→ `search/llm_evolve/`
-- lit-scout #3：交错电路 / d_circ=12 / 码+调度联合搜索的新颖性核查 → `research/literature/novelty-interleaved-circuits.md`
+- ~~lit-scout #3~~ 已完成：交错电路达到 d_circ=12 属于空白（证据中等），开放问题已在原文核实
 - lit-scout #2：噪声模型精确定义、E-001 阈值文献核对、qLDPC 码目录 → `research/literature/`
 - ~~E-001 表面码 baseline~~ 已完成 → `research/journal/2026-10-02-E-001-surface-baseline.md`：流水线可用，阈值约 1.2%；初始预测因噪声口径错误未命中
 
@@ -38,6 +37,8 @@
 4. 2 和 3 完成后写 G0 关卡报告。
 
 ## 已知风险 / 备注
+
+- 待办：E-002 完成后，写脚本判定 IBM 原调度是否交错（影响方向建议）。
 
 - 文献数字目前均为记忆整理，未核实。
 - E-001 教训：噪声模型口径决定阈值数字。gross code 对比必须使用与 IBM 论文相同的噪声定义，并在评估器中钉死。
