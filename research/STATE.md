@@ -8,6 +8,7 @@
 
 ## 待人决策
 
+0. **是否允许下载作者公开的 Strikis 电路文件**（Zenodo doi:10.5281/zenodo.18853600，STIM_LRCircuits.zip，3.2 MB，stim 文本格式）用于逐门核对 E-003
 1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。
 2. （未答复）SI1000 ResonatorIdle 的处理：lead 选择“不作用于正在做门的比特”，PI 未表态，暂按此执行。
 
@@ -19,7 +20,7 @@
 
 - 评估器·距离模块：修复 L0 距离漏报，并入 BP-OSD 见证搜索；测试下界证明（ILP/SAT）的可行性 → `evaluators/distance.py`
 - ~~评估器·L2 + 成绩单~~ 已完成（22 测试通过，lead 复跑）：X/Z 真联合采样；gross code p=0.006 paper 口径 0.0508（论文 0.0511）；独立近似偏高约 15%；seed 可复现（与 worker 数无关）；leaderboard 带哈希链和文件锁
-- E-003：复现 Strikis d_circ=11 电路，作为“最好已知电路”对照 → `experiments/E-003-strikis-gross.yaml`
+- ~~E-003 Strikis 电路~~ 已完成（待 auditor）：距离上界 11（IBM 为 10），**但逻辑错误率比 IBM 高约 1.3 倍**（p=0.004–0.005，6/6 点同向，与预测相反）。可能原因：电路复现、解码器偏向、边界层数。L0 误拒该电路（已登记）
 - ~~lit-scout：联合设计竞争格局~~ 已完成，H-003 已定稿（指标：Q=2n/k 与每逻辑比特 LER，按已知码包络线判定）。最近的竞争者是 OmniQEC（LLM AI 科学家，调度固定）
 - 码族枚举与筛选工具（BB/2BGA，含 IBM 表 3 复现与小规模试运行）→ `search/codes/`
 
