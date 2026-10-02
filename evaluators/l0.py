@@ -444,6 +444,14 @@ def _check_data_layout(parsed: _Parsed, data: list[int], basis: str) -> tuple[Ch
             final_rec[q] = last.meas[0]
             final_ops.add(id(last))
             final_layers.append(last.layer)
+    if not issues and final_layers:
+        # 评估器 v2（auditor G1 A1b）：最终数据读出之后不允许再有任何测量（例如读出后重测辅助比特冒充轮次）
+        first_final = min(final_layers)
+        late = [op for op in parsed.ops if op.meas and op.layer > first_final]
+        if late:
+            desc = [f"{op.name} on {list(op.qubits)} in layer {op.layer}" for op in late[:6]]
+            issues.append(f"{len(late)} measurement(s) after the final data readout (layer {first_final}): "
+                          + _fmt_list(desc, 6) + "; the final data readout must be the last measurement layer")
     if issues:
         return CheckResult("data_layout", "fail", "; ".join(issues[:8]), {"issues": issues}), None
     if first_2q is not None:
@@ -801,6 +809,92 @@ def _build_body(parsed: _Parsed, layout: _Layout, nq: int) -> tuple[_Body | None
     return _Body(c, l2g, rec_layer), None
 
 
+def _check_reextraction(body: _Body, gens, instances, layout: _Layout, nq: int, d_rows=()) -> list[str]:
+    """评估器 v2（修复 auditor G1 A1/A1b “伪轮次”）：每个窗口都必须从数据比特重新提取 s。
+
+    对相邻窗口的代表元之差 d_j = c_{j-1} ⊕ c_j（它属于 D，是确定奇偶），用 stim detecting_regions 求它在
+    body 中每个时刻的敏感区域，要求在 [窗口 j-1 结束层, 窗口 j 结束层) 之间存在某个时刻 τ，区域限制到数据比特上
+    **恰好是 s**（即 s 支撑上的数据错误在这段时间里会翻转这次比较）。诚实电路在第 j-1 个实例测量之后、
+    第 j 个实例第一个 CNOT 之前就有这样的时刻；“只重测辅助比特”的伪轮次的区域只在辅助比特上，被拒。
+
+    代表元不唯一（可以差一个完全落在窗口 j 内的确定奇偶 w，例如冗余行的 meta-check）。严格判据不成立时再用
+    放宽判据：允许 region(d_j) + region(w) 恰为 s，w 取窗口 j 内的确定奇偶的张成（d_rows = D 的最小跨度基）。
+    窗口 j-1 内的 w 在 τ 时刻区域为空，不需要考虑。返回问题列表（空 = 全部窗口都是真提取）。
+    """
+    parities: list[tuple[int, int, int, int]] = []   # (生成元序号, 窗口 j, 起始层 a, 结束层 b)
+    aux = body.circuit.copy()
+    Mb = len(body.local_to_global)
+    for gi, inst in enumerate(instances):
+        for j in range(1, len(inst)):
+            v = inst[j - 1][2] ^ inst[j][2]
+            aux.append("DETECTOR", [stim.target_rec(m - Mb) for m in _int_bits(v)])
+            parities.append((gi, j, inst[j - 1][1], inst[j][1]))
+    if not parities:
+        return []
+    num_ticks = aux.num_ticks
+    data = np.asarray(layout.data)
+
+    def data_bits(ps) -> int:
+        if ps is None:
+            return 0
+        px, pz = ps.to_numpy()
+        px = np.concatenate([px, np.zeros(max(0, nq - len(px)), dtype=bool)])[data]
+        pz = np.concatenate([pz, np.zeros(max(0, nq - len(pz)), dtype=bool)])[data]
+        arr = np.empty(2 * len(data), dtype=bool)
+        arr[0::2], arr[1::2] = px, pz
+        return int.from_bytes(np.packbits(arr, bitorder="little").tobytes(), "little")
+
+    def want_bits(typ, row) -> int:
+        arr = np.zeros(2 * len(row), dtype=bool)
+        arr[(0 if typ == "X" else 1)::2] = row.astype(bool)
+        return int.from_bytes(np.packbits(arr, bitorder="little").tobytes(), "little")
+
+    ticks = sorted({t for _, _, a, b in parities for t in range(a, min(b, num_ticks))})
+    regions = aux.detecting_regions(ticks=ticks) if ticks else {}
+    failing = []
+    for k, (gi, j, a, b) in enumerate(parities):
+        typ, idx, row = gens[gi]
+        want = want_bits(typ, row)
+        reg = regions.get(stim.DemTarget.relative_detector_id(k), {})
+        if not any(data_bits(reg.get(t)) == want for t in range(a, min(b, num_ticks))):
+            failing.append((k, gi, j, a, b, want, reg))
+    if not failing:
+        return []
+
+    # 放宽：模掉窗口 j 内的确定奇偶
+    local = [(lo, hi, v) for (lo, hi), v in d_rows]
+    need = {}
+    for _, _, _, a, b, _, _ in failing:
+        for lo, hi, v in local:
+            if a < lo and hi <= b:
+                need.setdefault(v, len(need))
+    wregions = {}
+    if need:
+        aux2 = body.circuit.copy()
+        for v in sorted(need, key=need.get):
+            aux2.append("DETECTOR", [stim.target_rec(m - Mb) for m in _int_bits(v)])
+        t2 = sorted({t for _, _, _, a, b, _, _ in failing for t in range(a, min(b, num_ticks))})
+        wregions = aux2.detecting_regions(ticks=t2)
+    bad: list[str] = []
+    for k, gi, j, a, b, want, reg in failing:
+        typ, idx, row = gens[gi]
+        ws = [need[v] for lo, hi, v in local if a < lo and hi <= b]
+        ok = False
+        for t in range(a, min(b, num_ticks)):
+            basis = GF2Basis()
+            for wi in ws:
+                basis.add(data_bits(wregions.get(stim.DemTarget.relative_detector_id(wi), {}).get(t)))
+            if basis.contains(data_bits(reg.get(t)) ^ want):
+                ok = True
+                break
+        if not ok:
+            w0 = bin(data_bits(reg.get(a))).count("1") if a < num_ticks else 0
+            bad.append(f"{typ}-stabilizer #{idx} window {j} (layers {a + 1}..{b}): the comparison with window {j - 1} "
+                       f"is never sensitive to exactly s on the data qubits (data weight of its detecting region "
+                       f"right after window {j - 1}: {w0}, expected {int(row.sum())})")
+    return bad
+
+
 def _check_coverage_flows(parsed: _Parsed, code: CSSCode, basis: str, layout: _Layout, rounds: int | None,
                           require_opposite: bool, nq: int) -> tuple[CheckResult, CheckResult]:
     """不依赖切段的覆盖检查（适用于辅助比特跨轮流水的电路）。
@@ -866,7 +960,10 @@ def _check_coverage_flows(parsed: _Parsed, code: CSSCode, basis: str, layout: _L
             never.append(f"{typ}-stabilizer #{idx}")
             instances.append([])
             continue
-        cands = sorted((span_layers(Bs.ends[e]) + (Bs.ends[e],) for e in Bs.phi), key=lambda t: (t[1], t[0]))
+        # 按结束层排序；结束层相同时取跨度最短的（开始层最晚）——计数不变，但代表元是“自然的”单次提取，
+        # 便于下面的重提取判据（评估器 v2）。
+        cands = sorted((span_layers(Bs.ends[e]) + (Bs.ends[e],) for e in Bs.phi),
+                       key=lambda t: (t[1], -t[0], t[2].bit_count()))
         chosen: list[tuple[int, int, int]] = []
         last_end = -1
         for lo, hi, v in cands:
@@ -895,6 +992,15 @@ def _check_coverage_flows(parsed: _Parsed, code: CSSCode, basis: str, layout: _L
     details = {"method": "flows", "counts": {f"{t}{i}": c for (t, i, _), c in zip(gens, counts)},
                "measurement_layers": {f"{t}{i}": [hi for _, hi, _ in inst]
                                       for (t, i, _), inst in zip(gens, instances)}}
+    if not issues:
+        d_rows = [(span_layers(v), v) for v in D.ends.values()]
+        fake = _check_reextraction(body, gens, instances, layout, nq, d_rows)
+        if fake:
+            issues.append(f"{len(fake)} measurement window(s) do not re-extract the stabilizer from the data qubits "
+                          f"(the value is only re-measured from an ancilla, e.g. a repeated ancilla measurement "
+                          f"without new CNOTs to the data; such 'rounds' are fake): " + "; ".join(fake[:6])
+                          + (f"; ... (+{len(fake) - 6} more)" if len(fake) > 6 else ""))
+            details["fake_windows"] = fake
     if issues:
         cov = CheckResult("stabilizer_coverage", "fail",
                           "; ".join(issues) + ". (A generator counts as measured once per time-disjoint window of "

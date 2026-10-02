@@ -126,15 +126,19 @@ def test_noisy_input_rejected():
 def test_noisy_boundary_requires_single_reset_prep():
     code = _code_422()
     cz, data = build_memory(code, "Z", 1)
-    # X 电路用 R + H 制备 |+>（L0 允许），paper 口径可以，noisy 口径拒绝
+    # 制备 = 复位 + I（L0 允许），paper 口径可以，noisy 口径拒绝。
+    # 评估器 v2（auditor G1 L2-1）：复位之后的单比特门属于主体（带噪声），所以两个基底复位之后的门必须相同；
+    # 旧测试里 X 用 R + H、Z 用 R + I 的组合现在被“主体不同”拒绝（见下）。
     cx, _ = build_memory(code, "X", 1)
-    txt = str(cx).replace("RX 0 1 2 3\nTICK", "R 0 1 2 3\nTICK\nH 0 1 2 3\nTICK", 1)
-    cx2 = stim.Circuit(txt)
+    cx2 = stim.Circuit(str(cx).replace("RX 0 1 2 3\nTICK", "RX 0 1 2 3\nTICK\nI 0 1 2 3\nTICK", 1))
+    cx3 = stim.Circuit(str(cx).replace("RX 0 1 2 3\nTICK", "R 0 1 2 3\nTICK\nH 0 1 2 3\nTICK", 1))
     cz2 = stim.Circuit(str(cz).replace("R 0 1 2 3\nTICK", "R 0 1 2 3\nTICK\nI 0 1 2 3\nTICK", 1))
     jc = build_joint_circuit(code, {"Z": cz2, "X": cx2}, data, p=0.002, boundary="paper")
     jc.circuit.detector_error_model()
     with pytest.raises(ValueError, match="single"):
         build_joint_circuit(code, {"Z": cz2, "X": cx2}, data, p=0.002, boundary="noisy")
+    with pytest.raises(ValueError, match="differ"):
+        build_joint_circuit(code, {"Z": cz2, "X": cx3}, data, p=0.002, boundary="paper")
 
 
 # ---------------------------------------------------------------------------
@@ -297,6 +301,9 @@ def test_diff_per_round_closed_form_and_interval():
     assert big["low"] < big["best"] < big["high"]
     neg = diff_per_round(50, 1000, 4, 40, 1000, 12)
     assert neg["best"] < 0 and neg["low"] == 0 and "negative" in neg["warning"]
+    # 评估器 v2（auditor G1 L2-2）：区间不再倒置，负估计标记为无效
+    assert neg["low"] <= neg["high"] and neg["valid"] is False and d["valid"] is True
+    assert neg["high_unclipped"] < 0 or neg["high"] == neg["high_unclipped"]
     with pytest.raises(ValueError):
         diff_per_round(1, 10, 5, 1, 10, 5)
 
