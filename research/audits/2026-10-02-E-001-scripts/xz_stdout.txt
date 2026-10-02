@@ -1,0 +1,10 @@
+d=3 p=0.003 X=2.475e-03(1500) Z=2.197e-03(1500) X/Z=1.127 ln-ratio z=+3.3
+d=3 p=0.005 X=6.386e-03(1516) Z=5.982e-03(1512) X/Z=1.068 ln-ratio z=+1.8
+d=5 p=0.003 X=7.921e-04(1501) Z=6.646e-04(1501) X/Z=1.192 ln-ratio z=+4.8
+d=5 p=0.005 X=3.324e-03(1516) Z=2.870e-03(1500) X/Z=1.158 ln-ratio z=+4.0
+d=7 p=0.003 X=2.405e-04(2025) Z=2.111e-04(1656) X/Z=1.139 ln-ratio z=+3.9
+d=7 p=0.005 X=1.677e-03(1503) Z=1.387e-03(1501) X/Z=1.210 ln-ratio z=+5.2
+Counter({'DETECTOR': 24, 'TICK': 21, 'QUBIT_COORDS': 17, 'CX': 12, 'DEPOLARIZE2': 12, 'DEPOLARIZE1': 9, 'X_ERROR': 7, 'H': 6, 'MR': 3, 'Z_ERROR': 2, 'RX': 1, 'R': 1, 'MX': 1, 'OBSERVABLE_INCLUDE': 1})
+PYTHONPATH=/Users/ephemeral/Desktop/qec-ai-search uv run python   22.14s user 0.54s system 284% cpu 7.968 total
+
+[exited with code 0]

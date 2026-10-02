@@ -1,0 +1,17 @@
+id: E-001-surface-baseline
+hypothesis: baseline
+question: 我们的 stim + sinter + pymatching 流水线能否复现旋转表面码在均匀电路级去极化噪声下的标准阈值行为？
+prediction: >
+  （跑前写下）d=3,5,7 的每轮逻辑错误率曲线在 p≈0.6%~0.8% 附近交叉（MWPM 电路级阈值文献值约 0.7%）；
+  p=1e-3 时 d 每增加 2，逻辑错误率下降约 5~8 倍（Λ ≈ p_th/p 的量级）。
+command: uv run python -m baselines.surface --config experiments/E-001-surface-baseline.yaml
+code: rotated_surface_code_memory_z
+distances: [3, 5, 7]
+rounds: d            # 轮数 = 距离
+seeds: [0]           # sinter 内部随机；正式对比时再加种子
+noise: {model: uniform_depolarizing, p: [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 0.010]}
+decoder: pymatching
+budget: {cpu_hours: 2, llm_tokens: 0, num_workers: 3}
+max_errors: 200
+max_shots: 20000000
+stop_rule: 每个点 ≥200 次逻辑错误或 2e7 shots

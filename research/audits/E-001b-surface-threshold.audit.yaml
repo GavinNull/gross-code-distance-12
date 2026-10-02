@@ -1,0 +1,16 @@
+id: E-001b-surface-threshold
+hypothesis: baseline
+question: E-001 预测阈值偏低。补测更高 p，定位该噪声模型下 d=3,5,7 的交叉点。
+prediction: >
+  （跑前写下，E-001 之后）交叉点位于 p=1.0%~1.5% 之间。
+command: uv run python -m baselines.surface --config experiments/E-001b-surface-threshold.yaml
+code: rotated_surface_code_memory_z
+distances: [3, 5, 7]
+rounds: d            # 轮数 = 距离
+seeds: [0]           # sinter 内部随机；正式对比时再加种子
+noise: {model: uniform_depolarizing, p: [0.009, 0.010, 0.011, 0.012, 0.013, 0.015]}
+decoder: pymatching
+budget: {cpu_hours: 2, llm_tokens: 0, num_workers: 3}
+max_errors: 1000   # 注：初版 yaml 写 200，代码硬编码 1000，实际按 1000 运行；事后修正为实际值
+max_shots: 20000000
+stop_rule: 每个点 ≥1000 次逻辑错误
