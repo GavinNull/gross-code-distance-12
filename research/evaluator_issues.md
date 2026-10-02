@@ -125,3 +125,45 @@
      未改 settings.json，冻结后靠 PI 用 chmod / chflags 锁目录（README §10 列出命令，未执行）。回归 `tests/test_freeze.py`。
   - 另：模板电路与 baselines 逐机制一致（IBM、Strikis，1 / 3 轮，两个基底，`tests/test_candidate.py`）；示例任务 `gross-sd6-p4e-3`
     的漏斗层级与预算为空，等 E-004；距离门槛 10 暂定。需要 auditor 再审。
+
+- 2026-10-03 · 评估器 v2.1 负责 agent · **第二轮审计（`research/audits/2026-10-02-evaluator-v2.md`）问题及修复说明** ·
+  复现：`research/audits/2026-10-02-evaluator-v2-scripts/`（auditor 脚本）；回归：`uv run pytest tests/test_v21_audit_fixes.py tests/test_distance_tasks.py -q` ·
+  影响范围：冻结前必须修的第 1–7 条全部在评估器里修复，另加 H-004 需要的只评距离任务 · 状态：fixed-pending-audit
+  （第 8 条中的 `.claude/settings.json` 是否纳入冻结清单等 PI 决定，未改）。逐条：
+  1. **S4 批文件注入（严重）** → 修复：`l2._load_batches` 逐批核对文件名 = index、shots = batch_size、stim 种子、
+     fail_Z/X/any/both = 逐 shot 失败位的 popcount；每次运行随机 HMAC 密钥（只在内存里，经 sinter pickle 给 worker），批文件带签名、
+     主进程验签；主进程再随机抽 `spot_checks`（默认 2）个批按同一种子重算逐位比较；任何不符 → `L2IntegrityError`，
+     pipeline 状态 `integrity_error`，不写榜。`pipeline.evaluate` / `reproduce_entry` 去掉 `work_dir`，目录由 mkdtemp 创建（0700）。
+     `entry_problems` 核对 shots = batches_used × batch_size 和计数自洽。auditor 的攻击进程（替换第 0 批）现在得到 `integrity_error`
+     （`test_S4_batch_file_injection_attack_is_detected`，攻击只扫描测试私有的临时目录）。残余：能读评估器进程内存的同用户进程
+     仍能拿到密钥（同进程恶意代码一类，README §8）。
+  2. **S8 误拒合法调度（严重）** → 修复：L0 新参数 `generator_ancillas`，flow 计数只数跨度包含该行自己辅助比特某次测量所在层的
+     窗口（README §3.2.2）；pipeline 总是给出，并用 `candidate.template_round_counts` 直接读电路核对“每行每轮恰好一次”，两者都要
+     等于轮数。auditor 的 12 个 BB72 自由窗口调度与 3 个 gross 调度全部通过（v2：误拒 10/12、1/3）；`tests/test_g1_attacks.py`
+     （A1/A1b 伪轮次等）全部照常被拒；原始电路不给映射时口径不变。最初试过“模板路径上计数 ≥ R”，10 个 BB72 调度仍在重提取判据上
+     被拒（多出来的组合窗口之间不是从数据重新提取），所以改用按自己的辅助比特计数。
+  3. **S1** → 修复：pipeline 用 `spec.canonical()` 生成电路（`pipeline.circuits_for`），entry_problems 同样。200 个随机自由调度的全部
+     平移给出同一哈希、同一电路；Strikis 8 个平移 1 种电路；auditor 的非规范平移调度能打分并写榜、verify 通过。
+  4. **S10 / W2** → 修复：`leaderboard.is_official_path`（resolve + samefile，认符号链接、相对路径、..、硬链接）；
+     `verify_leaderboard` 对正式榜加 `official_problems`：purpose=score、记录的评估器 frozen 且 verified、哈希 = `research/evaluator_freeze.json`、
+     库版本 = `PINNED_VERSIONS`（`library_versions` 也记录 ortools、python-sat）。写榜前的守卫也要求 frozen 且 verified。
+  5. **S5** → 修复：purpose=score 任务的 L2 种子 = sha256(task_hash, schedule_hash) 派生，调用方 seed 被忽略并写进诊断；
+     entry_problems 核对。自检任务仍用调用方种子。距离任务的距离种子同样派生。残余：改动调度来“重抽”（README §11，已知）。
+  6. **F7** → 修复：`pipeline.runtime_integrity()`（sys.pycache_prefix 必须为 None；每个已加载的 evaluators.* 模块必须由
+     SourceFileLoader 从 evaluators/ 里的 .py 加载，`__cached__` 在 evaluators/__pycache__ 内），evaluate / screen 开头断言，
+     environment_check 也报告。带 PYTHONPYCACHEPREFIX 启动的子进程里 screen 拒绝运行（测试）。冻结脚本本身未改（它仍不扫描 prefix
+     目录），防线在评估入口。
+  7. **R2** → 修复：reproduce_entry 比较每个 component 的计数与每轮 P_any；entry_problems 核对顶层 counts 与 components 一致。
+  - 小问题（S2）：numpy 整数 / 一维 numpy 数组作为调度数字被接受并规范成 int；ScheduleSpec 对象也走严格解析。
+  - **H-004 新功能**：`tasks.py` 的 `kind="distance"` 任务 `bb72/bb90/bb108/bb120/cp126/gross-dcirc`（每校验一个辅助比特、所有行每轮
+    都测、period ≤ 8；3 轮电路；种子派生；预算写死：n ≤ 126 为 BP-OSD 600 + LNS 32，gross 为 1500 + 96）；分数 = d_circ 上界，
+    并列看最小权重见证数（定义见 README §9.4）和周期；可上榜（与 L2 同一文件，按 task_id 单独排名，记录带见证，verify 时重新注入验证）。
+    `pipeline.screen(task_id, code_spec, schedule)`：只跑 L0 + 距离，不写榜。见证翻译成调度坐标（`candidate.describe_faults`，
+    写进 `Report.to_text()`）。
+  - **预算标定（IBM 项顺序调度，E-004 的构造，3 进程）**：BB90 种子 1–3 全部 8；BB108 1–3 全部 8；CP126 1–3 全部 9；
+    BB120 1–9 全部 10（Z 基底有 5 次是 11，靠 X 基底给出 10；E-004 的低预算 200 + 8 只到 11，所以加大）；BB72 1–3 全部 6；
+    gross（1500 + 96）1–2 全部 10。单次耗时 41–94 s（n ≤ 126，机器上另有一个 5 进程的任务同时运行）、gross 约 200 s。
+  - **任务实际派生种子下的 IBM 调度结果**（`scripts/run_dcirc_ibm.py`，`results/evaluator-v2.1-dcirc/`，负载较低时）：
+    bb72 6（见证数 159，27 s）、bb90 8（11，40 s）、bb108 8（5，42 s）、bb120 10（Z 11 / X 10，1，65 s）、cp126 9（2，58 s）、
+    gross 10（7，166 s）。全部与已知上界一致。
+  - 需要 auditor 复审上面 1–7 与距离任务（建议攻击：伪造 / 隐藏距离见证、利用 generator_ancillas 过滤、HMAC 密钥外泄路径）。
