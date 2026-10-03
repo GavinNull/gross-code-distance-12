@@ -1,0 +1,22 @@
+id: E-006-decoder-headroom
+hypothesis: H-005
+question: >
+  在 BB 码的电路级噪声下，标准 BP-OSD（E-002 / IBM 设置）离“近最优解码”还有多远？提升空间随 p 怎么变化？
+  特别是：解码器失败的最低故障权重 w_dec，是否低于电路能纠正的极限 ⌈d_circ/2⌉？
+prediction: >
+  （跑前写下）
+  1) p=4e-3 时，参考解码器（逐 shot 精确的最可能 / 最小权重解码）比 BP-OSD 的逻辑错误率低 3–10 倍（与 E-003 审计“约 90% 失败为解码器次优”一致）。
+  2) 提升空间随 p 降低而缩小：p=1e-3 时只剩 1.5–3 倍。
+  3) BB72 上 BP-OSD 的最低失败故障权重 w_dec 等于 ⌈d_circ/2⌉（低 p 下没有指数级损失）；BB90 上可能出现 w_dec < ⌈d_circ/2⌉ 的个例，但很少。
+codes: ["表面码 d=5（参照，pymatching 与精确解码对照）", "BB72 [[72,12,6]] × IBM 调度", "BB90 [[90,8,10]] × IBM 调度", "gross（只在 p=4e-3 抽样少量，作为与 E-003 的衔接）"]
+noise: {model: sd6, p: [0.001, 0.002, 0.003, 0.004]}
+decoders:
+  baseline: BP-OSD（E-002 / IBM 设置：min_sum, max_iter 10000, osd_cs order 7）
+  reference: 对 DEM 的逐 shot 精确最小权重（或最可能）解码（MILP / CP-SAT），在失败样本和随机子样本上使用
+  optional: BP+LSD 等现成替代方案，作为“现成工具能拿回多少”的对照
+methods: >
+  (a) 直接采样估计提升空间（高 p）；
+  (b) 固定权重故障采样（低 p 外推）：对权重 w 的随机故障组合，统计 BP-OSD 失败与参考解码器失败的比例，得到 A_w^dec 与 A_w^ref，用 LER ≈ Σ A_w p^w 外推到 p=1e-3；
+  (c) 寻找 BP-OSD 在最低权重处失败的具体故障组合（w_dec），并与 ⌈d_circ/2⌉ 比较
+budget: {cpu_hours: 30, llm_tokens: 0, num_workers: 6}
+stop_rule: 每个 (码, p) 至少 100 次 BP-OSD 失败，或按固定权重采样的预设样本量
