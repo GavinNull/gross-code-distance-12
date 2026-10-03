@@ -731,3 +731,32 @@ def test_mp_task_rejects_full_programs_as_rules():
     rep = evaluate_decoder("bb72-mp-p3e-3", program_for("relay_bp", RELAY_BP_PAPER), split="search", shots=500,
                            submit=False, num_workers=1)
     assert rep.status == "rejected" and "rules rejected" in rep.to_text()
+
+
+# ---------------------------------------------------------------------------
+# 近最优参考（CP-SAT MLE）
+# ---------------------------------------------------------------------------
+
+def test_near_optimal_gap_on_surface_code():
+    from evaluators.decoder_eval import near_optimal_gap
+    g = near_optimal_gap(ST, shots=60, first_batch=5)
+    for s in "ZX":
+        sec = g["sectors"][s]
+        assert sec["proved_optimal"] == 60
+        refs = sec["references"]
+        assert set(refs) == {"relay_bp", "pymatching"}
+        # MLE 不会比参考差很多（小样本，允许 2 个的统计波动）
+        assert sec["near_optimal_fail"] <= min(r["fail"] for r in refs.values()) + 2
+
+
+def test_cpsat_mle_finds_minimum_weight_solution_on_tiny_problem():
+    import scipy.sparse as sp
+
+    from evaluators.decoder_mle import CpSatMLE
+    from evaluators.decoder_problem import SectorProblem
+    # 重复码：3 个机制，2 个 detector；syndrome [1,1] 的最可能解是中间一个
+    H = sp.csc_matrix(np.array([[1, 1, 0], [0, 1, 1]], dtype=np.uint8))
+    L = sp.csr_matrix(np.array([[0, 1, 0]], dtype=np.uint8))
+    P = SectorProblem("Z", H, L, np.array([0.01, 0.01, 0.01]), [[0, 0, 1], [1, 0, 1]], 0)
+    r = CpSatMLE(time_limit_s=5).decode(P, np.array([1, 1], dtype=np.uint8))
+    assert r.optimal and r.observables.tolist() == [1]

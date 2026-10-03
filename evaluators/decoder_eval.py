@@ -335,26 +335,6 @@ class _ProgramRunner:
         return sum(w.restarts[s] for w in self.workers)
 
 
-@dataclass
-class _Acc:
-    """一个程序在若干批上的累计逐 shot 数据（每个 sector）。"""
-    status: dict = field(default_factory=lambda: {"Z": [], "X": []})
-    correct: dict = field(default_factory=lambda: {"Z": [], "X": []})
-    cpu: dict = field(default_factory=lambda: {"Z": [], "X": []})
-    msgs: list = field(default_factory=list)
-
-    def add(self, sector, status, correct, cpu, msgs):
-        self.status[sector].append(status)
-        self.correct[sector].append(correct)
-        self.cpu[sector].append(cpu)
-        self.msgs.extend(msgs)
-
-    def arrays(self, sector):
-        return (np.concatenate(self.status[sector]) if self.status[sector] else np.zeros(0, np.int8),
-                np.concatenate(self.correct[sector]) if self.correct[sector] else np.zeros(0, bool),
-                np.concatenate(self.cpu[sector]) if self.cpu[sector] else np.zeros(0))
-
-
 def _caps_for(task, ref_cpu: np.ndarray):
     sp_ = task.decoder["speed"]
     K = float(sp_["K"])
@@ -385,15 +365,6 @@ _REF_LOCK = threading.Lock()
 def clear_reference_cache():
     with _REF_LOCK:
         _REF_CACHE.clear()
-
-
-def _batches(inst, root, first, count, batch_size):
-    out = []
-    for b in range(first, first + count):
-        d = dp.sample_batch(inst, root, b, batch_size)
-        ids = np.arange(b * batch_size, (b + 1) * batch_size)
-        out.append((b, ids, d))
-    return out
 
 
 def _sector_stats(status, cpu, build, restarts, extra_budget_fail=None) -> dict:
@@ -764,28 +735,40 @@ def reference_report(task_id: str, *, split: str = "search", shots: int | None =
     return out
 
 
-def near_optimal_gap(task_id: str, program_src: str | None = None, *, split: str = "public", shots: int = 200,
-                     first_batch: int = 0, decoder=None) -> dict:
-    """小样本上：近最优（CP-SAT MLE）与候选 / 参考的失败对比。不打分。program_src=None 时只比较主参考。
-    这里直接在父进程里运行参考程序（不经沙箱、不计时），只用于报告差距。"""
+def near_optimal_gap(task_id: str, *, split: str = "public", shots: int = 200, first_batch: int = 0,
+                     references=None, decoder=None) -> dict:
+    """小样本上：近最优（默认 CP-SAT MLE）与参考解码器在同一组 shot 上的失败对比。不打分、不写榜。
+    参考程序直接在父进程里运行（不经沙箱、不计时，它们是评估器自己的代码）。split 默认 public（公开种子）。"""
     from evaluators.decoder_mle import get_near_optimal
     task = get_task(task_id)
     inst = dp.build_instance(task)
     mle = decoder or get_near_optimal(task.decoder.get("near_optimal") or {})
     root = dp.split_root(task.task_id, task.hash(), split)
     d = dp.sample_batch(inst, root, first_batch, shots)
+    refs = [task.decoder["reference"]] + list(task.decoder.get("secondary_references") or [])
+    if references is not None:
+        refs = [r for r in refs if r["name"] in references]
     res = {}
     for s in ("Z", "X"):
         syn, tru = d[s]
         P = inst.sectors[s]
-        ok, opt, walls = [], 0, []
+        mfail, opt, walls = np.zeros(shots, bool), 0, []
         for i in range(shots):
             r = mle.decode(P, syn[i].astype(np.uint8))
             walls.append(r.wall_s)
             opt += bool(r.optimal)
-            ok.append(r.observables is not None and not (r.observables.astype(bool) != tru[i]).any())
-        res[s] = {"mle_fail": int(shots - sum(ok)), "proved_optimal": opt, "shots": shots,
-                  "mle_wall_mean_s": float(np.mean(walls)), "mle_correct": ok}
+            mfail[i] = r.observables is None or bool((r.observables.astype(bool) != tru[i]).any())
+        sec = {"shots": shots, "near_optimal_fail": int(mfail.sum()), "proved_optimal": opt,
+               "near_optimal_wall_mean_s": float(np.mean(walls)), "references": {}}
+        for r in refs:
+            src = _reference_program(task) if r is task.decoder["reference"] else program_for(r["name"], r["params"])
+            ns = {"__name__": "reference"}
+            exec(compile(src, f"<{r['name']}>", "exec"), ns)
+            dec = ns["make_decoder"](P.H, P.L, P.priors, inst.info(s))
+            f = np.array([bool((np.asarray(dec(syn[i].astype(np.uint8))).astype(bool) != tru[i]).any())
+                          for i in range(shots)])
+            sec["references"][r["name"]] = {"fail": int(f.sum()), "fail_where_near_optimal_ok": int((f & ~mfail).sum())}
+        res[s] = sec
     return {"task_id": task_id, "split": split, "first_batch": first_batch, "method": mle.name, "sectors": res}
 
 
