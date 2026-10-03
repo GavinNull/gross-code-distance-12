@@ -25,6 +25,7 @@
 ## 正在进行
 
 - **E-006 解码器提升空间**（30 CPU 小时）：BP-OSD 对比逐 shot 精确解码；固定权重故障采样外推到 p=1e-3；解码器最低失败权重 → `experiments/E-006-decoder-headroom.yaml`
+- **解码器评估任务 + 进化框架接入**（worktree，PI 要求同步搭建）：`kind="decoder"` 任务、沙箱执行候选解码器、搜索集 / 留出集、速度预算、BP-OSD 与 BP+LSD 参考、DecoderProblem（mock）
 - lit-scout：qLDPC 解码器竞争格局（BP+LSD、Relay-BP、神经解码器、AI 设计的解码器）→ `research/literature/qldpc-decoders-landscape.md`
 
 ## 暂停中
