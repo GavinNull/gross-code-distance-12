@@ -1,7 +1,32 @@
-# evaluators/：评估器（v2：候选只交调度，评估器生成电路、跑 L0 / L2、写成绩单）
+# evaluators/：评估器（v2.1：候选只交调度，评估器生成电路、跑 L0 / 距离 / L2、写成绩单）
 
 状态：未冻结。评估器 v2（2026-10-02）修复了 auditor G1 前全面攻击（`research/audits/2026-10-02-evaluator-G1.md`）
-的全部问题，需 auditor 再审后由 PI 冻结（§10）。
+的全部问题；**v2.1（2026-10-03）修复了第二轮审计（`research/audits/2026-10-02-evaluator-v2.md`）“冻结前必须修”的
+第 1–7 条，并为 H-004 加了只评距离的任务**（§0.1）。需 auditor 复审 §0.1 各项后由 PI 冻结（§10）。
+
+## 0.1 评估器 v2.1 变更一览（auditor v2 §4 与 H-004）
+
+```python
+from evaluators.pipeline import evaluate, screen
+rep = screen("bb90-dcirc", None, schedule_json)    # 搜索内循环：L0 + 距离，不跑 L2，不写榜（bb90 约 1 分钟，3 进程）
+print(rep.to_text())                               # 含最短见证的调度坐标（轮次、时间步、校验、数据列、Pauli）
+rep = evaluate("bb90-dcirc", None, schedule_json)  # 正式：同上，并在满足条件时写榜（距离任务单独排名）
+```
+
+| # | 问题 | 修复 | 回归测试（全部在 `tests/test_v21_audit_fixes.py`，除非另注） |
+|---|---|---|---|
+| S4 | 批文件注入：改写 L2 批结果文件即可写进低 260 倍的分数 | (a) `l2._load_batches` 逐批核对：文件名 = index、shots = batch_size、stim 种子 = SeedSequence([seed, index])、fail_Z/X/any/both = 逐 shot 失败位的 popcount；(b) 每次运行随机生成 32 字节 HMAC 密钥（只在内存里，经 sinter 的 pickle 传给 worker），每个批文件带签名，主进程验签；另外主进程随机抽 `spot_checks`（默认 2）个批按同一种子重算、逐位比较；任何不符 → `L2IntegrityError`，pipeline 状态 `integrity_error`、不写榜；(c) `pipeline.evaluate` 与 `reproduce_entry` 去掉 `work_dir`，目录由 `tempfile.mkdtemp` 创建（0700），`sample_l2(work_dir=...)` 也会 chmod 0700；(d) `entry_problems` 核对 shots = batches_used × batch_size 及计数自洽 | `test_S4_*`：auditor 的攻击进程（扫描新 `l2_*` 目录替换第 0 批）→ `integrity_error`；未签名 / 改动 / 重签但不一致的批文件逐项被拒；W1 式 shots×3 伪造被 entry_problems 发现 |
+| S8 | 冗余行的组合被数成额外窗口（BB72 12 个合法自由窗口调度误拒 10 个，gross 3 个误拒 1 个） | L0 新参数 `generator_ancillas`（{"X3": 比特, ...}）：给出时 flow 计数只数**跨度包含该行自己辅助比特某次测量所在层**的窗口（§3.2.2）。pipeline 的模板电路总是给出；原始电路不给，行为不变。另外 `candidate.template_round_counts` 直接读电路核对“每行每轮恰好一次 复位→全部 CNOT→测量”，pipeline 要求它与 L0 计数一致 | `test_S8_*`：auditor 的 12 个 BB72 调度与 3 个 gross 调度全部通过；声称 2/4 轮的 3 轮电路仍被拒；`tests/test_g1_attacks.py`（A1/A1b 伪轮次等）全部照常通过 |
+| S1 | 全局平移改变生成的电路（同一哈希两种电路） | pipeline 一律用 `spec.canonical()` 生成电路（`pipeline.circuits_for`），`entry_problems` 同样 | 200 个随机自由调度 × 全部平移：哈希、电路都相同；Strikis 8 个平移 1 种电路；auditor 的非规范平移调度能打分并写榜 |
+| S10 / W2 | 正式成绩单守卫用字符串比较路径；verify 不看 purpose / 冻结 / 版本 | `leaderboard.is_official_path`：resolve 后比较，并认硬链接（samefile）；`verify_leaderboard(official=None)` 对正式榜自动加 `official_problems`：purpose=score、记录的评估器 frozen 且 verified、哈希 = `research/evaluator_freeze.json`、库版本 = `PINNED_VERSIONS`（`library_versions` 现在也记录 ortools、python-sat） | 相对路径 / `..` / 符号链接 / 硬链接都被认作正式榜；自检任务经相对路径不再写入；伪造 evaluator / versions 字段被报出 |
+| S5 | 种子可以挑 | purpose="score" 的任务：L2 种子 = `derive_seed(task_hash, schedule_hash, "l2")`（sha256 的前 63 位），调用方的 seed 被忽略并在 `Report.diagnostics` 里记一条；`entry_problems` 核对记录的种子；距离任务的距离种子同样派生（"distance"）。自检任务仍可用调用方种子（None = 派生） | 两个不同 seed 计数逐位相同、种子 = 派生值；改种子的记录被拒 |
+| F7 | `PYTHONPYCACHEPREFIX` 让 evaluators/ 之外的伪造 pyc 被加载 | `pipeline.runtime_integrity()`：`sys.pycache_prefix` 必须为 None；每个已加载的 `evaluators.*` 模块 `__file__` / `__spec__.origin` 在 evaluators/ 内、由 `SourceFileLoader` 从 .py 加载、`__cached__` 在 `evaluators/__pycache__` 内。`evaluate` / `screen` 开头断言（否则 RuntimeError），`environment_check` 也报告 | 设 prefix、注入外部模块、改 `__cached__` 都被报出；带 PYTHONPYCACHEPREFIX 的子进程里 screen 拒绝运行 |
+| R2 | reproduce_entry 只比顶层 counts（diff 任务） | `reproduce_entry` 比较每个 component 的计数与每轮 P_any；`entry_problems` 核对顶层 `counts["rounds_r"]` = `components[r].counts`、顶层 shots = 两者之和 | auditor 的 R2 伪造被两者都发现 |
+| — | numpy 整数 / ScheduleSpec 对象绕过解析（auditor v2 S2 小问题） | `parse_schedule` 接受 numpy 整数并规范成 int；ScheduleSpec 对象也先转成 dict 再严格解析（period 上限、时间步范围） | `test_numpy_*`、`test_schedule_object_*` |
+| H-004 | 只评距离的任务、screen 入口、见证翻译 | §9.4 | `tests/test_distance_tasks.py` |
+
+**没有改的**：`.claude/settings.json` 是否纳入冻结清单（auditor v2 F9）等 PI 决定。冻结清单 `EXTRA_FILES` 加了
+`tests/test_v21_audit_fixes.py`、`tests/test_distance_tasks.py`、`tests/v21_helpers.py`。
 
 ## 0. 评估器 v2 一览（先读这里）
 
@@ -205,6 +230,20 @@ IBM 约 6 s）。有干净切口的电路上两种方法的计数相同（测试
 - 冗余关系下单个 detector 可以省略：例如 gross code 的 HZ 有 6 个冗余关系，删掉一个第 0 轮的 Z detector，它等于其余行的
   detector ⊕ 一个该轮内部的 meta-check，而 meta-check 不要求声明，所以被接受（与旧方法相同）。这只让译码器少一条信息，
   不能降低逻辑错误率或抬高距离；测试里删掉全部 72 个第 0 轮 detector 才会被拒。
+
+### 3.2.2 按“自己的辅助比特”计数（评估器 v2.1，修复 auditor v2 S8）
+
+现象：BB 码有冗余行。若冗余行 s = s₁ + … + s_k，而 s₁..s_k 的测量时刻都不同于 s 自己的测量时刻，那么“s₁..s_k 这一轮的
+测量”也是 A_s 的元素，它的跨度与 s 自己的测量不重叠，§3.2 的区间调度就把每轮数成 2 次（“测了 6 次，要求 3 次”）。
+IBM 调度所有校验同一时刻测量，所以不受影响；逐检查自由的调度大多会撞上。
+
+修复：`L0Constraints.generator_ancillas = {"X3": q, "Z5": q', ...}`（类型 + HX/HZ 行号 → 该行的辅助比特）。给出时，
+第 2 步的候选窗口只保留**跨度包含该辅助比特某次测量所在层**的那些。由最小跨度基的性质，单个自测量 {m_j} ∈ A_s 时
+一定存在跨度落在 [layer(m_j), layer(m_j)] 内的 phi=1 基向量，所以诚实电路的每一轮都被数到；别的行的组合只要不跨过
+自测量的层就不再计数（跨过时，按结束层排序的贪心会先选到自测量那个更短的窗口）。这一过滤**只会让计数变少**，
+少测仍然被拒；重提取判据与 detector 覆盖照旧在选中的窗口上运行。pipeline 总是给出这个映射（模板布局已知），并另外用
+`candidate.template_round_counts` 直接读生成的电路核对“每行每轮恰好一次 复位 → 全部 CNOT → 测量”，两者都要等于轮数。
+原始电路（`check_l0` 直接调用、不给映射）的计数口径不变，G1 的 A1 / A1b 伪轮次回归测试照常被拒。
 
 ### 3.1 电路级距离（`distance.py`）
 
@@ -582,7 +621,9 @@ git add research/leaderboard.jsonl && git commit -m "leaderboard: <说明>
 
 ### 9.2 评估入口（`pipeline.py`）
 
-`evaluate(task_id, code_spec, schedule, *, seed, candidate_id=None, leaderboard_path=None, submit=True) -> Report`：
+`evaluate(task_id, code_spec, schedule, *, seed=None, candidate_id=None, leaderboard_path=None, submit=True) -> Report`
+（v2.1：正式任务忽略 seed、改用派生种子；没有 work_dir；电路由规范化调度生成；状态新增 `integrity_error`；另有
+`screen(...)`，见 §0.1、§9.4）：
 
 1. 取任务（导入时记录注册表哈希，运行时被改动的任务对象拒绝评估）；按任务码族把 `code_spec` 变成 `CSSCode`（fixed 码的任务传 None）。
 2. 解析、校验调度 → 不合法：`rejected_schedule`，`Report.diagnostics` 逐条列出。
@@ -622,6 +663,44 @@ L0（12 轮两个基底 + 3 轮距离门槛 10）加一个 50 shot 的 L2 约 7�
   "promote_if_per_round_P_any_below": 阈值 | None}, ...]}`。每层在打分轮数上做一次 paper 采样（种子由 seed 与层号派生），
   每轮 P_any 的区间下端 ≥ 阈值则 `filtered`；全部通过才做正式 L2。gross 任务目前 `tiers = []`（直接做正式 L2，代价很高：
   p=4e-3 下每 sector 1000 次失败约需 10⁵ shot × 数 CPU 秒）。E-004 给出代理指标的保真度后，由 lead 填层级与预算并重新冻结。
+
+### 9.4 只评距离的任务（`kind="distance"`，评估器 v2.1，H-004）
+
+| task_id | 码（出处） | IBM 项顺序调度的 d_circ 上界（本预算下复现） |
+|---|---|---|
+| `bb72-dcirc` | [[72,12,6]]，l=m=6，A=x³+y+y²，B=y³+x+x²（arXiv:2308.07915 Table 3） | 6 |
+| `bb90-dcirc` | [[90,8,10]]，l=15,m=3，A=x⁹+y+y²，B=1+x²+x⁷（同上） | 8 |
+| `bb108-dcirc` | [[108,8,10]]，l=9,m=6，A=x³+y+y²，B=y³+x+x²（同上） | 8 |
+| `bb120-dcirc` | [[120,8,12]]，l=20,m=3，A=1+x³y²+x⁷y²，B=1+x¹⁶y+x⁹y（E-004 用的码，`search/proxy/candidates.py`；与 arXiv:2601.09911 的 [[120,8,12]] 是否等价**未核实**） | 10 |
+| `cp126-dcirc` | coprime [[126,12,10]]，l=7,m=9，A=1+π+π⁵⁸，B=1+π¹³+π⁴¹，π=xy（arXiv:2408.10001 Table 2），写成 A=1+xy+x²y⁴，B=1+x⁶y⁴+x⁶y⁵ | 9 |
+| `gross-dcirc` | [[144,12,12]]（arXiv:2308.07915 Table 3） | 10 |
+
+（右列是本机用任务预算对 E-004 的 IBM 项顺序调度实测的值，见 `research/evaluator_issues.md` 2026-10-03 条；码的矩阵与
+`search.codes.construct` 的构造逐元素相同，测试 `tests/test_distance_tasks.py`。码的构造逻辑在 `tasks.bb_matrices`，
+评估器不 import search / baselines。）
+
+- **约束**：每校验一个辅助比特、所有行每轮都测（模板结构）；`schedule_constraints={"max_period": 8}`（IBM 原电路的摊销深度）。
+- **距离**：3 轮电路、两个基底、sd6 的故障位置（p 无关）；方法 graphlike + BP-OSD 随机 η + LNS；不早停。
+  种子 = `derive_seed(task_hash, schedule_hash, "distance")`；调用方的 seed 被忽略。预算写死在任务里：
+  n ≤ 126：`DCIRC_BUDGET` = BP-OSD 600 次 + 32 个 LNS 起点（CP-SAT 确定性时间 1.0）；gross：`DCIRC_BUDGET_GROSS` = 1500 + 96
+  （与 L0 默认相同）。标定：在 IBM 调度上，n ≤ 126 的四个码各 3 个种子、BB120 9 个种子都复现已知上界（E-004 的低预算
+  200 + 8 在 BB120 上只到 11，所以加大）；gross 2 个种子都是 10。单个候选的耗时见 `evaluator_issues.md` 2026-10-03 条。
+- **分数**（越靠前越好）：`sort_key = [-d, w, D]`。d = 两个基底距离上界的较小值（经注入验证的见证）；
+  w = **最小权重见证数**：在 d 达到最小值的基底里，固定预算搜索（BP-OSD 解 + LNS 终点）找到的**不同**的权重为 d 的
+  DEM 逻辑错误（Dξ = 0、Lξ ≠ 0 的列集合；症状相同的机制合并成一列）的个数之和；见证来自其他方法而这里一个也没有时记 1。
+  它只取决于派生种子与预算，是“低权重逻辑错误有多少”的可复现代理，不是精确计数。D = 调度周期（摊销深度）。
+- **Report.distance**：每个基底的权重、方法、最小权重见证数、权重直方图、最短见证的原始故障与**调度坐标**：
+  `candidate.describe_faults(spec, code, rounds, faults)` 把每个故障翻译成 cycle / step（step 就是调度 JSON 的周期内时间步）、
+  模板操作（cnot / reset / measure / idle / data_reset / readout）、校验（`X#i` / `Z#i`）与它的第几轮实例、数据列、各比特上的 Pauli。
+  `Report.to_text()` 列出这些行，例如 `cycle 1 step 2 (layer 12): CNOT of X#16 (round 1) with data col 49: DEPOLARIZE2 -> Z on data col 49`。
+  L2 任务的 L0 距离结果也带同样的翻译。
+- **成绩单**：与 L2 任务同一个文件，按 task_id 分开排名（`table(task_id)` 按 sort_key）。记录带 `distance_params`（= 任务
+  预算）、每个基底的最短见证（原始故障 + 调度坐标）、最小权重见证数。`entry_problems` 从调度重新生成电路，把每个见证
+  **重新注入验证**，并核对 d = 两个见证权重的较小值、w、sort_key、派生种子、预算；声称的距离偏大（藏起更短的见证）只能靠
+  `reproduce_entry`（同一种子复算，逐个比较见证）发现。正式榜规则与 L2 任务相同（冻结、purpose=score）。
+- **`screen(task_id, code_spec, schedule)`**：调度校验 + L0（含任务的距离预算），不跑漏斗与 L2，永不写榜，状态 `screened`。
+  距离任务上与 `evaluate` 的距离分数完全相同（同一派生种子与预算）。给搜索程序的内循环用。
+- 局限：距离仍只是上界；3 轮电路；w 依赖搜索预算；`max_period` 只限制周期，不限制辅助比特窗口长度。
 
 ## 10. 冻结流程（PI 执行；agent 不得执行 freeze）
 

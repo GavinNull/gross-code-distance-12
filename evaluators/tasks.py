@@ -70,6 +70,10 @@ class Task:
     num_workers: int = 3                                      # sinter / 距离搜索进程数（项目规定 ≤ 3）
     purpose: str = "score"                                    # "score" | "selftest"
     allow_redundant_row_omission: bool = False                # PI 未决定前一律不允许（L0-2）
+    # 评估器 v2.1：任务类型。"l2" = 逻辑错误率打分（原有）；"distance" = 只评电路级距离（H-004，不跑 L2）
+    kind: str = "l2"
+    # 调度的额外约束（任务级），目前只有 {"max_period": D}（摊销深度上限）
+    schedule_constraints: Mapping = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return json.loads(json.dumps(asdict(self), sort_keys=True, default=_jsonable))
@@ -81,6 +85,20 @@ class Task:
         if self.noise_model not in SCORING_MODELS:
             raise ValueError(f"task {self.task_id}: noise model {self.noise_model!r} is not a scoring model "
                              f"{SCORING_MODELS}")
+        if self.num_workers > 3:
+            raise ValueError("num_workers must be <= 3 (project CPU policy)")
+        if self.allow_redundant_row_omission:
+            raise ValueError("omitting redundant check rows is not allowed until the PI decides (L0-2)")
+        if self.purpose not in ("score", "selftest"):
+            raise ValueError(f"task {self.task_id}: purpose must be 'score' or 'selftest'")
+        extra = set(self.schedule_constraints) - {"max_period"}
+        if extra:
+            raise ValueError(f"task {self.task_id}: unknown schedule constraints {sorted(extra)}")
+        if self.kind == "distance":
+            self._validate_distance()
+            return
+        if self.kind != "l2":
+            raise ValueError(f"task {self.task_id}: kind must be 'l2' or 'distance'")
         if self.boundary not in ("paper", "diff"):
             raise ValueError(f"task {self.task_id}: boundary must be 'paper' or 'diff'")
         if self.boundary == "diff":
@@ -90,10 +108,22 @@ class Task:
         if int(self.stop.get("min_sector_errors") or 0) < MIN_SECTOR_ERRORS_FOR_LEADERBOARD:
             raise ValueError(f"task {self.task_id}: stop.min_sector_errors must be >= "
                              f"{MIN_SECTOR_ERRORS_FOR_LEADERBOARD}")
-        if self.num_workers > 3:
-            raise ValueError("num_workers must be <= 3 (project CPU policy)")
-        if self.allow_redundant_row_omission:
-            raise ValueError("omitting redundant check rows is not allowed until the PI decides (L0-2)")
+
+    def _validate_distance(self) -> None:
+        L = dict(self.l0)
+        if self.boundary != "none" or self.decoder or self.stop or self.funnel or self.boundary_options:
+            raise ValueError(f"task {self.task_id}: distance tasks have no L2 (boundary 'none', empty decoder / stop / "
+                             f"funnel / boundary_options)")
+        if L.get("distance_rounds") != self.rounds or not isinstance(self.rounds, int) or self.rounds < 1:
+            raise ValueError(f"task {self.task_id}: distance tasks need rounds == l0.distance_rounds >= 1")
+        if L.get("distance_seed") != "derived":
+            raise ValueError(f"task {self.task_id}: distance seed must be 'derived' (from task and schedule hashes)")
+        need = {"distance_methods", "distance_bposd_trials", "distance_lns_starts", "distance_lns_det_time",
+                "distance_timeout_s"}
+        if need - set(L):
+            raise ValueError(f"task {self.task_id}: distance budget must be fixed in the task (missing {sorted(need - set(L))})")
+        if set(L["distance_methods"]) - {"graphlike", "stim_search", "bposd"}:
+            raise ValueError(f"task {self.task_id}: unknown distance methods")
 
 
 def _jsonable(o):
@@ -271,6 +301,51 @@ _TASK_LIST = [
         num_workers=3, purpose="selftest",
     ),
 ]
+
+# ---------------------------------------------------------------------------
+# 评估器 v2.1：只评距离的任务（H-004，research/decisions.md 2026-10-02 主线）
+# ---------------------------------------------------------------------------
+# 码（多项式出处）：
+#   bb72 / bb90 / bb108 / gross：arXiv:2308.07915 Table 3（research/literature/qldpc-code-catalog.md、search/codes/catalog.py）
+#   bb120 [[120,8,12]]：l=20, m=3, A=1+x^3y^2+x^7y^2, B=1+x^16y+x^9y（E-004 用的码，search/proxy/candidates.py，
+#         试运行发现、MILP 精确 d=12；与 arXiv:2601.09911 Table I 的 [[120,8,12]]（l,m=10,6）是否等价**未核实**）
+#   cp126 coprime [[126,12,10]]：arXiv:2408.10001 Table 2，l=7, m=9, A=1+π+π^58, B=1+π^13+π^41（π=xy），
+#         这里写成 x、y 的单项式：π^k = x^(k mod 7) y^(k mod 9)
+# 约束：每校验一个辅助比特、所有行每轮都测（模板结构保证）；period ≤ 8（IBM 原电路的摊销深度）。
+# 距离在 3 轮电路上算；种子由 (task_hash, schedule_hash) 派生；预算写死（README §9.4 的标定）。
+DCIRC_BUDGET = {"distance_methods": ["graphlike", "bposd"], "distance_bposd_trials": 600, "distance_lns_starts": 32,
+                "distance_lns_det_time": 1.0, "distance_timeout_s": 1800.0}
+DCIRC_BUDGET_GROSS = {"distance_methods": ["graphlike", "bposd"], "distance_bposd_trials": 1500,
+                      "distance_lns_starts": 96, "distance_lns_det_time": 1.0, "distance_timeout_s": 3600.0}
+
+_DCIRC_CODES = [
+    # task_id, (l, m, A, B), (n, k, d), d 的出处, 已知 d_circ 上界（IBM 调度）及出处
+    ("bb72-dcirc", (6, 6, ["x^3", "y", "y^2"], ["y^3", "x", "x^2"]), (72, 12, 6), "arXiv:2308.07915 Table 3",
+     "IBM depth-8: d_circ <= 6 (E-004)"),
+    ("bb90-dcirc", (15, 3, ["x^9", "y", "y^2"], ["1", "x^2", "x^7"]), (90, 8, 10), "arXiv:2308.07915 Table 3",
+     "IBM depth-8: d_circ <= 8 (E-004; 2308.07915 Table 1)"),
+    ("bb108-dcirc", (9, 6, ["x^3", "y", "y^2"], ["y^3", "x", "x^2"]), (108, 8, 10), "arXiv:2308.07915 Table 3",
+     "IBM depth-8: d_circ <= 8 (E-004; 2308.07915 Table 1)"),
+    ("bb120-dcirc", (20, 3, ["1", "x^3*y^2", "x^7*y^2"], ["1", "x^16*y", "x^9*y"]), (120, 8, 12),
+     "E-004 pilot (MILP exact); not in the literature catalogue", "IBM term order: d_circ <= 10 (E-004)"),
+    ("cp126-dcirc", (7, 9, ["1", "x*y", "x^2*y^4"], ["1", "x^6*y^4", "x^6*y^5"]), (126, 12, 10),
+     "arXiv:2408.10001 Table 2 (coprime BB)", "IBM term order: d_circ <= 9 (E-004; 2408.10001 Sec. 5.2)"),
+    ("gross-dcirc", (12, 6, ["x^3", "y", "y^2"], ["y^3", "x", "x^2"]), (144, 12, 12), "arXiv:2308.07915 Table 3",
+     "IBM depth-8: d_circ <= 10 (E-002); Strikis Fig. 12: 11 conjectured"),
+]
+for _tid, (_l, _m, _A, _B), (_n, _k, _d), _src, _known in _DCIRC_CODES:
+    _TASK_LIST.append(Task(
+        task_id=_tid,
+        description=(f"distance-only task (H-004): [[{_n},{_k},{_d}]] BB code ({_src}); score = circuit-level distance "
+                     f"upper bound on the 3-round memory circuits (both bases, SD6 fault locations), larger is better; "
+                     f"ties: fewer minimum-weight witnesses, then smaller period. One ancilla per check, every row "
+                     f"every round, period <= 8. Known: {_known}. No L2."),
+        code_family={"kind": "bb", "fixed": {"l": _l, "m": _m, "A": _A, "B": _B}},
+        noise_model="sd6", p=1e-3, decoder={}, boundary="none", rounds=3, stop={},
+        l0={"min_circuit_distance": None, "distance_rounds": 3, "distance_seed": "derived",
+            **(DCIRC_BUDGET_GROSS if _n > 126 else DCIRC_BUDGET)},
+        num_workers=3, kind="distance", schedule_constraints={"max_period": 8},
+    ))
 
 for _t in _TASK_LIST:
     _t.validate()

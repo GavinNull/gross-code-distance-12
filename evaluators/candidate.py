@@ -70,6 +70,8 @@ __all__ = [
     "template_edges",
     "schedule_from_cyclic_layers",
     "Unrolled",
+    "template_round_counts",
+    "describe_faults",
 ]
 
 SCHEDULE_FORMAT = "qec-schedule/v1"
@@ -142,7 +144,8 @@ def _shift(c: CheckTiming, s: int, D: int) -> CheckTiming:
 
 
 def _is_int(x) -> bool:
-    return isinstance(x, int) and not isinstance(x, bool)
+    """整数（含 numpy 整数，评估器 v2.1 / auditor v2 S2(a)）；布尔值不算。"""
+    return isinstance(x, (int, np.integer)) and not isinstance(x, (bool, np.bool_))
 
 
 # ---------------------------------------------------------------------------
@@ -152,7 +155,8 @@ def _is_int(x) -> bool:
 def parse_schedule(obj) -> ScheduleSpec:
     """把候选给的 JSON（字符串或 dict）解析成 ScheduleSpec。只做语法检查；与码相关的检查见 validate_schedule。"""
     if isinstance(obj, ScheduleSpec):
-        return obj
+        # 评估器 v2.1（auditor v2 S2(b)）：对象也要走同一套严格解析（period 上限、时间步范围），不能绕过 JSON 检查
+        obj = obj.to_dict()
     if isinstance(obj, (str, bytes)):
         try:
             obj = json.loads(obj)
@@ -178,6 +182,7 @@ def parse_schedule(obj) -> ScheduleSpec:
     if not _is_int(D) or not 2 <= D <= MAX_PERIOD:
         problems.append(f"period must be an integer in 2..{MAX_PERIOD}, got {D!r}")
         raise ScheduleError(problems)
+    D = int(D)
     name = obj.get("name", "")
     if not isinstance(name, str) or len(name) > 200:
         problems.append("name must be a string of at most 200 characters")
@@ -207,6 +212,8 @@ def parse_schedule(obj) -> ScheduleSpec:
                 continue
             pairs = []
             for e in cn:
+                if isinstance(e, np.ndarray) and e.ndim == 1:      # numpy 用户常见写法（v2.1）
+                    e = e.tolist()
                 if (not isinstance(e, (list, tuple)) or len(e) != 2 or not all(_is_int(x) for x in e)
                         or e[0] < 0 or not 0 <= e[1] < D):
                     problems.append(f"{where}: bad CNOT entry {e!r} (need [data_column >= 0, time_step in 0..{D - 1}])")
@@ -433,3 +440,174 @@ def schedule_from_cyclic_layers(period: int, x_checks, z_checks) -> ScheduleSpec
         return tuple(CheckTiming(int(p), int(m), tuple(sorted((int(a), int(t)) for a, t in cn.items())))
                      for p, m, cn in lst)
     return ScheduleSpec(int(period), mk(x_checks), mk(z_checks))
+
+
+# ---------------------------------------------------------------------------
+# 评估器 v2.1：模板结构的独立核对（auditor v2 S8）与见证翻译成调度坐标
+# ---------------------------------------------------------------------------
+
+def template_round_counts(circuit: stim.Circuit, code: CSSCode, basis: str) -> dict[str, list[int]]:
+    """直接从生成的电路核对模板结构，返回每个校验行被完整测量的次数 {"X": [...], "Z": [...]}（按行序）。
+
+    独立于 `unroll` 的实现，逐比特读电路：每个辅助比特的操作序列必须恰好是若干次
+    “复位 → 与该行支撑上的每个数据比特各一次 CNOT（方向按模板）→ 测量”，中间没有其他操作；数据比特必须是
+    “第 0 层复位 → 只有 CNOT → 最后一层读出”。结构不符抛 ValueError。所以返回的计数就是“每行在每轮恰好被它
+    自己的辅助比特测量一次”的直接证据（pipeline 用它核对轮数，L0 的 flow 计数作为第二道防线，README §3.2.2）。
+    """
+    lay = layout_for(code)
+    role: dict[int, tuple[str, int]] = {q: ("D", j) for j, q in enumerate(lay.data)}
+    role.update({q: ("X", i) for i, q in enumerate(lay.x_anc)})
+    role.update({q: ("Z", i) for i, q in enumerate(lay.z_anc)})
+    seq: dict[int, list[tuple[str, int]]] = {q: [] for q in role}
+    layer = 0
+    for inst in circuit.flattened():
+        name = inst.name
+        if name == "TICK":
+            layer += 1
+            continue
+        if name in ("DETECTOR", "OBSERVABLE_INCLUDE", "QUBIT_COORDS", "SHIFT_COORDS"):
+            continue
+        if name not in ("R", "RX", "M", "MX", "CX"):
+            raise ValueError(f"template circuit contains unexpected instruction {name}")
+        ts = [t.value for t in inst.targets_copy()]
+        if name == "CX":
+            for a, b in zip(ts[::2], ts[1::2]):
+                if a not in role or b not in role:
+                    raise ValueError(f"CX on unknown qubit {a}, {b}")
+                seq[a].append(("C", b))
+                seq[b].append(("T", a))
+        else:
+            for q in ts:
+                if q not in role:
+                    raise ValueError(f"{name} on unknown qubit {q}")
+                seq[q].append((name, layer))
+    final_layer = layer
+    reset_of = {"X": "RX", "Z": "R"}
+    meas_of = {"X": "MX", "Z": "M"}
+    out: dict[str, list[int]] = {"X": [], "Z": []}
+    for typ, H, ancs in (("X", code.HX, lay.x_anc), ("Z", code.HZ, lay.z_anc)):
+        want_kind = "C" if typ == "X" else "T"      # X 辅助比特是 CNOT 的 control，Z 辅助比特是 target
+        for i, q in enumerate(ancs):
+            supp = {lay.data[c] for c in np.flatnonzero(H[i])}
+            ops = seq[q]
+            cnt = k = 0
+            while k < len(ops):
+                if ops[k][0] != reset_of[typ]:
+                    raise ValueError(f"{typ}-check #{i}: expected {reset_of[typ]} at op {k}, got {ops[k]}")
+                k += 1
+                seen = set()
+                while k < len(ops) and ops[k][0] in ("C", "T"):
+                    if ops[k][0] != want_kind or ops[k][1] not in supp or ops[k][1] in seen:
+                        raise ValueError(f"{typ}-check #{i}: bad CNOT {ops[k]} in instance {cnt}")
+                    seen.add(ops[k][1])
+                    k += 1
+                if seen != supp:
+                    raise ValueError(f"{typ}-check #{i}: instance {cnt} touches {len(seen)} of {len(supp)} "
+                                     f"data qubits")
+                if k >= len(ops) or ops[k][0] != meas_of[typ]:
+                    raise ValueError(f"{typ}-check #{i}: instance {cnt} is not closed by {meas_of[typ]}")
+                if ops[k][1] >= final_layer:
+                    raise ValueError(f"{typ}-check #{i}: measured in the final readout layer")
+                k += 1
+                cnt += 1
+            out[typ].append(cnt)
+    for j, q in enumerate(lay.data):
+        ops = seq[q]
+        if not ops or ops[0] != (reset_of[basis], 0):
+            raise ValueError(f"data column {j}: first operation must be {reset_of[basis]} in layer 0")
+        if ops[-1] != (meas_of[basis], final_layer):
+            raise ValueError(f"data column {j}: last operation must be the final {meas_of[basis]} readout")
+        if any(o[0] not in ("C", "T") for o in ops[1:-1]):
+            raise ValueError(f"data column {j}: only CNOTs are allowed between preparation and readout")
+    return out
+
+
+def _qubit_label(role: tuple[str, int]) -> str:
+    typ, i = role
+    return f"data col {i}" if typ == "D" else f"{typ}-anc #{i}"
+
+
+def describe_faults(spec: ScheduleSpec, code: CSSCode, rounds: int, faults) -> list[dict]:
+    """把距离见证的每个故障（evaluators.distance.Fault 或其 dict）翻译成调度坐标（评估器 v2.1）。
+
+    `spec` 必须是生成该电路的那份调度（pipeline 用规范化调度 spec.canonical() 生成电路）。每个故障给出：
+      layer         展开后的电路层（= 故障之前的 TICK 数；最终读出层 = 展开层数）；
+      cycle, step   周期坐标：layer = sigma + cycle·D + step，step 是周期内时间步 0..D−1，与调度 JSON 的时间步
+                    同一套（cycle 可以是 −1：第一个完整周期之前的灌入层）；
+      op            该层该比特上的模板操作：cnot / reset / measure / idle / data_reset / readout；
+      check, round  涉及的校验（"X#i" / "Z#i"，i = HX / HZ 行号）及其第几轮实例（0 起；在两轮之间空闲时为 None）；
+      data_col      涉及的数据列；
+      paulis        [(比特角色, Pauli)]，比特角色为 "data col c"、"X-anc #i"、"Z-anc #i"；
+      text          一行可读描述（Report.to_text 使用）。
+    """
+    U = unroll(spec, code, rounds)
+    D = spec.period
+    lay = layout_for(code)
+    role: dict[int, tuple[str, int]] = {q: ("D", j) for j, q in enumerate(lay.data)}
+    role.update({q: ("X", i) for i, q in enumerate(lay.x_anc)})
+    role.update({q: ("Z", i) for i, q in enumerate(lay.z_anc)})
+    dm = {}
+    for checks, ancs in ((spec.x_checks, lay.x_anc), (spec.z_checks, lay.z_anc)):
+        for c, q in zip(checks, ancs):
+            dm[q] = c.offsets(D)[0]
+    readout_layer = U.num_layers
+    out = []
+    for f in faults:
+        f = f if isinstance(f, Mapping) else vars(f)
+        layer = int(f["tick"])
+        rel = layer - U.sigma
+        cycle, step = rel // D, rel % D
+        qs = [int(q) for q in f.get("qubits", [])]
+        paulis = []
+        for p in f.get("paulis", []):
+            letter, q = p[0], int(p[1:])
+            paulis.append((_qubit_label(role[q]) if q in role else f"qubit {q}", letter))
+        check = rnd = col = None
+        op = "idle"
+        anc = next((q for q in qs if role.get(q, ("?",))[0] in ("X", "Z")), None)
+        dq = next((q for q in qs if role.get(q, ("?",))[0] == "D"), None)
+        if dq is not None:
+            col = role[dq][1]
+        if layer >= readout_layer:
+            op = "readout"
+        elif anc is not None:
+            typ, idx = role[anc]
+            check = f"{typ}#{idx}"
+            j = (layer - U.start[anc]) // D
+            inside = 0 <= j < rounds and 0 <= layer - U.start[anc] - D * j <= dm[anc]
+            rnd = int(j) if inside else None
+            cx = [pr for pr in U.cnots.get(layer, []) if anc in pr]
+            if anc in [q for q, _ in U.preps.get(layer, [])]:
+                op = "reset"
+            elif anc in [q for q, _, _ in U.meas.get(layer, [])]:
+                op = "measure"
+            elif cx:
+                op = "cnot"
+                other = cx[0][0] if cx[0][1] == anc else cx[0][1]
+                col = role[other][1]
+        elif dq is not None:
+            if layer == 0:
+                op = "data_reset"
+            else:
+                cx = [pr for pr in U.cnots.get(layer, []) if dq in pr]
+                if cx:
+                    other = cx[0][0] if cx[0][1] == dq else cx[0][1]
+                    typ, idx = role[other]
+                    check, op = f"{typ}#{idx}", "cnot"
+                    rnd = int((layer - U.start[other]) // D)
+        if f.get("measurement_record") is not None and not paulis:
+            what = f"flip of measurement record {f['measurement_record']}"
+        else:
+            what = " * ".join(f"{p} on {r}" for r, p in paulis) or "?"
+        ctx = {"cnot": f"CNOT of {check} (round {rnd}) with data col {col}",
+               "reset": f"after reset of {check} (round {rnd})",
+               "measure": f"before measurement of {check} (round {rnd})",
+               "data_reset": f"after data reset (data col {col})",
+               "readout": f"before final data readout (data col {col})",
+               "idle": "idle " + (f"{check} (round {rnd})" if check and rnd is not None else
+                                  f"{check} (between rounds)" if check else
+                                  f"data col {col}" if col is not None else "")}[op]
+        out.append({"layer": layer, "cycle": int(cycle), "step": int(step), "op": op, "check": check,
+                    "round": rnd, "data_col": col, "gate": f.get("gate"), "paulis": paulis,
+                    "text": f"cycle {cycle} step {step} (layer {layer}): {ctx}: {f.get('gate')} -> {what}"})
+    return out

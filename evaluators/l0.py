@@ -104,6 +104,11 @@ class L0Constraints:
     #   "flows"（默认）：对整条电路求 stim flow 生成元，不切段，支持辅助比特跨轮流水（README §3.2）；
     #   "segments"：旧方法，在“干净切口”处切段（流水电路会被误拒），只为对照保留。
     coverage_method: str = "flows"
+    # 每个生成元“自己的”辅助比特（评估器 v2.1，修复 auditor v2 S8）：{"X3": 电路比特, "Z5": ...}，键为
+    # 类型 + HX/HZ 行号。给出时，flow 计数只数**包含该辅助比特某次测量所在层**的窗口：冗余行 s = 其他行之和时，
+    # 其他行在别的时刻的测量组合不再被算成 s 的额外窗口（否则“测了 6 次，要求 3 次”）。只能让计数变少，
+    # 不会放过少测。pipeline 的模板电路总是给出它；原始电路（check_l0 直接调用）不给，行为不变。
+    generator_ancillas: Mapping[str, int] | None = None
 
 
 @dataclass
@@ -662,9 +667,12 @@ def _segments(parsed: _Parsed, layout: _Layout, nq: int):
 
 
 def _check_coverage(parsed: _Parsed, code: CSSCode, basis: str, layout: _Layout, rounds: int | None,
-                    require_opposite: bool, nq: int, method: str = "flows") -> tuple[CheckResult, CheckResult]:
+                    require_opposite: bool, nq: int, method: str = "flows",
+                    own_ancillas: Mapping[str, int] | None = None) -> tuple[CheckResult, CheckResult]:
     if method == "flows":
-        return _check_coverage_flows(parsed, code, basis, layout, rounds, require_opposite, nq)
+        return _check_coverage_flows(parsed, code, basis, layout, rounds, require_opposite, nq, own_ancillas)
+    if own_ancillas is not None:
+        raise ValueError("generator_ancillas is only supported by coverage_method='flows'")
     if method != "segments":
         raise ValueError(f"unknown coverage_method {method!r} (use 'flows' or 'segments')")
     return _check_coverage_segments(parsed, code, basis, layout, rounds, require_opposite, nq)
@@ -896,8 +904,12 @@ def _check_reextraction(body: _Body, gens, instances, layout: _Layout, nq: int, 
 
 
 def _check_coverage_flows(parsed: _Parsed, code: CSSCode, basis: str, layout: _Layout, rounds: int | None,
-                          require_opposite: bool, nq: int) -> tuple[CheckResult, CheckResult]:
+                          require_opposite: bool, nq: int,
+                          own_ancillas: Mapping[str, int] | None = None) -> tuple[CheckResult, CheckResult]:
     """不依赖切段的覆盖检查（适用于辅助比特跨轮流水的电路）。
+
+    own_ancillas（评估器 v2.1，auditor v2 S8）：{"X3": 比特, ...}。给出时第 2 步只用“跨度包含该生成元自己的
+    辅助比特某次测量所在层”的候选窗口（由最小跨度基的性质，单个自测量 {m_j} ∈ A_s 时一定有这样的候选）。
 
     1. body = 去掉数据制备和最终读出的电路（数据输入自由）。用 stim `flow_generators()` 求出全部 flow，
        在 GF(2) 上消元得到：D = 所有“输入输出都为恒等”的测量奇偶（与数据输入无关的确定奇偶），以及每个
@@ -936,6 +948,14 @@ def _check_coverage_flows(parsed: _Parsed, code: CSSCode, basis: str, layout: _L
            [("Z", i, code.HZ[i]) for i in range(code.HZ.shape[0])]
     gens = [g for g in gens if g[2].any()]
     layer_of = body.rec_layer
+    own_layers = None
+    if own_ancillas is not None:
+        own_layers = {}
+        q_layers: dict[int, list[int]] = {}
+        for b, g in enumerate(body.local_to_global):
+            q_layers.setdefault(parsed.meas_op[g].qubits[0], []).append(layer_of[b])
+        for key, q in own_ancillas.items():
+            own_layers[str(key)] = sorted(q_layers.get(int(q), []))
 
     def span_layers(v: int) -> tuple[int, int]:
         return layer_of[_lowbit(v)], layer_of[v.bit_length() - 1]
@@ -964,6 +984,11 @@ def _check_coverage_flows(parsed: _Parsed, code: CSSCode, basis: str, layout: _L
         # 便于下面的重提取判据（评估器 v2）。
         cands = sorted((span_layers(Bs.ends[e]) + (Bs.ends[e],) for e in Bs.phi),
                        key=lambda t: (t[1], -t[0], t[2].bit_count()))
+        if own_layers is not None:
+            ol = own_layers.get(f"{typ}{idx}")
+            if ol is None:
+                raise ValueError(f"generator_ancillas has no entry for {typ}{idx}")
+            cands = [c for c in cands if any(c[0] <= L <= c[1] for L in ol)]
         chosen: list[tuple[int, int, int]] = []
         last_end = -1
         for lo, hi, v in cands:
@@ -1323,7 +1348,7 @@ def _check_l0_single(circuit: stim.Circuit, code: CSSCode, basis: str,
     else:
         checks.append(CheckResult("logical_injection", "skipped", "requires deterministic detectors"))
     cov, dcov = _check_coverage(parsed, code, basis, layout, cons.rounds, cons.require_opposite_type_detectors,
-                                circuit.num_qubits, cons.coverage_method)
+                                circuit.num_qubits, cons.coverage_method, cons.generator_ancillas)
     checks.extend([cov, dcov])
 
     d = None

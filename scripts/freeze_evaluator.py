@@ -58,6 +58,9 @@ EXTRA_FILES = (
     "tests/test_noise.py",
     "tests/test_pipeline.py",
     "tests/test_stats.py",
+    "tests/test_v21_audit_fixes.py",
+    "tests/test_distance_tasks.py",
+    "tests/v21_helpers.py",
 )
 _SELF_FILES = {MANIFEST.name, FROZEN.name}
 _NATIVE_SUFFIXES = (".so", ".pyd", ".dylib", ".dll")
