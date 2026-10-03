@@ -208,6 +208,22 @@ def main():
     info = req.get("info") or {}
     del P, req["problem"]
 
+    # 预导入的库可能已经把禁用模块（ctypes 等）放进 sys.modules：从 sys.modules 里删掉名字，候选再 import 就会
+    # 触发 audit 的 import 事件而被拒（库内部已持有的引用不受影响）
+    _deny = set(req.get("deny_imports", []))
+    for _name in list(sys.modules):
+        if _name in _deny or _name.split(".")[0] in _deny:
+            sys.modules.pop(_name, None)
+    # 没有 audit 事件的危险函数（os.mkfifo / os.mknod 可在任意位置建命名管道，作为跨 sector 的信道）：直接删掉
+    import posix
+    for _mod in (os, posix):
+        for _fn in ("mkfifo", "mknod", "forkpty", "openpty", "login_tty", "setsid", "setpgid", "killpg",
+                    "plock", "register_at_fork"):
+            if hasattr(_mod, _fn):
+                try:
+                    delattr(_mod, _fn)
+                except AttributeError:
+                    pass
     _install_audit_hook(req["workdir"], req.get("deny_roots", []), req.get("allow_roots", []),
                         req.get("deny_files", []), req.get("deny_imports", []))
     try:

@@ -6,7 +6,7 @@
 
 `CpSatMLE`：在一个 sector 的解码问题上求
     min Σ_j w_j x_j   s.t.  H x = s (mod 2),  x ∈ {0,1}^M,   w_j = log((1-p_j)/p_j)
-用 OR-Tools CP-SAT（AddBoolXOr），权重按 `scale` 取整。时间上限内证明最优时 `optimal=True`；否则只是可行解
+用 OR-Tools CP-SAT（奇偶约束写成带整数松弛变量的线性等式），权重按 `scale` 取整。时间上限内证明最优时 `optimal=True`；否则只是可行解
 （报告里分开计数）。这是最可能**错误**（不是最可能的逻辑类，没有对简并求和），与 Tesseract / IP 解码器同口径。
 """
 from __future__ import annotations
@@ -66,11 +66,10 @@ class CpSatMLE:
         m = cp_model.CpModel()
         x = [m.NewBoolVar(f"x{j}") for j in range(len(w))]
         for i, cols in enumerate(rows):
-            lits = [x[j] for j in cols]
-            if s[i]:
-                m.AddBoolXOr(lits)
-            else:
-                m.AddBoolXOr(lits + [m.NewConstant(1)])
+            # 奇偶约束写成线性等式 Σ x_j − 2 t_i = s_i（CP-SAT 对这种形式比 AddBoolXOr 快得多：BB72 上 0.2–1 s / shot，
+            # AddBoolXOr 在 30 s 内一个都证明不了最优）
+            t = m.NewIntVar(0, len(cols) // 2, f"t{i}")
+            m.Add(sum(x[j] for j in cols) - 2 * t == int(s[i]))
         m.Minimize(sum(int(round(self.scale * w[j])) * x[j] for j in range(len(w))))
         solver = cp_model.CpSolver()
         solver.parameters.max_time_in_seconds = self.time_limit_s
