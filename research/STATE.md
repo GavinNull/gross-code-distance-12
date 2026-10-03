@@ -8,7 +8,6 @@
 
 ## 待人决策
 
-- **是否安装 Relay-BP 官方包** `relay-bp`（PyPI 0.2.2，IBM 作者，Apache-2.0，Rust 二进制 + Python 绑定）作为解码器线的主基线
 0. **是否加强 Bash 侧的防护**（auditor F2）：目前 hook 只拦截 Edit/Write 工具，agent 用 Bash 写 `evaluators/` 拦不住，只能靠冻结后的哈希校验和文件系统锁事后发现。
    可选：(a) 在 `.claude/settings.json` 加一个检查 Bash 命令的 hook；(b) 把 `.claude/settings.json` 纳入冻结清单。这两项都是项目配置，由 PI 决定，lead 不自行修改。
 1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。

@@ -33,6 +33,7 @@ dependencies = [
     "pyyaml",
     "jupyterlab",
     "ipykernel",
+    "relay-bp==0.2.2",
 ]
 
 [dependency-groups]
