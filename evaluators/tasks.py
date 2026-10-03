@@ -97,8 +97,11 @@ class Task:
         if self.kind == "distance":
             self._validate_distance()
             return
+        if self.kind == "decoder":
+            self._validate_decoder()
+            return
         if self.kind != "l2":
-            raise ValueError(f"task {self.task_id}: kind must be 'l2' or 'distance'")
+            raise ValueError(f"task {self.task_id}: kind must be 'l2', 'distance' or 'decoder'")
         if self.boundary not in ("paper", "diff"):
             raise ValueError(f"task {self.task_id}: boundary must be 'paper' or 'diff'")
         if self.boundary == "diff":
@@ -108,6 +111,40 @@ class Task:
         if int(self.stop.get("min_sector_errors") or 0) < MIN_SECTOR_ERRORS_FOR_LEADERBOARD:
             raise ValueError(f"task {self.task_id}: stop.min_sector_errors must be >= "
                              f"{MIN_SECTOR_ERRORS_FOR_LEADERBOARD}")
+
+    def _validate_decoder(self) -> None:
+        """解码器任务（H-005）：电路（码、调度、噪声、p、轮数、paper 边界）固定，候选只交解码程序。
+        解码器设置全部在 `decoder` 映射里（不加 Task 字段，保证已有任务的哈希不变），见 README §12。"""
+        D = dict(self.decoder)
+        if self.boundary != "paper" or self.l0 or self.funnel or self.boundary_options or self.schedule_constraints:
+            raise ValueError(f"task {self.task_id}: decoder tasks use boundary 'paper' and no l0 / funnel / "
+                             f"boundary_options / schedule_constraints")
+        if D.get("interface") not in ("program", "mp_rule"):
+            raise ValueError(f"task {self.task_id}: decoder.interface must be 'program' or 'mp_rule'")
+        if D.get("schedule") not in ("ibm-depth8", "surface-standard"):
+            raise ValueError(f"task {self.task_id}: unknown decoder.schedule {D.get('schedule')!r}")
+        if (D["schedule"] == "ibm-depth8") != (self.code_family.get("kind") == "bb"):
+            raise ValueError(f"task {self.task_id}: ibm-depth8 is for BB codes, surface-standard for surface codes")
+        ref = D.get("reference") or {}
+        if ref.get("name") not in ("relay_bp", "mp_relay"):
+            raise ValueError(f"task {self.task_id}: the primary reference must be Relay-BP")
+        sp_ = D.get("speed") or {}
+        if not (float(sp_.get("K", 0)) >= 1.0 and float(sp_.get("min_shot_cap_s", -1)) >= 0
+                and float(sp_.get("shot_wall_s", 0)) > 0 and float(sp_.get("build_cpu_s", 0)) > 0):
+            raise ValueError(f"task {self.task_id}: decoder.speed needs K >= 1, min_shot_cap_s >= 0, shot_wall_s > 0, "
+                             f"build_cpu_s > 0")
+        se = D.get("search") or {}
+        if int(se.get("shots", 0)) < 1 or int(se.get("batch_size", 0)) < 1:
+            raise ValueError(f"task {self.task_id}: decoder.search needs shots and batch_size")
+        if D["interface"] == "mp_rule":
+            mp = D.get("mp") or {}
+            if int(mp.get("max_total_iters", 0)) < 1:
+                raise ValueError(f"task {self.task_id}: mp_rule tasks need mp.max_total_iters")
+        if self.purpose == "score" and int(self.stop.get("min_sector_errors") or 0) < MIN_SECTOR_ERRORS_FOR_LEADERBOARD:
+            raise ValueError(f"task {self.task_id}: stop.min_sector_errors must be >= "
+                             f"{MIN_SECTOR_ERRORS_FOR_LEADERBOARD}")
+        if int(self.stop.get("max_shots", 0)) < 1 or int(self.stop.get("batch_size", 0)) < 1:
+            raise ValueError(f"task {self.task_id}: stop needs max_shots and batch_size")
 
     def _validate_distance(self) -> None:
         L = dict(self.l0)
@@ -346,6 +383,86 @@ for _tid, (_l, _m, _A, _B), (_n, _k, _d), _src, _known in _DCIRC_CODES:
             **(DCIRC_BUDGET_GROSS if _n > 126 else DCIRC_BUDGET)},
         num_workers=3, kind="distance", schedule_constraints={"max_period": 8},
     ))
+
+# ---------------------------------------------------------------------------
+# 解码器任务（H-005，2026-10-03）：电路固定（IBM depth-8 调度、sd6、paper 边界、X/Z 联合采样、按 sector 分开解码），
+# 候选提交完整解码程序 make_decoder(H, L, priors, info) -> decode(syndrome)；或者（mp_rule）只提交消息传递的
+# 局部更新规则，由评估器的引擎执行并强制迭代上限。分数 = 留出集上的 P_any（X/Z 任一失败即失败），速度为次级指标。
+# 速度预算以 Relay-BP（官方包 relay-bp==0.2.2）为基准：每 shot 上限 K × max(参考在该 shot 上的 CPU, 参考平均 CPU,
+# min_shot_cap_s)，总上限 K × 参考总 CPU；超时的 shot 按失败计。README §12。
+# ---------------------------------------------------------------------------
+# Relay-BP 参数：arXiv:2506.01779（Relay-BP-5，XZ 解码）——min-sum、无缩放（alpha=None）、γ0=0.125、第 0 段 80 次迭代、
+# 之后每段 γ ~ U[-0.24, 0.66]、60 次迭代、最多 301 段（num_sets=300 个 relay 段 + 第 0 段）、找到 S=5 个解停止、取权重最低。
+# 官方包的参数名：pre_iter / num_sets / set_max_iter / gamma_dist_interval / stop_nconv（包的默认 gamma0=0.1、
+# stop_nconv=1，这里按论文取 0.125 与 5）。seed 固定（γ 的抽样是解码器内部的伪随机，与 shot 无关）。
+RELAY_BP_PAPER = {"gamma0": 0.125, "pre_iter": 80, "num_sets": 300, "set_max_iter": 60,
+                  "gamma_dist_interval": [-0.24, 0.66], "stop_nconv": 5, "alpha": None, "seed": 0}
+BPLSD_PARAMS = {"max_iter": 10000, "bp_method": "min_sum", "ms_scaling_factor": 0.0, "schedule": "parallel",
+                "lsd_method": "lsd_cs", "lsd_order": 7}
+_DEC_SPEED = {"K": 2.0, "min_shot_cap_s": 0.002, "shot_wall_s": 30.0, "build_cpu_s": 120.0}
+_DEC_REFS = [{"name": "bposd", "params": _IBM_BPOSD}, {"name": "bplsd", "params": BPLSD_PARAMS}]
+_DEC_NEAR_OPT = {"method": "cpsat_mle", "max_shots": 200, "time_limit_s": 60.0, "num_workers": 1}
+
+for _tid, (_l, _m, _A, _B), (_n, _k, _d), _rounds, _desc, _search in (
+        ("bb72-dec-p3e-3", (6, 6, ["x^3", "y", "y^2"], ["y^3", "x", "x^2"]), (72, 12, 6), 6,
+         "[[72,12,6]] BB code (arXiv:2308.07915 Table 3)", {"shots": 20000, "batch_size": 1000}),
+        ("bb90-dec-p3e-3", (15, 3, ["x^9", "y", "y^2"], ["1", "x^2", "x^7"]), (90, 8, 10), 10,
+         "[[90,8,10]] BB code (arXiv:2308.07915 Table 3)", {"shots": 10000, "batch_size": 500})):
+    _TASK_LIST.append(Task(
+        task_id=_tid,
+        description=(f"decoder task (H-005): {_desc}, IBM depth-8 schedule, SD6 p=3e-3, {_rounds} noisy rounds, paper "
+                     f"boundary, X/Z joint sampling, X and Z sectors decoded separately (each sector's decoder sees "
+                     f"only its own syndrome). Candidate = full decoding program make_decoder(H, L, priors, info) -> "
+                     f"decode(syndrome) -> k observable bits. Score = held-out P_any (either sector wrong), lower is "
+                     f"better; speed budget relative to Relay-BP (arXiv:2506.01779 parameters, official package)."),
+        code_family={"kind": "bb", "fixed": {"l": _l, "m": _m, "A": _A, "B": _B}},
+        noise_model="sd6", p=3e-3,
+        decoder={"interface": "program", "schedule": "ibm-depth8",
+                 "reference": {"name": "relay_bp", "params": RELAY_BP_PAPER},
+                 "secondary_references": _DEC_REFS, "speed": _DEC_SPEED, "search": _search,
+                 "near_optimal": _DEC_NEAR_OPT},
+        boundary="paper", rounds=_rounds,
+        stop={"max_shots": 5_000_000, "max_errors": 1000, "min_sector_errors": 1000, "batch_size": 1000},
+        l0={}, num_workers=3, kind="decoder",
+    ))
+
+_TASK_LIST.append(Task(
+    task_id="bb72-mp-p3e-3",
+    description=("decoder task (H-005), message-passing interface: same circuit and noise as bb72-dec-p3e-3, but the "
+                 "candidate only supplies local update rules (check rule, variable rule, schedule of legs); the "
+                 "evaluator's own engine runs them with a hard cap on the total number of iterations "
+                 "(FPGA-style). Rules are restricted Python (AST whitelist: row-wise numpy only). Reference = the "
+                 "engine running Relay-BP rules under the same cap."),
+    code_family={"kind": "bb", "fixed": {"l": 6, "m": 6, "A": ["x^3", "y", "y^2"], "B": ["y^3", "x", "x^2"]}},
+    noise_model="sd6", p=3e-3,
+    decoder={"interface": "mp_rule", "schedule": "ibm-depth8",
+             "reference": {"name": "mp_relay", "params": {"gamma0": 0.125, "pre_iter": 80, "set_max_iter": 60,
+                                                         "gamma_dist_interval": [-0.24, 0.66], "stop_nconv": 5,
+                                                         "seed": 0}},
+             "secondary_references": [{"name": "relay_bp", "params": RELAY_BP_PAPER}],
+             "speed": {"K": 3.0, "min_shot_cap_s": 0.01, "shot_wall_s": 60.0, "build_cpu_s": 60.0},
+             "mp": {"max_total_iters": 500, "max_legs": 64},
+             "search": {"shots": 4000, "batch_size": 500}, "near_optimal": _DEC_NEAR_OPT},
+    boundary="paper", rounds=6,
+    stop={"max_shots": 5_000_000, "max_errors": 1000, "min_sector_errors": 1000, "batch_size": 1000},
+    l0={}, num_workers=3, kind="decoder",
+))
+
+_TASK_LIST.append(Task(
+    task_id="selftest-surface-d5-dec",
+    description=("self-test decoder task (not a research result): rotated surface code d=5, stim's standard CNOT "
+                 "order, SD6 p=5e-3, 5 rounds, paper boundary, X/Z joint sampling, sectors decoded separately."),
+    code_family={"kind": "rotated_surface", "fixed": {"d": 5}},
+    noise_model="sd6", p=5e-3,
+    decoder={"interface": "program", "schedule": "surface-standard",
+             "reference": {"name": "relay_bp", "params": RELAY_BP_PAPER},
+             "secondary_references": [{"name": "pymatching", "params": {}}],
+             "speed": _DEC_SPEED, "search": {"shots": 2000, "batch_size": 500},
+             "near_optimal": _DEC_NEAR_OPT},
+    boundary="paper", rounds=5,
+    stop={"max_shots": 200_000, "max_errors": 300, "min_sector_errors": 100, "batch_size": 1000},
+    l0={}, num_workers=3, kind="decoder", purpose="selftest",
+))
 
 for _t in _TASK_LIST:
     _t.validate()
