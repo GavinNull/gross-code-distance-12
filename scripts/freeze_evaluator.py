@@ -61,6 +61,7 @@ EXTRA_FILES = (
     "tests/test_v21_audit_fixes.py",
     "tests/test_distance_tasks.py",
     "tests/v21_helpers.py",
+    "tests/test_decoder_eval.py",          # 解码器任务（H-005）
 )
 _SELF_FILES = {MANIFEST.name, FROZEN.name}
 _NATIVE_SUFFIXES = (".so", ".pyd", ".dylib", ".dll")

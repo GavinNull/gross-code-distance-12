@@ -46,6 +46,8 @@ PINNED_VERSIONS = {
     "scipy": "1.18.1",
     "ortools": "9.15.6755",
     "python-sat": "1.9.dev15",
+    "relay-bp": "0.2.2",          # 解码器任务的主参考（H-005）
+    "psutil": "7.2.2",            # 解码器任务的 CPU 计时（H-005）
 }
 
 
