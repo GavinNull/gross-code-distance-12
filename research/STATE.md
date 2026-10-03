@@ -8,6 +8,7 @@
 
 ## 待人决策
 
+- **是否安装 Relay-BP 官方包** `relay-bp`（PyPI 0.2.2，IBM 作者，Apache-2.0，Rust 二进制 + Python 绑定）作为解码器线的主基线
 0. **是否加强 Bash 侧的防护**（auditor F2）：目前 hook 只拦截 Edit/Write 工具，agent 用 Bash 写 `evaluators/` 拦不住，只能靠冻结后的哈希校验和文件系统锁事后发现。
    可选：(a) 在 `.claude/settings.json` 加一个检查 Bash 命令的 hook；(b) 把 `.claude/settings.json` 纳入冻结清单。这两项都是项目配置，由 PI 决定，lead 不自行修改。
 1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。
@@ -26,7 +27,7 @@
 
 - **E-006 解码器提升空间**（30 CPU 小时）：BP-OSD 对比逐 shot 精确解码；固定权重故障采样外推到 p=1e-3；解码器最低失败权重 → `experiments/E-006-decoder-headroom.yaml`
 - **解码器评估任务 + 进化框架接入**（worktree，PI 要求同步搭建）：`kind="decoder"` 任务、沙箱执行候选解码器、搜索集 / 留出集、速度预算、BP-OSD 与 BP+LSD 参考、DecoderProblem（mock）
-- lit-scout：qLDPC 解码器竞争格局（BP+LSD、Relay-BP、神经解码器、AI 设计的解码器）→ `research/literature/qldpc-decoders-landscape.md`
+- ~~lit-scout：解码器竞争格局~~ 已完成：BP-OSD 的提升空间已被 Relay-BP（10–100 倍）等兑现；剩余目标是“FPGA 友好解码器与近最优之间约 17 倍的差距”。H-005 已修订
 
 ## 暂停中
 
