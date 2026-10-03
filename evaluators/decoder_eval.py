@@ -13,8 +13,8 @@
      每个 sector 各自的子进程（一个 worker 一个 Z 会话、一个 X 会话），**跑一个 sector 时另一个 sector 的
      所有子进程都被 SIGSTOP 暂停**，两个 sector 的代码不会同时运行；shot 逐个发送；
   4. 速度预算（每个 sector 每个 shot）：cap_i = K × max(参考在 shot i 上的 CPU, 参考在该批上的平均 CPU, min_shot_cap_s)；
-     每批总预算 K × 参考在该批上的总 CPU（按 shot 顺序累计，超出之后的 shot 全部算失败）；墙钟超过
-     min(shot_wall_s, 4·cap_i + 0.5 s) 的 shot 被杀（会话重启，重建时间单独计）；构建 CPU 超过 build_cpu_s 则整个
+     每批总预算 K × 参考在该批上的总 CPU（按 shot 顺序累计，超出之后的 shot 全部算失败）；墙钟超过硬上限
+     shot_wall_s 的 shot 被杀（会话重启，重建时间单独计；CPU 超过 cap_i 的 shot 事后判失败、不杀）；构建 CPU 超过 build_cpu_s 则整个
      sector 失败。超时 / 异常 / 输出格式错误的 shot 都按失败计；
   5. 停止规则（holdout）：候选每个 sector ≥ min_sector_errors 次失败且 P_any ≥ max_errors，或达到 max_shots；
      search 用固定 shot 数（task.decoder.search.shots，可传更小的 shots）。
@@ -160,7 +160,9 @@ class _Worker:
                 if s is None:
                     break
             cap = None if caps is None else float(caps[i])
-            wall = float(speed["shot_wall_s"]) if cap is None else min(float(speed["shot_wall_s"]), 4 * cap + 0.5)
+            # 墙钟只设硬上限 shot_wall_s（超过才杀进程）：CPU 超过 cap 的 shot 事后判失败而不杀，否则重尾解码器
+            # （BP-OSD）会因为偶尔的慢 shot 被反复杀掉、重启次数用完而整体判死。浪费的评估时间由批预算限制。
+            wall = float(speed["shot_wall_s"])
             rep = s.decode(int(shot_ids[i]), np.flatnonzero(syndromes[i]).tolist(), wall)
             cpu[i] = rep.cpu_s
             used += rep.cpu_s

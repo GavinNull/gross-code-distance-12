@@ -430,12 +430,22 @@ def make_decoder(H, L, priors, info):
         return [0] * k
     return decode
 '''
-    rep = ev(src, shots=N)
-    assert rep.status == "searched", rep.to_text()
-    for s in "ZX":
-        assert rep.sectors[s]["timeout"] == n_slow[s]
-        assert rep.sectors[s]["restarts"] == n_slow[s]
-    assert rep.timing["total_s"] < 200
+    import dataclasses
+    import time
+
+    from evaluators import decoder_eval as de
+    t2 = dataclasses.replace(t, decoder=dict(t.decoder, speed=dict(t.decoder["speed"], shot_wall_s=2.0)))
+    runner = de._ProgramRunner(src, inst, t2, workers=1, use_os_sandbox=None)
+    t0 = time.perf_counter()
+    try:
+        for s in "ZX":
+            (st, co, cp, ms), = runner.run_round(s, [(np.arange(N), d[s][0], d[s][1])])
+            assert int((st == de._ST["timeout"]).sum()) == n_slow[s]
+            assert runner.restarts(s) == n_slow[s] and runner.dead[s] is None
+            assert int((st == de._ST["dead"]).sum()) == 0          # 其余 shot 照常运行
+    finally:
+        runner.close()
+    assert time.perf_counter() - t0 < 60
 
 
 def test_cpu_over_cap_counts_as_timeout():

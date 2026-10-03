@@ -818,7 +818,7 @@ uv run python -m evaluators.decoder_eval init-secret                    # PI：�
 3. 计时：父进程用 psutil 读子进程累计 CPU（user+system，所有线程）；第 i 个 shot 记“上一个回复到这一个回复之间”的 CPU，
    后台线程在 shot 之间做的功也算进去（测试 `test_background_thread_work_is_charged`）。
 4. 每个 sector 每个 shot 的上限：`cap_i = K × max(参考在 shot i 上的 CPU, 参考在该批上的平均 CPU, min_shot_cap_s)`；
-   CPU 超过 cap_i 的 shot 记超时（失败）；墙钟超过 `min(shot_wall_s, 4·cap_i + 0.5 s)` 立即杀掉（失败、会话重启）。
+   CPU 超过 cap_i 的 shot 记超时（失败）；超过 cap_i 不杀进程（事后判失败，否则重尾的 BP-OSD 会因偶尔的慢 shot 被反复杀掉、重启次数用完而整体判死）；墙钟超过硬上限 `shot_wall_s` 才杀掉（失败、会话重启，重启 > 3 次该 sector 判死）。
    每批总预算 `K × 参考在该批上的总 CPU`：按 shot 顺序累计，超出后本批剩余 shot 不再运行、全部记失败。构建（make_decoder）
    CPU 超过 `build_cpu_s` 则该 sector 判死（status `rejected`）。BB 任务 K=2、min_shot_cap_s=2 ms、shot_wall_s=30 s、
    build_cpu_s=120 s；mp 任务 K=3。
