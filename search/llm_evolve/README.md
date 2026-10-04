@@ -45,6 +45,7 @@ FunSearch / AlphaEvolve 风格的内循环：LLM 改写程序，评估器打分�
 | `mutation.py` | AST 级数值字面量 / 运算符变异（Mock 与基线共用） |
 | `runlog.py` | JSONL 日志、原子写断点、`CachedEvaluator`、`best_so_far_curve` |
 | `toy.py` | 玩具问题 `CircleTSPProblem`（已知最优解） |
+| `decoder_problem.py` | 解码器问题 `DecoderProblem`（H-005，见下文“解码器问题”），评估全部交给评估器的公开入口 |
 | `cli.py` | 命令行入口 |
 
 ## 接口
@@ -117,6 +118,33 @@ uv run pytest tests -q -k llm_evolve
 6. 写 `experiments/<id>.yaml`：问题参数、`EvolutionConfig`、预算、种子、复现命令。
 7. 对照：同样的 `max_evals` 跑 `AnnealingSearch`（`ProgramMutator` 和/或 `SolutionSpaceMutator`），
    用 `best_so_far_curve` / `cli compare` 在相同评估次数下比较。
+
+## 解码器问题（`DecoderProblem`，H-005）
+
+```python
+from search.llm_evolve import EvolutionEngine, EvolutionConfig, MockClient, AnnealingSearch, AnnealingConfig, SolutionSpaceMutator
+from search.llm_evolve.decoder_problem import DecoderProblem
+
+problem = DecoderProblem("bb72-dec-p3e-3", shots=20000, num_workers=3)     # mp_rule 任务："bb72-mp-p3e-3"
+cfg = EvolutionConfig(run_id="dec-mock", seed=0, max_evals=20, concurrency=1, batch_size=2)
+EvolutionEngine(problem, MockClient(presets=problem.mock_presets()), cfg).run()
+AnnealingSearch(problem, SolutionSpaceMutator(problem), AnnealingConfig(run_id="dec-sa", max_evals=20)).run()
+```
+
+- 评估：`evaluators.decoder_eval.evaluate_decoder(task, src, split="search", submit=False)`（评估器的公开入口；候选在评估器的
+  沙箱里运行，这里不执行候选代码）。分数 = −P_any（搜索集），超时 / 异常 / 格式错误的 shot 已按失败计入；搜索阶段永不写榜，
+  正式分数只在留出集上由评估器给出（`split="holdout"`，需要 PI 的密钥文件）。
+- 诊断（给 LLM）：失败计数与区间、每类失败的分解、CPU/shot（均值 / 中位 / p99 / 最大）与参考之比、**与 Relay-BP 失败的重叠**
+  （双方都错 / 只有候选错 / 只有参考错）、失败 shot 的特征（syndrome 权重分布、按轮次的 detector 触发比例、按权重分箱的
+  “只有候选错”）。
+- 种子程序：Relay-BP（论文参数）与一个弱化的 Relay-BP（S=1、30 段）；description 给出接口、可用库、速度预算，以及
+  “BP + 后处理”模板（`BP_POSTPROCESS_TEMPLATE`，只是模板，评估器始终接收完整程序）。mp_rule 任务的种子是 Relay 规则。
+- 经典对照（铁律 5）：`SolutionSpace` = Relay-BP 类参数空间（γ0、γ 区间下端与宽度、第 0 段迭代数、每段迭代数、段数、S），
+  解经 `solution_to_program` 变成同一个评估入口的程序。
+- 每次评估本身已用 `num_workers`（≤3）个进程；`evaluate` 内部加锁串行化，引擎的 `concurrency` 建议设 1。
+- 速度预算按 CPU 时间判定，机器负载会让临界 shot 的超时判定抖动，所以 `evaluate` 不是严格确定性的（缓存按源码哈希，
+  同一源码只评一次）。
+- 测试：`tests/test_llm_evolve_decoder.py`（自检任务的公开 split，MockClient 端到端 + 退火，约 1.5 分钟）。
 
 ## 预算控制
 

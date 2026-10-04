@@ -33,7 +33,9 @@ dependencies = [
     "pyyaml",
     "jupyterlab",
     "ipykernel",
+    # 解码器任务（H-005）：Relay-BP 官方包是主参考；psutil 由父进程测量候选子进程的 CPU 时间（速度预算）
     "relay-bp==0.2.2",
+    "psutil==7.2.2",
 ]
 
 [dependency-groups]

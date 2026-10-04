@@ -3,6 +3,7 @@
 状态：未冻结。评估器 v2（2026-10-02）修复了 auditor G1 前全面攻击（`research/audits/2026-10-02-evaluator-G1.md`）
 的全部问题；**v2.1（2026-10-03）修复了第二轮审计（`research/audits/2026-10-02-evaluator-v2.md`）“冻结前必须修”的
 第 1–7 条，并为 H-004 加了只评距离的任务**（§0.1）。需 auditor 复审 §0.1 各项后由 PI 冻结（§10）。
+**H-005（2026-10-03）新增解码器任务**（`kind="decoder"`，候选提交解码程序，§12），同样需要 auditor 攻击后再冻结。
 
 ## 0.1 评估器 v2.1 变更一览（auditor v2 §4 与 H-004）
 
@@ -706,7 +707,7 @@ L0（12 轮两个基底 + 3 轮距离门槛 10）加一个 50 shot 的 L2 约 7�
 
 `scripts/freeze_evaluator.py`（修复 auditor G1 F3–F6）：
 - 哈希范围：evaluators/ 下**全部文件**（任何扩展名）+ `scripts/freeze_evaluator.py` + `.claude/hooks/guard_frozen.py` +
-  `pyproject.toml` + `uv.lock` + 评估器测试（`EXTRA_FILES`：`tests/test_{l0,l2,noise,distance,leaderboard,stats,codes,candidate,pipeline,g1_attacks,freeze}.py`、
+  `pyproject.toml` + `uv.lock` + 评估器测试（`EXTRA_FILES`：`tests/test_{l0,l2,noise,distance,leaderboard,stats,codes,candidate,pipeline,g1_attacks,freeze,decoder_eval}.py`、
   `tests/{conftest,memory_builder,schedule_helpers}.py`）。`uv run python scripts/freeze_evaluator.py list` 列出全部。
 - 清单外出现的任何文件 = 篡改；`.so` / `.pyd` / `.dylib`、符号链接、`__pycache__` 里的非 .pyc 文件一律拒绝；
   `__pycache__/*.pyc` 只有在“与对应受保护源文件重新编译的代码对象逐项相等”时才允许（伪造 pyc 头部的 mtime / size 无用）。
@@ -754,3 +755,170 @@ chflags -R uchg evaluators                                            # macOS：
 - 漏斗层级与预算等 E-004。
 - `__pycache__` 校验依赖“同一 Python 版本重新编译得到相等的代码对象”；版本不同或源文件改过会报错（偏保守：删掉 __pycache__ 即可）。
 - 底层 `check_l0` / `sample_l2` 仍接受任意电路（诊断用）；它们的结果不能上榜。原始电路上 L0 的已知局限见 §5。
+
+## 12. 解码器任务（`kind="decoder"`，H-005，2026-10-03）
+
+```python
+from evaluators.decoder_eval import evaluate_decoder, reference_report, near_optimal_gap
+rep = evaluate_decoder("bb72-dec-p3e-3", program_src, split="search")    # 搜索集：固定 shot，永不写榜
+print(rep.to_text())                                                    # 诊断（可直接给 LLM）
+rep = evaluate_decoder("bb72-dec-p3e-3", program_src, split="holdout")  # 留出集：按停止规则采样，满足条件时写榜
+reference_report("bb72-dec-p3e-3", split="search")                      # 主参考 + 次要参考，同一套沙箱与计时
+near_optimal_gap("bb72-dec-p3e-3", split="public", shots=200)           # CP-SAT MLE 小样本差距（不打分）
+uv run python -m evaluators.decoder_eval init-secret                    # PI：在 repo 外生成密钥（一次）
+```
+
+文件：`decoder_problem.py`（电路、解码问题、密钥与种子、采样）、`decoder_sandbox.py` + `_decoder_runner.py`（沙箱会话，
+从 `search/llm_evolve/sandbox.py` 复制并扩展，评估器不依赖 search/）、`decoder_eval.py`（入口、速度预算、报告、写榜）、
+`decoder_refs.py`（参考解码器程序）、`decoder_mp.py`（mp_rule 白名单与引擎）、`decoder_mle.py`（近最优参考接口）。
+测试：`tests/test_decoder_eval.py`（约 10 分钟，单 worker；在冻结清单 EXTRA_FILES 里）。
+
+### 12.1 任务
+
+| task_id | 码 | 电路 | 接口 | 主参考（速度基准） | 次要参考 |
+|---|---|---|---|---|---|
+| `bb72-dec-p3e-3` | [[72,12,6]]（arXiv:2308.07915 Table 3） | IBM depth-8，sd6，p=3e-3，6 轮，paper 边界 | program | Relay-BP（论文参数） | BP-OSD（E-002 设置）、BP+LSD |
+| `bb90-dec-p3e-3` | [[90,8,10]]（同上） | 同上，10 轮 | program | 同上 | 同上 |
+| `bb72-mp-p3e-3` | [[72,12,6]] | 同 bb72 | mp_rule（总迭代 ≤ 500） | 引擎里的 Relay 规则 | 官方 Relay-BP（只作对照） |
+| `selftest-surface-d5-dec` | 旋转表面码 d=5 | stim 标准 CNOT 顺序，sd6，p=5e-3，5 轮 | program | Relay-BP | pymatching |
+
+- 解码器相关设置全部放在已有的 `decoder` 映射里（interface、schedule、reference、secondary_references、speed、search、
+  near_optimal、mp），Task 没有加字段，**已有 9 个任务的哈希不变**（测试 `test_existing_task_hashes_unchanged`）。
+- 电路由评估器生成：IBM 调度（`decoder_problem.ibm_schedule`，与 `baselines/schedule.py:ibm_depth8` 规范化哈希相同，测试）、
+  模板 `candidate.memory_circuit`、`l2.build_joint_circuit`（X/Z 联合采样，paper 边界）。每个 sector 的解码问题 = 联合 DEM
+  限制到该 sector、合并相同症状后有症状的机制（与 l2 的 BP-OSD 路径相同）：BB72 每个 sector 252 个 detector × 2232 个机制。
+- Relay-BP 参数（arXiv:2506.01779，Relay-BP-5、XZ 解码；对照官方包 relay-bp 0.2.2 的签名与 README 核实）：min-sum、
+  `alpha=None`（无缩放）、`gamma0=0.125`、`pre_iter=80`、`num_sets=300`（加上第 0 段共 301 段）、`set_max_iter=60`、
+  `gamma_dist_interval=(-0.24, 0.66)`、`stop_nconv=5`、`seed=0`。包的默认值不同（gamma0=0.1、stop_nconv=1）。
+  **注意**：官方实现的 γ 抽样 RNG 在同一个解码器对象的连续调用之间延续，所以结果依赖 shot 的处理顺序（同一 worker
+  划分下可复现；不同 worker 数会差几个 shot）。
+- 停止规则（holdout）：每个 sector ≥ 1000 次失败且 P_any ≥ 1000，或 max_shots = 5e6；batch 1000。search：BB72 20000 shot、
+  BB90 10000 shot、mp 4000、自检 2000（`decoder.search`），调用方可以取更小的前缀。
+
+### 12.2 候选接口
+
+- **program**：完整程序，定义 `make_decoder(H, L, priors, info) -> decode`，`decode(syndrome) -> k 个 observable 比特`。
+  H：`scipy.sparse.csc_matrix`（uint8，num_det × M），L：`csr_matrix`（k × M），priors：float64（M,），info：sector、轮数、p、
+  detector 坐标（[校验行, 轮, 类型]）、码的校验支撑（**不含任何种子**）。输出必须是长度 k、元素为 0/1 或 True/False 的
+  序列（numpy 数组会被转成列表）；其他一律格式错误、按失败计（`validate_output`）。“BP + 后处理”只是
+  `search/llm_evolve/decoder_problem.py` 里给 LLM 的模板，评估器始终接收完整程序。
+- **mp_rule**：候选只交 `SCHEDULE`、`check_rule(m, sgn)`、`var_rule(prior, inc, gamma, prev)`；AST 白名单只允许局部名字
+  赋值、return、数字常量、算术与比较、`np.<白名单>`（逐元素函数；按行归约必须写 `axis=1, keepdims=True`）——没有下标、
+  属性、循环、字符串、import（除 `import numpy as np`），所以每个输出行只依赖同一行输入（局部性由构造保证）。
+  评估器把规则包进自己的引擎（`decoder_mp.ENGINE_TEMPLATE`）成为完整程序再进沙箱；引擎负责段（leg）、γ 抽样（种子由
+  syndrome 派生）、收敛判定、选最低权重解，并**强制每 shot 总迭代 ≤ `mp.max_total_iters`**（测试：永不收敛的规则恰好
+  跑 500 次）。规则在执行时看到的 `np` 是只含白名单函数的命名空间，`__builtins__` 为空。
+
+### 12.3 评估流程与速度预算
+
+1. 按任务生成电路与两个 sector 的问题；由密钥派生 split 的根种子（§12.4），第 b 批用 `SeedSequence([root, b])` 在父进程里采样。
+2. 每轮取 W = `num_workers`（≤ 3）个批：先在这些批上跑**主参考**（与候选同一种沙箱会话、同一计时），再跑候选。
+   每个 worker 每个 sector 一个子进程（会话跨批复用，崩溃 / 被杀后重启，重启 > 3 次则该 sector 判死）；**跑 Z sector 时所有
+   X 子进程被 SIGSTOP 暂停，反之亦然**（测试 `test_sectors_never_run_concurrently...`），shot 逐个发送。
+3. 计时：父进程用 psutil 读子进程累计 CPU（user+system，所有线程）；第 i 个 shot 记“上一个回复到这一个回复之间”的 CPU，
+   后台线程在 shot 之间做的功也算进去（测试 `test_background_thread_work_is_charged`）。
+4. 每个 sector 每个 shot 的上限：`cap_i = K × max(参考在 shot i 上的 CPU, 参考在该批上的平均 CPU, min_shot_cap_s)`；
+   CPU 超过 cap_i 的 shot 记超时（失败）；超过 cap_i 不杀进程（事后判失败，否则重尾的 BP-OSD 会因偶尔的慢 shot 被反复杀掉、重启次数用完而整体判死）；墙钟超过硬上限 `shot_wall_s` 才杀掉（失败、会话重启，重启 > 3 次该 sector 判死）。
+   每批总预算 `K × 参考在该批上的总 CPU`：按 shot 顺序累计，超出后本批剩余 shot 不再运行、全部记失败。构建（make_decoder）
+   CPU 超过 `build_cpu_s` 则该 sector 判死（status `rejected`）。BB 任务 K=2、min_shot_cap_s=2 ms、shot_wall_s=30 s、
+   build_cpu_s=120 s；mp 任务 K=3。
+5. 分数：P_any = 同一 shot X 或 Z 任一 sector 失败（错、超时、超预算、异常、格式错误、没运行）的比例，LR=1000 区间，另给每轮换算
+   `1-(1-P)^(1/rounds)`；次级指标：平均 CPU / shot 及与参考之比。报告分解每类失败、参考在同一批 shot 上的计数与速度、
+   与参考失败的重叠（双方都错 / 只有候选错 / 只有参考错），search 另给失败 shot 的特征（syndrome 权重分布、按轮次的
+   detector 触发比例、按权重分箱的“只有候选错”）。
+6. 上榜：只有 `split="holdout"`、`purpose="score"`、每个 sector ≥ 1000 次失败、候选在 OS 级沙箱下运行；正式成绩单还要求评估器
+   已冻结（与 L2 任务相同的 `_append` 守卫，凭证仍是 pipeline 的）。记录 `kind="decoder"`，含程序源码与哈希（同一程序重复提交
+   记 attempt，按第一次排名）、电路哈希、种子承诺（sha256 of 根种子，不是种子本身）、计数、分解、参考计数与速度。
+   `entry_problems` 的解码器分支核对：任务参数、split=holdout、程序哈希、电路哈希（重新生成）、种子承诺（有密钥时）、计数
+   自洽、≥1000、分数可由计数重算、参考名与参数、OS 沙箱。`table(task_id)` 按 P_any 升序、再按 CPU 排名。
+   `reproduce_entry` 对解码器记录重跑同一留出集，只要求 P_any 落在记录的区间内（超时判定依赖负载，不能逐位复现）。
+
+### 12.4 保密种子
+
+密钥文件默认 `~/.config/qec-ai-search/decoder_secret.key`（`QEC_DECODER_SECRET_FILE` 可改；测试用临时文件），64 个十六进制字符，
+必须 0600，且不能在 worktree 或主目录里（`SecretError`）。`root(split) = HMAC-SHA256(secret, "qec-decoder-shots|task|task_hash|split")`；
+search 与 holdout 都需要密钥，搜索程序（LLM）永远只看到 search 的诊断；自检任务另有 `public` split（公开常量派生）。
+报告与记录里只有种子承诺；测试检查报告 JSON / 文本里不出现根种子、批种子和密钥。
+
+### 12.5 攻击与防护（每项都有测试，`tests/test_decoder_eval.py`）
+
+| 攻击 | 防护 | 测试 |
+|---|---|---|
+| 沙箱里读评估器源码 / **主目录**（从 worktree 运行时）/ 家目录 / 密钥文件 | 两层：macOS `sandbox-exec`（SBPL：拒绝读家目录、所有项目根目录（`project_roots()` 由 `.git` 文件解析出主目录）、系统临时目录与密钥，只放行 venv、本会话工作目录和执行器脚本本身）+ audit hook（同样的路径规则） | `test_sandbox_attack_blocked[*-read_*]`，两层都开 / 只有 audit hook 各跑一遍；`test_os_sandbox_profile_blocks_independently_of_python`（`/bin/cat` 在同一配置下也读不到） |
+| 跨 sector 信息泄露 | 每个 sector 一个子进程，只拿到本 sector 的 H/L/priors/info/syndrome；两个 sector 的进程**从不同时运行**（另一侧 SIGSTOP）；持久化信道全部堵住：工作目录外不可写（sandbox + hook）、不能列 / 读临时目录（看不到别的会话的工作目录）、POSIX/SysV 共享内存与信号量被 sandbox 禁止、`_posixshmem` / `multiprocessing` / `mmap` 不能 import、`os.mkfifo` / `mknod` 从 os 与 posix 模块里删除（没有 audit 事件）、不能发信号 / 查其他进程信息 | `list_temp_root_for_other_sector`、`write_outside_workdir`、`symlink_outside`、`mkfifo_channel`、`shared_memory`、`posixshmem`、`mmap`、`signal_parent`；`test_sectors_never_run_concurrently_and_see_only_their_own_data` |
+| 从 syndrome 统计反推种子 / 预测噪声 | 种子 = HMAC(256 位密钥)，每批独立派生；候选只看到本 sector 的 syndrome，看不到任何 RNG 输出；stim 的采样在父进程。理论上从大量 syndrome 恢复某一批 stim 内部 PRNG 状态（非线性的 Bernoulli 跳跃采样，并且只有一半 detector）不可行，写为已知局限 | `test_candidate_randomness_cannot_guess_observables` |
+| numpy 全局随机状态 | 父进程采样只用 `compile_detector_sampler(seed=…)`，与 numpy / random 的全局状态无关；候选进程里的全局状态与父进程无关 | `test_numpy_global_random_state_does_not_affect_sampling` |
+| 缓存与侧信道（跨评估记住 holdout、读 /proc 类信息） | 每次评估全新 0700 工作目录、结束删除；不能写其他地方；psutil / ctypes / socket / subprocess 不能 import 或调用（预导入后从 sys.modules 删除名字，`import` 触发 audit 事件被拒；ctypes 的 dlopen / call 也被 audit 拒）；环境变量白名单 | `import_psutil`、`import_ctypes`、`ctypes_via_sys_modules`、`ctypes_dlopen_via_numpy`、`socket`、`subprocess`、`os_system`、`fork`、`import_evaluator`、`env_secret`、`raise_rlimit` |
+| 对搜索集过拟合 | 排名只用留出集（另一个 HMAC 派生的根种子）；搜索集诊断只有聚合统计 | `test_search_set_memorisation_does_not_transfer_to_holdout`（内嵌搜索集全部答案的“解码器”：搜索集近乎满分，留出集远差于参考） |
+| 输出格式攻击（长度、2、浮点、字符串、嵌套、dict、None、超长回复） | 父进程严格校验；超过 1 MiB 的回复是协议错误（会话被杀）；都按失败计 | `test_output_format_attacks_count_as_failures`（9 种）、`test_huge_output_is_protocol_error_and_fails`、`test_validate_output_strict` |
+| 伪造协议行（往原始 stdout 的 fd 写“答案”） | 每个回复必须带父进程发的 shot id，且一次只发一个 shot：答案只能在看到 syndrome 之后给出；id 不符 = 协议错误、shot 失败 | `test_forged_reply_lines_on_raw_stdout_fail` |
+| 超时操纵（睡眠、CPU 爆发、shot 之间偷算、构建期偷算、拖慢参考） | 见 §12.3：墙钟杀进程、CPU 上限、累计计时、批预算、构建预算；参考与候选分开运行，参考计的是 CPU 时间（对负载不敏感），候选进程在参考运行时不存在或处于暂停 | `test_wall_clock_timeout_kills_and_counts_as_failure`、`test_cpu_over_cap_counts_as_timeout`、`test_background_thread_work_is_charged`、`test_build_budget_enforced`、`test_exceptions_count_as_failures` |
+| 伪造成绩单记录 | 解码器分支的语义核对（§12.3 第 6 条）；只有 holdout 能写；正式成绩单需冻结 | `test_decoder_record_semantic_checks`、`test_search_split_never_written`、`test_official_leaderboard_unchanged` |
+| mp_rule 越权（属性逃逸、全局归约、下标、axis=0、import、循环、字符串、lambda、改绑 np）、超迭代 | AST 白名单 + 受限命名空间 + 引擎强制上限 | `test_mp_rule_whitelist_rejects`（13 种）、`test_mp_engine_enforces_iteration_cap`、`test_mp_task_rejects_full_programs_as_rules` |
+| 参考用错 | Relay-BP 候选 = 直接调官方包（逐 shot 相同）；表面码上 pymatching 候选 = 直接 pymatching | `test_relay_candidate_matches_official_package_and_reference`、`test_pymatching_candidate_matches_direct_pymatching`、`test_mp_engine_relay_close_to_official_relay` |
+
+### 12.6 已知局限
+
+- **沙箱不是虚拟机**：sandbox-exec 已被 Apple 标为废弃，但 macOS 15 上可用；非 macOS 只有 audit hook（可被 C 扩展绕过）。
+  候选可以加载 venv 里的任何已编译库（numpy、scipy、ldpc、relay_bp、pymatching、stim……）；一个有内存破坏漏洞的库调用可以
+  绕过 audit hook，但仍在 sandbox-exec 的限制内。
+- **计时**：CPU 时间受机器负载（缓存、频率）影响，个别临界 shot 的超时判定会抖动，所以分数不能逐位复现，只能统计复现。
+  参考与候选在同一时间段、同一机器上测量，以减小偏差。多线程候选的 CPU 时间按总和计（不会因并行而占便宜）。
+- **Relay-BP 的 RNG 顺序依赖**：官方包在同一解码器对象的连续调用之间延续 RNG，结果依赖 worker 划分（同一划分下可复现）。
+- **速度预算以 Relay-BP 为基准**：BP-OSD 这类重尾解码器在预算内会损失很多 shot（见 §12.7），这是设计（目标是 FPGA 友好的
+  解码器），不是 bug；报告里分开给出“错”和“超预算”。
+- 留出集只有一个；同一程序的重复提交按第一次排名，但对程序做无关紧要的改动可以“重抽”（与 L2 任务相同的局限，每 sector
+  ≥1000 次失败时收益有限）。
+- 近最优参考是 MLE（不是对简并求和的 ML），只在小样本上用；CP-SAT 在时间上限内没证明最优时单独计数。
+- mp_rule：引擎的 Relay 规则与官方包不是逐位相同（段间消息是否重置、γ 抽样方式不同），只是同量级；mp 任务的速度预算以
+  引擎里的 Relay 为基准（Python/numpy，比 Rust 慢约 5 倍），迭代上限才是主要约束。
+
+### 12.7 参考解码器实测（在评估器里、与候选同样的沙箱和计时）
+
+机器同时在跑 E-006（6 个进程），CPU 时间偏高约 1.5–2 倍；所有数字是 2026-10-03 在本机测的，留出集用的是**临时测试密钥**
+（不是 PI 的正式密钥），所以不能上榜，只说明量级。区间均为 LR=1000（≈3.72σ）。
+
+**(a) 原始精度（不加速度预算，父进程里直接跑，公开种子，同一组 shot）**
+
+| 任务 | shot | 解码器 | 失败 Z / X / any | P_any | CPU/shot（两 sector 合计）均值 / 中位 / p99 |
+|---|---|---|---|---|---|
+| bb72（6 轮） | 20000 | Relay-BP（论文参数） | 293 / 251 / 533 | 2.67% | 8.2 / 6.2 / 39 ms |
+| | | BP-OSD（E-002） | 308 / 273 / 566 | 2.83% | 27 / 1.9 / 934 ms |
+| | | BP+LSD | 339 / 296 / 617 | 3.09% | 24 / 1.6 / 830 ms |
+| bb90（10 轮） | 10000 | Relay-BP | 18 / 22 / 39 | 0.39% | 48 / 22 / 549 ms |
+| | | BP-OSD | 71 / 78 / 145 | 1.45% | 108 / 5.9 / 1876 ms |
+| | | BP+LSD | 115 / 119 / 227 | 2.27% | 118 / 6.7 / 1892 ms |
+
+近最优（CP-SAT MLE，Z sector，与 Relay 变体在同一组 5000 shot 上；MLE 在前 1000 shot 上全跑、其余只跑任一解码器失败的 shot，
+前 1000 shot 里没有“所有解码器都对而 MLE 错”的 shot，所以下面的 MLE 数近似精确）：
+
+| 任务 | BP-OSD | Relay-BP（S=5） | Relay-BP（S=20） | MLE |
+|---|---|---|---|---|
+| bb72，5000 shot，Z | 84 | 68 | 54 | ≈47（全部证明最优，均 0.27 s / shot） |
+| bb90，4000 shot，Z | 21 | 8 | 5 | ≥2（只在失败 shot 与前 300 shot 上跑） |
+
+另外在 Relay-BP 自己的工作区间做了用法核对（不是任务，脚本在会话 scratchpad）：gross code [[144,12,12]]、IBM 调度、sd6
+p=3e-3、12 轮、Z sector、同一组 12000 shot：BP-OSD 29 次失败，Relay-BP 6 次（约 4.8 倍；论文 arXiv:2506.01779 Fig. 2 在
+自己的噪声口径下报告约 10 倍）。
+
+**结论**：Relay-BP 的用法没有问题（在 gross 上明显优于 BP-OSD；BB90 上约 3.7 倍）。**但在 BB72（d=6）、p=3e-3 下 Relay-BP 只比
+BP-OSD 好约 6%（533 vs 566），并不“明显优于”**：原因是这里 BP-OSD 离近最优本来就只有约 1.8 倍（Z：84 vs 47），没有 10 倍的空间；
+Relay 的优势随距离增大。Relay 的 γ 参数没有按码调（README 说需要按解码图调参），γ0=0.1 / S=20 在 BB72 上分别是 61 / 54。
+
+**(b) 在评估器里打分（沙箱、计时、速度预算 K=2 以 Relay-BP 为准）**
+
+| 任务 / split | 候选 | shot | P_any [LR=1000] | 失败分解（Z sector：错 / 超上限 / 超批预算） | CPU/shot 与参考之比 |
+|---|---|---|---|---|---|
+| bb72 / holdout（测试密钥） | Relay-BP | 76000（每 sector ≥1000，达到上榜条件） | **2.64e-2** [2.43e-2, 2.86e-2]；每轮 4.45e-3 | 1053 / 1 / 0 | 9.46 ms，1.003 |
+| bb72 / holdout | BP-OSD | 6000 | 0.304 | 45 / 142 / 1098 | 19.4 ms，2.01（批预算用完） |
+| bb72 / holdout | BP+LSD | 4000 | 0.367 | 26 / 91 / 1040 | 15.2 ms，2.04 |
+| bb90 / search | Relay-BP | 10000 | 2.6e-3 [1.1e-3, 5.0e-3]（26 次） | 11 / 0 / 0 | 50.6 ms，1.00 |
+| bb90 / search | BP-OSD | 10000 | 0.325 | 9 / 380 / 1555 | 96.8 ms，1.98 |
+| bb90 / search | BP+LSD | 10000 | 0.342 | 12 / 375 / 1948 | 96.4 ms，1.97 |
+
+- 与参考相同的 Relay-BP 程序作为候选：76000 shot 里只有 1 个 shot 因计时抖动超上限（同一程序、同一 shot 的两次 CPU 时间之比超过 2）。
+- BP-OSD / BP+LSD 是重尾的：中位数比 Relay 快，但 p99 是 Relay 的 20–40 倍、总 CPU 约 2–3 倍，在“Relay 的 2 倍”预算下大部分批的
+  预算会用完，所以分数主要由超预算决定。这是速度预算的设计结果，次要参考的“原始精度”看表 (a)。
+- 上榜代价（每 sector ≥1000 次失败）：bb72 + Relay 级解码器约 7.6 万 shot、候选 + 参考约 1400 CPU 秒；**bb90 + Relay 级解码器约
+  50–75 万 shot、约 14–21 CPU 小时**（P_Z ≈ 0.15–0.2%，50 ms/shot，参考与候选各一遍）。bb90 在 p=3e-3 下做正式排名很贵，需要 PI 决定
+  （提高 p、降低 bb90 的失败数门槛、或只用 bb72 排名、bb90 作检验）。

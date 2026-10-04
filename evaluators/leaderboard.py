@@ -191,6 +191,8 @@ def entry_problems(rec: Mapping, *, regenerate: bool = True) -> list[str]:
         P.append(f"kind={rec.get('kind')!r} but task {tid} is {task.kind!r}")
     if task.kind == "distance":
         return P + _distance_entry_problems(rec, task, regenerate=regenerate)
+    if task.kind == "decoder":
+        return P + _decoder_entry_problems(rec, task, regenerate=regenerate)
     for f, want in (("noise_model", task.noise_model), ("p", task.p), ("rounds", task.rounds),
                     ("boundary", task.boundary), ("purpose", task.purpose)):
         if rec.get(f) != want:
@@ -391,6 +393,88 @@ def _distance_entry_problems(rec: Mapping, task, *, regenerate: bool = True) -> 
     return P
 
 
+def _decoder_entry_problems(rec: Mapping, task, *, regenerate: bool = True) -> list[str]:
+    """解码器任务（kind="decoder"，H-005）记录的语义核对：任务参数一致、split 必须是 holdout、程序哈希 = 记录里
+    程序源码的 sha256、电路哈希可由任务重新生成（regenerate）、种子承诺等于由密钥派生的承诺（有密钥时）、计数自洽、
+    每个 sector ≥ 1000 次失败、分数（P_any 与每轮值）可由计数重算、参考计数自洽、OS 沙箱。计数本身的伪造只能靠
+    重新评估（同一留出集）发现；超时判定依赖机器负载，重评估只能统计一致，不能逐位一致（README §12）。"""
+    import hashlib
+
+    from evaluators import tasks as T
+    from evaluators.l2 import per_round as _per_round
+    from evaluators.stats import binomial_interval
+
+    P: list[str] = []
+    for f, want in (("noise_model", task.noise_model), ("p", task.p), ("rounds", task.rounds),
+                    ("boundary", task.boundary), ("purpose", task.purpose)):
+        if rec.get(f) != want:
+            P.append(f"{f}={rec.get(f)!r} but task {task.task_id} has {want!r}")
+    if rec.get("split") != "holdout":
+        P.append(f"split {rec.get('split')!r}: only held-out evaluations can be ranked")
+    prog = rec.get("program")
+    if not isinstance(prog, str) or hashlib.sha256(prog.encode("utf-8")).hexdigest() != rec.get("program_hash"):
+        P.append("program_hash is not the sha256 of the stored program")
+    if rec.get("schedule_hash") != rec.get("program_hash"):
+        P.append("schedule_hash (attempt key) must equal program_hash")
+    if rec.get("batch_size") != int(task.stop["batch_size"]):
+        P.append("batch size differs from the task")
+    if rec.get("os_sandbox") is not True:
+        P.append("candidate did not run under the OS-level sandbox")
+    if regenerate:
+        try:
+            from evaluators.decoder_problem import build_instance
+            if build_instance(task).circuit_hash != rec.get("circuit_hash"):
+                P.append("circuit hash differs from the circuits the task generates")
+        except Exception as e:  # noqa: BLE001
+            P.append(f"task circuits cannot be rebuilt: {e}")
+    try:
+        from evaluators.decoder_eval import _seed_commitment
+        if _seed_commitment(task, "holdout") != rec.get("seed_commitment"):
+            P.append("seed commitment differs from the held-out seed derived from the decoder secret")
+    except Exception as e:  # noqa: BLE001 - 没有密钥时无法核对，记一条
+        P.append(f"seed commitment cannot be checked (decoder secret unavailable: {type(e).__name__})")
+    c = rec.get("counts") or {}
+    n = c.get("shots", 0)
+    bs = int(task.stop["batch_size"])
+    if not isinstance(n, int) or n <= 0 or n % bs or n > int(task.stop["max_shots"]) + bs * task.num_workers:
+        P.append(f"shots {n} is not a positive multiple of the batch size within the task budget")
+    if not (c.get("fail_any", 0) <= c.get("fail_Z", 0) + c.get("fail_X", 0)
+            and max(c.get("fail_Z", 0), c.get("fail_X", 0)) <= c.get("fail_any", 0) <= n
+            and c.get("fail_both", 0) == c.get("fail_Z", 0) + c.get("fail_X", 0) - c.get("fail_any", 0)):
+        P.append(f"counts are not self-consistent: {c}")
+    if min(c.get("fail_Z", 0), c.get("fail_X", 0)) < T.MIN_SECTOR_ERRORS_FOR_LEADERBOARD:
+        P.append(f"fewer than {T.MIN_SECTOR_ERRORS_FOR_LEADERBOARD} failures in a sector; small samples are not ranked")
+    sec = rec.get("sectors") or {}
+    for s, key in (("Z", "fail_Z"), ("X", "fail_X")):
+        st = sec.get(s) or {}
+        parts = sum(int(st.get(f, 0)) for f in ("wrong", "timeout", "budget", "error", "format", "dead"))
+        if st.get("shots") != n or st.get("failures") != c.get(key) or parts < c.get(key, 0):
+            P.append(f"sector {s} breakdown does not match the counts")
+    try:
+        for key, ck in (("P_Z", "fail_Z"), ("P_X", "fail_X"), ("P_any", "fail_any")):
+            iv = binomial_interval(c[ck], n)
+            got = (rec.get("rates") or {}).get(key) or {}
+            if any(not _close(got.get(f), getattr(iv, f)) for f in ("best", "low", "high")):
+                P.append(f"rate {key} is not what the counts give")
+            pr = (rec.get("per_round") or {}).get(key) or {}
+            if any(not _close(pr.get(f), _per_round(getattr(iv, f), task.rounds)) for f in ("best", "low", "high")):
+                P.append(f"per-round {key} is not what the counts give")
+    except Exception as e:  # noqa: BLE001
+        P.append(f"counts cannot be re-scored: {e}")
+    sc = rec.get("score") or {}
+    if sc.get("P_any") != (rec.get("rates") or {}).get("P_any") or \
+            sc.get("per_round_P_any") != (rec.get("per_round") or {}).get("P_any"):
+        P.append("score does not equal the counted P_any")
+    ref = (rec.get("reference") or {})
+    if ref.get("name") != task.decoder["reference"]["name"] or \
+            json.loads(_canonical(ref.get("params"))) != json.loads(_canonical(task.decoder["reference"]["params"])):
+        P.append("reference decoder differs from the task")
+    rc = ref.get("counts") or {}
+    if rc.get("shots") != n:
+        P.append("reference was not run on the same shots")
+    return P
+
+
 def _close(a, b, rel: float = 1e-9) -> bool:
     if a is None or b is None:
         return a is None and b is None
@@ -582,6 +666,15 @@ def table(task_id: str, path=None) -> list[dict]:
         count[h] = count.get(h, 0) + 1
         first.setdefault(h, r)
     rows = []
+    if any(r.get("kind") == "decoder" for r in first.values()):
+        for h, r in first.items():
+            s = r["score"]
+            rows.append({"program_hash": h, "candidate_id": r.get("candidate_id"), "seq": r["seq"],
+                         "P_any": s["P_any"]["best"], "low": s["P_any"]["low"], "high": s["P_any"]["high"],
+                         "per_round_P_any": s["per_round_P_any"]["best"], "cpu_per_shot_ms": s["cpu_per_shot_ms"],
+                         "reference_P_any": ((r.get("reference") or {}).get("rates") or {}).get("P_any", {}).get("best"),
+                         "shots": r["counts"]["shots"], "submissions": count[h]})
+        return sorted(rows, key=lambda x: (x["P_any"], x["cpu_per_shot_ms"], x["seq"]))
     if any(r.get("kind") == "distance" for r in first.values()):
         for h, r in first.items():
             s = r["score"]
@@ -604,6 +697,19 @@ def reproduce_entry(rec: Mapping) -> list[str]:
     """按记录里的 (task, code, schedule, seed) 重新跑一遍 pipeline（不写榜），核对 L2 计数逐位相同（diff 任务逐个
     component 比较，auditor v2 R2）；距离任务核对距离、见证数与每个基底的见证。
     很慢（与原评估相同的算力）；auditor 抽查用。返回不一致项（空 = 复现）。"""
+    if rec.get("kind") == "decoder":
+        # 解码器：同一留出集重评估；超时判定依赖负载，只要求分数在区间内一致（README §12）
+        from evaluators.decoder_eval import evaluate_decoder
+        rep = evaluate_decoder(rec["task_id"], rec["program"], split="holdout", submit=False)
+        out = []
+        lo, hi = rec["score"]["P_any"]["low"], rec["score"]["P_any"]["high"]
+        if not (lo <= rep.rates["P_any"]["best"] <= hi):
+            out.append(f"re-evaluated P_any {rep.rates['P_any']['best']:.3e} outside the recorded interval "
+                       f"[{lo:.3e}, {hi:.3e}]")
+        if rep.counts.get("shots") == rec["counts"]["shots"] and \
+                rep.reference.get("counts") != rec["reference"].get("counts"):
+            out.append("reference counts differ on the same held-out shots")
+        return out
     from evaluators.pipeline import evaluate
     rep = evaluate(rec["task_id"], rec["code"]["spec"], rec["schedule"], seed=rec["seed"], submit=False)
     out = []
