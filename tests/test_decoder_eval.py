@@ -727,6 +727,15 @@ def test_mp_engine_relay_close_to_official_relay():
     assert abs(int(eng.sum()) - int(off.sum())) <= max(6, off.sum())
 
 
+def test_mp_rules_end_to_end_through_evaluator():
+    """mp_rule 任务的完整路径：规则 → 白名单 → 引擎 → 沙箱 → 计时；与参考相同的规则得到与参考相同的计数。"""
+    t = get_task("bb72-mp-p3e-3")
+    rules = program_for("mp_relay", t.decoder["reference"]["params"])
+    rep = evaluate_decoder("bb72-mp-p3e-3", rules, split="search", shots=500, submit=False, num_workers=1)
+    assert rep.status == "searched", rep.to_text()
+    assert rep.counts == rep.reference["counts"]
+
+
 def test_mp_task_rejects_full_programs_as_rules():
     rep = evaluate_decoder("bb72-mp-p3e-3", program_for("relay_bp", RELAY_BP_PAPER), split="search", shots=500,
                            submit=False, num_workers=1)
