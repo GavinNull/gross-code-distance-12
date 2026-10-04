@@ -106,7 +106,7 @@ def work(args):
         rec["mle_sector"] = bool((pred != truth).any())
         rec["mle_sector_status"] = status
         # 联合 MLE
-        r = st["mle_joint"].decode(d, time_limit=120.0)
+        r = st["mle_joint"].decode(d, time_limit=30.0)
         rec["mle_joint_status"] = r.status
         rec["mle_joint"] = True if r.e is None else bool((((Lj @ r.e) % 2).astype(np.uint8) != truth).any())
         out.append(rec)
