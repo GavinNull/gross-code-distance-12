@@ -1,0 +1,16 @@
+id: E-007-relay-sa-tuning
+hypothesis: H-005、H-002（经典对照）
+question: >
+  只靠按码调 Relay-BP 的参数（不改算法结构），在速度预算内能拿回多少提升空间？
+  这同时是以后 LLM 进化搜索必须超过的“经典启发式对照”。
+prediction: >
+  （跑前写下）
+  1) BB72（搜索集，p=3e-3）：模拟退火调参后 P_any 比论文参数低 10–25%（解码器任务的验证里，γ0=0.1 或 S=20 已经各好约 10–20%）。
+  2) BB90：低 20–50%（码更大，空间更多）。
+  3) 最好的配置大多是“更多段 / 更大的 S”，会逼近 2 倍速度预算的上限；在预算内的最好配置收益约为不受限时的一半。
+  4) 在留出集上复核时，收益缩水不超过三分之一（搜索集过拟合有限）。
+tasks: [bb72-dec-p3e-3, bb90-dec-p3e-3]
+search_space: Relay-BP 参数（γ0、pre_iter、set_max_iter、γ 区间上下界、num_sets、stop_nconv、alpha），由 search/llm_evolve 的 DecoderProblem 模拟退火对照提供
+evaluation: 搜索阶段用搜索集的固定前缀（BB72 约 4 万 shot，BB90 约 1 万 shot）；最好的 3 个配置在留出集上复核，至少达到每 sector 300 次失败
+secret_key: 使用 repo 外的**临时**密钥（明确标注，结果不能上榜）；正式密钥由 PI 生成后，留出集复核需重跑
+budget: {cpu_hours: 20, llm_tokens: 0, num_workers: 3}
