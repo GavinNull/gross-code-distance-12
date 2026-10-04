@@ -8,13 +8,7 @@
 
 ## 待人决策
 
-- **生成正式保密密钥**（PI 执行）：`uv run python -m evaluators.decoder_eval init-secret`（只有 PI 知道留出集种子最稳妥）
-- **BB90 上榜代价**：每个解码器约 14–21 CPU 小时。可选：提高 p / 降低门槛 / 只用 BB72 排名
-- **正式 LLM 搜索的前提**：评估器冻结 + `.env` 配置 `ANTHROPIC_API_KEY` + 批准 token 预算（lead 届时给出预估）
-0. **是否加强 Bash 侧的防护**（auditor F2）：目前 hook 只拦截 Edit/Write 工具，agent 用 Bash 写 `evaluators/` 拦不住，只能靠冻结后的哈希校验和文件系统锁事后发现。
-   可选：(a) 在 `.claude/settings.json` 加一个检查 Bash 命令的 hook；(b) 把 `.claude/settings.json` 纳入冻结清单。这两项都是项目配置，由 PI 决定，lead 不自行修改。
-1. （未答复）是否在 `.claude/agents/experimenter.md` 加一条：禁止按模式批量杀进程。目前在每个 agent 的任务说明里单独禁止。
-2. （未答复）SI1000 ResonatorIdle 的处理：lead 选择“不作用于正在做门的比特”，PI 未表态，暂按此执行。
+（无。按 PI 2026-10-04 的指示，常规技术决定由 lead 做出并记录在 decisions.md。）
 
 ## 已确认结果
 
@@ -31,6 +25,7 @@
 - ~~解码器评估任务~~ 已合并（9756441）：两层沙箱、保密种子、速度预算（以 Relay-BP 为基准）、MLE 近最优参考、DecoderProblem
   - **关键发现**：p=3e-3 下 Relay-BP 在小码上已接近最优（BB72：S=20 离 MLE 约 15%）；空间随码变大而增长（Relay 对 BP-OSD：BB72 约 6%，BB90 约 3.7 倍，gross 约 4.8 倍）
 - **auditor：攻击解码器任务**（冻结前必做）→ `research/audits/2026-10-04-decoder-task.md`
+- **E-008（lead 自己做）：Relay-BP 失败解剖**：Relay 失败、MLE 成功的 shot 分成不收敛 / 更重的错误类 / 平局 / 不可纠正四类，决定改进方向 → `experiments/E-008-relay-failure-anatomy.yaml`
 - **E-007：Relay-BP 按码模拟退火调参**（经典对照，不花 API，临时密钥）→ `experiments/E-007-relay-sa-tuning.yaml`
 - ~~lit-scout：解码器竞争格局~~ 已完成：BP-OSD 的提升空间已被 Relay-BP（10–100 倍）等兑现；剩余目标是“FPGA 友好解码器与近最优之间约 17 倍的差距”。H-005 已修订
 
