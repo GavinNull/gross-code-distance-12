@@ -45,14 +45,19 @@ class CpSatMLE:
         self._cache: dict = {}
 
     def _prep(self, problem):
+        # 缓存同时保存 problem 本身的强引用，并核对身份：只用 id() 做键时，临时对象被回收后 id 会被复用，
+        # 会静默返回另一个问题的 H/w/L 并照样报 OPTIMAL（auditor 2026-10-04 发现）。
         key = id(problem)
-        if key not in self._cache:
-            H = problem.H.tocsr()
-            rows = [H.indices[H.indptr[i]:H.indptr[i + 1]].tolist() for i in range(H.shape[0])]
-            p = np.clip(np.asarray(problem.priors, dtype=np.float64), 1e-15, 0.5 - 1e-12)
-            w = np.log((1 - p) / p)
-            self._cache[key] = (rows, w, problem.L.tocsr())
-        return self._cache[key]
+        hit = self._cache.get(key)
+        if hit is not None and hit[0] is problem:
+            return hit[1]
+        H = problem.H.tocsr()
+        rows = [H.indices[H.indptr[i]:H.indptr[i + 1]].tolist() for i in range(H.shape[0])]
+        p = np.clip(np.asarray(problem.priors, dtype=np.float64), 1e-15, 0.5 - 1e-12)
+        w = np.log((1 - p) / p)
+        data = (rows, w, problem.L.tocsr())
+        self._cache[key] = (problem, data)
+        return data
 
     def decode(self, problem, syndrome: np.ndarray) -> NearOptResult:
         import time
