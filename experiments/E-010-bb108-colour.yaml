@@ -1,0 +1,13 @@
+id: E-010-bb108-colour
+hypothesis: H-004
+question: >
+  [[108,8,10]] 的可分段电路上限是 10（E-005，已确认），但深度 8 的均匀调度最多 9（已证明）。
+  Strikis 式三色着色（按到 Z_3 的群同态给校验着色，每种颜色一个块顺序，深度 8，非交错）能否达到 10？
+reasoning: >
+  （lead）三个码从“单检查上限”到“均匀铺满”都正好掉 1（gross 11→10，BB108 10→9，BB90 9→8），说明丢掉的 1 来自不同校验的残余错误拼出更短的逻辑错误。
+  均匀调度在平移下不变，这样的组合在所有平移副本里都存在；打破平移对称（着色）才可能拆掉它。Strikis 在 gross 上用三色着色恰好补回了这 1（10→11）。
+prediction: >
+  （跑前写下）1) X 侧和 Z 侧各存在至少一种三色着色使 d_ext ≥ 10（把握约五成）；
+  2) 若存在，由于 X/Z 两侧独立（非交错构造），组合起来即得 d_circ = 10 的深度 8 电路，并且这是**精确证明**（Corollary 1）。
+method: search/noninterleaved/colour_search.py（E-005 的工具），--code "[[108,8,10]]" --target 10，先 X 侧后 Z 侧；MILP 可行性检验（cap 9）
+budget: {cpu_hours: 8, llm_tokens: 0, num_workers: 4}
