@@ -1,0 +1,18 @@
+id: E-009-joint-decoding-headroom
+hypothesis: H-005（定位提升空间到底在哪里）
+question: >
+  E-006 发现分 sector 解码时 Relay-BP 离最优只差 1.1–2.5 倍，而文献报告 17–24 倍。差异是否来自 X/Z 关联（Y 错误）？
+  在同一批 shot 上比较四个解码器：分 sector Relay、联合 Relay（在完整 DEM 上运行）、分 sector MLE、联合 MLE。
+  两个关键比值：(a) 分 sector MLE / 联合 MLE = 利用关联能拿回的空间上限；
+  (b) 联合 Relay / 联合 MLE = 现有最好的实时类解码器在联合解码下还剩多少空间（若大，就是 AI 发现解码器的空白）。
+prediction: >
+  （跑前写下，lead 推理）BB72，p=4e-3：
+  1) 联合 MLE 比分 sector MLE 好 3–10 倍（Y 错误占 sd6 双比特去极化的 1/3 左右，丢掉关联代价很大）；
+  2) 联合 Relay 比分 sector Relay 好 2–5 倍（与 Relay-BP 论文“XYZ 比 XZ 更好”的方向一致）；
+  3) 联合 Relay / 联合 MLE 在 2–5 倍（联合 DEM 的 Tanner 图更稠密、短环更多，BP 更难）。
+  若 3) 成立，空白就在“联合解码的实时类解码器”；若联合 Relay 已接近联合 MLE（< 1.5 倍），解码器线在本码上就没有空间了。
+method: >
+  从完整联合 DEM（未分解）采样；每个 shot 跑四个解码器；MLE 用 HiGHS MILP（E-006 的 MilpMLE，证明最优，超时单独计）。
+  失败 = 任一 observable 预测错。Relay 参数用 E-006 的 Relay5 设置（README sinter 参数，num_sets=300，stop_nconv=5）。
+codes: [BB72（2000 shot，p=4e-3）；若时间允许，BB90（p=4e-3）]
+budget: {cpu_hours: 4, llm_tokens: 0, num_workers: 4}
