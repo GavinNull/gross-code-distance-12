@@ -18,9 +18,21 @@ import time
 from multiprocessing import Pool
 
 from search.noninterleaved.colour_search import S3, homomorphisms, order_terms, proper
-from search.noninterleaved.ext import residual_supports
+from search.noninterleaved.ext import extended_matrices, residual_supports
+from search.noninterleaved.heur import heur_min
 from search.noninterleaved.run import HL, OUT, _solve, get_code, neighbours, tag
 from search.noninterleaved.uniform_search import classes, single_values
+
+
+def _heur_job(job):
+    """启发式找错（BP-OSD 随机 η + LNS）。找到 ≤ cap 即淘汰；返回与 _solve 相同的字段。"""
+    import time as _t
+    t0 = _t.time()
+    He, Le, _ = extended_matrices(job["H"], job["L"], job["sups"])
+    w, x, info = heur_min(He, Le, trials=job["trials"], seed=job["seed"], stop_at=job["cap"])
+    return {"key": job["key"], "upper": (w if (w is not None and w <= job["cap"]) else None),
+            "best_found": w, "status": "witness_found" if (w is not None and w <= job["cap"]) else "no_witness_found",
+            "seconds": _t.time() - t0}
 
 
 def main():
@@ -31,6 +43,8 @@ def main():
     ap.add_argument("--homs", type=int, nargs="+", required=True)
     ap.add_argument("--time-limit", type=float, default=20)
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--method", choices=["milp", "heur"], default="heur")
+    ap.add_argument("--trials", type=int, default=300)
     a = ap.parse_args()
 
     code, css = get_code(a.code)
@@ -40,7 +54,7 @@ def main():
     blocks = [(pi, sg) for pi in S3 for sg in S3]
     ok = [b for b in blocks if (sv[rep[tuple(order_terms(a.kind, *b))]][1] or 99) >= a.target]
     HM = homomorphisms(code)
-    base = OUT / f"colourscreen_{tag(a.code)}_{a.kind}_T{a.target}"
+    base = OUT / f"colourscreen_{a.method}_{tag(a.code)}_{a.kind}_T{a.target}"
     out_path = base.with_suffix(".jsonl")
     fh = open(f"{base}.log", "a")
 
@@ -65,14 +79,15 @@ def main():
                     sups = [s for i in range(code.n2) for s in residual_supports([neighbours(code, a.kind, i, t)
                                                                                   for t in obc[col[i]]])]
                     jobs.append({"H": H, "L": L, "sups": sups, "cap": a.target - 1, "tl": a.time_limit,
-                                 "solver": "feas", "key": [hkey, [[list(x) for x in b] for b in (b0, b1, b2)]]})
+                                 "solver": "feas", "trials": a.trials, "seed": 0,
+                                 "key": [hkey, [[list(x) for x in b] for b in (b0, b1, b2)]]})
         log(f"h={hkey}: {n_proper} proper triples (from {len(ok)} block orders passing the single bound)")
     log(f"total {len(jobs)} triples, time limit {a.time_limit}s each, {a.workers} workers")
     n = killed = cand = 0
     with Pool(a.workers) as p, out_path.open("a") as fo:
-        for r in p.imap_unordered(_solve, jobs):
+        for r in p.imap_unordered(_heur_job if a.method == "heur" else _solve, jobs):
             n += 1
-            rec = {k: r[k] for k in ("key", "status", "upper", "seconds")}
+            rec = {k: r.get(k) for k in ("key", "status", "upper", "best_found", "seconds")}
             fo.write(json.dumps(rec) + "\n")
             fo.flush()
             if r["upper"] is not None:
