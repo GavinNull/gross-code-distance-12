@@ -25,7 +25,8 @@
 - ~~解码器评估任务~~ 已合并（9756441）：两层沙箱、保密种子、速度预算（以 Relay-BP 为基准）、MLE 近最优参考、DecoderProblem
   - **关键发现**：p=3e-3 下 Relay-BP 在小码上已接近最优（BB72：S=20 离 MLE 约 15%）；空间随码变大而增长（Relay 对 BP-OSD：BB72 约 6%，BB90 约 3.7 倍，gross 约 4.8 倍）
 - **auditor：攻击解码器任务**（冻结前必做）→ `research/audits/2026-10-04-decoder-task.md`
-- **E-008（lead 自己做）：Relay-BP 失败解剖**：Relay 失败、MLE 成功的 shot 分成不收敛 / 更重的错误类 / 平局 / 不可纠正四类，决定改进方向 → `experiments/E-008-relay-failure-anatomy.yaml`
+- ~~E-008 Relay-BP 失败解剖~~ 已完成（lead）：BB72 上 Relay 失败的 59% 连 MLE 也解不了，不收敛为 0；**p=3e-3 下完美解码器的上限约 1.6–2 倍**。
+  第 ii 类“正确的类只差约 1 个机制”，问题在跨类探索。**推论：解码器目标应改为 gross 上的固定权重失败谱**，待 E-006 方法 (b) 的结果
 - **E-007：Relay-BP 按码模拟退火调参**（经典对照，不花 API，临时密钥）→ `experiments/E-007-relay-sa-tuning.yaml`
 - ~~lit-scout：解码器竞争格局~~ 已完成：BP-OSD 的提升空间已被 Relay-BP（10–100 倍）等兑现；剩余目标是“FPGA 友好解码器与近最优之间约 17 倍的差距”。H-005 已修订
 
