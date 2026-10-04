@@ -1,0 +1,18 @@
+id: E-008-relay-failure-anatomy
+hypothesis: H-005（决定改进方向）
+question: >
+  Relay-BP 失败而 MLE 成功的 shot，属于哪一类？
+  (i) 不收敛；(ii) 收敛到错误逻辑类，且解比 MLE 解更重（更不可能）；
+  (iii) 收敛到错误逻辑类，但与 MLE 解等可能（平局 / 简并）；(iv) MLE 也失败（不可纠正）。
+  各类的比例决定改进方向：调参（i）、逻辑翻转局部搜索（ii）、简并度感知裁决（iii）。
+prediction: >
+  （跑前写下，lead 推理）在 BB72 与 BB90 的 Z sector，p=3e-3，Relay-BP 论文参数（S=5）下：
+  1) 在“Relay 失败、MLE 成功”的 shot 中，(ii) 占多数（约 50%），(i) 约 20%，(iii) 约 30%；
+  2) (iii) 平局在偶数距离码上占比显著（BB72 d=6、BB90 d_circ≤8），且解的权重差为 0 的情况集中在 ⌈d/2⌉ 附近；
+  3) 在 (ii) 类中，Relay 解与 MLE 解之差（ê⊕e*）大多是一个低权重的逻辑算符（权重 ≤ d_circ+2），
+     即“只差一次逻辑翻转”，这正是逻辑翻转局部搜索能修补的情形。
+method: >
+  自采样（分析用种子，非评估器的保密种子；结果不上榜）。对每个 shot 运行 Relay-BP 的 decode_detailed 拿到错误向量与收敛标志，
+  对 Relay 失败的 shot 运行 CP-SAT MLE（证明最优），比较两者的逻辑类、先验加权权重 Σ log((1-p)/p)，以及差向量 ê⊕e* 的结构。
+tasks: [bb72-dec-p3e-3, bb90-dec-p3e-3]
+budget: {cpu_hours: 3, llm_tokens: 0, num_workers: 2}
