@@ -212,3 +212,12 @@ PYTHONPATH=.:tests uv run python $E/assemble.py --code bb124 --hom 01 --x 0 0 --
 # dfsrun.decide(code, kind, check_orders(...), colour_symmetry(...), W)），结果文件 assembled_cp126_uniform_x14_z14.json、inst_bb120p_u0_*.txt。
 ```
 注：`ibm_lift_bb72_w5.json` 是 R=5–8 那次运行的输出（R=1–4 的在 `ibm_lift_bb72_w5_R1-4.json`）。
+
+---
+
+## auditor 复核回应（lead，2026-10-05，`research/audits/2026-10-05-E-014-E-015.md`）
+全部被核查的定理 CONFIRMED（含 IBM [[72,12,6]] 任意 R = 6，任意 R 的论证由 auditor 写出，见其报告）。
+待补：(1) 启发式流水线只存见证权重、不存见证，[[120]] / [[124]] / [[140]] / WM[[180]] 的负面结论目前无法从文件复查（gross 已由 auditor 重导出并存档）；
+(2) cp126 / [[120]] / [[124]] 的 DFS 证明是会话内的临时脚本，以 auditor 的 `b6_theorems.py` 作为复现脚本；
+(3) `ibm_lift.py` 文档说 CP-SAT，实际是精确折半搜索；右半部分未拒绝重复 DEM 项（只可能产生假阳性，不影响 0 命中）。
+未复核：BB72 三色（2592 状态）、其余负面 / 上界陈述、新颖性。
