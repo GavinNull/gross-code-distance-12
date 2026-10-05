@@ -1,0 +1,11 @@
+id: E-014-gross-dcirc11-proof
+hypothesis: H-004（推广：把猜想变成定理）
+question: 证明 Strikis 等（arXiv 2603.05481 App. H, Fig. 12）的 gross code [[144,12,12]] 电路 d_circ = 11（原文为猜想）。
+method: >
+  上界：E-003 已有权重 11 的注入验证见证（评估器上界 11）。下界：Prop. 3（d_circ ≥ d_ext(E)，对任何单辅助比特电路成立）+
+  在扩展码上用完整 DFS 证明两侧都不存在权重 ≤ 10 的逻辑错误。复用 E-013 auditor 的 dfs.c（需要把行数上限从 64 扩到 ≥ 72），
+  利用三色着色的平移对称（ker h 的平移，24 个元素）做轨道分情形。
+prediction: >
+  （跑前写下）1) d_ext = 11 成立（Strikis 的猜想正确），把握约八成；
+  2) 计算可行：W=10 的 DFS 比 BB108 的 W=9 大 1–3 个数量级，单线程每侧可能需要数小时；按第一层分支并行后在本机可完成。
+budget: {cpu_hours: 24, llm_tokens: 0, num_workers: 4}
