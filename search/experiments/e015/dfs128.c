@@ -89,7 +89,7 @@ static void dfs(u128 syn, int lm, int level){
 
 int main(int argc, char **argv){
   if (argc < 4){ fprintf(stderr, "usage\n"); return 1; }
-  FILE *f = fopen(argv[1], "r"); W = atoi(argv[2]); int cs = atoi(argv[3]);
+  FILE *f = fopen(argv[1], "r"); if (!f){ fprintf(stderr, "cannot open %s\n", argv[1]); return 5; } W = atoi(argv[2]); int cs = atoi(argv[3]);
   if (argc >= 6){ split_mod = atoi(argv[4]); split_idx = atoi(argv[5]); }
   if (fscanf(f, "%d %d %d", &R, &N, &NO) != 3) return 2;
   for (int j=0;j<N;j++){ unsigned long long lo, hi; if (fscanf(f, "%llu %llu %d %d", &lo, &hi, &cl[j], &corb[j]) != 4) return 3; ch[j]=((u128)hi<<64)|(u128)lo; cw[j]=pc(ch[j]); if (cw[j]>wmax) wmax=cw[j]; }

@@ -6,7 +6,10 @@ Argument (per memory basis; Z basis uses the X-type extended code (HZ, LZ), X ba
   |F| = w = d_ext, then (no logical of weight < w exists) the images are w DISTINCT NONZERO columns and they form
   a weight-w ext logical.  Hence every fault of F has its image in U = union of supports of all weight-w ext
   logicals.  Restrict the DEM to error terms having at least one circuit location with image in U and decide
-  by CP-SAT whether <= w of them flip no detector and flip an observable.  Infeasible => d_circ >= w+1 for this R.
+  by an exact meet-in-the-middle enumeration (not CP-SAT; docstring corrected 2026-10-07 per audit) whether <= w of them
+  flip no detector and flip an observable.  Infeasible => d_circ >= w+1 for this R.
+  Note (audit 2026-10-05): the right half does not reject repeated DEM terms; this can only add false positives,
+  so a 0-hit result is unaffected.  Any-R extension: see research/audits/2026-10-05-E-014-E-015.md.
   (Weights < w are already excluded by Prop. 3: d_circ >= d_ext = w.)
 
     PYTHONPATH=.:tests uv run python search/experiments/e015/ibm_lift.py --code bb72 --task bb72-dcirc --w 5 --R 1 2 3 4 5
