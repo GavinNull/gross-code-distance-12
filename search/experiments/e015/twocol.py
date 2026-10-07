@@ -97,13 +97,17 @@ def _job(args):
         H, L = HL(code, kind)
         sups = [s for i in range(code.n2) if col[i] == 0
                 for s in residual_supports([neighbours(code, kind, i, t) for t in o])]
-        He, Le, _ = extended_matrices(H, L, sups)
+        He, Le, lab = extended_matrices(H, L, sups)
     else:
         e, o = payload
-        He, Le, _ = ext_of_orders(code, kind, check_orders(code, kind, col, {0: BLOCKS[e], 1: BLOCKS[o]}))
+        He, Le, lab = ext_of_orders(code, kind, check_orders(code, kind, col, {0: BLOCKS[e], 1: BLOCKS[o]}))
     w, wit = heur(He, Le, seeds, trials, target)
-    return {"what": what, "payload": payload, "seeds": list(seeds), "trials": trials, "w": w,
-            "sec": round(time.time() - t0, 1)}
+    rec = {"what": what, "payload": payload, "seeds": list(seeds), "trials": trials, "w": w,
+           "sec": round(time.time() - t0, 1)}
+    if w is not None and w < target and wit is not None:
+        # 见证按标签保存（('q', 数据比特) 或 ('r', 残余覆盖的数据比特)），与合并列的顺序无关，可独立复查（auditor 2026-10-05 问题 1）
+        rec["witness"] = [[lab[j][0], list(lab[j][1]) if lab[j][0] == "r" else int(lab[j][1])] for j in wit]
+    return rec
 
 
 def heur_pipeline(codekey, kind, hk, target, workers, trials=300, htrials=1000, log=print, tag=""):
@@ -161,6 +165,7 @@ def main():
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--trials", type=int, default=300)
     ap.add_argument("--htrials", type=int, default=1000)
+    ap.add_argument("--tag", default="")
     a = ap.parse_args()
     logf = open(OUT / f"twocol_{a.mode}_{a.code}_T{a.target}.log", "a")
 
@@ -177,7 +182,7 @@ def main():
             if a.homs and hk not in a.homs:
                 continue
             for kind in a.kinds:
-                heur_pipeline(a.code, kind, hk, a.target, a.workers, a.trials, a.htrials, log)
+                heur_pipeline(a.code, kind, hk, a.target, a.workers, a.trials, a.htrials, log, tag=a.tag)
 
 
 if __name__ == "__main__":
