@@ -8,7 +8,7 @@
 
 ## 待人决策
 
-（无。按 PI 2026-10-04 的指示，常规技术决定由 lead 做出并记录在 decisions.md。）
+- **公开方式**（PI 决定）：尽快写论文挂 arXiv / 先留时间戳（公开仓库）/ 提交 qldpc-challenge 榜单 / 暂不公开。lead 建议尽快写论文。
 
 ## 已确认结果
 
@@ -41,6 +41,11 @@
    [[90,8,10]] 的 d_circ ≤ 9（**10 不可能**），[[108,8,10]] ≤ 10。均匀调度下 BB90 ≤ 8（不限深度），BB108（深度 8）≤ 9。
    方法：Strikis 等 arXiv 2603.05481 的扩展码 + Prop. 4 推广，两份独立实现结果一致。
    范围：仅限可分段（全局轮次一致）的电路；交错、不可分段的流水、flag 电路不在范围内。
+
+## 可复现性（2026-10-07）
+
+`bash scripts/reproduce_theorems.sh --with-gross` 从干净状态一次跑通：**ALL PASS**（BB108、[[72]] LRC、[[126]]、[[120]]、[[124]]、IBM [[72]] R=1..8、gross Fig. 12）。
+日志：`research/reproduction/2026-10-07-reproduce_theorems_full.log`。负面结论的见证：`research/witnesses/`。
 
 ## 公开前的风险提示（2026-10-07）
 

@@ -1,0 +1,29 @@
+== E-013  [[108,8,10]] 两色电路 d_circ = 10
+PASS  bb108_X: no logical of weight <= 9 (10 orbit cases), weight-10 control found
+PASS  bb108_Z: no logical of weight <= 9 (10 orbit cases), weight-10 control found
+== E-015  LRC 电路定理（auditor 独立构造的实例 b6_theorems.py）
+PASS  bb72_X: no logical of weight <= 5 (10 orbit cases), weight-6 control found
+PASS  bb72_Z: no logical of weight <= 5 (10 orbit cases), weight-6 control found
+PASS  cp126_X: no logical of weight <= 8 (5 orbit cases), weight-9 control found
+PASS  cp126_Z: no logical of weight <= 8 (5 orbit cases), weight-9 control found
+PASS  bb120p_X: no logical of weight <= 9 (5 orbit cases), weight-10 control found
+PASS  bb120p_Z: no logical of weight <= 9 (5 orbit cases), weight-10 control found
+PASS  bb124_X: no logical of weight <= 8 (5 orbit cases), weight-9 control found
+PASS  bb124_Z: no logical of weight <= 8 (5 orbit cases), weight-9 control found
+== E-015  IBM [[72,12,6]] 原电路 d_circ = 6（R = 1..8；任意 R 的论证见 research/audits/2026-10-05-E-014-E-015.md）
+[13:16:25] Z R=6: {'basis': 'Z', 'R': 6, 'dem_errors': 2232, 'explained_terms': 2232, 'locations': 31680, 'kept_terms': 1584, 'group_sizes_first': [[19, 19, 6, 6, 6], [19, 19, 6, 6, 6], [19, 19, 6, 6, 6]], 'max_group': 19, 'min_group': 6, 'right_combos': 7776, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 30.0}
+[13:17:04] Z R=7: {'basis': 'Z', 'R': 7, 'dem_errors': 2592, 'explained_terms': 2592, 'locations': 36936, 'kept_terms': 1836, 'group_sizes_first': [[22, 22, 7, 7, 7], [22, 22, 7, 7, 7], [22, 22, 7, 7, 7]], 'max_group': 22, 'min_group': 7, 'right_combos': 12348, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 39.0}
+[13:17:55] Z R=8: {'basis': 'Z', 'R': 8, 'dem_errors': 2952, 'explained_terms': 2952, 'locations': 42192, 'kept_terms': 2088, 'group_sizes_first': [[25, 25, 8, 8, 8], [25, 25, 8, 8, 8], [25, 25, 8, 8, 8]], 'max_group': 25, 'min_group': 8, 'right_combos': 18432, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 51.3}
+[13:17:55] X: ext (36, 180), 252 logicals of weight <= 5 (weights [5]), |U| = 144 columns, DFS nodes 294069
+[13:17:56] X R=1: {'basis': 'X', 'R': 1, 'dem_errors': 432, 'explained_terms': 432, 'locations': 5400, 'kept_terms': 360, 'group_sizes_first': [[4, 4, 4, 1, 1], [4, 4, 4, 1, 1], [4, 4, 1, 1, 1]], 'max_group': 4, 'min_group': 1, 'right_combos': 468, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 0.9}
+[13:18:00] X R=2: {'basis': 'X', 'R': 2, 'dem_errors': 792, 'explained_terms': 792, 'locations': 10656, 'kept_terms': 648, 'group_sizes_first': [[7, 7, 7, 2, 2], [7, 7, 7, 2, 2], [7, 7, 2, 2, 2]], 'max_group': 7, 'min_group': 2, 'right_combos': 3456, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 3.3}
+[13:18:07] X R=3: {'basis': 'X', 'R': 3, 'dem_errors': 1152, 'explained_terms': 1152, 'locations': 15912, 'kept_terms': 936, 'group_sizes_first': [[10, 10, 10, 3, 3], [10, 10, 10, 3, 3], [10, 10, 3, 3, 3]], 'max_group': 10, 'min_group': 3, 'right_combos': 11340, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 7.3}
+[13:18:20] X R=4: {'basis': 'X', 'R': 4, 'dem_errors': 1512, 'explained_terms': 1512, 'locations': 21168, 'kept_terms': 1224, 'group_sizes_first': [[13, 13, 13, 4, 4], [13, 13, 13, 4, 4], [13, 13, 4, 4, 4]], 'max_group': 13, 'min_group': 4, 'right_combos': 26496, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 13.0}
+[13:18:40] X R=5: {'basis': 'X', 'R': 5, 'dem_errors': 1872, 'explained_terms': 1872, 'locations': 26424, 'kept_terms': 1512, 'group_sizes_first': [[16, 16, 16, 5, 5], [16, 16, 16, 5, 5], [16, 16, 5, 5, 5]], 'max_group': 16, 'min_group': 5, 'right_combos': 51300, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 20.1}
+[13:19:09] X R=6: {'basis': 'X', 'R': 6, 'dem_errors': 2232, 'explained_terms': 2232, 'locations': 31680, 'kept_terms': 1800, 'group_sizes_first': [[19, 19, 19, 6, 6], [19, 19, 19, 6, 6], [19, 19, 6, 6, 6]], 'max_group': 19, 'min_group': 6, 'right_combos': 88128, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 29.1}
+[13:19:49] X R=7: {'basis': 'X', 'R': 7, 'dem_errors': 2592, 'explained_terms': 2592, 'locations': 36936, 'kept_terms': 2088, 'group_sizes_first': [[22, 22, 22, 7, 7], [22, 22, 22, 7, 7], [22, 22, 7, 7, 7]], 'max_group': 22, 'min_group': 7, 'right_combos': 139356, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 39.7}
+[13:20:41] X R=8: {'basis': 'X', 'R': 8, 'dem_errors': 2952, 'explained_terms': 2952, 'locations': 42192, 'kept_terms': 2376, 'group_sizes_first': [[25, 25, 25, 8, 8], [25, 25, 25, 8, 8], [25, 25, 8, 8, 8]], 'max_group': 25, 'min_group': 8, 'right_combos': 207360, 'undetected_logicals_of_weight_w': 0, 'examples': [], 'sec': 52.0}
+== E-014  gross Fig. 12 d_circ = 11
+PASS  gross_X: no logical of weight <= 10 (15 orbit cases), weight-11 control found
+PASS  gross_Z: no logical of weight <= 10 (15 orbit cases), weight-11 control found
+ALL PASS
