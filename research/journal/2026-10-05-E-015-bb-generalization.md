@@ -221,3 +221,9 @@ PYTHONPATH=.:tests uv run python $E/assemble.py --code bb124 --hom 01 --x 0 0 --
 (2) cp126 / [[120]] / [[124]] 的 DFS 证明是会话内的临时脚本，以 auditor 的 `b6_theorems.py` 作为复现脚本；
 (3) `ibm_lift.py` 文档说 CP-SAT，实际是精确折半搜索；右半部分未拒绝重复 DEM 项（只可能产生假阳性，不影响 0 命中）。
 未复核：BB72 三色（2592 状态）、其余负面 / 上界陈述、新颖性。
+
+### 补缺完成（lead，2026-10-07）
+- 问题 1：`twocol.py` 改为按标签保存见证；重跑 [[120]] T11、[[124]] T10、[[140]] T13、WM[[180]] T16（两侧），**320 个见证经独立线性代数复查全部有效**，存档于 `research/witnesses/e015/`。
+  结论不变：四个码的两色 LRC 全部低于各自目标。
+- 问题 2：新增 `scripts/reproduce_theorems.sh`，一条命令复现 BB108、E-015 四个定理、IBM [[72]]（以及 `--with-gross`）。
+- 问题 3：`ibm_lift.py` 文档已更正；问题 4：`dfs128.c` 两份拷贝均已检查文件打开。

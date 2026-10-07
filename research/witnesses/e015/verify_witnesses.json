@@ -1,0 +1,42 @@
+{
+ "heur_bb120p_10_X_T11_wit.jsonl": {
+  "verified": 36,
+  "failed": 0,
+  "kills_without_witness": 0
+ },
+ "heur_bb120p_10_Z_T11_wit.jsonl": {
+  "verified": 36,
+  "failed": 0,
+  "kills_without_witness": 0
+ },
+ "heur_bb124_01_X_T10_wit.jsonl": {
+  "verified": 48,
+  "failed": 0,
+  "kills_without_witness": 0
+ },
+ "heur_bb124_01_Z_T10_wit.jsonl": {
+  "verified": 56,
+  "failed": 0,
+  "kills_without_witness": 0
+ },
+ "heur_bb140_10_X_T13_wit.jsonl": {
+  "verified": 36,
+  "failed": 0,
+  "kills_without_witness": 0
+ },
+ "heur_bb140_10_Z_T13_wit.jsonl": {
+  "verified": 36,
+  "failed": 0,
+  "kills_without_witness": 0
+ },
+ "heur_wm180_10_X_T16_wit.jsonl": {
+  "verified": 36,
+  "failed": 0,
+  "kills_without_witness": 0
+ },
+ "heur_wm180_10_Z_T16_wit.jsonl": {
+  "verified": 36,
+  "failed": 0,
+  "kills_without_witness": 0
+ }
+}
