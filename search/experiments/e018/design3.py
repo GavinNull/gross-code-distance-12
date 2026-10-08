@@ -103,7 +103,7 @@ def build(P, mode, bases, types, assume=False, fix=None):
                 m.Add(floordiv("X", i, "Z", j, u) == floordiv("X", i, "Z", j, v))
     m.assume_lits = []
     nS = n4 = 0
-    BIG = 8
+    BIG = 64
     for basis in bases:
         kind = KIND_OF_BASIS[basis]
         rk = "Z" if kind == "X" else "X"
@@ -155,6 +155,35 @@ def build(P, mode, bases, types, assume=False, fix=None):
                         m.Add(dist[c] == dist[d] + floordiv(rk, d, rk, c, w) + 1).OnlyEnforceIf(e)
                         supp.append(e)
                 m.AddBoolOr(supp).OnlyEnforceIf(R[c])
+            # second certificate type: a negative cycle among free-qubit edges only (possible when some edge
+            # weight is -1, i.e. pipelined schedules); start node chosen by one-hot st, dist2[start] = 0
+            st = {c: m.NewBoolVar("") for c in nodes}
+            m.Add(sum(st.values()) <= 1)
+            R2 = {c: m.NewBoolVar("") for c in nodes}
+            rank2 = {c: m.NewIntVar(0, len(nodes), "") for c in nodes}
+            dist2 = {c: m.NewIntVar(-BIG, BIG, "") for c in nodes}
+            for c in nodes:
+                supp = [st[c]]
+                m.Add(dist2[c] == 0).OnlyEnforceIf(st[c])
+                m.Add(rank2[c] == 0).OnlyEnforceIf(st[c])
+                for w in qc[c]:
+                    if w in res:
+                        continue
+                    for d in rchk[w]:
+                        if d == c or d not in good:
+                            continue
+                        wt = floordiv(rk, d, rk, c, w)
+                        e = m.NewBoolVar("")
+                        m.AddImplication(e, R2[d])
+                        m.Add(rank2[d] < rank2[c]).OnlyEnforceIf(e)
+                        m.Add(dist2[c] == dist2[d] + wt + 1).OnlyEnforceIf(e)
+                        supp.append(e)
+                        # closing edge d -> c where c is the start: negative total
+                        f = m.NewBoolVar("")
+                        m.AddImplication(f, R2[d]); m.AddImplication(f, st[c])
+                        m.Add(dist2[d] + wt + 1 < 0).OnlyEnforceIf(f)
+                        fins.append(f)
+                m.AddBoolOr(supp).OnlyEnforceIf(R2[c])
             if assume:
                 lit = m.NewBoolVar("")
                 m.AddBoolOr(fins).OnlyEnforceIf(lit)
