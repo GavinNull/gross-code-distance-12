@@ -57,7 +57,10 @@
 
 - **E-017（experimenter，2026-10-08）**：IBM 2605.21898 App. C 所说“可能 d_circ=12”的 morphing 电路**不在 gross 码上**，唯一公开构造是 Shaw–Terhal 2407.16336 从 [[288,12,18]] morph 得到的另一个 [[144,12,12]]（不等价于 gross）。
   对该电路（f_x，仓库层序）：权重 12 见证注入 42/42 通过；穷举证明单轮、R=1、R=2（噪声边界）均无权重 ≤ 11 的不可检测逻辑错误；
-  借 Shaw–Terhal 2604.09797 Prop. 1，理想边界下任意轮数 d_circ = 12。待：auditor、其余变体、噪声边界任意 R、文献确认。
+  借 Shaw–Terhal 2604.09797 Prop. 1，理想边界下任意轮数 d_circ = 12。待：auditor、其余变体、噪声边界任意 R。
+  文献（`research/literature/morphing-d12-novelty.md`）：任何 morphing 电路的严格 d_circ 下界均未见先例（新，中高证据）；IBM 所指电路推断为此电路（中等证据，原文未写明）；
+  Prop. 1 只适用两轮 morphing、理想边界、时间反演封闭的故障集。措辞须限定为“Shaw–Terhal 的 [[288,12,18]] 电路（具体同态与门序）”，不可写“gross 码 idle 电路已证明”。
+  是否致信 IBM / Shaw 确认电路身份：对外联系，须 PI 同意。
 
 - E-010：BB108 三色 LRC 全部 ≤9（lead，未复核；E-015 复核已覆盖 gross / [[90]] 的同类负面结论）
 - E-016：BB108 两色电路在实际解码器、p ≥ 1e-3 下无可测 LER 改善（experimenter，未复核）
