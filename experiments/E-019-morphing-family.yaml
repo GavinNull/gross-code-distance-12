@@ -1,0 +1,34 @@
+id: E-019-morphing-family
+hypothesis: H-006（morphing 电路是否普遍完全保距离：d_circ = 端点码距离 d̃）
+question: >
+  把 E-017 的定理（Shaw–Terhal [[288,12,18]] → [[144,12,12]]，f_x、仓库层序：d_circ = 12）推广到 Shaw–Terhal 给出的全部
+  morphing 电路族：2407.16336 Table I 的 4 个母码 × 合法同态 × 两种层序（仓库 / 论文 Table 2），以及仓库的
+  get_swap2_morphing_specification（App. G.2“反转第 2 轮 CNOT”）。对每个电路：构造、无噪声确定性、端点码 [[n,k,d]]（精确 DFS）、
+  Prop. 1 折叠条件（auditor 的无基底表述，计算核对）、单轮实例穷举 DFS（W = d̃−1，两个基底）、W = d̃ 阳性对照、注入见证。
+  若某电路 d_circ < d̃，记录见证及其结构。
+sources: >
+  2407.16336v3 Table I（本地文本副本）；公开仓库 Mac-Shaw/morphing_qec_circuits bb_params.py（只读，未运行）；
+  2604.09797v2 Prop. 1；E-017 及其审计脚本 research/audits/2026-10-08-E-017-scripts/。
+family_known_before_running: >
+  Table I（BP-OSD 上界，仅单比特 X 故障、两轮 Z 记忆）：[[72,12,6]] f_x,f_y,f_xy → [[36,12,3]]，d̃_circ ≤ 3；
+  [[108,8,10]] f_y → [[54,8,8]]，d̃_circ ≤ 7（< 8!）；[[144,12,12]] f_x,f_y,f_xy → [[72,12,6]]，≤ 6；
+  [[288,12,18]] → [[144,12,12]]，≤ 12。Fig. 4 另有 swap2 变体 [[36,12,4]] f_xy、[[72,12,7]] f_y（App. G.2 称有三个这样的电路，第三个未给出）。
+  仓库另有三轮（Z_3 同态）morphing 规格；Prop. 1 只适用两轮电路，不在本实验的证明范围内（只记录）。
+prediction: >
+  （跑前写下，未看任何本实验数据）
+  1) [[36,12,3]]（全部 f、两种层序）d_circ = 3（约 95%）；[[72,12,6]] d_circ = 6（约 85%）；
+     [[144,12,12]] 的 f_y、f_xy 与 swap23 变体 d_circ = 12（约 85%）。
+  2) [[54,8,8]]（f_y）d_circ = 7 < d̃ = 8（约 75%）：论文的 ≤ 7 是 BP-OSD 找到的真实故障集，只要我们的电路与其一致就成立；
+     若成立，“morphing 普遍保距离”被证伪，H-006 只能限定为“部分 morphing 电路保距离”。剩余约 25%：论文电路与仓库/我们的层序不同，
+     或其 ≤ 7 来自不同的故障口径。
+  3) 两种层序（仓库 vs 论文）给出相同 d_circ（约 70%）。
+  4) swap2 变体：端点码距离比标准变体大（论文所说），d_circ = d̃ 的约 50%，否则比 d̃ 小 1。
+  5) 每个电路的折叠条件都成立（约 90%；它依赖电路的时间反演结构，这对两轮 morphing 是普遍的）。
+  6) 每个电路 CPU 用量：小码几分钟，[[288]] 变体每个约 0.5–1 CPU h（两基底）。
+budget: {cpu_hours: 30, llm_tokens: 0, num_workers: 6}
+code: search/experiments/e019/
+results: results/E-019-morphing-family/
+journal: research/journal/2026-10-08-E-019-morphing-family.md
+command: >
+  uv run python -m search.experiments.e019.run_all （各阶段的单独命令见日志“复现命令”）
+seeds: 采样确定探测器用固定种子 12345；DFS 无随机性。
