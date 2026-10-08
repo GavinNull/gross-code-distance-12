@@ -69,7 +69,9 @@
 - **E-018（PRL 冲刺，PI 指示“先着重注重突破”）gross 交错单辅助电路能否 d_circ = 12**（2603.05481 §IV.3 开放问题）→ `experiments/E-018-gross-interleaved-12.yaml`
   - stage a 完成（lead，2026-10-08）：Fig. 12 扩展码权重 11 逻辑错误按对称情形计 X 侧 254、Z 侧 257（预测 10^4–10^6 的低端以下：lift 证明可行）。
     原始输出 `results/E-018-gross-interleaved-12/w11_*`；3 个文件被 50 行打印上限截断，已用 `search/experiments/e014/dfs128_all.c` 重跑为 `full_*`
-  - stage b/c 交给 experimenter：推广 ibm_lift 为 gross 精确检查器（阳性对照：Fig. 12 必须找到权重 11），再按 Theorem 1 设计交错时序
+  - stage b/c 完成（experimenter，未复核）：全部权重 11 扩展码逻辑每侧 4224 个（176 自由轨道 × 24）；精确 lift 检验器 `search/experiments/e018/lift.py`（Fig. 12 阳性对照 4224/4224 提升，注入 600/600）。
+    交错设计：没有候选达到 12。“10 数据列 + 1 个 r2 钩子”型单钩子逻辑在 bulk 中总有一个能提升；帧模型 + CP-SAT 对若干电路族给出 INFEASIBLE（不回绕平移对称 P ≤ 30、不回绕逐校验 P=16、流水对称 P=8–10），最小不可行核 2 个轨道（相反的读出先后要求）。
+    判断：保持 Fig. 12 顺序只改时序达不到 12（bulk 意义；帧模型推导与 design3 证书待 auditor）。未覆盖：P ≥ 12 流水、换 CNOT 顺序。
 
 - **E-006 解码器提升空间**（30 CPU 小时）：BP-OSD 对比逐 shot 精确解码；固定权重故障采样外推到 p=1e-3；解码器最低失败权重 → `experiments/E-006-decoder-headroom.yaml`
 - ~~解码器评估任务~~ 已合并（9756441）：两层沙箱、保密种子、速度预算（以 Relay-BP 为基准）、MLE 近最优参考、DecoderProblem
