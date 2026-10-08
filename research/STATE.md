@@ -67,6 +67,11 @@
 
 ## 正在进行
 
+- **E-018（PRL 冲刺，PI 指示“先着重注重突破”）gross 交错单辅助电路能否 d_circ = 12**（2603.05481 §IV.3 开放问题）→ `experiments/E-018-gross-interleaved-12.yaml`
+  - stage a 完成（lead，2026-10-08）：Fig. 12 扩展码权重 11 逻辑错误按对称情形计 X 侧 254、Z 侧 257（预测 10^4–10^6 的低端以下：lift 证明可行）。
+    原始输出 `results/E-018-gross-interleaved-12/w11_*`；3 个文件被 50 行打印上限截断，已用 `search/experiments/e014/dfs128_all.c` 重跑为 `full_*`
+  - stage b/c 交给 experimenter：推广 ibm_lift 为 gross 精确检查器（阳性对照：Fig. 12 必须找到权重 11），再按 Theorem 1 设计交错时序
+
 - **E-006 解码器提升空间**（30 CPU 小时）：BP-OSD 对比逐 shot 精确解码；固定权重故障采样外推到 p=1e-3；解码器最低失败权重 → `experiments/E-006-decoder-headroom.yaml`
 - ~~解码器评估任务~~ 已合并（9756441）：两层沙箱、保密种子、速度预算（以 Relay-BP 为基准）、MLE 近最优参考、DecoderProblem
   - **关键发现**：p=3e-3 下 Relay-BP 在小码上已接近最优（BB72：S=20 离 MLE 约 15%）；空间随码变大而增长（Relay 对 BP-OSD：BB72 约 6%，BB90 约 3.7 倍，gross 约 4.8 倍）
