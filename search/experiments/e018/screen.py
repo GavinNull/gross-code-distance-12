@@ -68,8 +68,13 @@ def lift_counts(spec, Rs, reps=True, bases="ZX", stop_at=None):
 def evaluate(item):
     name, sx, sz, P, Rs, reps, stop_at = item
     t0 = time.time()
-    spec = spec_P(np.array(sx), np.array(sz), P, name=name).canonical()
-    rec = {"name": name, "P": P, "sx": list(map(int, sx)), "sz": list(map(int, sz))}
+    if isinstance(sx, str) and sx == "times":      # class-level CNOT times from cpgen (sz holds the 6x6 table)
+        from search.experiments.e018.cpgen import spec_from_times
+        spec = spec_from_times(np.array(sz), P, name=name).canonical()
+        rec = {"name": name, "P": P, "times": sz}
+    else:
+        spec = spec_P(np.array(sx), np.array(sz), P, name=name).canonical()
+        rec = {"name": name, "P": P, "sx": list(map(int, sx)), "sz": list(map(int, sz))}
     if not legal_spec(spec):
         rec["status"] = "conflict"; return rec
     check_orders(spec)
@@ -105,6 +110,11 @@ if __name__ == "__main__":
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     items = []
+    if a.family.endswith(".json"):
+        for path in a.family.split(","):
+            d = json.load(open(path))
+            items += [(f"{path.split('/')[-1][:-5]}_{i}", "times", T, d["P"], a.R, not a.all, a.stop_at)
+                      for i, T in enumerate(d["times"])]
     for P in a.P:
         if a.family == "colour":
             items += [(n, sx, sz, P_, a.R, not a.all, a.stop_at) for n, sx, sz, P_ in colour_family(P)]
