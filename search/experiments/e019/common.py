@@ -247,6 +247,7 @@ def analyse(code, gates, meas):
     N = code.N
     assert not np.any((HX.astype(int) @ HZ.T.astype(int)) % 2)
     out = {"k_mid": int(2 * N - rank(HX) - rank(HZ))}
+    stabinfo = {}
     contracted = {("X", r): set() for r in range(N)}
     contracted.update({("Z", r): set() for r in range(N)})
     ec = {}
@@ -267,8 +268,10 @@ def analyse(code, gates, meas):
                 if len(sup) == 1 and sup[0] >= N:
                     assert sup[0] in meas[c][P], "contracted onto wrong-basis measurement"
                     contracted[(P, r)].add(c)
+                    stabinfo.setdefault((P, r), {})[c] = ("contract", int(sup[0]))
                 else:
                     Rs = [q for q in sup if q >= N]
+                    stabinfo.setdefault((P, r), {})[c] = ("expand", [int(q) for q in sup if q < N], [int(q) for q in Rs])
                     assert set(Rs) <= set(meas[c][P]), "expanding stabiliser hits wrong-basis measurement"
                     vv = np.zeros(N, np.uint8)
                     vv[[q for q in sup if q < N]] = 1
@@ -291,6 +294,7 @@ def analyse(code, gates, meas):
                 nb[p].add(q)
                 nb[q].add(p)
     out["max_degree"] = max(len(s) for s in nb)
+    ec["stabinfo"] = stabinfo
     return out, ec
 
 
