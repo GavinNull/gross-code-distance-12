@@ -43,7 +43,7 @@ def det_ok(P, ta_u, tc_u, ta_v, tc_v):
     return (ta_u - tc_u) // P == (ta_v - tc_v) // P
 
 
-def build(P, fix0=True, extra=None, lazy_det=False):
+def build(P, fix0=True, extra=None, lazy_det=False, keep=None):
     """lazy_det: do not add the forbidden-pair determinism clauses; instead return them in pool.det_table
     {(a, c): (ga, gc, set of forbidden (g1, g2))} for lazy addition (sound: they are only added when violated)."""
     C = checks()
@@ -51,8 +51,12 @@ def build(P, fix0=True, extra=None, lazy_det=False):
     pool = IDPool()
     x = [[pool.id(("x", ci, k)) for k in range(len(O))] for ci in range(len(C))]
     cnf = []
+    keep = set(range(len(C))) if keep is None else set(keep)
     for ci in range(len(C)):
-        cnf += CardEnc.equals(lits=x[ci], bound=1, vpool=pool, encoding=EncType.seqcounter).clauses
+        if ci in keep:
+            cnf += CardEnc.equals(lits=x[ci], bound=1, vpool=pool, encoding=EncType.seqcounter).clauses
+        else:                       # local relaxation: check absent (all options false), no constraints
+            cnf += [[-v] for v in x[ci]]
     # time literal y[ci][pos][t mod P] <-> OR of options putting CNOT pos at t
     y = {}
     for ci in range(len(C)):
@@ -80,7 +84,7 @@ def build(P, fix0=True, extra=None, lazy_det=False):
         for c in range(nx, 2 * nx):
             oc = C[c][2]
             sh = sorted(set(oa) & set(oc))
-            if not sh:
+            if not sh or a not in keep or c not in keep:
                 continue
             u, v = sh
             pa_u, pa_v, pc_u, pc_v = oa.index(u), oa.index(v), oc.index(u), oc.index(v)
@@ -111,7 +115,8 @@ def build(P, fix0=True, extra=None, lazy_det=False):
                         cnf.append([-ga[g1], -gc[g2]])
                         ndet += 1
     if fix0:
-        cnf.append([x[0][k] for k, o in enumerate(O) if o[0] == 1])
+        c0 = min(keep)
+        cnf.append([x[c0][k] for k, o in enumerate(O) if o[0] == 1])
     return C, O, x, cnf, pool
 
 

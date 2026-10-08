@@ -190,6 +190,8 @@ def main():
     ap.add_argument("--seed", type=int, default=20261008)
     ap.add_argument("--tag", default="")
     ap.add_argument("--det_pair", type=int, default=1, help="on a determinism violation add the full constraint of that pair")
+    ap.add_argument("--overlap", type=int, default=0)
+    ap.add_argument("--local", type=int, default=-1, help="local relaxation on the k-th modelled logical")
     ap.add_argument("--orbit", type=int, default=-1, help="restrict to the translation orbit of one logical")
     ap.add_argument("--sub", default="", help="generators of a translation subgroup the schedule must be invariant under")
     ap.add_argument("--sym", type=int, default=1, help="add the 24 translated images of every nogood / det clause")
@@ -212,7 +214,19 @@ def main():
         L = [l for l in L if l[0] == a.kinds[0] and tuple(sorted(l[1])) in orb]
         print(f"orbit restriction: {len(L)} logicals", flush=True)
     print(f"modelled logicals {len(L)} (skipped {skipped}) {time.time() - t0:.0f}s", flush=True)
-    C, O, x, cnf, pool = build(a.P, lazy_det=True)
+    keep = None
+    if a.local >= 0:
+        # local relaxation: logical a.local plus every logical sharing >= a.overlap checks with it (if a.overlap > 0);
+        # only the checks their model constraints mention are kept (sound for UNSAT)
+        def ck(l):
+            return {pp[0] for *_, (p1, p2) in l[3] for pp in (p1, p2)}
+        anc = ck(L[a.local])
+        L = [L[a.local]] + ([l for i, l in enumerate(L) if i != a.local and len(ck(l) & anc) >= a.overlap]
+                            if a.overlap > 0 else [])
+        keep = sorted({pp[0] for _, _, _, cons in L for *_, (p1, p2) in cons for pp in (p1, p2)})
+        gmaps_local = True
+        print(f"local relaxation: {len(L)} logicals, {len(keep)} checks kept", flush=True)
+    C, O, x, cnf, pool = build(a.P, lazy_det=True, keep=keep)
     dett = pool.det_table
     activated = set()
     if a.sub:
@@ -247,8 +261,8 @@ def main():
             status = "UNSAT"
             break
         pos = set(l for l in S.get_model() if l > 0)
-        sv = [next(k for k in range(len(O)) if x[ci][k] in pos) for ci in range(len(C))]
-        T = schedule_times(sv, O)
+        sv = [next((k for k in range(len(O)) if x[ci][k] in pos), None) for ci in range(len(C))]
+        T = {(ci, p): t for ci, k in enumerate(sv) if k is not None for p, t in enumerate(O[k])}
         ndv = 0
         for (ca, cc), (ga, gc, (pau, pav, pcu, pcv), forb) in dett.items():
             g1 = (T[(ca, pau)], T[(ca, pav)]); g2 = (T[(cc, pcu)], T[(cc, pcv)])
@@ -271,7 +285,7 @@ def main():
                 lifting.append((cons, pi))
         if not lifting and ndv == 0:
             status = "CANDIDATE"
-            log["candidate"] = [list(O[k]) for k in sv]
+            log["candidate"] = [list(O[k]) if k is not None else None for k in sv]
             break
         rng.shuffle(lifting)
         sizes = [lits.nogood(cons, pi, gmaps) for cons, pi in lifting[: a.per_iter]] or [0]
