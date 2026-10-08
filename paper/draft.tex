@@ -1,0 +1,745 @@
+% =====================================================================
+% INTERNAL FIRST DRAFT -- NOT FOR DISTRIBUTION
+% qec-ai-search, paper/draft.tex
+% Every quantitative claim carries a tag [Cn]; see paper/claims_map.md for
+% the mapping  Cn -> (research/STATE.md "confirmed" item, audit file + section,
+% results path).  Set \showclaimtagsfalse to hide the tags.
+% Anything that could not be traced to the project files is marked [UNVERIFIED].
+% Compilation has NOT been tested (see paper/README.md).
+% =====================================================================
+\documentclass[aps,prl,twocolumn,superscriptaddress,nofootinbib]{revtex4-2}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+% ---- internal-draft macros ------------------------------------------------
+\newif\ifshowclaimtags \showclaimtagstrue
+\newcommand{\cl}[1]{\ifshowclaimtags\textsuperscript{\textcolor{blue}{\scriptsize[C#1]}}\fi}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\unverified}{\textcolor{red}{[UNVERIFIED]}}
+
+\newcommand{\dcirc}{d_{\mathrm{circ}}}
+\newcommand{\dext}{d_{\mathrm{ext}}}
+\newcommand{\dt}{\tilde d}
+\newcommand{\code}[1]{[[#1]]}
+
+\begin{document}
+
+\title{Circuit distances of bivariate-bicycle syndrome circuits must be proven, not inferred}
+
+\author{\todo{author list -- PI decision}}
+\affiliation{\todo{affiliations}}
+
+\date{Internal draft, \today}
+
+\begin{abstract}
+The circuit-level distance $\dcirc$ of a syndrome-extraction circuit sets the
+low-noise scaling of its logical error rate, yet for bivariate-bicycle (BB) codes
+and their morphing variants it has almost always been reported as heuristic upper
+bounds, conjectures, or Monte-Carlo beliefs. We compute exact circuit distances,
+with complete lower-bound certificates, for a set of BB and morphing circuits
+under circuit-level noise with independent single-operation faults. (i) The
+Shaw--Terhal morphing circuit derived from the $\code{288,12,18}$ code, acting on
+a $\code{144,12,12}$ end-cycle code, has $\dcirc=12$ for any number of rounds:
+a fully distance-preserving circuit without dedicated ancillas. (ii) Of all 80
+two-round morphing circuits of the same construction, 72 preserve the end-cycle
+distance and 8 do not; for $\code{54,8,8}$ the circuit distance depends on a term
+ordering that the construction leaves free, contrary to the order-independence
+stated for these circuits. (iii) The Strikis--Browne--Beverland gross-code
+circuit has $\dcirc=11$, proving their conjecture; within an explicit family of
+period-$\le 8$ retimings that keep its CNOT orders, no circuit reaches 12, and we
+give scoped bulk obstructions beyond it. (iv) A depth-8 single-ancilla circuit for
+$\code{108,8,10}$ has $\dcirc=10$ (previously $\le 8$), and further BB circuits
+have proven distances 6, 9, 10 and 9. The methods (extended codes with
+exhaustive symmetric search, an exact lift test, a computationally verified
+time-folding reduction, and frame-model certificates) are general.
+\end{abstract}
+
+\maketitle
+
+% ---------------------------------------------------------------------------
+\paragraph{Introduction.}
+Bivariate-bicycle (BB) codes~\cite{Bravyi2024} are leading candidates for
+low-overhead quantum memory. What matters in practice, however, is not the code
+distance $d$ but the circuit-level distance $\dcirc$: the minimum number of
+circuit faults that flip a logical observable without triggering any detector.
+At low physical error rate $p$ the logical error rate of a circuit is
+governed by $\dcirc$ (it scales as $p^{\lceil \dcirc/2\rceil}$ for a
+minimum-distance decoder), so $\dcirc$ rather than $d$ is the figure of merit of
+a syndrome circuit.
+
+For BB circuits, essentially every reported $\dcirc$ is an upper bound obtained by
+randomized minimum-weight search (e.g.\ BP-OSD)~\cite{Bravyi2024,ShawTerhal2025,TourDeGross},
+and the most-cited values are conjectures: IBM conjectured its
+$\code{72,12,6}$ circuit to be distance preserving~\cite{Bravyi2024};
+Strikis, Browne and Beverland conjectured their gross-code circuit to have
+$\dcirc=11$~\cite{Strikis2026}; and a morphing circuit for a gross-sized code is
+``believed'' to reach 12 on the basis of Monte-Carlo sampling~\cite{Wills2026}.
+Upper bounds are cheap and lower bounds are hard, so it is tempting to treat
+an unrefuted upper bound as the answer, or to transfer a property that holds for
+the underlying \emph{code} to the \emph{circuit}.
+
+This Letter shows that both shortcuts can fail, and that exact answers are
+within reach. We prove exact $\dcirc$ for a set of BB and morphing circuits
+(Table~\ref{tab:main}), find circuits where the inferred answer is wrong, and
+delimit precisely what can and cannot be concluded about reaching $\dcirc=12$
+for the gross code with single-ancilla circuits.
+
+% ---------------------------------------------------------------------------
+\paragraph{Setting.}
+We consider memory experiments: data initialisation, $R$ rounds of syndrome
+extraction, and transversal data readout, in both the $Z$ and $X$ basis.
+Faults are single-operation Pauli components of standard circuit-level
+depolarizing noise (SD6~\cite{Gidney2021honeycomb}: two-qubit depolarization after each CNOT, flips after
+resets and before measurements, single-qubit depolarization on idle qubits),
+counted as distinct detector-error-model (DEM) mechanisms~\cite{Gidney2021stim}.
+$\dcirc$ is the minimum number of such faults whose combined effect triggers no
+detector and flips a logical observable; we report it per basis, and in every case
+below the two bases agree. All lower bounds below also hold for any noise model
+whose faults are a subset of these (e.g.\ no idle noise). Correlated
+multi-operation faults, leakage, and CZ-based compilations are outside scope.
+Upper bounds are always realised by explicit witnesses injected with probability
+one into the noiseless \texttt{stim} circuit (zero detectors fired, an
+observable flipped).
+
+\paragraph{Methods in brief.}
+\emph{(a) Extended code and exhaustive search.} For single-ancilla CNOT circuits,
+Strikis \emph{et al.}~\cite{Strikis2026} append to the parity-check matrix one
+column per ``residual'' (a suffix of a check's CNOT order), giving an extended code
+with distance $\dext$; their Prop.~3 states $\dcirc\ge\dext$ for any such circuit.
+We verify the key step of Prop.~3 directly on each circuit to which we apply it (every single
+fault propagates to zero or exactly one extended-code column)\cl{27} and decide
+$\dext\ge w$ by a complete depth-first search (DFS) that branches on an
+unsatisfied syndrome row with sibling exclusion and splits cases by the orbits of
+the circuit's translation symmetry. The DFS was validated against unpruned
+meet-in-the-middle enumeration and rerun without symmetry where affordable
+(SM~\ref{sm:dfs}).
+\emph{(b) Exact lift.} When $\dext<\dcirc$ (interleaved circuits), a weight-$\dext$
+undetected circuit error must map to $\dext$ distinct nonzero extended-code
+columns; enumerating all minimum-weight extended logicals and testing whether
+each lifts to an undetected circuit error decides $\dcirc$ exactly
+(SM~\ref{sm:lift}).
+\emph{(c) Time folding for morphing circuits.} Shaw and Terhal's Prop.~1~\cite{ShawTerhal2026}
+reduces a two-round morphing circuit with any number of rounds to a
+single-round instance. Rather than relying on its per-fault time-reversal argument,
+we verify by linear algebra the basis-free condition the fold actually needs
+(SM~\ref{sm:fold})\cl{3}.
+\emph{(d) Frame-model certificates.} For retimed gross circuits we use a bulk
+Pauli-frame model whose feasibility implies a genuine weight-11 undetected error,
+and certify infeasibility of blocking all such errors with CP-SAT and a
+lazy-clause (CEGAR) SAT encoding (SM~\ref{sm:gross12}).
+
+% ---------------------------------------------------------------------------
+\begin{table}[t]
+\caption{Proven circuit distances. ``Prior'' is the best value previously reported
+for the same circuit or code. All entries: SD6 fault set, both memory bases,
+any number of rounds $R$ unless noted. Tags refer to \texttt{claims\_map.md}.}
+\label{tab:main}
+\begin{ruledtabular}
+\begin{tabular}{llcc}
+code / circuit & prior & $\dcirc$ & tag\\
+\hline
+$\code{288,12,18}\to\code{144,12,12}$ morphing ($f_x$) & $\le 12$~\cite{ShawTerhal2025} & $\mathbf{12}$ & \cl{1}\\
+80 two-round morphing circuits & $\le$ bounds~\cite{ShawTerhal2025} & 72 $=\dt$, 8 $<\dt$ & \cl{5}\\
+gross $\code{144,12,12}$, Fig.~12 of~\cite{Strikis2026} & 11 (conj.) & $\mathbf{11}$ & \cl{10}\\
+$\code{108,8,10}$, $y$-parity two-colour & $\le 8$~\cite{Bravyi2024} & $\mathbf{10}$ & \cl{19}\\
+$\code{72,12,6}$, IBM circuit~\cite{Bravyi2024} & 6 (conj.)$^{a}$ & $6$ & \cl{21}\\
+$\code{72,12,6}$, two-colour LRC & -- & $6$ & \cl{22}\\
+coprime $\code{126,12,10}$, uniform LRC & $\le 9$~\cite{WangMueller} & $9$ & \cl{22}\\
+$\code{120,8,12}$ $(\ell,m)=(20,3)$, uniform LRC & -- & $10$ & \cl{22}\\
+$\code{124,10,10}$ $(31,2)$, uniform LRC & -- & $9$ & \cl{22}\\
+\end{tabular}
+\end{ruledtabular}
+\raggedright\footnotesize
+$^{a}$An exact value 6 for one basis, $R=6$, and a CZ/SI1000 compilation is
+contained in the public data of Ref.~\cite{Webster2026}; see text.
+\end{table}
+
+% ---------------------------------------------------------------------------
+\paragraph{A fully distance-preserving morphing circuit.}
+Morphing circuits~\cite{ShawTerhal2025} have no dedicated ancillas: each round
+contracts half of the stabilisers of a ``mid-cycle'' code onto single qubits,
+measures them, and re-expands, so that between rounds the state is encoded in an
+``end-cycle'' code. Applied to the $\code{288,12,18}$ BB code with the
+homomorphism $f_x$, this yields a 288-qubit, degree-5 circuit whose end-cycle code
+has parameters $\code{144,12,12}$ and weight-9 checks. Ref.~\cite{ShawTerhal2025}
+reports $\dt_{\rm circ}\le 12$ from BP-OSD; Ref.~\cite{Wills2026} (App.~C)
+describes a morphing idling circuit ``for the gross code'' that is believed to have
+circuit distance 12, supported by Monte-Carlo sampling.
+
+We prove that this circuit (homomorphism $f_x$, layer order of the public
+implementation) has $\dcirc=12$ for every number of rounds, in both bases, with
+noisy or ideal initialisation and readout\cl{1}. The single-round instance has
+144 nontrivial detector rows and 864 projected fault columns with a
+72-element translation symmetry; an exhaustive DFS at weight $\le 11$ finds no
+undetected logical in either basis, reproduced independently on a second
+construction with a different detector basis and search tree
+($\approx 2\times10^{11}$ nodes per basis). Twelve-fault witnesses (end-cycle
+logical operators, the end-cycle code having distance exactly 12) give the
+matching upper bound. The fold condition required to pass from one round to
+any $T$ was verified for $T=2,\dots,5$, including the noisy final round, and its
+local form is periodic\cl{3}.
+
+Two points of scope matter. First, the end-cycle code is \emph{not} the gross code:
+its minimum stabiliser weight is exactly 9, versus 6 for the gross code, so the two
+are inequivalent under qubit permutations and local Cliffords\cl{2}. Whether the
+circuit of Ref.~\cite{Wills2026} is this one is not stated there and we have not
+confirmed it. Second, the statement is for this specific circuit; other variants
+are covered below. To our knowledge this is the first rigorous lower bound on
+$\dcirc$ for any morphing circuit\cl{4}.
+
+% ---------------------------------------------------------------------------
+\paragraph{All 80 two-round morphing circuits.}
+The construction of Ref.~\cite{ShawTerhal2025} has more freedom than its tables
+suggest. For each of the ten admissible (mother code, homomorphism) pairs it
+offers the standard contraction of its Table~IV and the reversed-second-round
+variant of its Table~VIII, and within each the order of the terms $(a_2,a_3)$ and
+$(b_2,b_3)$ is a writing convention. This gives 80 distinct circuits, which we
+reconstructed gate by gate from the paper (Tables IV, VIII, IX) and matched
+against an independent implementation\cl{5}. We computed the exact $\dcirc$ of
+all 80 in both bases: 72 have $\dcirc=\dt$ (the end-cycle distance) and 8 have
+$\dcirc<\dt$ (Table~\ref{tab:morph})\cl{5}.
+
+Three findings stand out. (1)~For $\code{108,8,10}\to\code{54,8,8}$, the four
+legal term orders of Table~IV give $\dcirc=6,6,7,7$: the two orders using
+$b_3=x^2$ in the first round give 6, the two using $b_3=x$ (including the public
+implementation's order) give 7\cl{6}. The caption of Table~IX in
+Ref.~\cite{ShawTerhal2025} states that the Table~IV circuits are independent of
+the order of the $A$ and $B$ terms; this holds for the end-cycle codes, but not for
+the circuit distance\cl{6}. The reported bound $\le 7$ coincides with the exact
+value for the public implementation's order. (2)~For $f_x$ applied to the gross
+code with the Table~VIII construction, the end-cycle code is $\code{72,12,8}$ but
+$\dcirc=6$; Ref.~\cite{ShawTerhal2025} (Table~IX) already reports $\le 6$ for this
+circuit, so our contribution is to show that this bound is tight\cl{7}.
+Likewise, its $\code{72,12,7}$ circuit ($f_y$) has $\dcirc=7$, also tight\cl{7}.
+(3)~The sub-$\dt$ errors are not boundary artefacts: in every one of the 8
+circuits and both bases there is a minimum-weight undetected error consisting only
+of CNOT faults within a single interior half-cycle, in a model without idle noise\cl{8}.
+All 24 circuits derived from $\code{288,12,18}$ preserve their end-cycle distance
+(12 or 10); three of these 24 were reproduced by a fully independent pipeline
+(SM~\ref{sm:morph80})\cl{9}.
+
+\begin{table}[t]
+\caption{Exact $\dcirc$ of the 80 two-round morphing circuits of
+Ref.~\cite{ShawTerhal2025} (SD6, both bases equal). $\dt$: end-cycle distance.
+Variants: Table~IV (``std'') or Table~VIII (``rev''), with the four
+$(a_2,a_3)/(b_2,b_3)$ orders.}
+\label{tab:morph}
+\begin{ruledtabular}
+\begin{tabular}{llccc}
+mother & end-cycle (variants) & \# & $\dcirc$ & $=\dt$?\\
+\hline
+$\code{72,12,6}$ & $\code{36,12,3}$ & 18 & 3 & yes\\
+ & $\code{36,12,4}$ (rev) & 6 & 4 & yes\\
+$\code{108,8,10}$ & $\code{54,8,8}$ std, $b_3=x^2$ & 2 & 6 & \textbf{no}\\
+ & $\code{54,8,8}$ std, $b_3=x$ & 2 & 7 & \textbf{no}\\
+ & $\code{54,8,8}$ rev & 2 & 7 & \textbf{no}\\
+ & $\code{54,8,7}$ rev & 2 & 7 & yes\\
+$\code{144,12,12}$ & $\code{72,12,6}$ & 18 & 6 & yes\\
+ & $\code{72,12,5}$ (rev) & 2 & 5 & yes\\
+ & $\code{72,12,7}$ (rev, $f_y$) & 2 & 7 & yes\\
+ & $\code{72,12,8}$ (rev, $f_x$) & 2 & 6 & \textbf{no}\\
+$\code{288,12,18}$ & $\code{144,12,12}$ & 16 & 12 & yes\\
+ & $\code{144,12,10}$ (rev) & 8 & 10 & yes\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+% ---------------------------------------------------------------------------
+\paragraph{The gross code: 11 is proven; 12 is obstructed in scoped families.}
+Strikis \emph{et al.} proved that no non-interleaved single-ancilla circuit for the
+gross code reaches $\dcirc=12$ (their Prop.~4) and presented a depth-8
+three-colour left-right circuit (their Fig.~12) conjectured to have $\dcirc=11$~\cite{Strikis2026}.
+We prove the conjecture: $\dcirc=11$ for any $R$, both bases\cl{10}. Its extended code
+has 360 merged columns per side and a 24-element order-preserving translation
+symmetry (15 orbits); a complete DFS at weight 10 finds no logical in either side,
+reproduced on an independently constructed lattice-coordinate instance and under a
+second, smaller symmetry group, while weight 11 is attained\cl{11}. To our
+knowledge this is the first rigorous lower bound on $\dcirc$ for any gross-code
+syndrome circuit, and by Prop.~4 of Ref.~\cite{Strikis2026} it is optimal among
+non-interleaved circuits\cl{12}.
+
+Can interleaving, i.e.\ retiming the same per-check CNOT orders, recover 12? Each
+side has exactly 4224 weight-11 extended-code logicals (176 free orbits under the
+24-element group), and every one of them lifts to an undetected circuit error of
+Fig.~12\cl{13}. A circuit with $\dcirc=12$ must prevent all of them from lifting.
+For the circuit family used in our benchmark---periodic single-ancilla schedules
+with period $P\le 8$, one reset, six CNOTs at distinct offsets and one measurement
+per check per period---the question is decided exactly. Keeping the CNOT orders of
+Fig.~12 forces $P=8$ (weight-6 checks need $P\ge 8$) and leaves one start time per
+check; a complete backtracking enumeration finds 32 conflict-free assignments,
+i.e.\ 4 up to global translation, all colour-uniform, deterministic and
+non-interleaved, Fig.~12 among them\cl{14}. Each of the four has
+injection-verified weight-11 undetected errors for every $R=1,\dots,6$ in both
+bases\cl{15}. Hence no retiming of Fig.~12 within this family exceeds 11; this
+statement is exact, includes the time boundaries, and does not use the frame
+model.
+
+Beyond this family we can only make bulk statements (sufficiently many rounds),
+via a frame model that agreed with the exact lift checker in the bulk on every
+circuit tested, but fails at the initial time boundary\cl{18}. In the bulk, every legal deterministic circuit that
+keeps the Fig.~12 CNOT orders has a weight-11 undetected error consisting of ten
+data faults and one hook fault, for: translation-symmetric non-wrapping frame
+circuits of any period; translation-symmetric pipelined circuits with
+$P=8,\dots,11$ (and $P=12$ by a single encoding); pipelined circuits invariant
+under any of several translation subgroups at $P=9,10$; and per-check-free
+non-wrapping frame circuits with $P\le 16$ (one encoding, reproduced but not
+independently re-encoded)\cl{16}. Open are all pipelined families with
+$P\ge 9$ not listed (in particular per-check-free circuits, order-2 subgroups,
+and the order-4 subgroup $\langle(3,0)\rangle$ at $P=9$), symmetric pipelined
+circuits with $P\ge 13$, per-check-free non-wrapping circuits with $P>16$, and any
+circuit that changes the CNOT orders\cl{17}. In a classical control,
+$\approx1.1\times10^5$ random-walk evaluations of legal deterministic per-check
+$P=9$ circuits never blocked a single one of the 720 single-hook logicals in the
+frame model (SM~\ref{sm:gross12}); this is evidence, not proof.
+
+% ---------------------------------------------------------------------------
+\paragraph{Distance-preserving circuits for other BB codes.}
+For $\code{108,8,10}$ the IBM circuit has $\dcirc\le 8$~\cite{Bravyi2024,ShawTerhal2025},
+and while the single-check bound for partitionable non-interleaved circuits does
+not exclude 10 for this code, uniform depth-8 tilings are limited to
+$\le 9$\cl{24}. A two-colour left-right circuit that
+reverses the CNOT order within one term block on checks of one $y$-parity (the
+$X$ side on odd rows, the $Z$ side on even rows; depth 8, one ancilla per check,
+all checks every round) has $\dcirc=10=d$\cl{19}. To our knowledge this is the
+first $\dcirc=10$ circuit for this code and the first rigorous circuit distance
+for a BB code with $d\ge10$; rigorous circuit distances exist for other qLDPC
+families~\cite{ManesClaes,Liang2026,SunCai2026}, and the idea of position-dependent
+CNOT orders is established~\cite{TomitaSvore,KishonyFowler,Strikis2026}\cl{20}.
+
+For the IBM $\code{72,12,6}$ circuit~\cite{Bravyi2024}, which is interleaved,
+$\dext=5<6$, so Prop.~3 alone does not suffice. The exact lift test shows that
+none of the weight-5 extended logicals lifts, for $R=1,\dots,10$, and a
+splitting argument extends this to every $R$: $\dcirc=6$ in both bases, settling
+IBM's conjecture for this circuit and fault model\cl{21}. Public data of
+Ref.~\cite{Webster2026} already contain an exact value 6 for one basis and $R=6$
+of a CZ/SI1000 compilation of an IBM-type circuit; our additions are arbitrary
+$R$, both bases, the CNOT circuit, and the method\cl{21}.
+
+The same pipeline---colour the checks by a translation subgroup, prune block
+orders by single-colour-class witnesses, enumerate legal states, and prove the
+survivors by DFS---gives the theorems in the lower half of Table~\ref{tab:main}
+\cl{22} and rigorous negative results: every two-colour LRC of the gross code has
+$\dcirc\le10$, and every two- or three-class mod-3 LRC of $\code{90,8,10}$ has
+$\dcirc\le8$\cl{23}. To our knowledge these are the first rigorous circuit
+distances for BB codes with $d\ge9$\cl{25} (but see the caveat on
+Ref.~\cite{Tripier2026} in SM~\ref{sm:novelty}).
+
+% ---------------------------------------------------------------------------
+\paragraph{Discussion.}
+Three lessons emerge. First, the code is not the circuit: an invariance of the
+end-cycle code under a term reordering does not carry over to $\dcirc$, and a
+larger end-cycle distance ($\code{72,12,8}$) need not give a larger circuit
+distance. Second, reductions must be checked in the form they are used: the premise of
+Prop.~1 of Ref.~\cite{ShawTerhal2026} holds for the circuits we treat, but its
+per-fault wording is basis dependent, and our frame model describes only the
+bulk. Third, exact certification at $n\approx 300$ qubits and $d=12$ is feasible
+on a workstation ($10^{10}$--$10^{11}$ search nodes) once symmetry and the
+extended-code structure are exploited.
+
+\paragraph{Open questions.}
+(i) Does any interleaved single-ancilla circuit for the gross code reach
+$\dcirc=12$~\cite{Strikis2026}? Our results exclude the retimings of Fig.~12 in
+the families listed above; per-check-free pipelined retimings with $P\ge9$ and
+circuits with different CNOT orders remain open. (ii) Is the IBM morphing idling
+circuit of Ref.~\cite{Wills2026} the circuit we certify? (iii) Three-round
+($\mathbb{Z}_3$) morphing circuits and the non-Abelian codes of
+Ref.~\cite{ShawTerhal2025} (App.~C) are not covered by the fold reduction
+used here. (iv) Do the proven distances survive correlated faults, leakage, or
+CZ-native compilations? (v) Do the distance gains translate into measurable
+logical-error-rate gains with practical decoders at accessible $p$? We have not
+established this. (vi) Can the remaining gaps---$\code{120,8,12}$ (proven 10),
+$\code{90,8,10}$ (non-interleaved $\le 9$), $\code{288,12,18}$ (IBM circuit
+$\le 18$, unproven)---be closed?
+
+\begin{acknowledgments}
+\todo{Acknowledgements; disclosure of AI-agent involvement in the research and
+writing -- PI decision.}
+\end{acknowledgments}
+
+% ===========================================================================
+\begin{thebibliography}{99}
+\bibitem{Bravyi2024} Bravyi, Cross, Gambetta, Maslov, Rall, and Yoder, High-threshold and low-overhead fault-tolerant quantum memory,
+Nature \textbf{627}, 778 (2024), arXiv:2308.07915.
+% NOTE: first names/initials and most titles are not recorded in the project's
+% literature notes; they are omitted rather than reconstructed from memory.
+\bibitem{Strikis2026} Strikis, Browne, and Beverland,
+arXiv:2603.05481 (v2, 2026). \unverified\ (title, first names).
+\bibitem{ShawTerhal2025} M.~H.~Shaw and Terhal, Phys.\ Rev.\ Lett.\
+\textbf{134}, 090602 (2025), arXiv:2407.16336. \unverified\ (title).
+\bibitem{ShawTerhal2026} M.~H.~Shaw and Terhal, arXiv:2604.09797 (v2, 2026).
+\unverified\ (title).
+\bibitem{Wills2026} Wills, Beverland, Bishop, Gambetta, Rall, Siddhu, and Cross, arXiv:2605.21898 (v2, 2026), App.~C.
+\unverified\ (title, initials).
+\bibitem{TourDeGross} Yoder, Schoute, Rall, Pritchett, Gambetta, Cross, Carroll,
+and Beverland, Tour de gross: A modular quantum
+computer based on bivariate bicycle codes, arXiv:2506.03094 (2025).
+\bibitem{Webster2026} Webster, Jacob, and Higgott,
+arXiv:2603.22532 (v2, 2026), and the public results table in the repository
+\texttt{m-webster/codeDistancePYPI}. \unverified\ (title).
+\bibitem{Gidney2021stim} Gidney, Stim: a fast stabilizer circuit simulator,
+Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
+\bibitem{Gidney2021honeycomb} Gidney, Newman, Fowler, and Broughton,
+A fault-tolerant honeycomb memory, arXiv:2108.10457 (2021).
+\bibitem{WangMueller} Wang and Mueller, Coprime bivariate bicycle codes and their
+layouts on cold atoms, arXiv:2408.10001. \unverified\ (authors and title taken
+from a search-result URL only).
+\bibitem{ManesClaes} Manes and Claes, Quantum (2025), arXiv:2308.15520.
+\unverified\ (title, volume).
+\bibitem{Liang2026} Liang, Gu, Chen, Eisert, and Wang, arXiv:2609.37231 (2026).
+\unverified\ (title, initials).
+\bibitem{SunCai2026} Sun and Cai, arXiv:2609.39522 (2026). \unverified\ (title,
+initials).
+\bibitem{TomitaSvore} Tomita and Svore, Phys.\ Rev.\ A \textbf{90},
+062320 (2014), arXiv:1404.3747. \unverified\ (title).
+\bibitem{KishonyFowler} Kishony and Fowler, arXiv:2603.28852 (2026).
+\unverified\ (title, initials).
+\bibitem{Ghosh2026} Ghosh, Boche, and Tanggara, arXiv:2610.03429 (2026).
+\unverified\ (title, initials).
+\bibitem{Tripier2026} Tripier \emph{et al.}, arXiv:2604.19481 (2026).
+\unverified\ (title, author list).
+\bibitem{Chao2026} Chao, arXiv:2606.12724 (2026). \unverified\ (title).
+\bibitem{qldpcchallenge} \texttt{unitaryfoundation/qldpc-challenge}, GitHub
+pull request \#724 (2026-08-26).
+\end{thebibliography}
+
+% ===========================================================================
+\clearpage
+\onecolumngrid
+\begin{center}
+\textbf{\large Supplemental Material}
+\end{center}
+\setcounter{section}{0}
+\renewcommand{\thesection}{S\arabic{section}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{S\arabic{table}}
+\setcounter{equation}{0}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+% ---------------------------------------------------------------------------
+\section{Fault model and definition of $\dcirc$}\label{sm:noise}
+Noise is inserted by a fixed routine (SD6~\cite{Gidney2021honeycomb}): after every
+CNOT a two-qubit depolarizing channel; after every reset a flip; before every
+measurement a flip; on every qubit not acted on in a time step a single-qubit
+depolarizing channel (also in reset and measurement layers). A \emph{fault} is one
+Pauli component of one such channel. Two faults with identical detector and
+observable signatures are the same DEM mechanism; $\dcirc$ counts mechanisms.
+For lower bounds of CSS circuits we use the CSS relaxation: in a $Z$-basis memory
+we keep only $Z$-type detectors and the $X$ part of each fault (and vice versa).
+This relaxation can only lower the minimum, so it is valid for lower bounds;
+upper bounds are always checked on the full circuit with all detectors.
+Lower bounds hold for any sub-model (e.g.\ no idle noise). For the morphing
+circuits the witnesses of $\dcirc\le\dt$ use idle components after a reset layer
+(or, in the first round, initial reset flips); for a no-idle model those upper
+bounds rely on the noisy initial data reset and would need re-checking
+otherwise\cl{28}.
+
+% ---------------------------------------------------------------------------
+\section{Extended code, Prop.~3, and the exhaustive search}\label{sm:dfs}
+\emph{Extended code.} For a single-ancilla circuit in which check $c$ applies its
+CNOTs in the order $i_1,\dots,i_w$, the residuals are the suffixes
+$\{i_l,\dots,i_w\}$, $l=2,\dots,w$. The $Z$-type extended code appends each $Z$-check
+residual (as the sum of its data columns) to $(H_X,L_X)$; analogously for $X$.
+Zero columns are dropped and identical $(H,L)$ columns merged.
+Prop.~3 of Ref.~\cite{Strikis2026}: $\dcirc\ge\dext$ for any single-ancilla CNOT
+circuit (interleaved or not); the converse $\dcirc\le\dext$ (their Cor.~1) needs
+non-interleaving and is not used for our lower bounds. The key step---each single
+fault, propagated to the end of the circuit, has a data image equal to zero or to
+exactly one extended-code column---was checked on the evaluated circuits:
+$\code{108,8,10}$ ($R=3$, 16\,416 fault components per basis), gross Fig.~12
+($R=1,2,3$), IBM $\code{72,12,6}$ ($R=1,\dots,10$) and the four LRC theorems:
+0 exceptions, all columns realised\cl{27}.
+
+\emph{DFS.} To decide whether $H_e x=0$, $L_e x\ne0$ has a solution with
+$|x|\le W$: a minimum-weight solution is syndrome-minimal; translate it so that it
+contains the representative of its lowest orbit; branch on the columns of an odd
+syndrome row, forbidding earlier siblings (a partition of the search space); prune
+by $\mathrm{depth}+\lceil |s|/w_{\max}\rceil>W$; look up the last column in a hash
+table. The symmetry group is computed (translations that are code automorphisms,
+map each check's CNOT order to the image check's order, and preserve logical
+classes, verified by solving $L\circ T=ML+NH$ with $\mathrm{rank}\,M=k$).
+Validation: exact solution counts against unpruned meet-in-the-middle enumeration
+on 22 BB72 instances and on $>64$-row direct-sum instances; split-run completeness
+(sum of split runs = unsplit run); runs without symmetry for $\code{108,8,10}$
+(both sides, $\approx2.5\times10^{10}$ nodes, 0 solutions) and for the four LRC
+theorems\cl{19,22}.
+
+\emph{$\code{108,8,10}$ circuit.} Terms indexed $[A_1,A_2,A_3,B_1,B_2,B_3]$ with
+$A=(x^3,y,y^2)$, $B=(y^3,x,x^2)$, $(\ell,m)=(9,6)$. $X$ checks: reset at 0, CNOTs at
+1--6, measure at 7; term order $[0,1,2,5,3,4]$ on even $y$ rows and
+$[2,1,0,5,3,4]$ on odd rows. $Z$ checks: reset at 4, CNOTs at 5,6,7,0,1,2, measure
+at 3; term order $[3,4,5,2,1,0]$ on even rows and $[3,4,5,0,1,2]$ on odd rows.
+(The $Z$ side applies the $B$ block first; the reversal acts on the $A$ block.)
+No data-qubit conflicts, non-interleaved and partitionable.
+$\dext^X=\dext^Z=10$ exactly (270 columns per side, 10 orbits of 27;
+weight-9 DFS: 0 solutions with and without symmetry; weight 10 attained);
+injection-verified weight-10 witness\cl{19}.
+
+\emph{Gross Fig.~12.} 360 merged columns per side (144 of $H_e$-weight 3, 144 of
+weight 6, 72 of weight 9); 24 translations ($a+b\equiv0 \bmod 3$) preserve every
+check's CNOT order and the logical classes; 15 orbits. Weight-10 DFS: 0 solutions
+on the original instance ($\approx2\times10^{10}$ nodes per side), on an
+independently built lattice-coordinate instance, and under an order-8 subgroup
+(45 orbits, $\approx5\times10^{10}$ nodes per side). Weight-11 solutions realised
+as 11 circuit faults for $R=1,2,3$, both bases\cl{10,11}. A run without any
+symmetry ($\approx 7\times10^{11}$ nodes) was not performed.
+
+% ---------------------------------------------------------------------------
+\section{Exact lift test and arbitrary $R$ for the IBM $\code{72,12,6}$ circuit}\label{sm:lift}
+Let $F$ be an undetected logical with $|F|=5=\dext$. By the Table-I property each
+fault image is zero or one column; cancelling pairs leaves an extended logical $T$
+with $|T|\le|F|$. Since no extended logical of weight $\le4$ exists, all five
+images are nonzero and distinct and form a weight-5 extended logical. We list all
+of them (36 for the $X$-type, 252 for the $Z$-type extended code; meet-in-the-middle
+and DFS agree), group the DEM terms by the image of every circuit location
+(checked to list all locations: location counts equal those from \texttt{stim}),
+and search for one term per column with zero detector sum and nonzero
+observable. Result: 0 for $R=1,\dots,10$, both bases; positive control at weight 6
+finds solutions\cl{21}.
+\emph{Arbitrary $R$.} (1)~The CNOT windows of consecutive cycles are separated.
+(2)~If an undetected logical $F$ has an empty round strictly inside its time span,
+it splits into two undetected parts whose observables add, one of them a
+lighter undetected logical; for $|F|=5=\dext$ this contradicts Prop.~3, so a
+weight-5 logical spans at most 5 consecutive rounds. (3)~The noisy $(R+1)$-round
+circuit equals the $R$-round circuit with one block inserted, so such a logical
+translates into a circuit with $\le7$ rounds, covered by the exact runs.
+Hypotheses (1) and (3) and the detector structure were machine-checked; step (3)
+is a written argument\cl{21}.
+
+% ---------------------------------------------------------------------------
+\section{Morphing circuits: construction, single-round instance, fold}\label{sm:fold}
+\emph{Construction.} Mid-cycle code $\code{288,12,18}$, $\ell=m=12$,
+$A=x^3+y^7+y^2$, $B=y^3+x+x^2$; homomorphism $f_x$; $K=\ker f_x$, $|K|=72$. Each
+round: reset the 144 previously measured qubits, apply the 3 layers of the
+inverse contraction and the 3 layers of the next contraction (each layer a
+perfect matching of 144 CNOTs), measure 144 qubits. Every contracting stabiliser
+lands on a single same-basis measured qubit; the end-cycle codes have 72+72
+weight-9 generators, rank 66+66, $k=12$, qubit degree 5. Our construction is
+gate-identical to an independent one for all 3 homomorphisms $\times$ 2 layer
+orders $\times$ 2 bases $\times$ 2 starting rounds. Detectors are derived as the
+GF(2) kernel of noiseless samples and split into time-local blocks
+$D_t$\cl{1}.
+
+\emph{Instance.} The set of DEM terms equals the set of projected fault
+signatures ($T=1..5$, both bases). Every round-$r$ fault touches only $D_r$,
+$D_{r+1}$. For $T=1..5$ every round's instance is equivalent to the round-1
+instance (time shift plus a translation for even $r$; rank conditions and a
+bijection on projected faults). The 72 translations by $K$ are automorphisms of
+every layer and induce column permutations preserving undetected logicals; 12
+orbits of 72\cl{1}.
+
+\emph{Fold condition (basis-free form).} Let $\mu$ map each round-$r$ fault to its
+time-reversed partner in round $r-1$ (checked to be a fault for every round-$r$
+fault). Let $Z_r$ be the span of detector functionals that vanish on all faults of
+rounds $<r$. If $F$ is undetected with last round $r$ and round-$r$ part $E$, then
+$E$ is annihilated by $Z_r$, and $F'=(F\setminus E)\oplus\mu(E)$ is undetected with
+the same logical value whenever
+\begin{equation}
+\Psi(E)=\big[H_{\rm all}(E)+H_{\rm all}(\mu E);\,L(E)+L(\mu E)\big]=0
+\quad\text{for all $E$ annihilated by $Z_r$,}
+\end{equation}
+i.e.\ whenever every row of $\Psi$ lies in the row space of $Z_r$ restricted to
+round-$r$ faults. A local version replaces $Z_r$ by the functionals in
+$\mathrm{span}(D_r,D_{r+1})$ vanishing on round-$(r-1)$ faults (a subspace, hence
+stronger) and depends only on two rounds. Both versions hold for $r=2..T$,
+$T=2..5$, both bases, including the noisy final round. Iterating the fold
+gives, for every $T$, an undetected logical of no larger weight inside one round,
+i.e.\ a solution of the single-round instance. The arbitrary-$T$ step therefore
+rests on exact checks for $T\le5$ plus periodicity of the local condition and of
+the single-round instance (machine-checked hypotheses plus a written argument).
+\emph{Remark.} The per-fault statements in the proof of Prop.~1 of
+Ref.~\cite{ShawTerhal2026} (``same detectors'', ``same observables'') do not hold
+literally in a general detector basis, and a naive block-wise test fails at the
+final round; the condition above is the one the fold needs and it holds\cl{3}.
+
+\emph{Search and witness.} Weight-11 DFS, all 12 orbit cases, both bases:
+0 solutions on two equivalent instances (sparse basis: $\approx2.8\times10^{10}$
+nodes per basis; record basis, different tree: $\approx2.0\times10^{11}$ nodes per
+basis). The end-cycle codes have distance exactly 12 (DFS) and minimum stabiliser
+weight exactly 9; injecting a weight-12 end-cycle logical as 12 single-qubit
+faults after a reset layer gives 0 detectors and flipped observables for every
+admissible round and $T$\cl{1,2}.
+
+% ---------------------------------------------------------------------------
+\section{The 80-circuit morphing family}\label{sm:morph80}
+\emph{Inventory.} 10 (mother code, homomorphism) pairs:
+$\code{72,12,6}$ ($f_x,f_y,f_{xy}$), $\code{108,8,10}$ ($f_y$ only),
+$\code{144,12,12}$ ($f_x,f_y,f_{xy}$), $\code{288,12,18}$ ($f_x,f_y,f_{xy}$);
+$\times$ \{Table IV, Table VIII\} $\times$ 2 orders of $(a_2,a_3)$ $\times$
+2 orders of $(b_2,b_3)$. Reconstructed from Tables IV, VIII and IX of
+Ref.~\cite{ShawTerhal2025} only, and found gate-identical (80/80) to an
+independent implementation; end-cycle distances agree; Table~IX of
+Ref.~\cite{ShawTerhal2025} fixes the permutations of the Table~VIII circuits it
+lists\cl{5}.
+
+\emph{Verification depth.} The 56 circuits with mother codes
+$\code{72}$, $\code{108}$, $\code{144}$ were solved directly on the full $T=4$
+circuit (noisy boundaries) in both bases by two independent pipelines (different
+detector derivations, DEM-based versus own fault enumeration, different solvers,
+plus a tree-free meet-in-the-middle check on five instances): 112/112 agree. For
+the 8 sub-$\dt$ circuits the values were recomputed in $96$ settings (SD6 versus
+no idle noise; full $T=4$; $T=5$ with noise only in half-cycles 2--4; $T=5$ with
+noise only in one interior half-cycle): identical values throughout. Minimum
+witnesses consisting only of CNOT faults in one interior half-cycle were injected
+into circuits carrying all $X$- and $Z$-type detectors (16/16 pass)\cl{5,8}.
+The 24 circuits with mother code $\code{288,12,18}$ were proven by one pipeline
+(single-round DFS plus fold check, all flags verified); three of them
+($f_x$ rev with $\dt=10$; $f_y$ std and $f_{xy}$ rev with $\dt=12$) were reproduced
+independently on single interior half-cycle instances in both bases, and one also
+on the full $T=3$ circuit without folding. The arbitrary-$T$ statement for these
+circuits relies on the per-circuit fold computation (code and output flags
+audited, not independently re-implemented)\cl{9}.
+
+\emph{Wording constraints we observe.} We do not claim that ``the circuit of
+Table~II of Ref.~\cite{ShawTerhal2025} has $\dcirc=6$'', because Tables II/IV do not
+fix the order of $(b_2,b_3)$. We do not attribute the sub-$\dt$ errors to reset
+faults: CNOT-only realisations exist\cl{6,8}. The $\code{72,12,8}$ circuits are
+listed in Table~IX of Ref.~\cite{ShawTerhal2025} with bound $\le6$; our result is
+tightness\cl{7}.
+
+% ---------------------------------------------------------------------------
+\section{Gross code: lift structure, evaluator family, and bulk obstructions}\label{sm:gross12}
+\emph{Weight-11 logicals.} Exhaustive enumeration with two different DFS programs
+gives 4224 weight-11 extended logicals per side, all in free orbits of the
+24-element group (176 orbits); 360 of them consist of ten data columns and one
+length-2 residual (``10 data + r2''). An exact lift checker augments the circuit
+with one observable per row of $H$ and $L$ on the final data readout, so each DEM
+term carries its extended-code image; for each extended logical a frontier
+dynamic program over the 11 column groups decides liftability exactly. On Fig.~12
+all $4224/4224$ lift for $R=1,2,3$ (independently reproduced; the original run
+covers $R=1..6$)\cl{13}.
+
+\emph{The benchmark family ($P\le8$).} Rules: one period $P\in[2,8]$ shared by
+$X$ and $Z$ checks; per check one reset, six CNOTs at distinct offsets
+$0<o_1<\dots<o_6<o_{\rm meas}<P$ and one measurement; each data qubit in at most
+one CNOT per time step mod $P$; determinism checked on the circuit. Weight 6
+forces $P=8$, $o_k=k$, $o_{\rm meas}=7$; keeping the Fig.~12 orders leaves only
+$s_c\in\mathbb{Z}_8$ per check. A non-SAT backtracking search (forward checking,
+pigeonhole per data qubit, no symmetry) finds exactly 4 solutions with one start
+fixed and 32 $=8\times4$ without; two independent SAT encodings agree. All four
+are colour-uniform, deterministic, non-interleaved; one is Fig.~12. The other
+lattice isomorphism of Fig.~12 is related by a code relabelling, so the
+statement does not depend on that choice. Weight-11 witnesses were injected
+through the benchmark's own verification routine: 72/72 (4 circuits $\times$
+$R=1..6$ $\times$ 2 bases) fire no detector and flip an observable, with 11
+distinct DEM terms\cl{14,15}. Not covered: other CNOT orders; $R\ge7$ for this
+finite-$R$ statement.
+
+\emph{Frame model.} A data $X$ error at time $\theta$ is first seen by $Z$ check $c$
+(readout times $T_c+nP$) in instance $H_c=\min\{n:T_c+nP>\theta\}$. Three readouts
+of a data qubit give three length-$P$ open intervals; pairwise intersection is a
+difference constraint on the $H_c$, and by one-dimensional Helly a common time
+exists, at which an SD6 fault location is available. A hook (ancilla $X$ after the
+fourth CNOT of an $X$ check) fixes its arrival. Feasibility of the difference
+constraints (no negative cycle) implies a genuine weight-11 undetected error in the
+bulk; this was checked by 75 stim injections. The converse is not used. The model
+agrees with the exact lift checker in the bulk but not at the initial time
+boundary: on a $P=16$ circuit, 96 logicals blocked in the model lift at $R=2,4,6$
+via round-0 detectors\cl{18}.
+
+\emph{Certificates.} Blocking every ``10 data + r2'' logical requires a
+negative cycle for each; CP-SAT (path encoding, and independently an unrolled
+Bellman--Ford encoding) and a CEGAR SAT loop (lazy determinism clauses; nogoods
+from the potentials of liftable logicals, with 24 translated images) give
+INFEASIBLE/UNSAT for the families in Table~\ref{tab:gross}\cl{16}.
+
+\begin{table}[h]
+\caption{Bulk obstruction status for retimings of Fig.~12 that keep its per-check
+CNOT orders. ``Proven'' means: every legal deterministic circuit of the family has
+a bulk weight-11 undetected error, hence $\dcirc\le11$ for sufficiently many rounds.}
+\label{tab:gross}
+\begin{ruledtabular}
+\begin{tabular}{lll}
+family & status & evidence\\
+\hline
+symmetric (24-translation) non-wrapping frame, any $P$ & proven & CP-SAT, compressed to $P=38$, two encodings\\
+symmetric pipelined, $P=8,9,10$ & proven & two CP-SAT encodings; exhaustive for $P=8,9$\\
+symmetric pipelined, $P=11$ & proven & CP-SAT and CEGAR\\
+symmetric pipelined, $P=12$ & proven, single encoding & CP-SAT (unrolled Bellman--Ford)\\
+$H$-invariant pipelined, $P=9$: $|H|=12$ (3), 8, 6 (3), 4 ($\langle(0,3),(6,0)\rangle$, $\langle(3,3)\rangle$), 3 & proven & CEGAR (two families re-run)\\
+$H$-invariant pipelined, $P=10$: $|H|=12$ $\langle(1,2)\rangle$, 8, 6 $\langle(2,4)\rangle$ & proven & CEGAR\\
+per-check-free non-wrapping frame, $P\le16$ & proven, one encoding & CP-SAT (reproduced; independent encoding UNKNOWN)\\
+$|H|=4$ $\langle(3,0)\rangle$ pipelined, $P=9$ & open & UNKNOWN\\
+symmetric pipelined, $P\ge13$ & open & --\\
+all other pipelined families with $P\ge9$ (incl.\ $|H|=2$, per-check-free, unlisted subgroups at $P=10$) & open & per-check-free $P=9$: SAT too slow\\
+per-check-free non-wrapping frame, $P>16$ & open & --\\
+different CNOT orders & open & --\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+\cl{16,17}
+\emph{Classical control.} Over 2000 SAT-enumerated and $\approx1.1\times10^5$
+random-walk legal deterministic per-check $P=9$ circuits, all 720 single-hook
+logicals remained liftable in the frame model. This is a classical baseline, not a
+proof\cl{17}.
+
+% ---------------------------------------------------------------------------
+\section{Other BB codes}\label{sm:other}
+Codes: $\code{72,12,6}$ and $\code{108,8,10}$ as in Ref.~\cite{Bravyi2024}
+($A=x^3+y+y^2$, $B=y^3+x+x^2$); coprime $\code{126,12,10}$ ($\ell=7$, $m=9$,
+$A=1+\pi+\pi^{58}$, $B=1+\pi^{13}+\pi^{41}$, $\pi=xy$; Ref.~\cite{WangMueller},
+Table 2); $\code{120,8,12}$ with $(\ell,m)=(20,3)$, $A=1+x^3y^2+x^7y^2$,
+$B=1+x^{16}y+x^9y$ (found in our own code screen; its equivalence to the
+$\code{120,8,12}$ code of other works is \unverified); $\code{124,10,10}$ with
+$(\ell,m)=(31,2)$, $A=1+x^{27}y+x^{17}$, $B=1+x^{30}y+x^{12}y$ (own screen).
+Term orders (indices $[A_1,A_2,A_3,B_1,B_2,B_3]$): $\code{72,12,6}$ two-colour:
+as for $\code{108,8,10}$; cp126 uniform: $X$ $[1,0,2,4,3,5]$, $Z$ $[4,3,5,1,0,2]$;
+$\code{120}$ and $\code{124}$ uniform: $X$ $[0,1,2,3,4,5]$, $Z$ $[3,4,5,0,1,2]$.
+Each theorem: DFS at $W=w-1$ with and without symmetry (0 solutions), DFS at $W=w$
+finds solutions, injection-verified weight-$w$ witness for $R=1,2,3$ and by the
+time-translation argument of SM~\ref{sm:lift} for every $R$\cl{22}.
+All 864 proper two-colour LRC states of $\code{72,12,6}$ have $\dext=6$\cl{22}.
+
+\emph{Negative results.} Gross: for all three index-2 colourings, every two-colour
+LRC has a verified weight-10 extended logical, hence $\dcirc\le10$ (Cor.~1;
+the template is non-interleaved). $\code{90,8,10}$ ($A=x^9+y+y^2$, $B=1+x^2+x^7$,
+$(15,3)$): every LRC whose block order is constant on the $h=0$ class and on its
+complement, or on each of the three cosets, for all four $\mathbb{Z}_3$
+homomorphisms, has $\dext\le8$\cl{23}. For partitionable non-interleaved
+circuits (circuits that can be cut in time into alternating $X$-only and
+$Z$-only CNOT segments), $\code{90,8,10}$ has $\dcirc\le9$ and
+$\code{108,8,10}$ has $\dcirc\le10$ by the single-check argument of Prop.~4 of
+Ref.~\cite{Strikis2026}; uniform tilings give $\le8$ ($\code{90}$, any depth) and
+$\le9$ ($\code{108}$, depth 8). IBM-type pipelined circuits are pairwise
+non-interleaved but not partitionable and are not covered\cl{24}.
+
+% ---------------------------------------------------------------------------
+\section{Prior work and novelty caveats}\label{sm:novelty}
+\begin{itemize}
+\item Gross Fig.~12 $=11$: Ref.~\cite{Strikis2026} v2 still states 11 as a
+conjecture and suggests exhaustive methods without executing them; no proof of
+any gross-circuit $\dcirc\ge11$ was found in the literature checked (search date
+2026-10-07)\cl{12}.
+\item IBM $\code{72,12,6}$: partial precedent. The public results table of
+Ref.~\cite{Webster2026} contains an exact value 6 (two exact solvers) for a
+$Z$-basis, $R=6$, CZ+H/SI1000 circuit of IBM type; it is not stated as a result in
+the paper and its gate-by-gate identity with the IBM order was not checked. The
+GitHub leaderboard~\cite{qldpcchallenge} lists an upper bound 6/6 for $R=6$\cl{21}.
+\item $\code{108,8,10}$: literature values are $\le8$; position- or colour-dependent
+CNOT orders have precedents~\cite{TomitaSvore,KishonyFowler,Strikis2026}; the
+circuit is an instance of the left-right framework of Ref.~\cite{Strikis2026}.
+Rigorous circuit-distance results exist for hypergraph-product
+codes~\cite{ManesClaes}, layer codes~\cite{SunCai2026}, and as certificates for
+amplified codes~\cite{Liang2026}; an algebraic LP framework gives upper
+bounds~\cite{Ghosh2026}\cl{20}.
+\item ``First rigorous $\dcirc$ for BB codes with $d\ge9$'': Ref.~\cite{Tripier2026}
+lists $\dcirc=9$ (without ``$\le$'') for a $\code{70,6,9}$ BB code; the method is not
+stated in the parts read. This must be resolved before the claim is made publicly
+\unverified\cl{25}.
+\item Morphing: no rigorous lower bound on $\dcirc$ for any morphing circuit was
+found (search date 2026-10-08); Ref.~\cite{Chao2026} certifies code distances of
+related constructions, not circuit distances\cl{4}. The 80-circuit study (C5--C9)
+and the gross obstruction (C13--C17) have not had a dedicated literature check
+\unverified.
+\end{itemize}
+
+% ---------------------------------------------------------------------------
+\section{Reproduction}\label{sm:repro}
+A single script re-runs the DFS lower bounds for $\code{108,8,10}$, the four LRC
+theorems, IBM $\code{72,12,6}$ and (optionally) gross Fig.~12; a full run passed on
+2026-10-07. Each audit report lists its own reproduction commands; witnesses for
+negative results are archived. \todo{public repository and DOI -- PI decision.}
+
+\end{document}
