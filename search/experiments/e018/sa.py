@@ -93,7 +93,7 @@ def main():
     if a.random:
         n = 0
         while n < a.evals:
-            sols, st = sample(a.P, 10, int(rng.integers(1 << 30)), time_limit=10)
+            sols, st = sample(a.P, 10, int(rng.integers(1 << 20)), time_limit=10)
             for T in sols:
                 if n >= a.evals:
                     break

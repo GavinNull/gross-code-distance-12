@@ -100,7 +100,7 @@ def sample(P, n, seed, contiguous=False, time_limit=20):
         s = cp_model.CpSolver()
         s.parameters.max_time_in_seconds = time_limit
         s.parameters.num_workers = 1
-        s.parameters.random_seed = int(seed * 1000 + it)
+        s.parameters.random_seed = int((seed * 1000 + it) % (1 << 30))
         st = s.Solve(m)
         if st not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             return out, s.StatusName(st)
