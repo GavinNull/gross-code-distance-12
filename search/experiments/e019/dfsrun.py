@@ -74,7 +74,7 @@ def run_one(inst, W, case, extra=(), outdir=None, timeout=None):
     except subprocess.TimeoutExpired as e:
         out = (e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or "")) + "\nTIMEOUT\n"
     if outdir:
-        tag = os.path.basename(inst).replace(".txt", "") + f"_W{W}_c{case}"
+        tag = os.path.basename(inst).replace(".txt", "") + f"_W{W}_c{case}" + (f"_s{extra[0]}of{extra[1]}" if extra else "")
         open(f"{outdir}/{tag}.txt", "w").write(out)
     found = [list(map(int, ln.split("cols:")[1].split())) for ln in out.splitlines() if ln.startswith("FOUND")]
     m = re.search(r"nodes=(\d+)", out)
@@ -83,11 +83,23 @@ def run_one(inst, W, case, extra=(), outdir=None, timeout=None):
                 sec=float(s.group(1)) if s else time.time() - t0, complete="SUMMARY" in out)
 
 
-def run_all_cases(inst, W, norb, outdir=None, stop_on_found=False, npar=NPAR, timeout=None):
-    """Run every orbit case at weight bound W. Returns list of per-case dicts."""
+SPLITS = {0: 6, 1: 3}   # the lowest orbit cases carry most of the tree; split them at depth 1 (adfs split option)
+
+
+def run_all_cases(inst, W, norb, outdir=None, stop_on_found=False, npar=NPAR, timeout=None, splits=None):
+    """Run every orbit case at weight bound W (cases 0, 1 split into disjoint depth-1 parts when norb > 2).
+    Returns list of per-job dicts (a case's parts together are exhaustive for that case)."""
+    splits = (SPLITS if norb > 2 else {}) if splits is None else splits
+    jobs = []
+    for c in range(norb):
+        ns = splits.get(c, 1)
+        if ns > 1:
+            jobs += [(c, (str(i), str(ns))) for i in range(ns)]
+        else:
+            jobs.append((c, ()))
     res = []
     with ThreadPoolExecutor(npar) as ex:
-        futs = [ex.submit(run_one, inst, W, c, (), outdir, timeout) for c in range(norb)]
+        futs = [ex.submit(run_one, inst, W, c, e, outdir, timeout) for c, e in jobs]
         for f in futs:
             res.append(f.result())
     return res

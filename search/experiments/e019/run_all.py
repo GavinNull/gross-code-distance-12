@@ -34,7 +34,8 @@ def main():
             if not os.path.exists(f"{RES}/inst/info_{tag}.json"):
                 sh(["search.experiments.e019.instance", key, b, "4"], log)
             if not os.path.exists(f"{RES}/solve_{tag}.json"):
-                sh(["search.experiments.e019.solve", key, b], log)
+                extra = ["--no_posctl"] if key.startswith("bb288") else []   # upper bound by injection only
+                sh(["search.experiments.e019.solve", key, b, *extra], log)
 
 
 if __name__ == "__main__":

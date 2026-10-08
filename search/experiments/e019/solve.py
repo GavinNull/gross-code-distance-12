@@ -79,6 +79,8 @@ def main():
     ap.add_argument("basis")
     ap.add_argument("--timeout_pos", type=float, default=1800)
     ap.add_argument("--npar", type=int, default=6)
+    ap.add_argument("--no_posctl", action="store_true", help="skip the W = d_end search (upper bound then rests "
+                    "on the injected end-cycle logical only)")
     a = ap.parse_args()
     key, basis = a.key, a.basis
     tag = f"{key}_{basis}_T4"
@@ -119,13 +121,14 @@ def main():
         wit = best
     else:
         rep["lower_bound"] = d_end
-        res = run_all_cases(inst, d_end, norb, outdir, npar=a.npar, timeout=a.timeout_pos)
+        res = [] if a.no_posctl else run_all_cases(inst, d_end, norb, outdir, npar=a.npar, timeout=a.timeout_pos)
         cpu += sum(r["sec"] for r in res)
         sols = [s for r in res for s in r["found"]]
-        rep["runs"].append(dict(W=d_end, exhaustive=False, posctl=True, found=len(sols),
-                                sec=round(sum(r["sec"] for r in res), 1),
-                                cases_found=[r["case"] for r in res if r["found"]]))
-        print(key, basis, "posctl W", d_end, rep["runs"][-1], flush=True)
+        if not a.no_posctl:
+            rep["runs"].append(dict(W=d_end, exhaustive=False, posctl=True, found=len(sols),
+                                    sec=round(sum(r["sec"] for r in res), 1),
+                                    cases_found=[r["case"] for r in res if r["found"]]))
+            print(key, basis, "posctl W", d_end, rep["runs"][-1], flush=True)
         wit = sols[0] if sols else None
         rep["d_circ"] = d_end
         rep["status"] = "exact (= d_end)"
@@ -149,7 +152,7 @@ def main():
     rep["injections"] = inj
     ub_ok = all(e["ok"] for e in ecl)
     if best is None and wit is None:
-        rep["status"] = "lower bound d_end; upper bound d_end from end-cycle logical" if ub_ok else "lower bound only"
+        rep["status"] = "exact (= d_end; upper bound by injected end-cycle logical)" if ub_ok else "lower bound only"
         rep["d_circ"] = d_end if ub_ok else None
     rep["dfs_cpu_sec"] = round(cpu, 1)
     rep["wall_sec"] = round(time.time() - t0, 1)
