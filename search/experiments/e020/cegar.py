@@ -189,6 +189,7 @@ def main():
     ap.add_argument("--per_iter", type=int, default=10 ** 9, help="max nogoods added per iteration")
     ap.add_argument("--seed", type=int, default=20261008)
     ap.add_argument("--tag", default="")
+    ap.add_argument("--orbit", type=int, default=-1, help="restrict to the translation orbit of one logical")
     ap.add_argument("--sub", default="", help="generators of a translation subgroup the schedule must be invariant under")
     ap.add_argument("--sym", type=int, default=1, help="add the 24 translated images of every nogood / det clause")
     a = ap.parse_args()
@@ -202,6 +203,13 @@ def main():
             gmaps.append([int(pm[i]) for i in range(72)] + [72 + int(pm[j]) for j in range(72)])
     t0 = time.time()
     L, skipped = prep_logicals(a.kinds, a.types)
+    if a.orbit >= 0:
+        # keep only the translation orbit of the a.orbit-th modelled logical of the first kind (relaxation: valid)
+        perms = ext(a.kinds[0])["perms"]
+        base = [l for l in L if l[0] == a.kinds[0]][a.orbit][1]
+        orb = {tuple(sorted(int(pm[j]) for j in base)) for pm in perms}
+        L = [l for l in L if l[0] == a.kinds[0] and tuple(sorted(l[1])) in orb]
+        print(f"orbit restriction: {len(L)} logicals", flush=True)
     print(f"modelled logicals {len(L)} (skipped {skipped}) {time.time() - t0:.0f}s", flush=True)
     C, O, x, cnf, pool = build(a.P, lazy_det=True)
     dett = pool.det_table
