@@ -1,0 +1,11 @@
+id: E-017-gross-morphing-scoping
+hypothesis: H-004（推高含金量：gross code 能否达到 d_circ = 12）
+question: >
+  已证明 Strikis 非交错电路 d_circ = 11（E-014），且非交错电路上限就是 11（2603.05481 Prop. 4）。
+  文献称某 morphing 电路对 gross code 可能达到 12（IBM 2605.21898 v2 App. C，仅 Monte Carlo）。
+  本实验是可行性调研：精确确定那个电路是什么、能否在本项目的评估框架里构造，电路级距离的上界是多少，以及有没有可行的下界证明路线。
+prediction: >
+  （跑前写下）1) 能复现该电路，评估器启发式上界为 12（约六成）或 ≤11（约四成）；
+  2) Strikis 的扩展码 + Prop. 3 不能直接用于 morphing 电路（没有独立辅助比特），需要新的下界论证；
+     E-015 的“映射到低权重逻辑错误再精确枚举”的思路可能可以推广，但规模（d=12）可能超出本机能力。
+budget: {cpu_hours: 8, llm_tokens: 0, num_workers: 4}
