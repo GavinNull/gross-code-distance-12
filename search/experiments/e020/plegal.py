@@ -43,7 +43,9 @@ def det_ok(P, ta_u, tc_u, ta_v, tc_v):
     return (ta_u - tc_u) // P == (ta_v - tc_v) // P
 
 
-def build(P, fix0=True, extra=None):
+def build(P, fix0=True, extra=None, lazy_det=False):
+    """lazy_det: do not add the forbidden-pair determinism clauses; instead return them in pool.det_table
+    {(a, c): (ga, gc, set of forbidden (g1, g2))} for lazy addition (sound: they are only added when violated)."""
     C = checks()
     O = options(P)
     pool = IDPool()
@@ -97,6 +99,11 @@ def build(P, fix0=True, extra=None):
                 cnf.append([-gc[g]] + [x[c][k] for k in ks])
                 for k in ks:
                     cnf.append([-x[c][k], gc[g]])
+            if lazy_det:
+                pool_det = getattr(pool, "det_table", {})
+                pool_det[(a, c)] = (ga, gc, (pa_u, pa_v, pc_u, pc_v))
+                pool.det_table = pool_det
+                continue
             for g1 in sa:
                 for g2 in sc:
                     if not det_ok(P, g1[0], g2[0], g1[1], g2[1]):

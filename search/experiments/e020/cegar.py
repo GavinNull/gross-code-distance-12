@@ -146,10 +146,20 @@ class Lits:
         self.cache[key] = l
         return l
 
-    def nogood(self, cons, pi):
+    def nogood(self, cons, pi, gmaps=(None,)):
+        """adds the nogood and its images under the check permutations in gmaps (translation symmetry: valid
+        because the family, the model and the logical set are invariant under the 24 order-preserving translations)."""
+        n = 0
+        for gm in gmaps:
+            n = self._nogood(cons, pi, gm)
+        return n
+
+    def _nogood(self, cons, pi, gm):
         P = self.P
+        mp = (lambda pp: pp) if gm is None else (lambda pp: (gm[pp[0]], pp[1]))
         cl = []
         for u, w, kd, (p1, p2) in cons:
+            p1, p2 = mp(p1), mp(p2)
             K = pi[u] - pi[w]                 # need wt < K to violate
             if kd in ("free", "hook+"):       # floor((t1-t2)/P) + 1 < K  <=> t1 - t2 <= (K-1)P - 1
                 cl.append(self.diff(p1, p2, "le", (K - 1) * P - 1))
@@ -179,12 +189,21 @@ def main():
     ap.add_argument("--per_iter", type=int, default=10 ** 9, help="max nogoods added per iteration")
     ap.add_argument("--seed", type=int, default=20261008)
     ap.add_argument("--tag", default="")
+    ap.add_argument("--sym", type=int, default=1, help="add the 24 translated images of every nogood / det clause")
     a = ap.parse_args()
     rng = random.Random(a.seed)
+    from search.experiments.e018.common import tr
+    gmaps = [None]
+    if a.sym:
+        gmaps = []
+        for g in ext("X")["group"]:
+            pm, _ = tr(*g)
+            gmaps.append([int(pm[i]) for i in range(72)] + [72 + int(pm[j]) for j in range(72)])
     t0 = time.time()
     L, skipped = prep_logicals(a.kinds, a.types)
     print(f"modelled logicals {len(L)} (skipped {skipped}) {time.time() - t0:.0f}s", flush=True)
-    C, O, x, cnf, pool = build(a.P)
+    C, O, x, cnf, pool = build(a.P, lazy_det=True)
+    dett = pool.det_table
     S = Cadical153(bootstrap_with=cnf)
     lits = Lits(a.P, C, O, x, pool, S)
     log = {"P": a.P, "kinds": a.kinds, "types": a.types, "modelled": len(L), "skipped": skipped, "iters": []}
@@ -200,18 +219,27 @@ def main():
         pos = set(l for l in S.get_model() if l > 0)
         sv = [next(k for k in range(len(O)) if x[ci][k] in pos) for ci in range(len(C))]
         T = schedule_times(sv, O)
+        ndv = 0
+        for (ca, cc), (ga, gc, (pau, pav, pcu, pcv)) in dett.items():
+            g1 = (T[(ca, pau)], T[(ca, pav)]); g2 = (T[(cc, pcu)], T[(cc, pcv)])
+            if (g1[0] - g2[0]) // a.P != (g1[1] - g2[1]) // a.P:
+                for gm in gmaps:
+                    k = (ca, cc) if gm is None else (gm[ca], gm[cc])
+                    S.add_clause([-dett[k][0][g1], -dett[k][1][g2]])
+                ndv += 1
         lifting = []
         for kind, Sx, cp, cons in L:
             pi = bellman_ford(cons, T, a.P)
             if pi is not None:
                 lifting.append((cons, pi))
-        if not lifting:
+        if not lifting and ndv == 0:
             status = "CANDIDATE"
             log["candidate"] = [list(O[k]) for k in sv]
             break
         rng.shuffle(lifting)
-        sizes = [lits.nogood(cons, pi) for cons, pi in lifting[: a.per_iter]]
-        rec = {"it": it, "lifting": len(lifting), "added": len(sizes), "mean_clause": round(sum(sizes) / len(sizes), 1),
+        sizes = [lits.nogood(cons, pi, gmaps) for cons, pi in lifting[: a.per_iter]] or [0]
+        rec = {"it": it, "det_viol": ndv, "lifting": len(lifting), "added": len(sizes),
+               "mean_clause": round(sum(sizes) / len(sizes), 1),
                "sec": round(time.time() - ts, 2)}
         log["iters"].append(rec)
         if it % 10 == 0 or it < 5:
