@@ -170,11 +170,25 @@ def prepared(code, hom):
     return lists
 
 
+VARIANTS = {   # name -> (kind, swap a2<->a3, swap b2<->b3)
+    "repo": ("std", 0, 0), "paper": ("std", 1, 1), "std01": ("std", 0, 1), "std10": ("std", 1, 0),
+    "swap2": ("sw2", 0, 0), "sw01": ("sw2", 0, 1), "sw10": ("sw2", 1, 0), "sw11": ("sw2", 1, 1),
+}
+
+
 def spec(code, hom, variant):
-    """gates[r][layer] = list of (control, target); meas[r] = {"X": [...], "Z": [...]} for contraction round r."""
+    """gates[r][layer] = list of (control, target); meas[r] = {"X": [...], "Z": [...]} for contraction round r.
+    'paper' (Table II order) == repo construction with a2<->a3 and b2<->b3 exchanged; std01/std10 exchange only
+    one pair (the order of the two non-special terms of A, B is a free convention of the input polynomials).
+    swap2 (Table VIII) with the same four ordering choices: swap2 = repo input order, sw01/sw10/sw11."""
     assert hom_valid(code, hom), (code.name, hom)
     f = HOMS[hom]
+    kind, sa, sb = VARIANTS[variant]
     a, b = prepared(code, hom)
+    if sa:
+        a = [a[0], a[2], a[1]]
+    if sb:
+        b = [b[0], b[2], b[1]]
     gates = [[[] for _ in range(3)] for _ in range(2)]
     meas = [{"X": [], "Z": []} for _ in range(2)]
     R = code.R
@@ -183,18 +197,18 @@ def spec(code, hom, variant):
             rg = f((i, j))
             rh = 1 - rg
             Lq = code.L(i, j)
-            if variant in ("repo", "paper"):
+            if kind == "std":
                 rgq = [R(i - a[0][0] + e[0], j - a[0][1] + e[1]) for e in b]
                 rhq = [R(i - e[0] + b[0][0], j - e[1] + b[0][1]) for e in a]
                 for k in range(1, 3):
-                    layer = (k - 1) if variant == "repo" else (2 - k)
+                    layer = k - 1
                     gates[rg][layer].append((Lq, rgq[k]))
                     gates[rh][layer].append((rhq[k], Lq))
                 gates[rg][2].append((rgq[0], Lq))
                 gates[rh][2].append((Lq, rhq[0]))
                 meas[rg]["X"].append(rgq[0])
                 meas[rh]["Z"].append(rhq[0])
-            elif variant == "swap2":
+            elif kind == "sw2":
                 rgq = [R(i - a[0][0] + e[0], j - a[0][1] + e[1]) for e in b]
                 rhq = [R(i - e[0] + b[0][0], j - e[1] + b[0][1]) for e in a]
                 nuc = R(i - a[1][0] + b[1][0], j - a[1][1] + b[1][1])
@@ -344,6 +358,6 @@ def variants():
         code = get_code(name)
         for hom in ("x", "y", "xy"):
             if hom_valid(code, hom):
-                for v in ("repo", "paper", "swap2"):
+                for v in VARIANTS:
                     out.append((name, hom, v))
     return out
