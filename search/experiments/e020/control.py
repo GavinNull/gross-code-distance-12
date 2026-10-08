@@ -47,7 +47,7 @@ def main():
             sv = [next(k for k in range(len(O)) if x[ci][k] in pos) for ci in range(len(C))]
             T = schedule_times(sv, O)
             bad = 0
-            for (ca, cc), (ga, gc, (pau, pav, pcu, pcv)) in dett.items():
+            for (ca, cc), (ga, gc, (pau, pav, pcu, pcv), _) in dett.items():
                 g1 = (T[(ca, pau)], T[(ca, pav)]); g2 = (T[(cc, pcu)], T[(cc, pcv)])
                 if (g1[0] - g2[0]) // P != (g1[1] - g2[1]) // P:
                     S.add_clause([-ga[g1], -gc[g2]]); bad += 1

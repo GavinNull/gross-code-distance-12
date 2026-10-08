@@ -101,7 +101,8 @@ def build(P, fix0=True, extra=None, lazy_det=False):
                     cnf.append([-x[c][k], gc[g]])
             if lazy_det:
                 pool_det = getattr(pool, "det_table", {})
-                pool_det[(a, c)] = (ga, gc, (pa_u, pa_v, pc_u, pc_v))
+                forb = [(g1, g2) for g1 in sa for g2 in sc if not det_ok(P, g1[0], g2[0], g1[1], g2[1])]
+                pool_det[(a, c)] = (ga, gc, (pa_u, pa_v, pc_u, pc_v), forb)
                 pool.det_table = pool_det
                 continue
             for g1 in sa:
