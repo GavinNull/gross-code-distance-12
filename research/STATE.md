@@ -68,6 +68,10 @@
 
 ## 待复核的结论
 
+- **E-019（experimenter，2026-10-08，未复核）Shaw–Terhal 全部 80 个两轮 morphing 电路的精确 d_circ**（sd6，两基底）：72 个 d_circ = d̃，**8 个 < d̃**（见证注入验证）。
+  反例：[[108,8,10]] f_y → [[54,8,8]]：仓库序 7、**论文 Table II 原序 6**（低于论文 Table I 的 ≤7）；[[144,12,12]] f_x sw01/sw10 → [[72,12,8]]：6。机制：复位翻转经 F† 扩散成 2–3 比特的类钩子错误。
+  [[288]] 母码 24 个电路全部保距离（12 或 10），补齐 E-017 变体。附带：[[72,12,7]]（144 比特）d_circ = 7。未做：三轮 Z_3 morphing、App. C 非阿贝尔码。
+  → `research/journal/2026-10-08-E-019-morphing-family.md`、`results/E-019-morphing-family/summary.md`；auditor 复核中。
 - E-010：BB108 三色 LRC 全部 ≤9（lead，未复核；E-015 复核已覆盖 gross / [[90]] 的同类负面结论）
 - E-016：BB108 两色电路在实际解码器、p ≥ 1e-3 下无可测 LER 改善（experimenter，未复核）
 

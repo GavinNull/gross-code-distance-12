@@ -63,7 +63,8 @@
 - **状态**：**supported（morphing 路线）**：Shaw–Terhal morphing [[144,12,12]] 电路 d_circ = 12（E-017，auditor 复核）。
   **gross 码 + Fig. 12 CNOT 顺序 + 只改时序：倾向 refuted（E-018，bulk 意义，未复核）**。
 - **证据**：E-017（定理）；E-018 单钩子逻辑的全局时序冲突（帧模型 + CP-SAT INFEASIBLE 于若干电路族）。
-- **下一步**：E-019 把 E-017 的证明推广到 Shaw–Terhal 的全部 morphing 电路族（“morphing 是否普遍保距离”）；auditor 复核 E-018 的障碍论证。
+- **E-019（未复核）**：“morphing 普遍保距离”被否定：80 个中 8 个 d_circ < d̃（[[54,8,8]] 6/7，[[72,12,8]] 6）；[[288]] 母码全部保距离。
+- **原下一步**：E-019 把 E-017 的证明推广到 Shaw–Terhal 的全部 morphing 电路族（“morphing 是否普遍保距离”）；auditor 复核 E-018 的障碍论证。
 
 ## H-005 · BB 码的电路级解码存在大幅提升空间，可由 AI 发现的解码器兑现（2026-10-03，主线，草案）
 - **状态**：open（E-006 先量化提升空间，再决定是否投入）
