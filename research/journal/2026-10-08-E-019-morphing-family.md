@@ -169,3 +169,9 @@ uv run python -m search.experiments.e019.summary              # 总表
 uv run python -m search.experiments.e019.anatomy <key> <basis>          # 低于 d̃ 的见证解剖
 uv run python -m search.experiments.e019.crosscheck_morph <key> <basis> # 用 E-017 morph.py 交叉验证（std 变体）
 ```
+
+## 复核后更正（lead，2026-10-09，依据 research/audits/2026-10-08-E-019.md）
+
+- 漏读论文 Table IX：它显式给出 Table VIII 电路的项排列，“论文与仓库都没规定顺序”不对；Table IX 已列出 [[72,12,8]] 及 d̃_circ ≤ 6，故 [[72,12,8]] = 6 只是证明上界紧，不是新发现。
+- “论文 Table II 原序是 6”改为：Table IV 四种合法项序中第 1 轮 b3 = x² 的两种为 6、b3 = x 的两种（含仓库序）为 7；Table I 的 ≤7 等于仓库序精确值，不构成矛盾。
+- 撤回“< d̃ 见证依赖初态复位或空闲噪声”的保留：8 个电路两基底都有只含 CNOT 故障、内部半周期、无空闲噪声的同权重见证。

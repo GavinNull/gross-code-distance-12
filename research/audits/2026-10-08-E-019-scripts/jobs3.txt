@@ -1,0 +1,16 @@
+bb108 y IV 0 0 Z 5 noidle 3-3 6
+bb108 y IV 0 0 X 5 noidle 3-3 6
+bb108 y IV 1 0 Z 5 noidle 3-3 6
+bb108 y IV 1 0 X 5 noidle 3-3 6
+bb108 y IV 1 1 Z 5 noidle 3-3 7
+bb108 y IV 1 1 X 5 noidle 3-3 7
+bb108 y IV 0 1 Z 5 noidle 3-3 7
+bb108 y IV 0 1 X 5 noidle 3-3 7
+bb108 y VIII 0 0 Z 5 noidle 3-3 7
+bb108 y VIII 0 0 X 5 noidle 3-3 7
+bb108 y VIII 1 0 Z 5 noidle 3-3 7
+bb108 y VIII 1 0 X 5 noidle 3-3 7
+bb144 x VIII 0 1 Z 5 noidle 3-3 6
+bb144 x VIII 0 1 X 5 noidle 3-3 6
+bb144 x VIII 1 0 Z 5 noidle 3-3 6
+bb144 x VIII 1 0 X 5 noidle 3-3 6
