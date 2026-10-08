@@ -76,6 +76,10 @@
 
 ## 待复核的结论
 
+- **E-020（experimenter，2026-10-09，未复核，auditor 复核中）gross Fig. 12 顺序的逐校验自由流水电路**：
+  P=8（评估器 gross-dcirc 族）完全决定：去掉全局平移后合法赋值恰 4 个（两套 SAT 编码一致），48 组 (电路, R=1..6, 基底) 全部 4224/4224 提升，注入 240/240 → **有限 R 精确 d_circ ≤ 11，含 R=3**。
+  P ≥ 9：CEGAR（帧模型 nogood，依赖已复核的 C1）对称 P=11 UNSAT（新）、多个子群不变族 P=9/10 UNSAT；逐校验自由 P=9、10 未决定（随机 11 万次 + SAT 枚举 2000 个电路全部提升）。
+  → `research/journal/2026-10-08-E-020-gross-perchk-pipeline.md`
 - E-010：BB108 三色 LRC 全部 ≤9（lead，未复核；E-015 复核已覆盖 gross / [[90]] 的同类负面结论）
 - E-016：BB108 两色电路在实际解码器、p ≥ 1e-3 下无可测 LER 改善（experimenter，未复核）
 
