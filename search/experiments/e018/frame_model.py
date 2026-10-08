@@ -126,3 +126,89 @@ def _bf(evs, reads, htime, cls):
         if not ch:
             return True
     return False
+
+
+# ----------------------------------------------------------------------------- general (pipelined) version
+def abs_tables(spec, basis):
+    """Absolute times: a check's instance 0 starts at its prep p in [0,P); CNOT at p + ((t - p) mod P)."""
+    P = spec.period
+    rd = spec.z_checks if basis == "Z" else spec.x_checks
+    hk = spec.x_checks if basis == "Z" else spec.z_checks
+    reads = [[] for _ in range(144)]
+    for i, c in enumerate(rd):
+        for q, t in c.cnots:
+            reads[q].append((c.prep + (t - c.prep) % P, i))
+    htime = {}
+    for i, c in enumerate(hk):
+        for q, t in c.cnots:
+            htime[(i, q)] = c.prep + (t - c.prep) % P
+    return reads, htime, P
+
+
+def feasible_general(S, kind, reads, htime, P):
+    """Difference-constraint model for any periodic schedule (absolute times, instance index H_c per check):
+    free qubit w, checks c, d: H_c - H_d <= floor((t_d - t_c)/P) + 1;  hook a on residual q:
+    H_c = F_a + floor((t_a - t_c)/P) + 1.  |Q∩c| > 2 handled by pairing enumeration (as `feasible`)."""
+    from itertools import product
+    evs = [column_events(kind, j) for j in S]
+    qs = []
+    for e in evs:
+        qs += [e[1]] if e[0] == "d" else list(e[2])
+    if len(set(qs)) != len(qs):
+        return None
+    rc = {}
+    for q in qs:
+        for _, i in reads[q]:
+            rc.setdefault(i, []).append(q)
+
+    def pairings(lst):
+        if not lst:
+            yield []
+            return
+        for k in range(1, len(lst)):
+            for p in pairings(lst[1:k] + lst[k + 1:]):
+                yield [(lst[0], lst[k])] + p
+    multi = [i for i, l in rc.items() if len(l) > 2]
+    for choice in product(*[list(pairings(sorted(rc[i]))) for i in multi]):
+        cls = {}
+        for i, l in rc.items():
+            if len(l) == 2:
+                cls[(i, l[0])] = cls[(i, l[1])] = (i, 0)
+        for i, prs in zip(multi, choice):
+            for k, (x, y) in enumerate(prs):
+                cls[(i, x)] = cls[(i, y)] = (i, k)
+        var, cons = {}, []
+
+        def v(key):
+            if key not in var:
+                var[key] = len(var)
+            return var[key]
+        for e in evs:
+            if e[0] == "d":
+                q = e[1]
+                for tc, c in reads[q]:
+                    for td, d in reads[q]:
+                        if c != d:
+                            cons.append((v(("c", cls[(c, q)])), v(("c", cls[(d, q)])), (td - tc) // P + 1))
+            else:
+                a = e[1]; F = v(("F", a))
+                for q in e[2]:
+                    ta = htime[(a, q)]
+                    for tc, c in reads[q]:
+                        off = (ta - tc) // P + 1
+                        cv = v(("c", cls[(c, q)]))
+                        cons += [(cv, F, off), (F, cv, -off)]
+        n = len(var)
+        d = [0] * n
+        ok = False
+        for _ in range(n + 1):
+            ch = False
+            for u, w, c in cons:
+                if d[w] + c < d[u]:
+                    d[u] = d[w] + c; ch = True
+            if not ch:
+                ok = True
+                break
+        if ok:
+            return True
+    return False
