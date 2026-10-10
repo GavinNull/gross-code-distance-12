@@ -91,6 +91,12 @@
 
 ## 正在进行
 
+- **PRL 升级三线并行（PI 2026-10-10：“abc都冲”）**：现稿 `paper/draft.tex` 已备好，公开与否仍待 PI。
+  - A = E-021：gross 码换 CNOT 顺序 + 交错冲 d_circ = 12（或更大族的不可能性）
+  - B = E-022：morphing 何时掉距离的结构性判据（从 8 反例 / 72 正例提炼，并在新电路上做预测检验）
+  - C = E-023：d_circ 提升是否带来可测的逻辑错误率收益（同码不同电路的 A/B 对照，低 p 外推）
+  CPU 分配：A 4 核、B 2 核、C 3 核
+
 - **E-018（PRL 冲刺，PI 指示“先着重注重突破”）gross 交错单辅助电路能否 d_circ = 12**（2603.05481 §IV.3 开放问题）→ `experiments/E-018-gross-interleaved-12.yaml`
   - stage a 完成（lead，2026-10-08）：Fig. 12 扩展码权重 11 逻辑错误按对称情形计 X 侧 254、Z 侧 257（预测 10^4–10^6 的低端以下：lift 证明可行）。
     原始输出 `results/E-018-gross-interleaved-12/w11_*`；3 个文件被 50 行打印上限截断，已用 `search/experiments/e014/dfs128_all.c` 重跑为 `full_*`
