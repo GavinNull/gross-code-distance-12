@@ -1,4 +1,4 @@
-# Figure plan for `paper/draft.tex` (revision b, 2026-10-10)
+# Figure plan for `paper/draft.tex` (revision c, 2026-10-10)
 
 No figure has been produced yet. Every panel below is drawn only from existing files; nothing is to be
 re-computed or invented for the figures. Where a panel would need data that does not exist yet, it says so.
@@ -39,8 +39,7 @@ experiment-log control clearly marked).
      Source: `results/E-021-audit/b9_p8.json`.
   4. Random legal deterministic circuits of the search family (SAT sampler without blocking clauses): 233/233 have
      a liftable weight-11 logical, 0 certified (C39; in STATE). Source: `results/E-021-gross-new-orders/randsat_summary.json`.
-  5. Reasoned candidates (blocking clauses): 39/39 certified for R = 1..6 (C39; **experiment log only, not audited** —
-     hatch or footnote this bar, or drop it if not audited before submission). Source: `results/E-021-gross-new-orders/enumscreen.jsonl`.
+  5. (dropped in revision c by lead decision: the 39/39 reasoned-candidate count is unaudited; do not plot it.)
   6. cand_p21: 0/4224 lift, R = 1..14, 16, both bases (C34). Source: `results/E-021-audit/cand_p21/b3_cand_{X,Z}_*.json`.
 - Optional schematic inset (no data): a "10 data + 1 hook" weight-11 error — ten data-qubit faults plus one ancilla
   fault after the 4th CNOT of an X check, whose two-qubit residual {q5, q6} completes a weight-12 code logical;
@@ -50,7 +49,7 @@ experiment-log control clearly marked).
 - Do not plot the frame-model families of Table S-gross as bars: those are bulk statements (sufficiently many
   rounds) and mixing them with exact finite-R counts would mislead. They stay in the SM table.
 
-## Fig. 3 (main or SM): the 80 morphing circuits — end-cycle distance vs circuit distance
+## Fig. 3 (main; the main text cites it, the full table is in the SM): the 80 morphing circuits — end-cycle distance vs circuit distance
 
 Purpose: the evidence that circuit distances must be proven (C5–C9).
 
