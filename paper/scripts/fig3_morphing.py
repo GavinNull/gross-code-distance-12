@@ -48,7 +48,7 @@ DRAFT_TABLE = [("bb72", 3, 3, None, 18), ("bb72", 4, 4, None, 6),
                ("bb108", 8, 6, "std", 2), ("bb108", 8, 7, "std", 2), ("bb108", 8, 7, "rev", 2),
                ("bb108", 7, 7, "rev", 2),
                ("bb144", 6, 6, None, 18), ("bb144", 5, 5, None, 2), ("bb144", 7, 7, None, 2), ("bb144", 8, 6, None, 2),
-               ("bb288", 12, 12, None, 16), ("bb288", 10, 10, None, 8)]
+               ("bb288", 12, 12, None, 18), ("bb288", 10, 10, None, 6)]  # 18/6 since draft commit e31d43f
 
 
 def main(allow_mismatch: bool):
@@ -120,6 +120,12 @@ def main(allow_mismatch: bool):
         if got != n:
             mism.append(f"{m} d_end={de} d_circ={d} {kind or ''}: draft {n}, data {got}")
     check(sum(n for *_, n in DRAFT_TABLE) == 80, "draft table sums to 80")
+    tex = (ROOT / "paper/draft.tex").read_text()
+    tab = tex[tex.index(r"\label{tab:morph}"):]
+    tab = tab[:tab.index(r"\end{tabular}")]
+    counts = [int(m.group(1)) for m in re.finditer(r"&[^&\n]*&\s*(\d+)\s*&\s*\d+\s*&", tab)]
+    if counts != [n for *_, n in DRAFT_TABLE]:
+        mism.append(f"draft.tex tab:morph counts {counts} != DRAFT_TABLE {[n for *_, n in DRAFT_TABLE]}")
     if mism:
         msg = "DRAFT TABLE tab:morph MISMATCH vs summary.json:\n  " + "\n  ".join(mism)
         if not allow_mismatch:
