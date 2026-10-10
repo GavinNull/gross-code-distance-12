@@ -18,7 +18,7 @@
    电路：每校验 CNOT 顺序由 Fig. 12 对应顺序经反转、前两位互换、后两位互换组合得到（扩展码与 Fig. 12 相同，d_ext = 11）；颜色对称、所有校验同时复位/测量、交错；最短实例周期 21（`search/experiments/e021/cand_p21_spec.json`；另 cand1 P=38、cand1c P=26）。
    证明：权重 ≤ 10 由 d_ext = 11（E-014）排除；权重 11 用完整 4224 个扩展码逻辑（E-018）精确 lift，R ≤ 14（auditor 自写 CP-SAT + MITM 两种实现，到 R=20）0 提升；归约依据是“模板恒等式 + Table I”（不是 Prop. 3），R=1..20 核对；“不跨空轮 + 时间平移”推到任意 R（auditor 书面核对 + 前提机器核验）。上界：权重 12 注入。
    经典对照：同类随机合法电路抽 233 个，0 个认证；同扩展码类颜色对称 P=8 的 944 个电路全部有权重 11（独立枚举一致）。
-   **限定**：深度每轮 21 步（Fig. 12 / IBM 为 8），不是评估器 gross-dcirc（max_period=8）分数；未评估有噪逻辑错误率，只能说“距离达到 12”，不能说电路更好；仅 SD6 + CNOT 模板；不经 lift 的直接求解在时限内未出结论；逐校验自由 P=8 未排除。Strikis 开放问题原文措辞（是否含深度要求）待 lit-scout 核对。
+   **限定**：深度每轮 21 步（Fig. 12 / IBM 为 8），不是评估器 gross-dcirc（max_period=8）分数；未评估有噪逻辑错误率，只能说“距离达到 12”，不能说电路更好；仅 SD6 + CNOT 模板；不经 lift 的直接求解在时限内未出结论；逐校验自由 P=8 未排除。新颖性（`research/literature/2026-10-10-gross-d12-novelty.md`，中高）：2603.05481 v2 Sec. IV.3 原文“whether any interleaved circuit can achieve circuit distance 12”无深度条件、无不可能猜想 → 本结果是对该开放问题的肯定回答；未见任何 gross 码本身 d_circ = 12 的先例（morphing 的 12 属另一个码）。深度 8 版本仍开放。抢发风险：中。
 
 9. **（E-020 + auditor 独立复核，2026-10-09，`research/audits/2026-10-09-E-020.md`）gross 评估器任务内只改时序不可达 12（有限 R 精确）**：
    gross-dcirc 任务中保持 Fig. 12 每校验 CNOT 顺序的候选只能是 P=8（P ≤ 7 不合法），等价于每校验一个起点；无冲突赋值共 32 个，模全局平移 4 个（auditor 用非 SAT 的 C 回溯独立证明），全部颜色统一、确定、非交错（含 Fig. 12）。
