@@ -1,0 +1,16 @@
+bb124p_y_paper Z 6 1 9
+bb124p_y_paper Z 5 1 9 3-3
+bb124p_y_std10 X 6 1 9
+bb124p_y_std10 X 5 1 9 3-3
+r1n96k4i5_x_paper Z 6 1 9
+r1n96k4i5_x_paper Z 5 1 9 3-3
+r1n96k4i5_x_repo X 6 1 9
+r1n96k4i5_x_repo X 5 1 9 3-3
+bb120p_x_sw10 Z 6 1 9
+bb120p_x_sw10 Z 5 1 9 3-3
+bb120p_x_std01 Z 6 1 9
+bb120p_x_std01 Z 5 1 9 3-3
+r2n84k4i1_x_sw01 Z 6 1 9
+r2n84k4i1_x_sw01 Z 5 1 9 3-3
+r1n96k4i4_xy_paper Z 6 1 9
+r1n96k4i4_xy_paper Z 5 1 9 3-3

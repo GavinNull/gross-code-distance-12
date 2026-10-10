@@ -158,3 +158,11 @@ uv run python -m search.experiments.e022.pipe019 <key...>                       
 uv run python -m search.experiments.e022.audit_check <key> <basis> <Wmax>                # auditor 独立电路 + 整段 T=4 DEM + mdfs
 uv run python -m search.experiments.e022.table                                           # 汇总表
 ```
+
+## 复核后更正（lead，2026-10-11，依据 research/audits/2026-10-11-E-022.md）
+
+- 5 条声称全部 CONFIRMED；移入 STATE 已确认结果第 11 条。
+- 定理须明写两条假设：(a) 每个中点稳定子恰在一轮收缩到一个同基底测量的右比特；(b) 探测器集合完备。“任意轮数”依赖逐电路的折叠秩条件计算，不是一般证明；d_circ ≤ d̃ 依赖 sd6 的左比特空闲/复位故障。
+- “864 个独立实例”撤回（数字也不对：576 + 330 = 906）；E-019 管线的一致与扩展码共用规格和求解器族，不独立。独立检验由 auditor 补做：整段 T=4，576/576。
+- d ≥ 5 “太慢”的原因是两基底全 DEM 且无轨道分案；CSS 投影 + 分案后 d=6 实例 0.1 s 定案。
+- 机制 (C) 是排除法得出的观察，不是证明。
