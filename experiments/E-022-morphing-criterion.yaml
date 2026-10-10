@@ -332,3 +332,8 @@ results: results/E-022-morphing-criterion/
 journal: research/journal/2026-10-10-E-022-morphing-criterion.md
 command: 见日志“复现命令”
 seeds: 无随机性（E-019 管线探测器采样种子 12345）。
+heldout_predictions_tierA_wm180:
+  note: >
+    WM[[180,8,16]]（2408.10001 Tab.1，f_x）端点码 [[90,8,10 或 11]]。定理 1 扩展码（Z 基底，全半周期），在跑 E-019 管线前写下。
+  d_circ:
+    wm180_x_repo: 10   # d_end 11  （扩展码 W=9 穷举无解、W=10 有解；约 0.65 CPU h）
