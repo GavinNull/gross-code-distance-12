@@ -102,3 +102,4 @@ IBM 说的“d_circ 可能为 12 的 morphing 电路”唯一公开的具体形�
 - 更正 1（中）：上文“对称成立（论证，未另行计算）”只是论证；原文逐故障的“同探测器、同可观测量”在一般探测器基底下不成立。正确的、无基底依赖的折叠条件已由 auditor 计算核对（T=2..5、两基底、含噪末轮）。写作时引用该核对。
 - 更正 2（低）：单轮 W=11 节点数应为 Z 2.82e10 / X 2.87e10（输出文件之和），不是约 3.4e10 / 3.3e10。
 - 更正 3（低）：lead 的 Z 基底 W=12 阳性对照只搜了 case 0 并超时；auditor 在 case 1 找到见证（150 s），Z 侧对照由 auditor 补齐。
+- 补正（lead，2026-10-10，依据 research/reproduction/2026-10-10-reproduce_morphing_retiming.log）：上条“auditor 在 case 1 找到见证”的 case 编号属于 auditor 自己的实例；在 lead 的实例上 Z 的 W=12 见证在 case 6（4 s），case 1/3/4/5 无解。复现脚本已据此从 case 11 往前试对照。
