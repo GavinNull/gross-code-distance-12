@@ -53,3 +53,22 @@ project notes are omitted and marked [UNVERIFIED] in the bibliography (Strikis 2
 Tomita–Svore 1404.3747, Kishony–Fowler 2603.28852, Ghosh 2610.03429, Tripier 2604.19481, Chao 2606.12724,
 Wang–Mueller 2408.10001 — the last one's authors/title come only from a search-result URL per `refs-verified.md`).
 Verified titles: 2308.07915, 2506.03094, 2103.02202, 2108.10457 (`refs-verified.md`, `noise-models.md`).
+
+**Update 2026-10-09 (lit-scout):** all 14 [UNVERIFIED] entries above have now been checked against their arXiv abs
+pages (title, full author list, versions/dates, journal ref, DOI). All arXiv numbers and author lists in the draft are
+correct; only titles/first names/journal data were missing. Full table, with the replacement bib text:
+`research/literature/2026-10-09-paper-novelty.md` §问题 3. Points that change the bibliography content (not just add
+titles): 2408.10001 is published as Quantum 10, 2009 (2026), DOI 10.22331/q-2026-02-23-2009; 2308.15520 is Quantum 9,
+1618 (2025); 2603.05481 latest is v2 (2026-09-14); 2604.19481 has only v1 (2026-04-21). Suggested new reference:
+2608.19917 v2 (Nguyen, Rimbach-Russ, Bosco, "Disassembling qLDPC codes for depth-optimal parity-check circuits").
+
+**Reference-check result for 2604.19481 (bears on C20/C25 caveat):** the paper (v1, only version) gives d_circ = 9 for
+[[70,6,9]] BB7, [[102,22,9]] GB8 and [[54,2,10]] GB8 (Table 9, Table 10) without "≤" (values quoted from other works
+carry "≤"), but nowhere states how d_circ was computed (tool, rounds, boundaries, certification). It can be cited
+neither as rigorous nor as an upper bound. Proposed wording changes for C20/C25 are in the lit note above (§建议的改写);
+the claims themselves are left unchanged here.
+
+**Reference-check result for 2407.16336 Table IX caption (bears on C6 wording):** the caption says the A/B element
+ordering is "not important" for the Table 4 schedules because the end-cycle codes are invariant under a₂↔a₃, b₂↔b₃
+(Cor. D.3); it does not separately assert invariance of circuit distance. Table IX lists only (ℓ,m) = (6,6), (12,6);
+[[108,8,10]] is not in it. Proposed rewording of draft lines 208–211 in the lit note §建议的改写 item 4.
