@@ -1,0 +1,27 @@
+id: E-022-morphing-criterion
+hypothesis: H-006（morphing 何时掉距离）——PRL 升级 B 线
+question: >
+  把 E-019 的 80 个两轮 morphing 电路（72 个 d_circ = d̃，8 个 < d̃）提炼成定理或尖锐的结构判据：
+  (1) 一个只依赖端点码与“有效错误集合”的扩展码，其距离（精确或上下界）等于 d_circ；
+  (2) 保距离的充分条件与掉距离的充分条件；(3) 在推导时没用过的电路上先写预测、再跑精确管线检验。
+sources: >
+  2407.16336v3（Shaw–Terhal morphing，Table I/IV/VIII/IX，本地文本副本）；2604.09797 Prop. 1（折叠）；
+  2603.05481（Strikis 扩展码，Prop. 3）；E-017、E-019 及其审计脚本。
+prediction_stage0: >
+  （2026-10-10，跑前写下，只读过 E-019 日志与见证解剖，未做任何新计算）
+  P0-1) 把半周期内每个故障前推到半周期末，得到 (C~_c 上的数据错误 b_f, 本轮同基底测量翻转 rho_f)；
+        单轮实例的不可探测逻辑错误 <=> sum rho = 0 且 sum b 是 C~_c 的非平凡逻辑算子。由此定义的“morphing 扩展码”
+        的距离应与 E-019 的 d_circ 在全部 80 个电路 × 2 基底上逐个相等（约 90%；若不等，是推导漏了某类故障）。
+  P0-2) 对称地后推到半周期起点得到 (C~_p 上的 a_f, 复位翻转 r_f)。猜想：每个故障要么 r_f = 0 要么 rho_f = 0
+        （约 50%，没有把握）；若成立，则 d_circ >= min(d(Ext_p), d(Ext_c))，Ext 为只含“单侧无旗”故障列的扩展码，
+        可以作为便宜的保距离充分条件。
+  P0-3) 掉距离的 8 个电路的最小见证中，至少一半故障是“放大故障”（|b_f| >= 2 或 |a_f| >= 2），
+        保距离电路的最小见证就是端点码逻辑算子（全部单比特数据错误）（约 70%）。
+heldout_predictions: >
+  （判据定出后、跑精确管线前追加在此；见下方 stage 2 段落，按 git 提交时间可核对先后）
+budget: {cpu_hours: 20, llm_tokens: 0, num_workers: 2}
+code: search/experiments/e022/
+results: results/E-022-morphing-criterion/
+journal: research/journal/2026-10-10-E-022-morphing-criterion.md
+command: 见日志“复现命令”
+seeds: 无随机性（E-019 管线探测器采样种子 12345）。
