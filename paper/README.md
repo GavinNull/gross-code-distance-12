@@ -74,7 +74,7 @@ Avoid in any title: "better", "optimal", "first … to reach code distance", LER
   - (done in revision c) unaudited control numbers removed from the main text; they remain in the SM, labelled.
   - Re-run `paper/scripts/extract_class_orders.py` on `search/experiments/e021/cand_p21_spec.json` before submission
     (Table I is the writer's extraction; the "from Fig. 12" column is not in the audit, C32).
-  - Add the E-021 proof to `scripts/reproduce_theorems.sh` (currently only the audit's command list exists; SM
+  - ~~Add the E-021 proof to `scripts/reproduce_theorems.sh` (currently only the audit's command list exists; SM~~ done 2026-10-10 (`--with-gross12`, ALL PASS)
     Reproduction says so).
   - (done in revision c) 2606.30592 sentence removed.
   - Optional (lead): independent second route to the lower bound without the lift (direct DEM solve timed out), and a
