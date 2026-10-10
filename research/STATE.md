@@ -73,6 +73,7 @@
 
 `bash scripts/reproduce_theorems.sh --with-gross` 从干净状态一次跑通：**ALL PASS**（BB108、[[72]] LRC、[[126]]、[[120]]、[[124]]、IBM [[72]] R=1..8、gross Fig. 12）。
 日志：`research/reproduction/2026-10-07-reproduce_theorems_full.log`。负面结论的见证：`research/witnesses/`。
+2026-10-10：脚本新增 `--with-morphing`（E-017 = 12：单轮 W=11 穷举两基底 0 解、W=12 对照、折叠前提 T=2..5；E-019 56 个小母码电路精确值，含 8 个 < d̃）、`--all-morphing`（另加 24 个 [[288]]，约 14 CPU h，未全跑）、`--with-gross-retiming`（E-020 P=8：C 回溯固定 X0 得 4 个、不固定 32 个；4 电路 × 两基底 R=3 权重 11 注入 8/8）。干净目录一次跑通 **ALL PASS**（0.9 CPU h，`research/reproduction/2026-10-10-reproduce_morphing_retiming.log`）；[[288]] 子集 f_x sw11 = 10、f_y paper = 12 ALL PASS（`2026-10-10-reproduce_all_morphing_subset.log`），节点数与原始运行逐个相同。
 
 ## 公开前的风险提示（2026-10-07）
 

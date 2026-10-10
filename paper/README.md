@@ -48,12 +48,18 @@ referenced audits. Nothing from "待复核的结论" (E-010 three-colour BB108, 
   Table II or the "other BB codes" paragraph to the SM.
 
 ### Reproduction pointers (for the SM / data statement)
-- One-command lower-bound reproduction: `bash scripts/reproduce_theorems.sh [--with-gross]`
-  (log of a full PASS run: `research/reproduction/2026-10-07-reproduce_theorems_full.log`). Covers BB108, the four LRC
-  theorems, IBM [[72]], gross Fig. 12. **Does not yet cover** E-017 (morphing 12), E-019 (80 circuits), E-020/E-018
-  (gross obstruction); their reproduction commands are only in the audit reports:
-  `research/audits/2026-10-08-E-017.md` §Reproduction, `2026-10-08-E-019.md` §复现, `2026-10-08-E-018.md` §复现命令,
-  `2026-10-09-E-020.md` §复现命令. A unified script should be added before release.
+- One-command reproduction: `bash scripts/reproduce_theorems.sh [--with-gross] [--with-morphing | --all-morphing]
+  [--with-gross-retiming] [--skip-base]`. Default: BB108, the four LRC theorems, IBM [[72]]; `--with-gross`: gross
+  Fig. 12 (full PASS log: `research/reproduction/2026-10-07-reproduce_theorems_full.log`).
+  `--with-morphing`: E-017 morphing [[144,12,12]] d_circ = 12 (single-round W = 11 exhaustive + W = 12 control, fold
+  premise of Prop. 1 checked for T = 2..5, both bases) and E-019's 56 small-parent circuits with exact values incl. the
+  8 with d_circ < d̃; `--all-morphing` adds the 24 [[288]] circuits (≈ 14 CPU h, not run in full; subset via
+  `MORPH288_KEYS`). `--with-gross-retiming`: E-020 P = 8 (auditor's non-SAT C search: 4 assignments with X0 fixed,
+  32 = 8 × 4 unfixed; one weight-11 witness per circuit injected at R = 3, both bases, via the evaluator).
+  2026-10-10 from a clean output directory: ALL PASS, morphing + retiming 0.9 CPU h / 33 min
+  (`research/reproduction/2026-10-10-reproduce_morphing_retiming.log`); `--all-morphing` with [[288]] f_x sw11 and
+  f_y paper ALL PASS (`2026-10-10-reproduce_all_morphing_subset.log`). Not in the script: E-018 (bulk obstruction,
+  `research/audits/2026-10-08-E-018.md` §复现命令) and the E-020 CEGAR families (`2026-10-09-E-020.md` §复现命令).
 - Witnesses for negative results: `research/witnesses/` (E-015) and `results/E-014-E-015-audit/b8_gross_X_*.json`
   (gross two-colour). `results/` is not in git — a data archive is needed for release.
 - Upper-bound witnesses for the morphing results are in `results/E-017-*/witness_endcycle.json` and
