@@ -26,7 +26,18 @@ injection; cost: period 21 vs 8 stated in intro, abstract and a "Cost and scope"
 80-circuit table; (4) other BB theorems: one paragraph in the main text, full table (`tab:bbthm`) and text in SM.
 The former "Methods in brief" paragraph was dropped (methods are in the SM sections).
 
-Proposed titles (current `\title` is option 1):
+### Revision c (2026-10-10, lead decisions on revision b)
+- Classical control in the main text reduced to the audited statement (0/233 random vs the constraint-guided search
+  producing the certified circuits); 39/39, 4 s / 40 s and the 6×10⁷-sample control only in the SM, labelled unaudited.
+- 2606.30592 sentence, SM mention and bib entry deleted (unverified).
+- Title 1 kept as working title.
+- Trimmed: "Other BB codes" paragraph → one sentence in the Discussion (details in SM `sm:other`, `tab:bbthm`);
+  bulk-obstruction details → SM `sm:gross12` (main keeps the exact P ≤ 8 statement + one bulk sentence);
+  80-circuit table → SM (`tab:morph`), main text keeps a compact paragraph + reference to planned Fig. 3.
+- Word count (script estimate, LaTeX commands stripped): abstract ≈ 230; main body ≈ 2.6k words excluding tables;
+  one main-text table (Table I, ≈ 160 words incl. caption). With three figures this should be near the PRL limit.
+
+Proposed titles (current `\title` is option 1, confirmed by lead as working title):
 1. "A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
 2. "Interleaving restores the full distance of the gross code: a proven distance-12 syndrome circuit"
 3. "The gross code admits a distance-12 single-ancilla syndrome circuit, and other circuit distances that had to be proven"
@@ -60,20 +71,17 @@ Avoid in any title: "better", "optimal", "first … to reach code distance", LER
 
 ### Content still missing
 - **Revision b items needing work before submission**:
-  - Audit (or drop from the main text) the experiment-log-only numbers of the classical control: 39/39 certified
-    reasoned candidates, the 4 s / 40 s timings, the 6×10⁷-sample rejection control (C39). 0/233 is in STATE.
+  - (done in revision c) unaudited control numbers removed from the main text; they remain in the SM, labelled.
   - Re-run `paper/scripts/extract_class_orders.py` on `search/experiments/e021/cand_p21_spec.json` before submission
     (Table I is the writer's extraction; the "from Fig. 12" column is not in the audit, C32).
   - Add the E-021 proof to `scripts/reproduce_theorems.sh` (currently only the audit's command list exists; SM
     Reproduction says so).
-  - 2606.30592 (Bi, Chang, Puri): title/initials missing and the biased-noise "returns to 12" is `[UNVERIFIED]`
-    (tool paraphrase); lit-scout should read it or the sentence should go.
+  - (done in revision c) 2606.30592 sentence removed.
   - Optional (lead): independent second route to the lower bound without the lift (direct DEM solve timed out), and a
     no-symmetry rerun of d_ext = 11 for the Fig. 12 class (≈7×10¹¹ nodes) — currently the proof depends on E-014 and
     E-018 as audited.
-  - Length: main text ≈ 3.2k words + 2 tables before figures — above the PRL limit; candidates to cut or move: the
-    morphing Table II (to SM), the "Why the original orders" paragraph (shorten to 3 sentences), the classical-control
-    details (keep one sentence).
+  - Length (revision c): main body ≈ 2.6k words + Table I; figures still to be added. If further cuts are needed:
+    shorten the "Proof" paragraph (details are duplicated in SM `sm:p21`).
 - **Figures**: none yet; plan in `figures_plan.md` (Fig. 1 timing diagram of the period-21 circuit vs Fig. 12; Fig. 2
   lift outcome across circuit families; Fig. 3 the 80 morphing circuits, d̃ vs d_circ). Older ideas (extended code +
   fold schematic, [[108,8,10]] two-colour rule on the torus, sub-d̃ witness anatomy) are SM candidates.
