@@ -1,11 +1,13 @@
-# Claims map for `paper/draft.tex` (internal draft, 2026-10-09)
+# Claims map for `paper/draft.tex` (internal draft, revised 2026-10-10 (b): headline = STATE item 10 / E-021)
 
 Every tag `[Cn]` in the draft maps to: the confirmed item in `research/STATE.md` ("已确认结果", item number),
 the audit report and section that confirms it, and the raw-results path(s). `results/` is not in git;
 paths are relative to the repository root. "Scope" repeats the wording limits that the draft must respect.
 
-Table rows of the draft: Table I (main) rows map to C1, C5, C10, C19, C21, C22 (x4). Table II (80 morphing circuits)
-maps to C5–C9. Table S1 (gross obstruction status) maps to C16, C17.
+Tables of the draft (revision b): Table I (main, `tab:p21`, the period-21 gross circuit) maps to C31, C32.
+Table II (main, `tab:morph`, 80 morphing circuits) maps to C5–C9. In the SM, `tab:gross` (bulk obstruction status for
+the Fig. 12 orders) maps to C16, C17, and `tab:bbthm` (all proven distances; the former main Table I plus the new gross
+row) maps to C31, C10, C1, C5, C19, C21, C22 (x4). Tables are referenced by `\ref`, so their S-numbers follow the SM order.
 
 | tag | claim in draft (short) | STATE item | audit (file § section) | results path(s) | scope / wording constraint |
 |---|---|---|---|---|---|
@@ -40,9 +42,40 @@ maps to C5–C9. Table S1 (gross obstruction status) maps to C16, C17.
 | C29 | 2608.19917 v2 (Nguyen, Rimbach-Russ, Bosco) proposes combining the Strikis non-interleaved lower bound with the Shaw–Terhal single-round time-reversal reduction, as future work, no numbers | — (literature) | `research/literature/2026-10-09-paper-novelty.md` §(b), 建议的改写 6 | — | Method-idea precedent only; does not affect C4 result novelty |
 | C30 | Dedicated search (2026-10-09): no prior exact d_circ for any morphing circuit, no prior evaluation of the 80-circuit family beyond 2407.16336's BP-OSD upper bounds, no prior result on retimings of Fig. 12 (interleaved 12 open per 2603.05481) | — (literature) | `research/literature/2026-10-09-paper-novelty.md` §(a), (b), (c), 新颖性判断 | — | Evidence strength: (a) medium-high, (b) medium-high, (c) medium |
 
+
+### New tags for the gross d_circ = 12 headline (STATE item 10, E-021; audit `research/audits/2026-10-10-E-021.md`)
+
+Results paths: experimenter `results/E-021-gross-new-orders/`, auditor `results/E-021-audit/` (cand1 at top level,
+`cand_p21/`, `cand1c/` subdirectories). Specs in git: `search/experiments/e021/{cand_p21,cand1,cand1c}_spec.json`.
+Circuit names: cand_p21 = period 21 (the circuit of Table I), cand1 = period 38, cand1c = period 26 (DAG compression of cand1).
+
+| tag | claim in draft (short) | STATE item | audit (file § section) | results path(s) | scope / wording constraint |
+|---|---|---|---|---|---|
+| C31 | Single-ancilla, CNOT-based, interleaved syndrome circuit for the gross code itself (matrices element-wise equal to the benchmark's; colour-symmetric; all ancillas reset at step 0 / measured at step 20; period 21): d_circ = 12 in both memory bases, every R, SD6. Legality, determinism (64 noiseless shots, DEM for R=1,2,3,6), L0; interleaving: 48 data qubits switch 4× (cyclic X/Z sequence over one period) | 10 | `2026-10-10-E-021.md` §1, F1 (cand_p21), F2 (cand1c); verdict table | `results/E-021-audit/cand_p21/b1_legal.json`, `results/E-021-audit/b1_legal.json` | Always "distance 12", never "better circuit"; no LER claim; SD6 + CNOT template only; "for the gross code itself"; not an evaluator gross-dcirc score (max_period 8). The draft states only "48 data qubits switch four times" for cand_p21 (audit F1); the audit's "96 × 2" split is for cand1 (§1) |
+| C32 | Extended code depends only on {q1,q2}, {q1,q2,q3}, {q5,q6} per check ⇒ reversal, s12, s56 (8-element class) preserve it; key sets equal to Fig. 12 (360 cols/side) for all three circuits. cand_p21 uses only in-pair swaps: X1 class (24 checks) identical to Fig. 12, other 120 checks s12 or s12·s56. Table I orders/times; Fig. 12 orders in SM | 10 | `2026-10-10-E-021.md` §2, F1 ("24 个校验与 Fig. 12 顺序相同，120 个是 … 其他变体") | `results/E-021-audit/b2_ext.json`, `results/E-021-audit/cand_p21/b2_ext.json`; Table I extracted by `paper/scripts/extract_class_orders.py` from `search/experiments/e021/cand_p21_spec.json` and `results/E-021-gross-new-orders/fig12_spec.json` | **Writer's extraction**: the per-class orders/times in Table I and the "only in-pair swaps" observation (transformation column) were read by the writer's script from the spec files (the script asserts support equality and class uniformity); consistent with the audit's 24/120 count but the transformation column itself is not in the audit. Re-run the script before submission |
+| C33 | Lift reduction uses the template identity (augmented H_i observable = sum of all detectors of check i) + SBB Table I; NOT Prop. 3; insensitive to interleaving; checked on the DEM (telescoping_bad = 0, bad_obs = 0, image set = 360 columns) for every R used up to 20, both bases; fewer detectors (no X-check detectors in a Z memory) only strengthen the lower bound | 10 ("归约依据是‘模板恒等式 + Table I’（不是 Prop. 3）") | `2026-10-10-E-021.md` §3; issue 2 | `results/E-021-audit/b2_ext.json`, b3 runs (assertions) | Must not cite Prop. 3 as the basis for the gross-12 lower bound |
+| C34 | Exact lift: 0/4224 per basis; cand_p21 R = 1..14, 16 (CP-SAT) and R = 1..3 (MITM); cand1 R = 1..14, 16, 20 (CP-SAT) + R ≤ 3 (MITM); cand1c R = 1..14; positive control Fig. 12 4224/4224 (Z R=1; X R=1,2; both methods); experimenter's own lift R = 1..6 agrees | 10 | `2026-10-10-E-021.md` §4a, F1, F2 | `results/E-021-audit/b3_cand_{X,Z}_*.json`, `b4_cand_*_R{1,2,3}.json`, `b3_fig12_*`, `b4_fig12_*`; `results/E-021-audit/cand_p21/b3_cand_*`, `b4_cand_*`; experimenter `results/E-021-gross-new-orders/lift_p21_R1-14.json`, `lift_cand1_R1-6.json`, `lift_cand1_R7-14.json`, `lift_cand1c.json` | Depends on C11 (d_ext = 11, E-014) and C13 (complete 4224 list, E-018) |
+| C35 | Any R: round separation + layer periodicity (machine-checked) + split lemma + translation to R' ≤ 13 (auditor) / deletion to R' ≤ 14 (experimenter, checked by auditor) | 10 ("‘不跨空轮 + 时间平移’推到任意 R") | `2026-10-10-E-021.md` §6, F1, F3 | `results/E-021-audit/b7_periodic.json`, `results/E-021-audit/cand_p21/b7_periodic.json`; `results/E-021-gross-new-orders/anyR_p21.log`, `anyR_premises.log` | Written argument with machine-checked premises; state both parts |
+| C36 | Upper bound: weight-12 data logical injected after data reset, R = 1,3,6,10, both bases, 0 detectors + observable flip, removing one qubit ⇒ detected. Heuristic upper_bound best = 12 (cand1 R = 1,2,3,7,10; cand_p21 R = 1,3,7; both bases) | 10 | `2026-10-10-E-021.md` §5, §4c, F1 | `results/E-021-audit/b6_inject.json`, `b8_ub.jsonl`; `results/E-021-audit/cand_p21/b6_inject.json`, `b8_ub.jsonl` | Heuristic is evidence only |
+| C37 | Cost/scope: period 21 (cand_p21), 38 (cand1), 26 (cand1c) vs 8 for IBM / Fig. 12 (~2.6×); same qubit count (one ancilla per check); SD6 + CNOT template only; direct DEM solve without lift: MaxSAT 7200 s timeout, CP-SAT 3600 s UNKNOWN (R=1, Z) ⇒ not part of proof; d_ext = 11 not re-run without symmetry | 10 ("限定") | `2026-10-10-E-021.md` §4b, "写作可用的表述" 限定; lit note §1 | `results/E-021-audit/b5_Z_R1_maxsat_None.json`, `b5_Z_R1_cpsat_12.json` | "distance 12" only; LER not evaluated; depth-8 open; "2.6×" is 21/8 (writer arithmetic) |
+| C38 | Period-8 colour-symmetric circuits in the Fig. 12 class: exactly 944 legal deterministic (two independent enumerations, hash-identical); all 944 have a weight-11 undetected logical at R = 1, Z basis (witnesses rechecked) | 10 ("同扩展码类颜色对称 P=8 的 944 个电路全部有权重 11") | `2026-10-10-E-021.md` F4 | `results/E-021-audit/b9_p8.json`, `b9_p8.log`; experimenter `results/E-021-gross-new-orders/p8class_H24*.json`, `p8screen_{0,1}.jsonl` | Colour-symmetric only; per-check-free P = 8 NOT excluded; finite R (R = 1) |
+| C39 | Classical control: same family; SAT sampler without logical clauses: 2277 legal deterministic in 9 min, none with 0 modelled liftable (min 25/184), random 10% (233) exact-lifted → 0 certified. Reasoned search: model candidate in 4.1 s (98 lazy rounds) → cand1; 300 model candidates in 40 s; 40 shortest after compression, 39 lifted R = 1..6, 39/39 certified (2 of period 21); uniform-random rejection sampler 6×10⁷ samples → 41 deterministic, min 68/184 modelled liftable. With Fig. 12 orders pinned the model is UNSAT | 10 (only "随机合法电路抽 233 个，0 个认证") | — (not audited; the auditor re-ran only cand1, cand1c, cand_p21) | `results/E-021-gross-new-orders/randsat_summary.json`, `randctl_summary_shuffle.json`, `enumscreen.jsonl`, `nwenum.jsonl`, `nwfull_H24_12_03*.json`, `ctl_fig12_H24.json`; journal `research/journal/2026-10-10-E-021-gross-new-orders.md` §跟进 (3), (2d) | **Partly unaudited**: 0/233 is in STATE; 39/39, the 4 s / 40 s timings and the 41-sample control are from the experiment log only. Draft says so in SM. Before submission either get these audited or drop the numbers from the main text and abstract (abstract currently has no number) |
+| C40 | Novelty + open question: SBB 2603.05481 v2 Sec. IV.3 verbatim "whether any interleaved circuit can achieve circuit distance 12"; no depth condition, no impossibility conjecture; App. H.2 "non-staggered, interleaved variants" (= depth-8 question, left open); no previous gross-code-itself circuit with d_circ = 12, numeric or rigorous, single or multi-ancilla; evidence medium-high; scoop risk medium | 10 (novelty clause) | — lit note `research/literature/2026-10-10-gross-d12-novelty.md` §1, §2, 新颖性判断, 推荐措辞 | — | "answers in the affirmative" must come with: no depth condition in the question + depth 8 open. Not "first BB circuit reaching code distance" (2603.22532 [[72]]). Distinguish morphing 12 (different code, no dedicated ancillas) |
+
+Note on C21 reuse: the main-text sentence "Nor is ours the first BB circuit proven to reach the code distance" uses C21
+(IBM [[72,12,6]] = 6 with the 2603.22532 partial precedent).
+
 ## Quantities in the draft that are NOT from STATE / audits (writer's additions)
 
-- Abstract/intro: "logical error rate scales as p^⌈d_circ/2⌉ for a minimum-distance decoder" — textbook statement, no number from literature.
+- (revision b) The p^⌈d_circ/2⌉ sentence and the "essentially every reported d_circ is an upper bound" sentence were
+  removed from the intro.
+- (revision b) "The IBM circuit (8 time steps per round) has d_circ ≤ 10" — `research/literature/2026-10-10-gross-d12-novelty.md` §2 row 2308.07915.
+- (revision b) "Under biased noise the IBM circuit's upper bound returns to 12 [2606.30592]" — lit note §2 marks this as a tool paraphrase
+  from an older note (not read in full) ⇒ marked `[UNVERIFIED]` in the draft; the bib entry lacks title/initials.
+- (revision b) Mechanism sentences in "Construction" / "Why the original orders cannot reach 12" (extended code fixed by three
+  sets per check; the bulk certificate is an inconsistency of timing conditions) paraphrase audit §2 and E-018 §C; they are
+  explanations, not new claims.
+- Abstract/intro (old revision): "logical error rate scales as p^⌈d_circ/2⌉ for a minimum-distance decoder" — textbook statement, no number from literature.
 - Intro: "essentially every reported d_circ is an upper bound" — supported by lit notes (`novelty-bb108-dcirc10.md` §3, `novelty-gross11-ibm72.md` §2.2), not an audit item.
 - Discussion: "10^10–10^11 search nodes on a workstation" — taken from audit node counts (C1, C11).
 - SM S6: SD6 definition follows `evaluators/noise.py` docstring and `research/literature/noise-models.md` (arXiv 2108.10457).
@@ -57,3 +90,9 @@ For 2308.07915, 2506.03094, 2103.02202, 2108.10457 the project notes record surn
 (`refs-verified.md`, `noise-models.md`); initials are still to be added.
 The one remaining `[UNVERIFIED]` in the draft is not bibliographic: equivalence of the project's (20,3) [[120,8,12]]
 to the [[120,8,12]] of 2601.09911 (SM "Other BB codes").
+
+Revision b (2026-10-10): new entry `BiChangPuri2026` (arXiv:2606.30592) — "suggested citation" in
+`research/literature/2026-10-10-gross-d12-novelty.md`; only surnames and arXiv number are recorded, the biased-noise
+"upper bound returns to 12" is a tool paraphrase (old note), so the draft marks it `[UNVERIFIED]` and the bib item has a
+TODO for title and initials. All must-cite references of that note (2308.07915, 2603.05481, 2506.03094, 2407.16336,
+2605.21898, 2604.09797, 2608.19917, 2603.22532) are cited in the revised main text.
