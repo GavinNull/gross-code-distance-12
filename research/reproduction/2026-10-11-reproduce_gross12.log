@@ -1,0 +1,18 @@
+Sat Oct 10 16:18:23 CST 2026
++ OUT=results/reproduce_theorems_2026-10-11_gross12 P=2 bash scripts/reproduce_theorems.sh --skip-base --with-gross12
+== E-021  gross [[144,12,12]] 单辅助比特交错电路 cand_p21（周期 21）d_circ = 12，任意 R、两基底（auditor 脚本，不调用 e021 代码）
+PASS  e021 weight-11 list kind X (Z-basis memory): DFS W=11 120/120 jobs complete, 254 raw solutions, 6174513371 nodes (E-018 audit: 6174513371, same); expanded by 24-element group: 4224 logicals (4224 verified He x = 0, Le x != 0, 11 distinct of N = 360), 176 orbits
+PASS  e021 weight-11 list kind Z (X-basis memory): DFS W=11 120/120 jobs complete, 257 raw solutions, 5819348553 nodes (E-018 audit: 5819348553, same); expanded by 24-element group: 4224 logicals (4224 verified He x = 0, Le x != 0, 11 distinct of N = 360), 176 orbits
+PASS  e021 legality (auditor b1): own gross matrices = evaluator, k = 12; own spec check and evaluator validate_schedule 0 problems; period 21, all prep 0 / meas [20]; noiseless 0 fires (8 circuits); L0 4/4; X/Z switches per data qubit {'2': 96, '4': 48} (interleaved)
+PASS  e021 extended code (auditor b2): key set = Fig. 12's, both sides (N = 360/360; also = E-018 audit build); order relation to Fig. 12 {'same': 24, 'rev+swaps': 0, 'other': 120}; DEM image set = extended code, telescoping_bad = bad_obs = 0 (6 (R, basis))
+PASS  e021 lift basis Z (auditor b3, CP-SAT): R = 1..13, lifting [0] of 4224 at every R => no undetected logical of weight <= 11
+PASS  e021 lift basis X (auditor b3, CP-SAT): R = 1..13, lifting [0] of 4224 at every R => no undetected logical of weight <= 11
+PASS  e021 positive control: Fig. 12 basis Z R = 1 lifts 4224/4224 (d_circ = 11 circuit)
+PASS  e021 positive control: Fig. 12 basis X R = 1 lifts 4224/4224 (d_circ = 11 circuit)
+PASS  e021 upper bound basis Z (auditor b6): weight-12 data logical injected after reset, R1, R3, R6, R10: 0 detectors, observable flipped; minus one fault detected => d_circ <= 12
+PASS  e021 upper bound basis X (auditor b6): weight-12 data logical injected after reset, R1, R3, R6, R10: 0 detectors, observable flipped; minus one fault detected => d_circ <= 12
+PASS  e021 any-R premises (auditor b7): round separation R = 3, 8; layer periodicity rounds 1..12; R = 7 = R = 6 + one block; detector coordinates complete (both bases) => weight-11 logicals span <= 11 rounds, R <= 13 suffices
+ALL PASS
+OUT=results/reproduce_theorems_2026-10-11_gross12 P=2 bash  --skip-base   4667.65s user 8.97s system 186% cpu 41:43.40 total
+exit 0
+Sat Oct 10 17:00:06 CST 2026
