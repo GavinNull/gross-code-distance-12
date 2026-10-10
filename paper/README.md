@@ -1,12 +1,38 @@
-# paper/ — internal first draft (2026-10-09)
+# paper/ — internal draft (first version 2026-10-09; revision b 2026-10-10)
 
 Files:
 - `draft.tex` — PRL-style letter (revtex4-2) + Supplemental Material in the same file. Claim tags `[Cn]`
   (blue superscripts; switch off with `\showclaimtagsfalse`), red `[TODO]` and `[UNVERIFIED]` markers.
 - `claims_map.md` — every tag `[Cn]` → STATE confirmed item, audit file + section, results path, wording limits.
+  Revision b adds C31–C40 (gross d_circ = 12).
+- `figures_plan.md` — three planned figures with their data sources (no figure produced yet).
+- `scripts/extract_class_orders.py` — prints per-colour-class CNOT orders/times of a gross schedule spec
+  (source of Table I and of Fig. 1).
 
-Scope rule used: only `research/STATE.md` "已确认结果" items 1–9 are claimed, inside the scope stated there and in the
+Scope rule used: only `research/STATE.md` "已确认结果" items 1–10 are claimed, inside the scope stated there and in the
 referenced audits. Nothing from "待复核的结论" (E-010 three-colour BB108, E-016 BB108 LER) is claimed.
+**In progress and NOT in the draft**: E-022 (structural criterion for when morphing loses distance) and E-023
+(whether d_circ gains give measurable logical-error-rate gains; journal `research/journal/2026-10-10-E-023-ler-benefit.md`).
+The draft makes no LER claim; open question (ii) is where E-023 would enter if it is confirmed.
+
+## Revision b (2026-10-10): headline changed to the gross-code circuit with d_circ = 12
+
+Structure now: (1) gross circuit, d_circ = 12 (Table I = the full period-21 circuit, 6 colour classes; construction:
+extended code fixed by three unordered sets per check, so reversal + in-pair swaps keep d_ext = 11 and the 4224 list;
+proof: template identity + Table I (not Prop. 3), exact lift 0/4224, split-and-translate to all R, weight-12
+injection; cost: period 21 vs 8 stated in intro, abstract and a "Cost and scope" paragraph; classical control
+0/233 vs 39/39); (2) why it was hard: Fig. 12 = 11, P ≤ 8 retimings exact, bulk obstructions (Table in SM),
+944/944 colour-symmetric P = 8 in the class; (3) morphing: [[288]]→[[144,12,12]] = 12 (different code) and the
+80-circuit table; (4) other BB theorems: one paragraph in the main text, full table (`tab:bbthm`) and text in SM.
+The former "Methods in brief" paragraph was dropped (methods are in the SM sections).
+
+Proposed titles (current `\title` is option 1):
+1. "A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
+2. "Interleaving restores the full distance of the gross code: a proven distance-12 syndrome circuit"
+3. "The gross code admits a distance-12 single-ancilla syndrome circuit, and other circuit distances that had to be proven"
+(The old title "Circuit distances of bivariate-bicycle syndrome circuits must be proven, not inferred" fits a split
+methods paper, see PI decision 5.)
+Avoid in any title: "better", "optimal", "first … to reach code distance", LER language.
 
 ## Missing before any submission
 
@@ -20,16 +46,37 @@ referenced audits. Nothing from "待复核的结论" (E-010 three-colour BB108, 
    (outbound contact; affects how C20/C25 can be worded).
 4. **Author list, affiliations, acknowledgements**, and how to disclose that the research and the draft were produced
    by AI agents (lead / experimenter / auditor / lit-scout / writer).
-5. **Storyline / venue**: the draft bundles four result groups; PI may prefer to split (e.g. morphing + gross into a
-   PRL, BB theorems into a longer methods paper).
+5. **Storyline / venue / title**: revision b leads with the gross d_circ = 12 circuit and keeps the other three groups
+   as support; PI may prefer to split (gross 12 + obstructions as the PRL; morphing 80 + BB theorems as a methods
+   paper). Choose among the proposed titles above.
+8. **Timing of release vs. depth-8 / LER work** (new, revision b): scoop risk for the gross-12 result is "medium"
+   (2608.19917 v2 lists interleaved lower bounds as next step; qldpc-challenge circuit tier accepts n = 144 entries).
+   Waiting for E-023 (LER) or a shorter period would strengthen the paper but delays the timestamp; that trade-off is
+   the PI's.
+9. **Contacting Strikis / Browne / Beverland** about the answer to their open question (outbound contact; PI only).
 6. **How to name the "benchmark family"** for the gross P ≤ 8 result (draft defines it by its rules rather than as
    "our evaluator task").
 7. Public code/data release (repository, DOI) for reproduction.
 
 ### Content still missing
-- **Figures**: none yet. Suggested: (a) schematic of extended code + fold reduction; (b) the 80-circuit landscape
-  (d̃ vs d_circ); (c) gross obstruction family map (Table S1 as a diagram); (d) the [[108,8,10]] two-colour rule on the
-  torus; (e) a witness anatomy for a sub-d̃ morphing error (CNOT-only, single interior half-cycle).
+- **Revision b items needing work before submission**:
+  - Audit (or drop from the main text) the experiment-log-only numbers of the classical control: 39/39 certified
+    reasoned candidates, the 4 s / 40 s timings, the 6×10⁷-sample rejection control (C39). 0/233 is in STATE.
+  - Re-run `paper/scripts/extract_class_orders.py` on `search/experiments/e021/cand_p21_spec.json` before submission
+    (Table I is the writer's extraction; the "from Fig. 12" column is not in the audit, C32).
+  - Add the E-021 proof to `scripts/reproduce_theorems.sh` (currently only the audit's command list exists; SM
+    Reproduction says so).
+  - 2606.30592 (Bi, Chang, Puri): title/initials missing and the biased-noise "returns to 12" is `[UNVERIFIED]`
+    (tool paraphrase); lit-scout should read it or the sentence should go.
+  - Optional (lead): independent second route to the lower bound without the lift (direct DEM solve timed out), and a
+    no-symmetry rerun of d_ext = 11 for the Fig. 12 class (≈7×10¹¹ nodes) — currently the proof depends on E-014 and
+    E-018 as audited.
+  - Length: main text ≈ 3.2k words + 2 tables before figures — above the PRL limit; candidates to cut or move: the
+    morphing Table II (to SM), the "Why the original orders" paragraph (shorten to 3 sentences), the classical-control
+    details (keep one sentence).
+- **Figures**: none yet; plan in `figures_plan.md` (Fig. 1 timing diagram of the period-21 circuit vs Fig. 12; Fig. 2
+  lift outcome across circuit families; Fig. 3 the 80 morphing circuits, d̃ vs d_circ). Older ideas (extended code +
+  fold schematic, [[108,8,10]] two-colour rule on the torus, sub-d̃ witness anatomy) are SM candidates.
 - **Bibliography**: completed from lit-scout's arXiv abstract-page check
   (`research/literature/2026-10-09-paper-novelty.md`, 2026-10-10). Remaining: initials for 2308.07915, 2506.03094,
   2103.02202, 2108.10457 (only surnames recorded in the project notes).
@@ -60,12 +107,34 @@ referenced audits. Nothing from "待复核的结论" (E-010 three-colour BB108, 
   (`research/reproduction/2026-10-10-reproduce_morphing_retiming.log`); `--all-morphing` with [[288]] f_x sw11 and
   f_y paper ALL PASS (`2026-10-10-reproduce_all_morphing_subset.log`). Not in the script: E-018 (bulk obstruction,
   `research/audits/2026-10-08-E-018.md` §复现命令) and the E-020 CEGAR families (`2026-10-09-E-020.md` §复现命令).
+- Gross d_circ = 12 (E-021, revision b): not in `reproduce_theorems.sh` yet. Commands: `research/audits/2026-10-10-E-021.md`
+  §复现命令 (scripts in `research/audits/2026-10-10-E-021-scripts/`, b1–b9; `SPEC=search/experiments/e021/cand_p21_spec.json
+  TAG=cand_p21` for the period-21 circuit). Audit CPU ≈ 7 h in total. Inputs needed from `results/`: the E-018 audit's
+  independent weight-11 DFS outputs (`results/E-018-audit/dfs_*.txt`).
 - Witnesses for negative results: `research/witnesses/` (E-015) and `results/E-014-E-015-audit/b8_gross_X_*.json`
   (gross two-colour). `results/` is not in git — a data archive is needed for release.
 - Upper-bound witnesses for the morphing results are in `results/E-017-*/witness_endcycle.json` and
   `results/E-019-*` (not in git).
 
 ### Known wording constraints (do not loosen when editing)
+Gross d_circ = 12 (revision b, from STATE item 10, audit E-021 and the 2026-10-10 novelty note):
+- Say "distance 12" / "reaches circuit distance 12"; never "better circuit", "improved circuit", "outperforms"; no LER claims.
+- Always state the cost: period 21 time steps per round vs 8 (IBM / Fig. 12); never present it as a score of the
+  evaluator's gross-dcirc task (max_period 8).
+- "Answers in the affirmative the open question of 2603.05481 Sec. IV.3" must come with both: the question has no
+  depth condition, and the depth-8 version remains open. Quote the question verbatim:
+  "whether any interleaved circuit can achieve circuit distance 12". Do not imply SBB asked about depth 8.
+- Say "for the gross code itself"; distinguish it from the morphing 12, which is a different [[144,12,12]] code
+  (min stabiliser weight 9 vs 6) and has no dedicated ancillas.
+- Never "first BB circuit to reach the code distance" ([[72,12,6]]: 2603.22532 public data; our own C21).
+- Scope: SD6 fault set + CNOT template (one dedicated ancilla per check, reset–6 CNOT–measure per round); no CZ/H
+  compilations, biased noise, leakage.
+- The lower-bound reduction is "template identity + SBB Table I", not Prop. 3.
+- P = 8 exclusion only for colour-symmetric circuits in the Fig. 12 class (finite R = 1); per-check-free P = 8 and
+  periods 9–20 are open. Do not write "P ≤ 8 is impossible".
+- The proof depends on E-014 (d_ext = 11) and E-018 (complete 4224 list); a direct DEM solve did not finish.
+
+Earlier constraints:
 - Never "gross code proven 12" (the morphing end-cycle code is inequivalent to the gross code).
 - Never "the paper's Table II circuit is 6"; never "[[72,12,8]] = 6 is new"; never "sub-d̃ comes from reset errors".
 - Never an unscoped "12 is unreachable" for the gross code; bulk results ≠ R = 3 task results.
