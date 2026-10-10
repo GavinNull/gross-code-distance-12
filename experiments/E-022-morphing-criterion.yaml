@@ -337,3 +337,9 @@ heldout_predictions_tierA_wm180:
     WM[[180,8,16]]（2408.10001 Tab.1，f_x）端点码 [[90,8,10 或 11]]。定理 1 扩展码（Z 基底，全半周期），在跑 E-019 管线前写下。
   d_circ:
     wm180_x_repo: 10   # d_end 11  （扩展码 W=9 穷举无解、W=10 有解；约 0.65 CPU h）
+    wm180_x_paper: 10   # d_end 11
+    wm180_x_std01: 10   # d_end 11
+    wm180_x_std10: 10   # d_end 11
+    wm180_x_swap2: 10   # d_end 10 (保距离)
+    wm180_x_sw01: 11    # d_end 11 (保距离；W=10 穷举无解，约 1.5 CPU h)
+    # sw10 / sw11 未算（预算）。E-019 管线只核对 swap2 与 paper（两基底）。
