@@ -12,33 +12,34 @@ referenced audits. Nothing from "待复核的结论" (E-010 three-colour BB108, 
 
 ### PI decisions (strategic / irreversible — not taken by the writer)
 1. **Whether and how to publish** (STATE "待人决策": arXiv paper vs timestamped public repo vs qldpc-challenge vs not yet).
-   Scoop-risk notes: IBM [[72]] high, gross = 11 medium, morphing low–medium (lit notes).
+   Scoop-risk notes: IBM [[72]] high, gross = 11 medium, morphing medium (raised 2026-10-09 because of 2608.19917 v2).
 2. **Contacting IBM (Wills / Beverland) or Shaw** to ask whether 2605.21898 App. C's "morphing idling circuit for the
    gross code" is the 2407.16336 [[288,12,18]] → [[144,12,12]] circuit we certify. Outbound contact needs PI approval.
    The draft currently says the identity is not confirmed.
-3. **Author list, affiliations, acknowledgements**, and how to disclose that the research and the draft were produced
+3. **Contacting IonQ (Webster or Delfosse) about how d_circ = 9 in 2604.19481 Tables 9–10 was obtained**
+   (outbound contact; affects how C20/C25 can be worded).
+4. **Author list, affiliations, acknowledgements**, and how to disclose that the research and the draft were produced
    by AI agents (lead / experimenter / auditor / lit-scout / writer).
-4. **Storyline / venue**: the draft bundles four result groups; PI may prefer to split (e.g. morphing + gross into a
+5. **Storyline / venue**: the draft bundles four result groups; PI may prefer to split (e.g. morphing + gross into a
    PRL, BB theorems into a longer methods paper).
-5. **How to name the "benchmark family"** for the gross P ≤ 8 result (draft defines it by its rules rather than as
+6. **How to name the "benchmark family"** for the gross P ≤ 8 result (draft defines it by its rules rather than as
    "our evaluator task").
-6. Public code/data release (repository, DOI) for reproduction.
+7. Public code/data release (repository, DOI) for reproduction.
 
 ### Content still missing
 - **Figures**: none yet. Suggested: (a) schematic of extended code + fold reduction; (b) the 80-circuit landscape
   (d̃ vs d_circ); (c) gross obstruction family map (Table S1 as a diagram); (d) the [[108,8,10]] two-colour rule on the
   torus; (e) a witness anatomy for a sub-d̃ morphing error (CNOT-only, single interior half-cycle).
-- **Bibliography**: titles and first names for 13 entries are not recorded in `research/literature/` and are marked
-  [UNVERIFIED] (see `claims_map.md` §Bibliography). A lit-scout pass must fill them from arXiv abstract pages.
-  Wang–Mueller 2408.10001 authors/title come only from a search-result URL.
-- **Novelty checks not yet done** (lit-scout):
-  - E-019 (80-circuit family, Table IX caption, [[72,12,8]]/[[72,12,7]] tightness) and E-020/E-018 (gross obstruction)
-    have no dedicated novelty note; only indirect coverage by `morphing-d12-novelty.md` (2026-10-08) and
-    `novelty-interleaved-circuits.md` (2026-10-02, old).
-  - **Caveat found while writing**: 2604.19481 (IonQ, Tripier et al.) lists d_circ = 9 (no "≤") for a [[70,6,9]] BB7
-    code, method not found (`novelty-bb108-dcirc10.md`). This threatens the C25 wording "first rigorous circuit distances
-    for BB codes with d ≥ 9". The d ≥ 10 wording (C20) is unaffected. Resolve before public use.
-  - Refresh all searches (latest notes are 2026-10-07/08).
+- **Bibliography**: completed from lit-scout's arXiv abstract-page check
+  (`research/literature/2026-10-09-paper-novelty.md`, 2026-10-10). Remaining: initials for 2308.07915, 2506.03094,
+  2103.02202, 2108.10457 (only surnames recorded in the project notes).
+- **Novelty**: dedicated check done 2026-10-09 (same note): no precedent found for the 80-circuit exact d_circ,
+  the morphing d_circ = 12 lower bound, or the Fig. 12 retiming obstruction. New citation added: 2608.19917 v2
+  proposes our method combination as future work (scoop risk raised to medium). C25 reworded (old "first rigorous
+  … d ≥ 9" withdrawn because 2604.19481 lists d_circ = 9 for d = 9–10 BB/GB codes without a method); C20 restricted
+  to ℓ,m ≥ 2 and "stated, reproducible proof". Re-check 2604.19481 (v2?) and 2608.19917 (v3?) before release.
+- **Optional side experiment (lead decision)**: compute d_circ of IonQ's [[70,6,9]] schedule (2604.19481 Tables 10, 30)
+  with our pipeline; the circuit reconstruction from their Sec. IX.2 / Algorithm 1 is not yet checked to be unique.
 - **Recommended low-cost cross-check** (from `novelty-gross11-ibm72.md`): run our tools on the tesseract / 2603.22532
   [[72,12,6]] circuits and compare gate by gate with the IBM order.
 - **Compilation**: not tested. `revtex4-2.cls` is not in the local TeX cache and the rules forbid downloads.
@@ -63,4 +64,7 @@ referenced audits. Nothing from "待复核的结论" (E-010 three-colour BB108, 
 - Never "the paper's Table II circuit is 6"; never "[[72,12,8]] = 6 is new"; never "sub-d̃ comes from reset errors".
 - Never an unscoped "12 is unreachable" for the gross code; bulk results ≠ R = 3 task results.
 - State Prop. 1's premise in the auditor's basis-free form.
-- IBM [[72]]: always mention the 2603.22532 partial precedent. BB108: "first for BB d ≥ 10", not "first qLDPC".
+- IBM [[72]]: always mention the 2603.22532 partial precedent. BB108: "first for BB (ℓ,m ≥ 2) d ≥ 10 with a stated,
+  reproducible proof", not "first qLDPC", not "first rigorous for d ≥ 9".
+- Table IX caption: say the code-level order-independence "does not extend to the circuit distance"; no
+  "contradicting/refuting"; [[54,8,8]] is not an entry of Table IX.
