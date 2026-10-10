@@ -21,6 +21,7 @@ import stim
 
 from evaluators.candidate import build_circuits, parse_schedule
 from evaluators.noise import add_noise
+from search.experiments.e018 import common as C18
 from search.experiments.e018.common import css
 from search.experiments.e018.lift import solve
 from search.experiments.e021.extgen import ext_dfs, ext_general, expand
@@ -127,6 +128,14 @@ def w11_list(kind, lab, workers=4, tag=""):
     return allS
 
 
+def w11_from_fig12(kind, E):
+    """E-018 complete weight-11 list (Fig. 12 extended code), re-indexed by (H,L) key into E (same column set)."""
+    E0 = C18.ext(kind)
+    k2j = {E["He"][:, j].tobytes() + E["Le"][:, j].tobytes(): j for j in range(E["N"])}
+    assert len(k2j) == len(E0["keys"]) and set(k2j) == set(E0["keys"]), "extended code differs from Fig. 12's"
+    return [tuple(sorted(k2j[E0["keys"][j]] for j in S)) for S in C18.load_logicals(kind)]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cand", required=True, help="nwsat json with candidate_rank, or a qec-schedule json")
@@ -134,6 +143,7 @@ def main():
     ap.add_argument("--bases", default="ZX")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--tag", default="")
+    ap.add_argument("--fig12class", type=int, default=0, help="orders have Fig. 12's extended code: reuse E-018 lists")
     a = ap.parse_args()
     d = json.loads(Path(a.cand).read_text())
     if "candidate_rank" in d:
@@ -151,8 +161,8 @@ def main():
     for basis in a.bases:
         kind = KIND_OF_BASIS[basis]
         t0 = time.time()
-        sols = w11_list(kind, lo[kind], a.workers, tag)
         E = ext_general(kind, lo[kind])
+        sols = w11_from_fig12(kind, E) if a.fig12class else w11_list(kind, lo[kind], a.workers, tag)
         print(f"{kind}: {len(sols)} weight-11 extended logicals ({time.time() - t0:.0f}s)", flush=True)
         for R in a.R:
             t1 = time.time()

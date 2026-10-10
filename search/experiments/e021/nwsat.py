@@ -378,6 +378,10 @@ def main():
     ap.add_argument("--only", type=int, default=-1, help="positive control: keep only the first N logical reps")
     ap.add_argument("--no_triple", type=int, default=0, help="do not forbid d_ext<=10 triples (family = ALL orders)")
     ap.add_argument("--max_sec", type=float, default=7200)
+    ap.add_argument("--fig12class", type=int, default=0,
+                    help="restrict every class to orders with the SAME extended code as its Fig. 12 order "
+                         "(within-pair swaps of positions 1-2 / 5-6 and reversal): d_ext = 11 and the E-018 "
+                         "weight-11 list (4224 per kind) are then exact for the whole family")
     ap.add_argument("--dext", type=int, default=0, help="require d_ext >= 11 on both kinds (lazy DFS witnesses)")
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--tag", default="")
@@ -395,10 +399,31 @@ def main():
         for ty in "XZ":
             for i in range(N2):
                 assert f[ty][i] == f[ty][F.reps[F.cls[i]]], "Fig. 12 orders not Hs-invariant"
+    if a.fig12class:
+        from search.experiments.e021.mono import fig12_labels
+        f12 = fig12_labels()
     recs, skipped = prepare(F, a.kinds)
     if a.only >= 0:
         recs = recs[:a.only]
     M = Model(F, {"X": [], "Z": []} if a.no_triple else bad_triples_all())
+    if a.fig12class:
+        for ty in "XZ":
+            for k in range(F.nc):
+                o = f12[ty][F.reps[k]]
+                for i in range(N2):
+                    assert F.cls[i] != k or f12[ty][i] == o, "Fig. 12 orders not Hs-invariant"
+                rev = M.pool.id(("rev", ty, k))
+                it_ = lambda lab: F.idx[(ty, k, lab)]  # noqa: E731
+
+                def first(U, guard):
+                    for x in U:
+                        for y in range(6):
+                            if y not in U:
+                                M.S.add_clause(guard + [M.lt(it_(x), it_(y))])
+                # not reversed: P1 = o[:2] first, T = o[:3] first, P3 = o[4:] last
+                first(o[:2], [rev]); first(o[:3], [rev]); first(o[:4], [rev])
+                # reversed: P3 first, T^c first, P1 last
+                first(o[4:], [-rev]); first(o[3:], [-rev]); first(o[2:], [-rev])
     print(f"|Hs|={len(F.Hs)} classes={F.nc} items={len(F.items)} logical reps={len(recs)} skipped={skipped} "
           f"det={M.ndet} {time.time() - t0:.1f}s", flush=True)
     tag = a.tag or f"nw_H{len(F.Hs)}_{a.sub.replace(';', '_').replace(',', '')}_{a.kinds}"
