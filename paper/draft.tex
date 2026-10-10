@@ -5,6 +5,8 @@
 % the mapping  Cn -> (research/STATE.md "confirmed" item, audit file + section,
 % results path).  Set \showclaimtagsfalse to hide the tags.
 % Anything that could not be traced to the project files is marked [UNVERIFIED].
+% Revision 2026-10-10: bibliography completed and C6/C20/C25 wording revised per
+% research/literature/2026-10-09-paper-novelty.md.
 % Compilation has NOT been tested (see paper/README.md).
 % =====================================================================
 \documentclass[aps,prl,twocolumn,superscriptaddress,nofootinbib]{revtex4-2}
@@ -46,8 +48,8 @@ a $\code{144,12,12}$ end-cycle code, has $\dcirc=12$ for any number of rounds:
 a fully distance-preserving circuit without dedicated ancillas. (ii) Of all 80
 two-round morphing circuits of the same construction, 72 preserve the end-cycle
 distance and 8 do not; for $\code{54,8,8}$ the circuit distance depends on a term
-ordering that the construction leaves free, contrary to the order-independence
-stated for these circuits. (iii) The Strikis--Browne--Beverland gross-code
+ordering that the construction leaves free: an order-independence that holds for
+the end-cycle codes does not extend to the circuit distance. (iii) The Strikis--Browne--Beverland gross-code
 circuit has $\dcirc=11$, proving their conjecture; within an explicit family of
 period-$\le 8$ retimings that keep its CNOT orders, no circuit reaches 12, and we
 give scoped bulk obstructions beyond it. (iv) A depth-8 single-ancilla circuit for
@@ -125,7 +127,9 @@ each lifts to an undetected circuit error decides $\dcirc$ exactly
 reduces a two-round morphing circuit with any number of rounds to a
 single-round instance. Rather than relying on its per-fault time-reversal argument,
 we verify by linear algebra the basis-free condition the fold actually needs
-(SM~\ref{sm:fold})\cl{3}.
+(SM~\ref{sm:fold})\cl{3}. Combining a Strikis-type lower bound with the
+Shaw--Terhal time-reversal reduction was proposed as future work by Nguyen,
+Rimbach-Russ and Bosco~\cite{Nguyen2026}\cl{29}.
 \emph{(d) Frame-model certificates.} For retimed gross circuits we use a bulk
 Pauli-frame model whose feasibility implies a genuine weight-11 undetected error,
 and certify infeasibility of blocking all such errors with CP-SAT and a
@@ -205,10 +209,14 @@ $\dcirc<\dt$ (Table~\ref{tab:morph})\cl{5}.
 Three findings stand out. (1)~For $\code{108,8,10}\to\code{54,8,8}$, the four
 legal term orders of Table~IV give $\dcirc=6,6,7,7$: the two orders using
 $b_3=x^2$ in the first round give 6, the two using $b_3=x$ (including the public
-implementation's order) give 7\cl{6}. The caption of Table~IX in
-Ref.~\cite{ShawTerhal2025} states that the Table~IV circuits are independent of
-the order of the $A$ and $B$ terms; this holds for the end-cycle codes, but not for
-the circuit distance\cl{6}. The reported bound $\le 7$ coincides with the exact
+implementation's order) give 7\cl{6}. The caption of Table~IX of
+Ref.~\cite{ShawTerhal2025} states that the ordering of the elements of $A$ and $B$
+is not important for the Table~IV schedules, on the grounds that the end-cycle
+codes are invariant under $a_2\leftrightarrow a_3$, $b_2\leftrightarrow b_3$. The
+end-cycle codes are indeed invariant, but the circuit distance is not\cl{6}.
+(Table~IX itself lists only $(\ell,m)=(6,6)$ and $(12,6)$; the $\code{54,8,8}$
+case concerns the general statement about Table~IV schedules, not an entry of
+that table.) The reported bound $\le 7$ coincides with the exact
 value for the public implementation's order. (2)~For $f_x$ applied to the gross
 code with the Table~VIII construction, the end-cycle code is $\code{72,12,8}$ but
 $\dcirc=6$; Ref.~\cite{ShawTerhal2025} (Table~IX) already reports $\le 6$ for this
@@ -304,8 +312,10 @@ $\le 9$\cl{24}. A two-colour left-right circuit that
 reverses the CNOT order within one term block on checks of one $y$-parity (the
 $X$ side on odd rows, the $Z$ side on even rows; depth 8, one ancilla per check,
 all checks every round) has $\dcirc=10=d$\cl{19}. To our knowledge this is the
-first $\dcirc=10$ circuit for this code and the first rigorous circuit distance
-for a BB code with $d\ge10$; rigorous circuit distances exist for other qLDPC
+first $\dcirc=10$ circuit for this code and the first circuit distance for a BB
+code with $d\ge10$ that comes with a stated, reproducible proof (here BB means
+$\ell,m\ge2$; Ref.~\cite{Tripier2026} lists $\dcirc=9$, method unstated, for a
+$\code{54,2,10}$ generalized-bicycle code); rigorous circuit distances exist for other qLDPC
 families~\cite{ManesClaes,Liang2026,SunCai2026}, and the idea of position-dependent
 CNOT orders is established~\cite{TomitaSvore,KishonyFowler,Strikis2026}\cl{20}.
 
@@ -323,9 +333,11 @@ orders by single-colour-class witnesses, enumerate legal states, and prove the
 survivors by DFS---gives the theorems in the lower half of Table~\ref{tab:main}
 \cl{22} and rigorous negative results: every two-colour LRC of the gross code has
 $\dcirc\le10$, and every two- or three-class mod-3 LRC of $\code{90,8,10}$ has
-$\dcirc\le8$\cl{23}. To our knowledge these are the first rigorous circuit
-distances for BB codes with $d\ge9$\cl{25} (but see the caveat on
-Ref.~\cite{Tripier2026} in SM~\ref{sm:novelty}).
+$\dcirc\le8$\cl{23}. Apart from $\code{72,12,6}$, these are, to our knowledge,
+the first circuit distances for BB codes with $d\ge10$ that come with a stated,
+reproducible proof; Ref.~\cite{Tripier2026} reports $\dcirc=9$ for
+$\code{70,6,9}$ and $\code{102,22,9}$ BB/GB codes and for a $\code{54,2,10}$ GB
+code without describing how these values were obtained\cl{25}.
 
 % ---------------------------------------------------------------------------
 \paragraph{Discussion.}
@@ -361,46 +373,51 @@ writing -- PI decision.}
 
 % ===========================================================================
 \begin{thebibliography}{99}
+% Full names as on the arXiv abstract pages (lit-scout 2026-10-10); for the first four
+% project-verified entries only surnames are recorded -- initials to be added.
 \bibitem{Bravyi2024} Bravyi, Cross, Gambetta, Maslov, Rall, and Yoder, High-threshold and low-overhead fault-tolerant quantum memory,
 Nature \textbf{627}, 778 (2024), arXiv:2308.07915.
-% NOTE: first names/initials and most titles are not recorded in the project's
-% literature notes; they are omitted rather than reconstructed from memory.
-\bibitem{Strikis2026} Strikis, Browne, and Beverland,
-arXiv:2603.05481 (v2, 2026). \unverified\ (title, first names).
-\bibitem{ShawTerhal2025} M.~H.~Shaw and Terhal, Phys.\ Rev.\ Lett.\
-\textbf{134}, 090602 (2025), arXiv:2407.16336. \unverified\ (title).
-\bibitem{ShawTerhal2026} M.~H.~Shaw and Terhal, arXiv:2604.09797 (v2, 2026).
-\unverified\ (title).
-\bibitem{Wills2026} Wills, Beverland, Bishop, Gambetta, Rall, Siddhu, and Cross, arXiv:2605.21898 (v2, 2026), App.~C.
-\unverified\ (title, initials).
-\bibitem{TourDeGross} Yoder, Schoute, Rall, Pritchett, Gambetta, Cross, Carroll,
-and Beverland, Tour de gross: A modular quantum
-computer based on bivariate bicycle codes, arXiv:2506.03094 (2025).
-\bibitem{Webster2026} Webster, Jacob, and Higgott,
-arXiv:2603.22532 (v2, 2026), and the public results table in the repository
-\texttt{m-webster/codeDistancePYPI}. \unverified\ (title).
+\bibitem{Strikis2026} A.~Strikis, D.~E.~Browne, and M.~E.~Beverland,
+High-performance syndrome extraction circuits for quantum codes,
+arXiv:2603.05481 (v2, 2026).
+\bibitem{ShawTerhal2025} M.~H.~Shaw and B.~M.~Terhal, Lowering connectivity
+requirements for bivariate bicycle codes using morphing circuits, Phys.\ Rev.\
+Lett.\ \textbf{134}, 090602 (2025), arXiv:2407.16336.
+\bibitem{ShawTerhal2026} M.~H.~Shaw and B.~M.~Terhal, Optimising quantum error
+correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
+\bibitem{Wills2026} A.~Wills, M.~E.~Beverland, L.~S.~Bishop, J.~M.~Gambetta,
+P.~Rall, V.~Siddhu, and A.~W.~Cross, Concatenating algebraic codes over high-rate
+quantum LDPC codes, arXiv:2605.21898 (v2, 2026), App.~C.
+\bibitem{TourDeGross} Yoder, Schoute, Rall, Pritchett, Gambetta, Cross, Carroll, and Beverland, Tour de gross: A
+modular quantum computer based on bivariate bicycle codes, arXiv:2506.03094 (2025).
+\bibitem{Webster2026} M.~Webster, A.~Jacob, and O.~Higgott, Distance-finding
+algorithms for quantum codes and circuits, arXiv:2603.22532 (v2, 2026); public
+results table in the repository \texttt{m-webster/codeDistancePYPI}.
 \bibitem{Gidney2021stim} Gidney, Stim: a fast stabilizer circuit simulator,
 Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
 \bibitem{Gidney2021honeycomb} Gidney, Newman, Fowler, and Broughton,
 A fault-tolerant honeycomb memory, arXiv:2108.10457 (2021).
-\bibitem{WangMueller} Wang and Mueller, Coprime bivariate bicycle codes and their
-layouts on cold atoms, arXiv:2408.10001. \unverified\ (authors and title taken
-from a search-result URL only).
-\bibitem{ManesClaes} Manes and Claes, Quantum (2025), arXiv:2308.15520.
-\unverified\ (title, volume).
-\bibitem{Liang2026} Liang, Gu, Chen, Eisert, and Wang, arXiv:2609.37231 (2026).
-\unverified\ (title, initials).
-\bibitem{SunCai2026} Sun and Cai, arXiv:2609.39522 (2026). \unverified\ (title,
-initials).
-\bibitem{TomitaSvore} Tomita and Svore, Phys.\ Rev.\ A \textbf{90},
-062320 (2014), arXiv:1404.3747. \unverified\ (title).
-\bibitem{KishonyFowler} Kishony and Fowler, arXiv:2603.28852 (2026).
-\unverified\ (title, initials).
-\bibitem{Ghosh2026} Ghosh, Boche, and Tanggara, arXiv:2610.03429 (2026).
-\unverified\ (title, initials).
-\bibitem{Tripier2026} Tripier \emph{et al.}, arXiv:2604.19481 (2026).
-\unverified\ (title, author list).
-\bibitem{Chao2026} Chao, arXiv:2606.12724 (2026). \unverified\ (title).
+\bibitem{WangMueller} M.~Wang and F.~Mueller, Coprime bivariate bicycle codes and
+their layouts on cold atoms, Quantum \textbf{10}, 2009 (2026), arXiv:2408.10001.
+\bibitem{ManesClaes} A.~G.~Manes and J.~Claes, Distance-preserving stabilizer
+measurements in hypergraph product codes, Quantum \textbf{9}, 1618 (2025),
+arXiv:2308.15520.
+\bibitem{Liang2026} Z.~Liang, B.~Gu, Y.-A.~Chen, J.~Eisert, and Z.~Wang,
+Ultra-high-distance quantum memories from amplified qLDPC codes,
+arXiv:2609.37231 (2026).
+\bibitem{SunCai2026} Z.~Sun and Z.~Cai, Layer codes as quantum memories: syndrome
+extraction, thresholds and idle robustness, arXiv:2609.39522 (v2, 2026).
+\bibitem{TomitaSvore} Y.~Tomita and K.~M.~Svore, Low-distance surface codes under
+realistic quantum noise, Phys.\ Rev.\ A \textbf{90}, 062320 (2014), arXiv:1404.3747.
+\bibitem{KishonyFowler} G.~Kishony and A.~Fowler, Color code off-the-hook:
+avoiding hook errors with a single auxiliary per plaquette, arXiv:2603.28852 (2026).
+\bibitem{Ghosh2026} S.~Ghosh, H.~Boche, and A.~Tanggara, Fault tolerance of quantum
+circuits with tensor networks and symplectic geometry, arXiv:2610.03429 (2026).
+\bibitem{Tripier2026} F.~Tripier \emph{et al.}, Fault-tolerant quantum computing
+with trapped ions: The walking cat architecture, arXiv:2604.19481 (v1, 2026).
+\bibitem{Chao2026} R.~Chao, Block algebra for morphing circuits, arXiv:2606.12724 (2026).
+\bibitem{Nguyen2026} M.~T.~P.~Nguyen, M.~Rimbach-Russ, and S.~Bosco, Disassembling
+qLDPC codes for depth-optimal parity-check circuits, arXiv:2608.19917 (v2, 2026).
 \bibitem{qldpcchallenge} \texttt{unitaryfoundation/qldpc-challenge}, GitHub
 pull request \#724 (2026-08-26).
 \end{thebibliography}
@@ -724,15 +741,26 @@ Rigorous circuit-distance results exist for hypergraph-product
 codes~\cite{ManesClaes}, layer codes~\cite{SunCai2026}, and as certificates for
 amplified codes~\cite{Liang2026}; an algebraic LP framework gives upper
 bounds~\cite{Ghosh2026}\cl{20}.
-\item ``First rigorous $\dcirc$ for BB codes with $d\ge9$'': Ref.~\cite{Tripier2026}
-lists $\dcirc=9$ (without ``$\le$'') for a $\code{70,6,9}$ BB code; the method is not
-stated in the parts read. This must be resolved before the claim is made publicly
-\unverified\cl{25}.
+\item Exact circuit distances for BB/GB codes with $d\ge9$ by others:
+Ref.~\cite{Tripier2026} lists $\dcirc=9$ (without ``$\le$'') for
+$\code{70,6,9}$ BB, $\code{102,22,9}$ GB and $\code{54,2,10}$ GB codes; the method is
+not stated anywhere in the paper (v1, the only version; its Tables~9--10 and
+Sec.~IX.2 define $\dcirc$ and list the schedules, and ``$\le$'' is used only for
+values quoted from other works). We therefore restrict our wording to proofs that
+are stated and reproducible, and to $d\ge10$ with $\ell,m\ge2$. Ref.~\cite{Webster2026}
+reports that exact solvers completed only the smallest BB circuit of its
+benchmark\cl{20,25}.
 \item Morphing: no rigorous lower bound on $\dcirc$ for any morphing circuit was
 found (search date 2026-10-08); Ref.~\cite{Chao2026} certifies code distances of
-related constructions, not circuit distances\cl{4}. The 80-circuit study (C5--C9)
-and the gross obstruction (C13--C17) have not had a dedicated literature check
-\unverified.
+related constructions, not circuit distances\cl{4}. A dedicated search
+(2026-10-09) found no prior exact circuit distance for any morphing circuit, no
+prior evaluation of the 80-circuit family beyond the BP-OSD upper bounds of
+Ref.~\cite{ShawTerhal2025}, and no prior result on retimings of the Fig.~12
+circuit (whether interleaved circuits can reach 12 is stated as open in
+Ref.~\cite{Strikis2026}). Ref.~\cite{Nguyen2026} proposes combining the
+non-interleaved lower bound of Ref.~\cite{Strikis2026} with the single-round
+reduction of Ref.~\cite{ShawTerhal2026} as future work, without numerical
+results\cl{4,29,30}.
 \end{itemize}
 
 % ---------------------------------------------------------------------------
