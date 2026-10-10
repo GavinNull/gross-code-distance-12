@@ -92,6 +92,9 @@
 
 ## 待复核的结论
 
+- **E-022（experimenter，2026-10-10，未复核，auditor 复核中）morphing 掉距离判据**：定理 1：两轮 morphing 电路的 d_circ = “带旗 morphing 扩展码”的距离（端点码数据像 + 本轮测量/复位翻转作旗；等式，任意 R 依赖 Prop. 1 折叠）。
+  预注册检验：296 个新电路，对 E-019 管线 580/580、对 auditor 独立整段 DEM（仅 d ≤ 4）330/330 命中；简单闭式规则多被推翻；三种掉距离机制（各不完备）；新例 WM[[180,8,16]] 族 std 变体 11 → 10。
+  → `research/journal/2026-10-10-E-022-morphing-criterion.md`
 - E-010：BB108 三色 LRC 全部 ≤9（lead，未复核；E-015 复核已覆盖 gross / [[90]] 的同类负面结论）
 - E-016：BB108 两色电路在实际解码器、p ≥ 1e-3 下无可测 LER 改善（experimenter，未复核）
 
