@@ -10,6 +10,10 @@
 #   --all-morphing          同上，另加 E-019 的 24 个 [[288]] 母码电路（约 14 CPU 小时；MORPH288_KEYS="bb288_x_sw11 ..." 可只跑部分）
 #   --with-gross-retiming   E-020 P=8：auditor 的非 SAT C 回溯枚举合法起点赋值（固定 X0 应得 4 个，不固定应得 32 = 8×4），
 #                           再对每个电路在 R=3 两基底各提升并注入一个权重 11 见证（评估器 verify_faults）（约 0.5 CPU 小时）
+#   --with-gross12          E-021 gross [[144,12,12]] 交错电路 cand_p21（周期 21）d_circ = 12，任意 R、两基底：auditor 脚本
+#                           查合法性与扩展码 = Fig. 12；E-018 审计的 w11dfs 从头重建权重 11 扩展码逻辑（W=11，按 24 元群展开，
+#                           每侧应得 4224）；auditor 的 CP-SAT 精确 lift R=1..13 两基底应 0 提升、Fig. 12 R=1 阳性对照 4224/4224；
+#                           权重 12 注入（上界）；任意 R 论证的前提（约 1.5 CPU 小时）
 #   --skip-base             不跑默认的 BB108 / E-015 / IBM [[72]] 部分（只跑所选的可选部分）
 #   环境变量：P = 并行进程数（默认 4，不超过 6）；OUT = 输出目录（默认 results/reproduce_theorems，须为仓库内相对路径）。
 #
@@ -26,13 +30,14 @@ set -u
 cd "$(dirname "$0")/.."
 P=${P:-4}
 OUT=${OUT:-results/reproduce_theorems}
-BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0
+BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0; GROSS12=0
 for a in "$@"; do
   case "$a" in
     --with-gross) GROSS=1 ;;
     --with-morphing) MORPH=1 ;;
     --all-morphing) MORPH=1; MORPH_ALL=1 ;;
     --with-gross-retiming) RETIME=1 ;;
+    --with-gross12) GROSS12=1 ;;
     --skip-base) BASE=0 ;;
     *) echo "unknown option $a"; exit 2 ;;
   esac
@@ -196,6 +201,33 @@ if [ "$RETIME" -eq 1 ]; then
   grep -q "^DONE solutions=32 " "$G/p8search_all.txt" \
     && echo "PASS  e020 p8search (unfixed): 32 solutions = 8 global shifts x 4 ($(grep DONE "$G/p8search_all.txt"))" \
     || { echo "FAIL  e020 p8search (unfixed): $(grep DONE "$G/p8search_all.txt")"; FAIL=1; }
+fi
+
+if [ "$GROSS12" -eq 1 ]; then
+  echo "== E-021  gross [[144,12,12]] 单辅助比特交错电路 cand_p21（周期 21）d_circ = 12，任意 R、两基底（auditor 脚本，不调用 e021 代码）"
+  Q=$OUT/gross12; mkdir -p "$Q"
+  S21=research/audits/2026-10-10-E-021-scripts; S18=research/audits/2026-10-08-E-018-scripts
+  # 审计脚本写死的 results/E-021-audit（输出）、results/E-018-audit（扩展码实例与 W=11 DFS 输出）改写到 $Q 下
+  export SPEC=search/experiments/e021/cand_p21_spec.json
+  MAP21="results/E-021-audit=$Q/audit;results/E-018-audit=$Q/e018"
+  R21="env -u TAG REPRO_MAP=$MAP21 PYTHONPATH=.:tests $RR"
+  $R21 $S21/b1_legal.py > "$Q/b1_legal.log" 2>&1 || { echo "FAIL  e021 b1_legal crashed (see $Q/b1_legal.log)"; FAIL=1; }
+  $R21 $S21/b2_ext.py 3 > "$Q/b2_ext.log" 2>&1 || { echo "FAIL  e021 b2_ext crashed (see $Q/b2_ext.log)"; FAIL=1; }
+  # 权重 11 扩展码逻辑从头重建：E-018 审计的扩展码实例 + 列轨道类任务（每类 8 份）+ w11dfs（W=11），按 24 元群展开
+  $R21 $S18/a2_stage_a.py prep > "$Q/e018_prep.log" 2>&1 && $R21 scripts/repro_gross12.py jobs >> "$Q/e018_prep.log" 2>&1 \
+    || { echo "FAIL  e021 W=11 instance / jobs (see $Q/e018_prep.log)"; FAIL=1; }
+  cc -O3 -o "$Q/e018/w11dfs" $S18/w11dfs.c || exit 1
+  ( cd "$Q/e018" && xargs -P "$P" -L 1 sh -c 'EXCL=$4 ./w11dfs inst_$0.txt 11 $1 $2 $3 > dfs_$0_$1_$3.txt' < jobs.txt 2> dfs.log )
+  $R21 scripts/repro_gross12.py list > "$Q/list.log" 2>&1 || FAIL=1
+  grep -E '^(PASS|FAIL)' "$Q/list.log" || { echo "FAIL  e021 weight-11 list (see $Q/list.log)"; FAIL=1; }
+  # 精确 lift（auditor 的 CP-SAT b3）：候选 R=1..13 两基底（任意 R 论证需要 R <= 13）；阳性对照 Fig. 12 R=1 两基底
+  # （每行不能以空格结尾：BSD xargs -L 会把下一行接上来）
+  { echo "cand Z" $(seq 1 13); echo "cand X" $(seq 1 13); echo "fig12 Z 1"; echo "fig12 X 1"; } | xargs -P "$P" -L 1 sh -c \
+    'r=$0 s=$1 q=$2; shift 2; $r $s/b3_lift.py "$@" > "$q/b3_$1_$2.log" 2>&1' "$R21" "$S21" "$Q"
+  $R21 $S21/b6_inject.py > "$Q/b6_inject.log" 2>&1 || { echo "FAIL  e021 b6_inject crashed (see $Q/b6_inject.log)"; FAIL=1; }
+  $R21 $S21/b7_periodic.py > "$Q/b7_periodic.log" 2>&1 || { echo "FAIL  e021 b7_periodic crashed (see $Q/b7_periodic.log)"; FAIL=1; }
+  $R21 scripts/repro_gross12.py check 13 || FAIL=1
+  unset SPEC
 fi
 
 [ "$FAIL" -eq 0 ] && echo "ALL PASS" || { echo "SOME CHECKS FAILED"; exit 1; }
