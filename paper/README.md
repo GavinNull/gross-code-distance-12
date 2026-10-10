@@ -115,10 +115,13 @@ Avoid in any title: "better", "optimal", "first … to reach code distance", LER
   (`research/reproduction/2026-10-10-reproduce_morphing_retiming.log`); `--all-morphing` with [[288]] f_x sw11 and
   f_y paper ALL PASS (`2026-10-10-reproduce_all_morphing_subset.log`). Not in the script: E-018 (bulk obstruction,
   `research/audits/2026-10-08-E-018.md` §复现命令) and the E-020 CEGAR families (`2026-10-09-E-020.md` §复现命令).
-- Gross d_circ = 12 (E-021, revision b): not in `reproduce_theorems.sh` yet. Commands: `research/audits/2026-10-10-E-021.md`
-  §复现命令 (scripts in `research/audits/2026-10-10-E-021-scripts/`, b1–b9; `SPEC=search/experiments/e021/cand_p21_spec.json
-  TAG=cand_p21` for the period-21 circuit). Audit CPU ≈ 7 h in total. Inputs needed from `results/`: the E-018 audit's
-  independent weight-11 DFS outputs (`results/E-018-audit/dfs_*.txt`).
+- Gross d_circ = 12 (E-021, revision b, period-21 circuit `search/experiments/e021/cand_p21_spec.json`):
+  `bash scripts/reproduce_theorems.sh --skip-base --with-gross12`, auditor scripts only (no e021 code): legality +
+  extended code = Fig. 12 (key sets); weight-11 extended-logical list rebuilt from scratch (E-018 audit's w11dfs at
+  W = 11, expanded by the 24-element group: 4224 per side); CP-SAT lift R = 1..13 both bases 0/4224; positive control
+  Fig. 12 R = 1 4224/4224; weight-12 injection; any-R premises. Nothing is read from `results/`. 2026-10-10 from a
+  clean output directory: ALL PASS, 1.3 CPU h / 42 min (`research/reproduction/2026-10-11-reproduce_gross12.log`).
+  Not in the script (audit §复现命令 only): MITM cross-check, heuristic upper_bound, R = 14/16/20, cand1 / cand1c, P = 8 family.
 - Witnesses for negative results: `research/witnesses/` (E-015) and `results/E-014-E-015-audit/b8_gross_X_*.json`
   (gross two-colour). `results/` is not in git — a data archive is needed for release.
 - Upper-bound witnesses for the morphing results are in `results/E-017-*/witness_endcycle.json` and
