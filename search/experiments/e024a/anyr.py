@@ -34,7 +34,7 @@ import sys
 
 from evaluators.candidate import build_circuits, layout_for, parse_schedule, unroll
 from search.experiments.e018.common import css
-from search.experiments.e021.anyR import periodicity
+from evaluators.noise import add_noise
 
 MEAS = ("M", "MX", "MR", "MRX", "MZ")
 
@@ -79,6 +79,30 @@ def structure(spec, R):
     return U, dm, out
 
 
+def layers(c):
+    """noisy circuit -> list of per-TICK op strings (annotations dropped), as audit b7."""
+    out, cur = [], []
+    for op in c.flattened():
+        if op.name == "TICK":
+            out.append("\n".join(sorted(cur))); cur = []
+        elif op.name not in ("DETECTOR", "OBSERVABLE_INCLUDE", "SHIFT_COORDS", "QUBIT_COORDS"):
+            cur.append(str(op))
+    out.append("\n".join(sorted(cur)))
+    return out
+
+
+def cuts(spec, basis, Rmax):
+    """for R = 3..Rmax: all x with circuit(R) = circuit(R-1) + circuit(R)[x:x+D] inserted at x."""
+    D = spec.period
+    L = {R: layers(add_noise(build_circuits(spec, css(), R)[basis], "sd6", 1e-3)) for R in range(2, Rmax + 1)}
+    out = {}
+    for R in range(3, Rmax + 1):
+        a, b = L[R - 1], L[R]
+        assert len(b) == len(a) + D
+        out[R] = [x for x in range(len(a) + 1) if b[:x] == a[:x] and b[x + D:] == a[x:]]
+    return out
+
+
 def main():
     spec = parse_schedule(json.load(open(sys.argv[1]))).canonical()
     D = spec.period
@@ -95,15 +119,30 @@ def main():
     G = max(2 * D + dmax - 1, D + S + dmax)
     span = 10 * (G - 1)
     res.update(S=S, dm_max=dmax, min_start=min(starts.values()), G=G, span_max=span)
-    per = {}
+    lo_all, chi_all = set(), set()
     for b in "ZX":
-        ok, iv = periodicity(spec, b, 12)
-        per[b] = ok
-        res[f"periodic_{b}"] = ok
-        res[f"insert_ranges_{b}"] = iv if ok else str(iv)
-    # R' bound: rounds touched by [first fault - 3D, last fault + 3D] plus boundary rounds (first 2, last 2 rounds
-    # are never removed): conservative.
-    Rp = 2 + math.ceil((span + 6 * D) / D) + 2
+        cu = cuts(spec, b, 12)
+        for R, xs in cu.items():
+            assert xs == list(range(xs[0], xs[-1] + 1)), "valid cuts not contiguous"
+            lo_all.add(xs[0]); chi_all.add(xs[-1] - D * R)
+        res[f"cuts_{b}"] = {R: (xs[0], xs[-1]) for R, xs in cu.items()}
+    assert len(chi_all) == 1, chi_all
+    # R' bound (deletion argument, docstring (4) made precise):
+    #   circuit(R) = circuit(R-1) + D-block inserted at segment x, valid for x in [lo, hi_R] (checked R = 3..12;
+    #   hi_R = D*R + c_hi, lo constant -- asserted on the checked range; the template is exactly periodic so the
+    #   pattern continues).  Removing the block at x keeps F's detector/observable values if x + D <= f1 (everything
+    #   before is fault-free: all measurements < x+D read 0) or x >= f11 + 2D - 1 (data frame constant e from
+    #   f11 + D - 1; every instance reset >= x - D is fault-free and settled, so the re-paired comparisons read
+    #   H_c e xor H_c e, and the frame entering layer x+D of circuit(R) equals that entering layer x of circuit(R-1)).
+    #   Delete at x = lo while lo + D <= f1  =>  f1 <= lo + D - 1, f11 <= lo + D - 1 + span.
+    #   Delete at x = f11 + 2D - 1 while x <= hi_R  =>  final R satisfies D*R + c_hi < f11 + 2D - 1.
+    lo, c_hi = max(lo_all), chi_all.pop()
+    f11max = lo + D - 1 + span
+    # largest R with no valid cut x >= f11 + 2D - 1, i.e. D*R + c_hi < f11max + 2D - 1: every circuit with more
+    # rounds containing F can be shortened, so F reappears in a circuit with <= Rp rounds.
+    Rp = (f11max + 2 * D - 2 - c_hi) // D
+    assert D * Rp + c_hi < f11max + 2 * D - 1 <= D * (Rp + 1) + c_hi
+    res.update(lo=lo, c_hi=c_hi)
     res["R_prime"] = Rp
     print(json.dumps(res, indent=1))
 

@@ -60,8 +60,58 @@ def bf_P(cons, t, P):
     return None
 
 
+def tighten(cons, t, P, unit_of, rng):
+    """Strengthen a lifting logical's potential (my addition, E-024a).  Edge e = (u, w, kd, (i1, i2)) is the constraint
+    H_u - H_w <= wt_e (graph edge w -> u).  Greedily lower each edge's bound b_e (from wt_e towards the smallest weight
+    the edge can take in the family, minwt_e) while the system stays feasible (no negative cycle; checked with an
+    all-pairs shortest-path matrix updated incrementally), then return potentials pi feasible for b.  The nogood
+    OR_e [wt'_e <= pi_u - pi_w - 1] is valid for ANY pi feasible for the current circuit's weights (pi_u - pi_w <=
+    b_e <= wt_e), and every edge with pi_u - pi_w <= minwt_e contributes an impossible literal (dropped), so the clause
+    gets shorter (stronger).  Returns (pi, minwt list)."""
+    import numpy as np
+    nodes = {}
+    E = []
+    for u, w, kd, (i1, i2) in cons:
+        iu = nodes.setdefault(u, len(nodes)); iw = nodes.setdefault(w, len(nodes))
+        f = (t[i2] - t[i1]) // P + 1
+        wt = f if kd != "hook-" else -f
+        same = unit_of[i1] == unit_of[i2]
+        if kd != "hook-":
+            mn = 0 if same else -1
+        else:
+            mn = -1 if same else -2
+        E.append([iw, iu, wt, mn])
+    n = len(nodes)
+    INF = 10 ** 6
+    Dm = np.full((n, n), INF, dtype=np.int64)
+    np.fill_diagonal(Dm, 0)
+    for a, b, wt, _ in E:
+        if wt < Dm[a, b]:
+            Dm[a, b] = wt
+    for k in range(n):
+        Dm = np.minimum(Dm, Dm[:, k:k + 1] + Dm[k:k + 1, :])
+    assert (np.diag(Dm) >= 0).all()
+    order = list(range(len(E)))
+    rng.shuffle(order)
+    for ei in order:
+        a, b, wt, mn = E[ei]
+        for nb in range(mn, wt):
+            # adding edge a->b with weight nb keeps feasibility iff nb + dist(b, a) >= 0
+            if nb + Dm[b, a] >= 0:
+                if nb < Dm[a, b]:
+                    Dm = np.minimum(Dm, Dm[:, a:a + 1] + nb + Dm[b:b + 1, :])
+                E[ei][2] = nb
+                break
+    pot = np.minimum(0, Dm.min(axis=0))
+    inv = {i: k for k, i in nodes.items()}
+    pi = {inv[i]: int(pot[i]) for i in range(n)}
+    for a, b, wt, _ in E:
+        assert pot[b] - pot[a] <= wt
+    return pi, [e[3] for e in E]
+
+
 class TimeSAT:
-    def __init__(self, F: Family, P: int, fix_first=True):
+    def __init__(self, F: Family, P: int, fix_first=True, maxwin=None):
         self.F, self.P = F, P
         self.TM = 2 * P - 4
         self.pool = IDPool()
@@ -83,7 +133,7 @@ class TimeSAT:
                     if a < b:
                         self.add([self.le_diff(a, b, -1), self.le_diff(b, a, -1)])   # distinct
                     if a != b:
-                        self.add([self.le_diff(a, b, P - 3)])                         # window
+                        self.add([self.le_diff(a, b, P - 3 if maxwin is None else min(P - 3, maxwin))])  # window
             self.add([-self.ge(i, P) for i in its])                                    # first CNOT <= P-1
             o = f12[u[0]][F.reps[u[1]]]
             for i in range(N2):
@@ -251,6 +301,8 @@ def main():
     ap.add_argument("--seed", type=int, default=20261011)
     ap.add_argument("--tag", default="")
     ap.add_argument("--stop_on_cert", type=int, default=1)
+    ap.add_argument("--tighten", type=int, default=1)
+    ap.add_argument("--maxwin", type=int, default=None, help="max (last CNOT - first CNOT) per check")
     ap.add_argument("--witness", default="", help="soundness test: a spec in the family that must stay admitted")
     a = ap.parse_args()
     P = a.P
@@ -259,11 +311,12 @@ def main():
     F = Family(gens)
     tag = a.tag or f"P{P}_H{len(F.Hs)}_{a.sub.replace(';', '_').replace(',', '') or 'triv'}"
     recs, skipped = NF.prepare_full(F, "XZ")
-    M = TimeSAT(F, P)
+    M = TimeSAT(F, P, maxwin=a.maxwin)
     perms = item_perms(F) if a.images else [list(range(len(F.items)))]
     print(f"P={P} |H|={len(F.Hs)} classes={F.nc} items={len(F.items)} reps={len(recs)} skipped={skipped} "
           f"det_pairs={M.ndet} clauses={M.ncl} vars={M.pool.top} {time.time() - t0:.0f}s", flush=True)
     rng = random.Random(a.seed)
+    unit_of = [(it_[0], it_[1]) for it_ in F.items]
     wass = None
     if a.witness:
         from search.experiments.e024a.selftest import times_of_spec
@@ -303,13 +356,18 @@ def main():
                 log["iters"].append(rec)
                 continue
             continue
-        nn = 0
+        nn = clen = 0
         seen_cl = set()
         for r_, cons, pi in lif:
+            mins = None
+            if a.tighten:
+                pi, mins = tighten(cons, t, P, unit_of, rng)
             for pm in perms:
                 lits = set()
-                for u_, w_, kd, (i1, i2) in cons:
+                for ei, (u_, w_, kd, (i1, i2)) in enumerate(cons):
                     K = pi[u_] - pi[w_]
+                    if mins is not None and K - 1 < mins[ei]:
+                        continue                 # literal impossible in the family
                     j1, j2 = pm[i1], pm[i2]
                     if kd in ("free", "hook+"):
                         lits.add(M.le_diff(j2, j1, (K - 1) * P - 1))
@@ -319,10 +377,11 @@ def main():
                 if cl in seen_cl:
                     continue
                 seen_cl.add(cl)
-                M.add(list(cl)); nn += 1
+                M.add(list(cl)); nn += 1; clen += len(cl)
         if wass is not None:
             assert M.solve(wass) is not None, "nogood excluded the witness circuit"
-        rec = {"it": it, "lifting": len(lif), "nogoods": nn, "sec": round(time.time() - t0, 1)}
+        rec = {"it": it, "lifting": len(lif), "nogoods": nn, "sec": round(time.time() - t0, 1),
+               "mean_len": round(clen / max(nn, 1), 1)}
         log["iters"].append(rec)
         if it % 10 == 0 or it < 4:
             print(rec, flush=True)
