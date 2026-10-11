@@ -71,7 +71,8 @@ def main():
     ap.add_argument("--P", type=int, required=True)
     ap.add_argument("--max_sec", type=float, default=3600)
     ap.add_argument("--step_sec", type=float, default=60)
-    ap.add_argument("--extra", type=int, default=2)
+    ap.add_argument("--extra", type=int, default=0)
+    ap.add_argument("--nmax", type=int, default=10, help="max checks freed per step (random subset of l's checks)")
     ap.add_argument("--sym_sec", type=float, default=120)
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--rmax", type=int, default=6)
@@ -112,7 +113,9 @@ def main():
     while L and time.time() - T0 < a.max_sec:
         cand = [k for k in L if k not in stuck] or list(L)
         l = rng.choice(cand)
-        N = set(rchecks[l])
+        lc = sorted(rchecks[l])
+        rng.shuffle(lc)
+        N = set(lc[:a.nmax])
         others = [k for k in L if k != l and rchecks[k] & N]
         rng.shuffle(others)
         for k in others[:a.extra]:
@@ -160,9 +163,9 @@ def main():
         log["steps"].append(rec)
         print(rec, f"total {time.time() - T0:.0f}s nogoods {nng}", flush=True)
         if len(stuck) >= len(L):
-            a.extra += 1
+            a.nmax += 2
             stuck = set()
-            print("all stuck -> extra =", a.extra, flush=True)
+            print("all stuck -> nmax =", a.nmax, flush=True)
     log.update(final_lifting=len(L), sec=round(time.time() - T0, 1))
     sp = OUT / f"{a.tag}_best.json"
     sp.write_text(json.dumps(spec_of(F, t, P)))
