@@ -317,6 +317,8 @@ def main():
     ap.add_argument("--maxwin", type=int, default=None, help="max (last CNOT - first CNOT) per check")
     ap.add_argument("--split_units", default="", help="mixed family: split only these colour units (e.g. 'X0,Z2') "
                     "into orbits of --sub; others colour-symmetric")
+    ap.add_argument("--rec_subset", default="", help="json list of rec indices to keep (core extraction)")
+    ap.add_argument("--no_exact", type=int, default=0, help="model candidate => stop with status MODEL_SAT")
     ap.add_argument("--hook_filter", default="", help="keep only logicals with a hook on a check of these classes, "
                     "e.g. 'X:0' (sound for UNSAT; local core test)")
     ap.add_argument("--winunits", default="", help="apply maxwin only to these units, e.g. 'X0,Z2'")
@@ -334,6 +336,10 @@ def main():
         F = Family(gens)
     tag = a.tag or f"P{P}_H{len(F.Hs)}_{a.sub.replace(';', '_').replace(',', '') or 'triv'}{'_m' + a.split_units.replace(',', '') if a.split_units else ''}"
     recs, skipped = NF.prepare_full(F, "XZ")
+    if a.rec_subset:
+        keep = json.load(open(a.rec_subset))
+        recs = [recs[k] for k in keep]
+        print("rec subset", len(recs), flush=True)
     if a.hook_filter:
         ty_, ks = a.hook_filter.split(":")
         ks = {int(x) for x in ks.split(",")}
@@ -381,6 +387,8 @@ def main():
         lif = NF.evaluate_full(F, recs, None)
         if best is None or len(lif) < best:
             best = len(lif)
+        if not lif and a.no_exact:
+            status = "MODEL_SAT"; break
         if not lif or a.no_model:
             ncand += 1
             sp = OUT / f"{tag}_cand{ncand}.json"
