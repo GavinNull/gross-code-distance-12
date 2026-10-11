@@ -91,8 +91,17 @@ def main():
         from search.experiments.e024b.w11 import parse_orders
         col = tuple(r["col"])
         from search.experiments.e024b.common import labord
-        E0 = ext_general(kind, labord(col, parse_orders(r["orders"])))
-        known.append((keyset(E0), r["orders"]))
+        lab0 = labord(col, parse_orders(r["orders"]))
+        seen_k = set()
+        for ga in range(12):            # all translates of the known class (translation maps check i -> pr[i])
+            for gb in range(6):
+                pr, _ = C.tr(ga, gb)
+                lab1 = [None] * N2
+                for i in range(N2):
+                    lab1[int(pr[i])] = lab0[i]
+                ks = keyset(ext_general(kind, lab1))
+                if ks not in seen_k:
+                    seen_k.add(ks); known.append((ks, r["orders"]))
     pool = IDPool()
     S = Cadical153()
     x = [[pool.id(("x", c, t)) for t in range(nt)] for c in range(m)]
