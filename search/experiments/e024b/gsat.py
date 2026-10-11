@@ -179,12 +179,22 @@ def main():
     ap.add_argument("--maxcand", type=int, default=100000)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--stop_on_cert", type=int, default=1)
+    ap.add_argument("--sub", default="", help="finer symmetry: generators of a subgroup of ker(col); units = its cosets")
     a = ap.parse_args()
     P = a.P
     t0 = time.time()
     col = tuple(int(v) for v in a.col.split(","))
     C = Cls(col, a.x, a.z)
-    F, ccol = build_family(col)
+    if a.sub:
+        from search.experiments.e021.nwsat import Family
+        from search.experiments.e024b.common import colour
+        gens = [tuple(int(v) for v in g.split(",")) for g in a.sub.split(";")]
+        F = Family(gens)
+        ccol = [colour(col, F.reps[k]) for k in range(F.nc)]
+        for i in range(N2):
+            assert colour(col, i) == ccol[F.cls[i]], "subgroup not inside the colouring kernel"
+    else:
+        F, ccol = build_family(col)
     recs, skipped = prepare(F, C)
     M = Enc(F, C, ccol, P, a.nowrap)
     rng = random.Random(a.seed)
