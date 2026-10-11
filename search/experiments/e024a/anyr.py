@@ -19,10 +19,16 @@ layer's measurement).
      s(c,R-1) < a+D-1, but b <= END <= s(c,R-1) + S + dm_max + 1 <= a + D + S + dm_max - 1), so both are undetected and
      one is a logical with < 11 faults, contradicting (1).  Hence a weight-11 undetected logical has all consecutive
      fault-layer gaps <= G-1, span <= 10(G-1).
- (4) Translation: the noisy circuit is D-periodic in the bulk; a D-layer block [x, x+D) at a valid cut can be removed
-     without changing any detector/observable value of F if all instances reset in [x-D, x+D) measure 0 (x+2D <= first
-     fault layer) or are all settled (x - D >= last fault layer + D - 1): the re-paired comparison detectors compare
-     two zeros / two H_c e.  So F is reproduced in a circuit with R' <= B0 + ceil((10(G-1) + margins)/D) + B1 rounds.
+ (4) Translation: circuit(R) = circuit(R-1) with D layers inserted at x, for every x in a contiguous range
+     [lo, D*R + c_hi] (checked layer by layer, R = 3..12, both bases; the template is exactly D-periodic, so this
+     continues).  Removing the block [x, x+D) from circuit(R) with F's faults outside it gives circuit(R-1) with the same
+     faults (shifted); each ancilla loses exactly one measurement; a detector of circuit(R-1) not straddling the cut
+     equals a detector of circuit(R), a straddling one equals the XOR of the two detectors of circuit(R) around the
+     dropped measurement -- so F stays undetected, provided the frame (data + ancillas) entering layer x+D of
+     circuit(R) equals the frame entering layer x of circuit(R-1): true if x + D <= f1 (all zero) or
+     x >= f11 + 2D - 2 (data frame constant e from f11 + D - 1; every instance in flight is fault-free and reset after
+     f11 + D - 1, hence in the same state at x and x+D); the code uses 2D - 1.  Observables (final readout) identical.
+     So F reappears in a circuit with at most R' rounds (computed below).
 This script checks the structural premises (starts R-independent, dm <= D-1, detector structure by parsing the
 circuit, periodicity via e021.anyR.periodicity) and prints G and the resulting R'.
 

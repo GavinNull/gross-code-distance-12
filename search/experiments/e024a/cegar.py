@@ -110,6 +110,16 @@ def tighten(cons, t, P, unit_of, rng):
     return pi, [e[3] for e in E]
 
 
+def adapt(F):
+    """give a plain nwsat.Family the unit interface of mixed.MixedFamily."""
+    if hasattr(F, "units"):
+        return F
+    F.units = [(ty, k) for ty in "XZ" for k in range(F.nc)]
+    F.unit_rep = {(ty, k): F.reps[k] for ty in "XZ" for k in range(F.nc)}
+    F.ucls = {ty: list(F.cls) for ty in "XZ"}
+    return F
+
+
 class TimeSAT:
     def __init__(self, F: Family, P: int, fix_first=True, maxwin=None, winunits=None):
         self.F, self.P = F, P
@@ -125,7 +135,8 @@ class TimeSAT:
                 self.add([-self.ge(i, v + 1), self.ge(i, v)])
         self.dcache = {}
         f12 = fig12_labels()
-        self.units = [(ty, k) for ty in "XZ" for k in range(F.nc)]
+        adapt(F)
+        self.units = list(F.units)
         for u in self.units:
             its = [F.idx[(u[0], u[1], lab)] for lab in range(6)]
             for a in its:
@@ -136,9 +147,9 @@ class TimeSAT:
                         wl = P - 3 if (maxwin is None or (winunits is not None and u not in winunits)) else min(P - 3, maxwin)
                         self.add([self.le_diff(a, b, wl)])  # window
             self.add([-self.ge(i, P) for i in its])                                    # first CNOT <= P-1
-            o = f12[u[0]][F.reps[u[1]]]
+            o = f12[u[0]][F.unit_rep[u]]
             for i in range(N2):
-                assert F.cls[i] != u[1] or f12[u[0]][i] == o, "Fig. 12 orders not H-invariant"
+                assert F.ucls[u[0]][i] != u[1] or f12[u[0]][i] == o, "Fig. 12 orders not H-invariant"
             rev = self.pool.id(("rev", u))
             it_ = lambda lab: F.idx[(u[0], u[1], lab)]  # noqa: E731
 
@@ -304,6 +315,8 @@ def main():
     ap.add_argument("--stop_on_cert", type=int, default=1)
     ap.add_argument("--tighten", type=int, default=1)
     ap.add_argument("--maxwin", type=int, default=None, help="max (last CNOT - first CNOT) per check")
+    ap.add_argument("--split_units", default="", help="mixed family: split only these colour units (e.g. 'X0,Z2') "
+                    "into orbits of --sub; others colour-symmetric")
     ap.add_argument("--hook_filter", default="", help="keep only logicals with a hook on a check of these classes, "
                     "e.g. 'X:0' (sound for UNSAT; local core test)")
     ap.add_argument("--winunits", default="", help="apply maxwin only to these units, e.g. 'X0,Z2'")
@@ -312,8 +325,14 @@ def main():
     P = a.P
     t0 = time.time()
     gens = parse_sub(a.sub) if a.sub else [(0, 0)]
-    F = Family(gens)
-    tag = a.tag or f"P{P}_H{len(F.Hs)}_{a.sub.replace(';', '_').replace(',', '') or 'triv'}"
+    if a.split_units:
+        from search.experiments.e024a.mixed import MixedFamily
+        su = {(x[0], int(x[1:])) for x in a.split_units.split(",")}
+        F = MixedFamily(gens, su)
+        print("mixed family units", F.units, flush=True)
+    else:
+        F = Family(gens)
+    tag = a.tag or f"P{P}_H{len(F.Hs)}_{a.sub.replace(';', '_').replace(',', '') or 'triv'}{'_m' + a.split_units.replace(',', '') if a.split_units else ''}"
     recs, skipped = NF.prepare_full(F, "XZ")
     if a.hook_filter:
         ty_, ks = a.hook_filter.split(":")
