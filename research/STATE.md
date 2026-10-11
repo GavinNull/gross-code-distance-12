@@ -106,6 +106,8 @@
 
 ## 待复核的结论
 
+- **E-024b（experimenter，2026-10-11，未复核，auditor 复核中）**：gross d_circ = 12 电路周期压到 **18**（`search/experiments/e024b/p18w_spec.json`，Fig. 12 类、颜色对称、流水回绕；lift R=1..24 0/4224；新“板”分割任意 R 论证）。
+  颜色对称族最优：流水 18（P=8..17 体内 UNSAT）、不回绕 21（P=8..20 UNSAT），gsat 增量 SAT CEGAR，单一实现。颜色对称着色（24 个陪集着色）中 Fig. 12 是唯一 d_ext = 11 的扩展码类；逐校验自由未完成。
 - E-010：BB108 三色 LRC 全部 ≤9（lead，未复核；E-015 复核已覆盖 gross / [[90]] 的同类负面结论）
 - E-016：BB108 两色电路在实际解码器、p ≥ 1e-3 下无可测 LER 改善（experimenter，未复核）
 
