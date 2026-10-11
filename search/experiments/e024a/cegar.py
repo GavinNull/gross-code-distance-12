@@ -111,7 +111,7 @@ def tighten(cons, t, P, unit_of, rng):
 
 
 class TimeSAT:
-    def __init__(self, F: Family, P: int, fix_first=True, maxwin=None):
+    def __init__(self, F: Family, P: int, fix_first=True, maxwin=None, winunits=None):
         self.F, self.P = F, P
         self.TM = 2 * P - 4
         self.pool = IDPool()
@@ -133,7 +133,8 @@ class TimeSAT:
                     if a < b:
                         self.add([self.le_diff(a, b, -1), self.le_diff(b, a, -1)])   # distinct
                     if a != b:
-                        self.add([self.le_diff(a, b, P - 3 if maxwin is None else min(P - 3, maxwin))])  # window
+                        wl = P - 3 if (maxwin is None or (winunits is not None and u not in winunits)) else min(P - 3, maxwin)
+                        self.add([self.le_diff(a, b, wl)])  # window
             self.add([-self.ge(i, P) for i in its])                                    # first CNOT <= P-1
             o = f12[u[0]][F.reps[u[1]]]
             for i in range(N2):
@@ -303,6 +304,9 @@ def main():
     ap.add_argument("--stop_on_cert", type=int, default=1)
     ap.add_argument("--tighten", type=int, default=1)
     ap.add_argument("--maxwin", type=int, default=None, help="max (last CNOT - first CNOT) per check")
+    ap.add_argument("--hook_filter", default="", help="keep only logicals with a hook on a check of these classes, "
+                    "e.g. 'X:0' (sound for UNSAT; local core test)")
+    ap.add_argument("--winunits", default="", help="apply maxwin only to these units, e.g. 'X0,Z2'")
     ap.add_argument("--witness", default="", help="soundness test: a spec in the family that must stay admitted")
     a = ap.parse_args()
     P = a.P
@@ -311,7 +315,15 @@ def main():
     F = Family(gens)
     tag = a.tag or f"P{P}_H{len(F.Hs)}_{a.sub.replace(';', '_').replace(',', '') or 'triv'}"
     recs, skipped = NF.prepare_full(F, "XZ")
-    M = TimeSAT(F, P, maxwin=a.maxwin)
+    if a.hook_filter:
+        ty_, ks = a.hook_filter.split(":")
+        ks = {int(x) for x in ks.split(",")}
+        recs = [r for r in recs if r["kind"] == ty_ and any(e[0] == "h" and F.cls[e[1]] in ks for e in r["evs"])]
+        print("hook filter", a.hook_filter, "->", len(recs), "logicals kept", flush=True)
+    wu = None
+    if a.winunits:
+        wu = {(x[0], int(x[1:])) for x in a.winunits.split(",")}
+    M = TimeSAT(F, P, maxwin=a.maxwin, winunits=wu)
     perms = item_perms(F) if a.images else [list(range(len(F.items)))]
     print(f"P={P} |H|={len(F.Hs)} classes={F.nc} items={len(F.items)} reps={len(recs)} skipped={skipped} "
           f"det_pairs={M.ndet} clauses={M.ncl} vars={M.pool.top} {time.time() - t0:.0f}s", flush=True)
