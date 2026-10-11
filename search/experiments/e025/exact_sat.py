@@ -38,7 +38,7 @@ class ExactSAT(TimeSAT):
         self.sel = {}
 
     def new(self):
-        return self.pool.id(("aux", self.pool.top + 1))
+        return self.pool._next()     # anonymous aux variable (no dict entry)
 
     def indicators(self, i1, i2):
         """(const, [literals]) with 1 + floor((t_i2 - t_i1)/P) = const + sum(literals)."""
