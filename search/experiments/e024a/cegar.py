@@ -259,7 +259,7 @@ class TimeSAT:
         self.dcache[key] = L
         return L
 
-    def solve(self, assumptions=()):
+    def solve(self, assumptions=(), deadline=None):
         if not self.S.solve(assumptions=list(assumptions)):
             return None
         mod = self.S.get_model()
@@ -357,6 +357,19 @@ def main():
     log = {"P": P, "sub": a.sub, "H": len(F.Hs), "reps": len(recs), "skipped": skipped, "iters": [], "lift": []}
     status, it, ncand = "UNKNOWN", 0, 0
     best = None
+    import os
+    import threading
+
+    def watchdog():   # a single SAT call can exceed max_sec (CaDiCaL in pysat cannot be interrupted)
+        log.update(status="UNKNOWN", iterations=it, sec=round(time.time() - t0, 1), best_model_lifting=best,
+                   candidates=ncand, note="watchdog: SAT call exceeded max_sec")
+        print(f"STATUS P={P} |H|={len(F.Hs)} UNKNOWN it={it} cands={ncand} best={best} (watchdog) "
+              f"{log['sec']}s", flush=True)
+        (OUT / f"{tag}.json").write_text(json.dumps(log))
+        os._exit(0)
+    wd = threading.Timer(a.max_sec + 60, watchdog)
+    wd.daemon = True
+    wd.start()
     while time.time() - t0 < a.max_sec:
         it += 1
         if a.no_model:
@@ -416,6 +429,7 @@ def main():
         log["iters"].append(rec)
         if it % 10 == 0 or it < 4:
             print(rec, flush=True)
+    wd.cancel()
     log.update(status=status, iterations=it, sec=round(time.time() - t0, 1), best_model_lifting=best,
                candidates=ncand)
     print(f"STATUS P={P} |H|={len(F.Hs)} {status} it={it} cands={ncand} best={best} {log['sec']}s", flush=True)
