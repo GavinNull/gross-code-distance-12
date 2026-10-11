@@ -42,6 +42,9 @@ def main():
     ap.add_argument("--P", type=int, required=True)
     ap.add_argument("--sub", default="")
     ap.add_argument("--tag", required=True)
+    ap.add_argument("--lazy", type=int, default=0, help="on SAT: add (exactly) up to this many lifting logicals of the "
+                    "FULL modelled set per round and re-solve (exact lazy loop)")
+    ap.add_argument("--max_sec", type=float, default=20000)
     a = ap.parse_args()
     t0 = time.time()
     F = make_family(a.sub)
@@ -54,6 +57,27 @@ def main():
           f"vars {M.pool.top} ({time.time() - t0:.0f}s)", flush=True)
     ts = time.time()
     t = M.solve([M.sel[k] for k in range(len(keep))])
+    active = list(range(len(keep)))
+    if a.lazy and t is not None:
+        allr, _ = NF.prepare_full(F, "XZ")
+        RCall = [rec_cycles(F, r) for r in allr]
+        key = {(r["kind"], tuple(sorted(r["S"]))): k for k, r in enumerate(keep)}
+        rnd = 0
+        while t is not None and time.time() - t0 < a.max_sec:
+            rnd += 1
+            lif = [j for j, r in enumerate(allr) if not blocked(RCall[j], t, a.P)]
+            print({"round": rnd, "lifting_full": len(lif), "active": len(active), "clauses": M.ncl,
+                   "sec": round(time.time() - t0)}, flush=True)
+            if not lif:
+                break
+            import random as _r
+            _r.Random(rnd).shuffle(lif)
+            for j in lif[:a.lazy]:
+                r = allr[j]
+                kk = key.setdefault((r["kind"], tuple(sorted(r["S"]))), len(keep))
+                assert kk == len(keep), "active logical lifts: encoding error"
+                keep.append(r); M.add_logical(kk, r); active.append(kk)
+            t = M.solve([M.sel[k] for k in active])
     res = {"P": a.P, "sub": a.sub, "core": a.core, "logicals": len(keep), "clauses": M.ncl,
            "solve_sec": round(time.time() - ts, 1)}
     if t is None:
