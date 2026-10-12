@@ -121,18 +121,27 @@ undetected faults\cl{11,13}.
 % ---------------------------------------------------------------------------
 \begin{figure}[t]
 \includegraphics[width=\columnwidth]{figures/fig1_concept.pdf}
-\caption{The idea. (a) An ancilla fault after the $k$-th CNOT of a check spreads the
-residual $\{q_{k+1},\dots,q_6\}$ onto the data. Up to the check itself, the
-residuals are determined by three unordered sets, $\{q_1,q_2\}$,
-$\{q_1,q_2,q_3\}$ and $\{q_5,q_6\}$; reversing the order and swapping
-positions 1,2 or 5,6 keep them, so eight orders share one extended code.
-(b) A weight-11 extended logical made of ten data errors and one two-qubit
-residual: with the timing of Fig.~12 it is realised by eleven faults that trigger
-no detector; with the new timing the residual is read out by a check between
-two of its measurements and a detector fires. (c) Logic of the proof: the fixed
-extended code excludes weight $\le10$ (Lemma~\ref{lem:reduction}); none of the
-4224 weight-11 extended logicals lifts (Lemma~\ref{lem:lift}); a gap argument
-covers every $R$ (Lemma~\ref{lem:gap}); a weight-12 logical gives the upper bound.}
+\caption{The idea. (a) An ancilla fault after the $k$-th CNOT of a check spreads
+the residual $\{q_{k+1},\dots,q_6\}$ onto the data. Up to the check itself, the
+residuals of length 4, 3 and 2 give the same extended-code columns as $\{q_1,q_2\}$,
+$\{q_1,q_2,q_3\}$ and $\{q_5,q_6\}$, and those of length 5 and 1 act as single data
+qubits. Reversal and the swaps $s_{12}$, $s_{56}$ generate eight orders that keep
+these three sets, so all eight share one extended code. (b) One weight-11 extended
+logical ($Z$-basis memory, $R=1$): ten data errors and one two-qubit hook column of
+an $X$ check. Rows: the hook (shown twice to close the cycle) and three data qubits; bars: the times at which the $Z$
+checks $Z_{15}$, $Z_{18}$, $Z_{12}$, $Z_6$ read them; stars: when the hook error
+reaches the data. Each of these checks sees exactly two errors of the logical and is
+silent only if both lie on the same side of its readout. Left, Fig.~12: the hook is
+deposited after its neighbours have read it, every data error can be placed
+consistently, and no detector fires. Right, period-18 circuit: the reversed order
+realises the same column only by an earlier ancilla fault whose four-qubit spread is
+seen late by one neighbour and early by the other; the constraints propagate around
+the cycle (shaded: forced late) and leave odd parity at $Z_6$, so a detector fires.
+(c) Logic of the proof: $\dext=11$ excludes weight $\le10$ (Lemma~\ref{lem:reduction});
+none of the 4224 weight-11 extended logicals lifts for $R\le32$
+(Lemma~\ref{lem:lift}); the gap argument reduces every $R$ to $R\le32$
+(Lemma~\ref{lem:gap}); a weight-12 witness gives the upper bound. Non-interleaved
+circuits obey $\dcirc\le\dext$; interleaved ones do not.}
 \label{fig:concept}
 \end{figure}
 
@@ -151,17 +160,29 @@ preserved by reversal (rev) and by the swaps $s_{12}$, $s_{56}$ of positions 1,2
 Fig.~12, its distance 11 and its list of 4224 weight-11 logicals
 (Fig.~\ref{fig:concept}a)\cl{32,42}.
 
-The second requirement is a statement about time. Whether an extended logical lifts
-to an undetected circuit error depends on when each residual lands on the data
-relative to the readouts of the other checks. With Fig.~12's orders, the timing
-conditions that would hide the weight-11 errors made of ten data faults and one
-residual are mutually inconsistent in every family of retimings we could
-decide\cl{16}; with the other orders of the class they can be satisfied
-(Fig.~\ref{fig:concept}b). Circuit design thus becomes a finite problem: find orders
-in the class and CNOT times for which none of 4224 known logicals lifts.
+The second requirement is a statement about time. Reversing an order keeps the
+extended code but changes which physical fault realises each residual column and
+when its spread reaches the neighbouring checks. Consider a weight-11 extended
+logical made of ten data errors and one two-qubit hook column $\{q_5,q_6\}$ of an
+$X$ check (Fig.~\ref{fig:concept}b). In Fig.~12 the column is produced by an ancilla
+fault after the fourth CNOT, which lands on the data after the neighbouring $Z$
+checks have read those qubits; every data error can then be placed after its reads,
+and no detector fires. With the order reversed, the same column can only come from a
+fault after the second CNOT, whose spread over four qubits (equal to the hook up to
+a stabiliser) reaches one neighbouring check after its readout and another before
+it. The checks along a cycle through the hook and three data qubits each see two
+errors of the logical and stay silent only if both fall on the same side of their
+readout; the early and late constraints propagate around the cycle and leave one
+check with odd parity, so a detector fires. Timing thus turns each potential
+weight-11 logical into a parity cycle that cannot be satisfied. For all 360 logicals
+of this ``ten data plus one hook'' form, the minimal conflicting sets have 4 to 10
+detectors at $R=1$\cl{49}. Circuit design becomes a finite problem: find orders in the
+class and CNOT times for which none of the 4224 known logicals lifts. With the
+Fig.~12 orders themselves this is impossible in every family of retimings we could
+decide\cl{16}.
 
 % ---------------------------------------------------------------------------
-\begin{table}[t]
+\begin{table*}[t]
 \caption{The period-18 circuit. Checks are grouped by type and colour
 $(x+y)\bmod 3$ of their position $(x,y)$ on the $12\times6$ torus; all 24 checks
 of a class share reset step, CNOT order (labels $A=x^3+y+y^2\mapsto A_1A_2A_3$,
@@ -181,7 +202,7 @@ $Z_1$ & 2 & $B_2B_3B_1A_3A_2A_1$ & 3, 4, 9, 10, 11, 17 & 0 & rev\,$s_{12}s_{56}$
 $Z_2$ & 16 & $B_2B_1B_3A_3A_2A_1$ & 17, 5, 6, 12, 13, 14 & 15 & rev\,$s_{56}$\\
 \end{tabular}
 \end{ruledtabular}
-\end{table}
+\end{table*}
 
 \paragraph{Construction.}
 We searched schedules that are symmetric under the 24 translations preserving the
@@ -355,7 +376,7 @@ realistic quantum noise, Phys.\ Rev.\ A \textbf{90}, 062320 (2014), arXiv:1404.3
 \bibitem{KishonyFowler} G.~Kishony and A.~Fowler, Color code off-the-hook:
 avoiding hook errors with a single auxiliary per plaquette, arXiv:2603.28852 (2026).
 \bibitem{Gidney2021honeycomb} C.~Gidney, M.~Newman, A.~Fowler, and M.~Broughton,
-A fault-tolerant honeycomb memory, arXiv:2108.10457 (2021).
+A fault-tolerant honeycomb memory, Quantum \textbf{5}, 605 (2021), arXiv:2108.10457.
 \bibitem{Gidney2021stim} C.~Gidney, Stim: a fast stabilizer circuit simulator,
 Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
 \end{thebibliography}
@@ -426,10 +447,10 @@ Fig.~12 order. Circuit C (Table~\ref{tab:circC}) has period 21 and a common fram
 all ancillas are reset at step 0 and measured at step 20, so rounds are separated
 in time. Both have $\dcirc=12$ for every $R$ in both bases (S6, S7).
 
-For reference, the Fig.~12 orders in the same labelling are $X_0$:
-$B_1B_2B_3A_3A_2A_1$, $X_1$: $B_2B_3B_1A_3A_2A_1$, $X_2$: $B_1B_2B_3A_2A_1A_3$,
-$Z_0$: $A_1A_3A_2B_3B_1B_2$, $Z_1$: $A_2A_1A_3B_1B_2B_3$, $Z_2$:
-$A_2A_1A_3B_3B_1B_2$ (period 8, pipelined, non-interleaved).
+For reference, the Fig.~12 orders in the same labelling are
+$X_0$: $B_1B_2B_3A_3A_2A_1$, \ $X_1$: $B_2B_3B_1A_3A_2A_1$, \ $X_2$: $B_1B_2B_3A_2A_1A_3$,
+$Z_0$: $A_1A_3A_2B_3B_1B_2$, \ $Z_1$: $A_2A_1A_3B_1B_2B_3$, \ $Z_2$: $A_2A_1A_3B_3B_1B_2$
+(period 8, pipelined, non-interleaved).
 
 \begin{table}[h]
 \caption{Circuit B (period 18). Columns as in Table~\ref{tab:circuit}.}
@@ -643,7 +664,7 @@ deterministic circuit of the family has a weight-11 undetected error for
 sufficiently many rounds.}
 \label{tab:fig12}
 \begin{ruledtabular}
-\begin{tabular}{ll}
+\begin{tabular}{p{0.7\linewidth}l}
 family & status\\
 \hline
 24-translation symmetric, common frame, any $P$ & obstructed\\
