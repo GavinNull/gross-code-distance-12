@@ -1,5 +1,17 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision e (2026-10-12, restructure to one result).** Tags render as nothing in the PDF (`\showclaimtagsfalse`)
+but stay in the source. Tags used in revision e: C10, C11, C13–C18, C31–C36, C38–C47 (SM sections carry hidden tags
+too: S2 C31/C41/C43, S3 C32/C42, S4 C11/C13, S5 C33, S6 C34/C42, S7 C35/C43, S8 C36/C42, S9 C10/C13–C18,
+S10 C38/C39/C45–C47). **Not used in this paper** (moved to a separate paper; rows kept below for it): C1–C9 (morphing),
+C12 (old novelty wording), C19–C30 (other BB codes, novelty notes), C37 (old P=21 cost; replaced by C44), C48 (cross-code
+LER; replaced by one generic sentence with no numbers). Circuit names in the PDF: A = cs_P18_H24 (Table I),
+B = p18w (Table S1), C = cand_p21 (Table S2). Writer additions in revision e that are not claims: the definition of
+"non-interleaved" in the intro paraphrases SBB Cor. 1's hypothesis; "Since every CNOT order gives d_ext ≤ 11 … (their
+Prop. 4)" paraphrases SBB; author initials in the bibliography for 2308.07915, 2506.03094, 2108.10457, 2103.02202 were
+added from the writer's knowledge and must be checked on arXiv before release.
+
+
 Every tag `[Cn]` in the draft maps to: the confirmed item in `research/STATE.md` ("已确认结果", item number),
 the audit report and section that confirms it, and the raw-results path(s). `results/` is not in git;
 paths are relative to the repository root. "Scope" repeats the wording limits that the draft must respect.
