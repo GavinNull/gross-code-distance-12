@@ -14,6 +14,10 @@
 #                           查合法性与扩展码 = Fig. 12；E-018 审计的 w11dfs 从头重建权重 11 扩展码逻辑（W=11，按 24 元群展开，
 #                           每侧应得 4224）；auditor 的 CP-SAT 精确 lift R=1..13 两基底应 0 提升、Fig. 12 R=1 阳性对照 4224/4224；
 #                           权重 12 注入（上界）；任意 R 论证的前提（约 1.5 CPU 小时）
+#   --with-gross12-p18      已确认结果第 13 条：E-024a cs_P18_H24（周期 18、流水回绕）d_circ = 12，任意 R、两基底：E-024b 审计脚本
+#                           （= E-021 审计脚本只改输出目录）查合法性与扩展码 = Fig. 12；4224 列表复用 --with-gross12 在 OUT 里的重建，
+#                           没有则从头重建；CP-SAT 精确 lift R=1..32 两基底应 0 提升、Fig. 12 R=1 阳性对照 4224/4224；权重 12 注入；
+#                           E-024a 间隙论证的前提（G = 52、逐层插块周期性 ⇒ R' = 32）与板论证前提 (A)（约 0.8 CPU 小时，重建列表另加约 1 CPU 小时）
 #   --skip-base             不跑默认的 BB108 / E-015 / IBM [[72]] 部分（只跑所选的可选部分）
 #   环境变量：P = 并行进程数（默认 4，不超过 6）；OUT = 输出目录（默认 results/reproduce_theorems，须为仓库内相对路径）。
 #
@@ -30,7 +34,7 @@ set -u
 cd "$(dirname "$0")/.."
 P=${P:-4}
 OUT=${OUT:-results/reproduce_theorems}
-BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0; GROSS12=0
+BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0; GROSS12=0; GP18=0
 for a in "$@"; do
   case "$a" in
     --with-gross) GROSS=1 ;;
@@ -38,6 +42,7 @@ for a in "$@"; do
     --all-morphing) MORPH=1; MORPH_ALL=1 ;;
     --with-gross-retiming) RETIME=1 ;;
     --with-gross12) GROSS12=1 ;;
+    --with-gross12-p18) GP18=1 ;;
     --skip-base) BASE=0 ;;
     *) echo "unknown option $a"; exit 2 ;;
   esac
@@ -228,6 +233,49 @@ if [ "$GROSS12" -eq 1 ]; then
   $R21 $S21/b7_periodic.py > "$Q/b7_periodic.log" 2>&1 || { echo "FAIL  e021 b7_periodic crashed (see $Q/b7_periodic.log)"; FAIL=1; }
   $R21 scripts/repro_gross12.py check 13 || FAIL=1
   unset SPEC
+fi
+
+if [ "$GP18" -eq 1 ]; then
+  echo "== E-024a/b  gross [[144,12,12]] 周期 18 流水电路 cs_P18_H24 d_circ = 12，任意 R、两基底（E-024b 审计脚本，不调用 e024a 代码）"
+  Q18=$OUT/gross12_p18; mkdir -p "$Q18"
+  S24=research/audits/2026-10-11-E-024b-scripts; S18=research/audits/2026-10-08-E-018-scripts
+  # 权重 11 列表（E-018 审计 w11dfs 的输出 + 24 元群）：--with-gross12 已在 OUT 里重建且两侧 PASS 就直接用，否则在 $Q18/e018 重建
+  if [ "$(grep -c '^PASS  e021 weight-11 list kind' "$OUT/gross12/list.log" 2>/dev/null)" = 2 ]; then
+    E18=$OUT/gross12/e018
+    echo "PASS  e024a weight-11 list: reusing the --with-gross12 rebuild in $E18 (both sides 4224, see $OUT/gross12/list.log)"
+  else
+    E18=$Q18/e018
+    RB="env -u TAG -u SPEC REPRO_MAP=results/E-018-audit=$E18;results/E-021-audit=$Q18/e021 PYTHONPATH=.:tests $RR"
+    $RB $S18/a2_stage_a.py prep > "$Q18/e018_prep.log" 2>&1 && $RB scripts/repro_gross12.py jobs >> "$Q18/e018_prep.log" 2>&1 \
+      || { echo "FAIL  e024a W=11 instance / jobs (see $Q18/e018_prep.log)"; FAIL=1; }
+    cc -O3 -o "$E18/w11dfs" $S18/w11dfs.c || exit 1
+    ( cd "$E18" && xargs -P "$P" -L 1 sh -c 'EXCL=$4 ./w11dfs inst_$0.txt 11 $1 $2 $3 > dfs_$0_$1_$3.txt' < jobs.txt 2> dfs.log )
+    $RB scripts/repro_gross12.py list > "$Q18/list.log" 2>&1 || FAIL=1
+    grep -E '^(PASS|FAIL)' "$Q18/list.log" | sed 's/  e021 weight-11 list/  e024a weight-11 list (rebuilt)/' \
+      || { echo "FAIL  e024a weight-11 list (see $Q18/list.log)"; FAIL=1; }
+  fi
+  # 审计脚本写死的 results/E-024b-audit（输出，TAG 子目录）、results/E-018-audit（4224 列表的 DFS 输出）改写到 $Q18、$E18
+  export SPEC=search/experiments/e024a/cs_P18_H24.json TAG=cs_P18
+  R24="env REPRO_MAP=results/E-024b-audit=$Q18/audit;results/E-018-audit=$E18 PYTHONPATH=.:tests $RR"
+  A=$Q18/audit/$TAG
+  $R24 $S24/b1_legal.py > "$Q18/b1_legal.log" 2>&1 || { echo "FAIL  e024a b1_legal crashed (see $Q18/b1_legal.log)"; FAIL=1; }
+  $R24 $S24/b2_ext.py 3 > "$Q18/b2_ext.log" 2>&1 || { echo "FAIL  e024a b2_ext crashed (see $Q18/b2_ext.log)"; FAIL=1; }
+  # 精确 lift（auditor 的 CP-SAT b3）：R=1..32 两基底（间隙论证 R' = 32；按耗时分 4 段）；阳性对照 Fig. 12 R=1 两基底
+  # （每行不能以空格结尾：BSD xargs -L 会把下一行接上来）
+  { for b in Z X; do echo "cand $b" $(seq 1 16); echo "cand $b" $(seq 17 24); echo "cand $b" $(seq 25 28); echo "cand $b" $(seq 29 32); done
+    echo "fig12 Z 1"; echo "fig12 X 1"; } | xargs -P "$P" -L 1 sh -c \
+    'r=$0 s=$1 q=$2; shift 2; $r $s/b3_lift.py "$@" > "$q/b3_$1_$2_$3.log" 2>&1' "$R24" "$S24" "$Q18"
+  $R24 $S24/b6_inject.py > "$Q18/b6_inject.log" 2>&1 || { echo "FAIL  e024a b6_inject crashed (see $Q18/b6_inject.log)"; FAIL=1; }
+  # 板论证的前提 (A)（s1 每次写同一个 s1_slab.json，逐个改名）；逐层插块周期性（s2，R = 6、12）
+  for R in 3 8 24; do
+    R=$R $R24 $S24/s1_slab.py > "$Q18/s1_slab_R$R.log" 2>&1 && mv "$A/s1_slab.json" "$A/s1_slab_R$R.json" \
+      || { echo "FAIL  e024a s1_slab R=$R crashed (see $Q18/s1_slab_R$R.log)"; FAIL=1; }
+  done
+  $R24 $S24/s2_period.py > "$Q18/s2_period.log" 2>&1 || { echo "FAIL  e024a s2_period crashed (see $Q18/s2_period.log)"; FAIL=1; }
+  $R24 scripts/repro_gross12_p18.py premises 32 > "$Q18/premises.log" 2>&1; cat "$Q18/premises.log"
+  grep -q '^PASS' "$Q18/premises.log" || FAIL=1
+  $R24 scripts/repro_gross12_p18.py check 32 || FAIL=1
+  unset SPEC TAG
 fi
 
 [ "$FAIL" -eq 0 ] && echo "ALL PASS" || { echo "SOME CHECKS FAILED"; exit 1; }

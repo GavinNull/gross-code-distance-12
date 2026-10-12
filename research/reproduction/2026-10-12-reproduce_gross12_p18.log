@@ -1,0 +1,20 @@
+Mon Oct 12 21:53:20 CST 2026
++ OUT=results/reproduce_theorems_2026-10-12_gross12_p18 P=4 bash scripts/reproduce_theorems.sh --skip-base --with-gross12-p18
+== E-024a/b  gross [[144,12,12]] 周期 18 流水电路 cs_P18_H24 d_circ = 12，任意 R、两基底（E-024b 审计脚本，不调用 e024a 代码）
+PASS  e024a weight-11 list (rebuilt) kind X (Z-basis memory): DFS W=11 120/120 jobs complete, 254 raw solutions, 6174513371 nodes (E-018 audit: 6174513371, same); expanded by 24-element group: 4224 logicals (4224 verified He x = 0, Le x != 0, 11 distinct of N = 360), 176 orbits
+PASS  e024a weight-11 list (rebuilt) kind Z (X-basis memory): DFS W=11 120/120 jobs complete, 257 raw solutions, 5819348553 nodes (E-018 audit: 5819348553, same); expanded by 24-element group: 4224 logicals (4224 verified He x = 0, Le x != 0, 11 distinct of N = 360), 176 orbits
+PASS  e024a gap-argument premises (own parser of the evaluator circuits, R = 2, 3, 5, 9, both bases): D = 18, starts R-independent, dm_max = 17 <= D-1, S = 5, CNOTs inside windows, template CNOT orientation, detector set exact; G = max(2D+dm_max-1, D+S+dm_max) = 52 (audit: 52), span <= 510; insertion periodicity (auditor s2, R = 6, 12): x in [4, D R +0], 144 meas/block => R' = 32 (audit: 32) <= lifted R = 32
+PASS  e024a legality (auditor b1): own gross matrices = evaluator, k = 12; own spec check and evaluator validate_schedule 0 problems; period 18, prep [2, 15, 16, 17] / meas [0, 14, 15, 16] (wrapping); noiseless 0 fires (8 circuits); L0 4/4; X/Z switches per data qubit {'2': 48, '4': 96} (interleaved)
+PASS  e024a extended code (auditor b2): key set = Fig. 12's, both sides (N = 360/360; also = E-018 audit build); order relation to Fig. 12 {'same': 0, 'rev+swaps': 144, 'other': 0}; DEM image set = extended code, telescoping_bad = bad_obs = 0 (6 (R, basis))
+PASS  e024a lift basis Z (auditor b3, CP-SAT, E-018 audit 4224 list): R = 1..32 (32 runs), lifting [0] of 4224 at every R => no undetected logical of weight <= 11
+PASS  e024a lift basis X (auditor b3, CP-SAT, E-018 audit 4224 list): R = 1..32 (32 runs), lifting [0] of 4224 at every R => no undetected logical of weight <= 11
+PASS  e024a positive control: Fig. 12 basis Z R = 1 lifts 4224/4224 (d_circ = 11 circuit)
+PASS  e024a positive control: Fig. 12 basis X R = 1 lifts 4224/4224 (d_circ = 11 circuit)
+PASS  e024a upper bound basis Z (auditor b6): weight-12 data logical injected after reset, R1, R3, R6, R10: 0 detectors, observable flipped; minus one fault detected => d_circ <= 12
+PASS  e024a upper bound basis X (auditor b6): weight-12 data logical injected after reset, R1, R3, R6, R10: 0 detectors, observable flipped; minus one fault detected => d_circ <= 12
+PASS  e024a slab-argument premise (A) (auditor s1, supplementary second any-R route): R = 3, 8, 24 both bases, violations [(0, 0), (0, 0), (0, 0)]; slab 1 = [18, 39]
+PASS  e024a any-R (gap argument): G = 52, R' = 32 <= 32 = largest lifted R => d_circ = 12 for every R, both bases
+ALL PASS
+OUT=$OUTD P=4 bash scripts/reproduce_theorems.sh --skip-base   6497.18s user 23.80s system 323% cpu 33:34.59 total
+exit 0
+Mon Oct 12 22:26:54 CST 2026

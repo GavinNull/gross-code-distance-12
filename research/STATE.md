@@ -101,6 +101,7 @@
 日志：`research/reproduction/2026-10-07-reproduce_theorems_full.log`。负面结论的见证：`research/witnesses/`。
 2026-10-10：脚本新增 `--with-morphing`（E-017 = 12：单轮 W=11 穷举两基底 0 解、W=12 对照、折叠前提 T=2..5；E-019 56 个小母码电路精确值，含 8 个 < d̃）、`--all-morphing`（另加 24 个 [[288]]，约 14 CPU h，未全跑）、`--with-gross-retiming`（E-020 P=8：C 回溯固定 X0 得 4 个、不固定 32 个；4 电路 × 两基底 R=3 权重 11 注入 8/8）。干净目录一次跑通 **ALL PASS**（0.9 CPU h，`research/reproduction/2026-10-10-reproduce_morphing_retiming.log`）；[[288]] 子集 f_x sw11 = 10、f_y paper = 12 ALL PASS（`2026-10-10-reproduce_all_morphing_subset.log`），节点数与原始运行逐个相同。
 2026-10-10：脚本新增 `--with-gross12`（已确认结果第 10 条，cand_p21，全部用 auditor 脚本、不调用 e021 代码）：合法性 + 扩展码键集合 = Fig. 12；E-018 审计 w11dfs 从头重建权重 11 列表，两侧各 4224（176 轨道 × 24，节点数与审计逐个相同）；CP-SAT lift R=1..13 两基底 0/4224；Fig. 12 R=1 两基底 4224/4224；权重 12 注入；任意 R 前提。干净目录一次跑通 **ALL PASS**（1.3 CPU h / 42 min，P=2，`research/reproduction/2026-10-11-reproduce_gross12.log`）。
+2026-10-12：脚本新增 `--with-gross12-p18`（已确认结果第 13 条，`e024a/cs_P18_H24.json`，用 E-024b 审计脚本、不调用 e024a 代码）：合法性（周期 18、回绕）+ 扩展码 = Fig. 12；4224 列表复用 `--with-gross12` 的重建，没有则从头重建（节点数与审计相同）；CP-SAT lift R=1..32 两基底 0/4224；Fig. 12 R=1 两基底 4224/4224；权重 12 注入；间隙论证前提自写解析核验（D=18、S=5、dm_max=17 ⇒ G=52；逐层插块 x∈[4,18R] ⇒ R′=32）+ 板论证前提 (A) R=3/8/24 0 违例。干净目录一次跑通 **ALL PASS**（1.8 CPU h / 34 min，P=4，含列表重建；`research/reproduction/2026-10-12-reproduce_gross12_p18.log`）；复用分支（OUT 里已有 `--with-gross12` 列表）另测 ALL PASS（0.95 CPU h / 21 min）。
 
 ## 公开前的风险提示（2026-10-07）
 
