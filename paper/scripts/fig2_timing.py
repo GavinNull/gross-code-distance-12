@@ -1,6 +1,6 @@
-"""Fig. 1: timing diagram of the period-18 gross circuit (cs_P18_H24) vs Fig. 12 of SBB (arXiv:2603.05481).
+"""Fig. 2 (was Fig. 1): timing diagram of the period-18 gross circuit (cs_P18_H24) vs Fig. 12 of SBB (arXiv:2603.05481).
 
-  uv run python paper/scripts/fig1_timing.py
+  uv run python paper/scripts/fig2_timing.py
 
 Data (read-only):
   search/experiments/e024a/cs_P18_H24.json            (in git; headline circuit, STATE item 13)
@@ -228,7 +228,7 @@ def main():
     axes[1].set_xticks([t for t in range(int(lo) - 1, int(hi) + 1) if t % 2 == 0 and lo < t < hi])
     axes[1].set_xlabel("time step (dotted: period boundaries; grey: neighbouring rounds)")
     axes[0].text(hi + 0.15, 1.0, "vs Fig. 12", fontsize=5.6, color=GREY, ha="left", va="center")
-    save(fig, "fig1_timing")
+    save(fig, "fig2_timing")
 
 
 if __name__ == "__main__":
