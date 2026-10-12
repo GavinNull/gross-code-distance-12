@@ -1,4 +1,4 @@
-# paper/ — draft manuscript (first version 2026-10-09; revision d 2026-10-12, arXiv-ready apart from PI items)
+# paper/ — draft manuscript (first version 2026-10-09; revision e 2026-10-12: one result, restructured)
 
 Files:
 - `draft.tex` — PRL-style letter (revtex4-2) + Supplemental Material in the same file. Claim tags `[Cn]`
@@ -15,10 +15,62 @@ Files:
   with an optional reference spec (Fig. 12) to print and assert the ⟨rev, s12, s56⟩ map (source of Table I; also
   imported by the Fig. 1 script).
 
-Scope rule: only `research/STATE.md` "已确认结果" items are claimed — items 1–10, 12 and 13 — inside the scope stated
+Scope rule (revision e): this paper claims only STATE items 3, 7, 9, 10 and 13 (gross code); items 1, 2, 4, 5, 6, 8, 11, 12 go to separate papers. Earlier scope note: items 1–10, 12 and 13 — inside the scope stated
 there and in the referenced audits. Item 11 (exact morphing criterion, E-022) goes to a separate paper; the draft has
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
+
+## Revision e (2026-10-12): restructured to ONE result (per `research/literature/2026-10-12-paper-structure-study.md` + lead decisions)
+
+`draft.tex` was rewritten from the study's outline. The PDF contains no internal process: claim tags render as nothing
+(kept in source), no agent roles, file paths, dates, E-numbers, "not done" or wording-constraint text, no novelty memo.
+Independent checks are stated as "two independent implementations".
+
+Outline actually used (main text):
+1. Abstract, 5 sentences (background; SBB gap and open question; result; idea: fixed extended code, change only order
+   class member and timing, two short arguments + exact computation; cost P = 18 vs 8, minimal among colour-symmetric
+   schedules, and Fig. 12 = 11 proven).
+2. Introduction, 4 unheaded paragraphs: d_circ as the figure of merit; known bounds (IBM ≤ 10, SBB Prop. 3 / Cor. 1 /
+   Prop. 4, definition of "non-interleaved", verbatim open question); result + idea + cost (→ Fig. 1, Theorem 1);
+   prior work in 4 sentences.
+3. Setting (memory experiment, template, pipelining, SD6, d_circ; residuals, extended code, Table I property, Fig. 12
+   d_ext = 11 and 4224 logicals).
+4. Fig. 1 (concept, `figures/fig1_concept.pdf`) — Key idea (invariance of the extended code under ⟨rev, s12, s56⟩;
+   timing decides lifting).
+5. Table I (circuit A) — Construction (colour-symmetric SAT search with blocking clauses; properties; circuits B, C
+   mentioned in one sentence). Fig. 2 (timing, `figures/fig2_timing.pdf`).
+6. Main result: Theorem 1; Lemma 1 (reduction, proof); Lemma 2 (finite R ≤ 32, "we verified", CP-SAT, positive
+   control, two implementations); Lemma 3 (gap argument, proof sketch); upper bound; Corollary 1 (Fig. 12 = 11 and
+   retimings of its orders do not help).
+7. Cost and optimality (18 vs 8 = 2.25×; minima 18/21 in the colour-symmetric family, bulk; uniqueness of the class
+   among 24 coset colourings; reduced symmetry open).
+8. Discussion (transferable method; d_circ is a circuit property, LER impact not evaluated; noise-model scope; open
+   question P < 18). Data availability (placeholder DOI). Acknowledgments + AI-use placeholders.
+SM: S1 notation and noise; S2 circuits A, B, C (Tables S1, S2 for B, C); S3 invariance proof; S4 d_ext = 11 and the
+4224 list; S5 proof of Lemma 1; S6 computation for Lemma 2; S7 proof of Lemma 3 (+ B: slab argument with its premise,
+C: separated rounds); S8 upper bound; S9 Fig. 12 (= 11, lift structure, P ≤ 8 classification, bulk retiming table
+S3); S10 search and optimality (incl. the 0/233 control in one sentence, minimum periods, uniqueness, less
+symmetry); S11 verification and data.
+
+Removed from this paper (to a separate paper): morphing results (STATE 6, 8; Fig. 3, Table II), other BB theorems
+(STATE 1, 2, 4, 5), cross-code LER estimates (STATE 12; only one generic sentence remains), novelty/reproduction
+sections, the bar chart `fig2_lift`.
+
+Word-equivalents (APS rules; script count, LaTeX stripped): main text 2059 words + captions 300 (Fig. 1 154,
+Table I 69, Fig. 2 77) + Data availability ≈ 30 + figure areas (150/aspect + 20: Fig. 2 aspect 1.22 → 143; Fig. 1
+assumed ≈ 1.2 → ≈ 145) + Table I (single column 13 + 6.5×7 ≈ 59; 117 if it has to be set across both columns)
+≈ **2,740–2,800 of 3,750**. Abstract 165 words / 1104 characters. Nothing had to be cut for length.
+
+Open items from revision e:
+- Fig. 1 caption is written from the study's §5 plan; panel (b) wording ("the residual is read out by a check
+  between two of its measurements and a detector fires") must be checked against the real witness data once the
+  figure agent's caption facts arrive. `figures/fig1_concept.pdf` and `figures/fig2_timing.pdf` did not exist at
+  build time; the preview shows framed placeholders.
+- Table I has six columns; in two-column revtex it may need `table*` (check in the revtex build).
+- Bibliography initials for 2308.07915, 2506.03094, 2108.10457, 2103.02202 were filled in from the writer's
+  knowledge — verify on arXiv.
+- The data-availability sentence and SM S11 promise: circuits, the 4224-logical list, witnesses, clause sets of the
+  unsatisfiable instances and a reproduction script. The archive must contain these (PI decision 7).
 
 ## Revision d (2026-10-12, after PI "开始写作"; lead decisions)
 - Headline circuit is now `search/experiments/e024a/cs_P18_H24.json` (period 18, pipelined; STATE 13, audit
