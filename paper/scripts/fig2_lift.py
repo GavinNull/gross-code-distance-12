@@ -3,7 +3,7 @@
   uv run python paper/scripts/fig2_lift.py
 
 Bar = fraction of the row's units that lift to a weight-11 undetected circuit error.
-Units: rows "Fig. 12" and "period 21" count the 4224 weight-11 extended logicals per basis (one circuit);
+Units: rows "Fig. 12" and "period 18" count the 4224 weight-11 extended logicals per basis (one circuit);
 the other rows count circuits (a circuit counts if at least one weight-11 extended logical lifts).
 Data (read-only, data archive) and the claims_map.md counts asserted:
   C13/C34 Fig. 12 4224/4224: results/E-018-audit/a9_fig12.json, results/E-021-audit/b3_fig12_{Z_1,X_1-2}.json
@@ -11,12 +11,14 @@ Data (read-only, data archive) and the claims_map.md counts asserted:
   C38 944/944: results/E-021-audit/b9_p8.json
   C39 233/233 lift, 0 certified (experiment log, in STATE; not re-run by the auditor):
       results/E-021-gross-new-orders/randsat_summary.json
-  C34 cand_p21 0/4224, R=1..14,16, both bases: results/E-021-audit/cand_p21/b3_cand_{X,Z}_*.json
+  E-024b A-a cs_P18_H24 0/4224, R=1..32, both bases (auditor): results/E-024b-audit/cs_P18/b3_cand_*.json;
+      cross-checked with experimenter results/E-024a-gross12-period/cert_cs_P18_H24_{X,Z}.jsonl (R=1..36)
 The unaudited 39/39 reasoned-candidate count is deliberately not plotted (figures_plan rev. c).
 """
 from __future__ import annotations
 
 import glob
+import json
 import re
 
 from fig_common import BLUE, COLW, GREY, INK, ORANGE, ROOT, check, load, save, style
@@ -74,18 +76,28 @@ def main():
     check(rs["samples"] == 2277 and len(ex) == 233, "C39: 2277 sampled, 233 exact-lifted")
     nl = sum(e["status"] == "lifts" for e in ex)
     check(nl == 233 and rs["certified"] == 0, "C39: 233/233 lift, 0 certified")
-    rows.append(dict(name="random legal circuits, same family", det=f"R = {rng(e['R'] for e in ex)}; {bases(ex)}",
+    rows.append(dict(name="random non-wrapping colour-symm.", det=f"R = {rng(e['R'] for e in ex)}; {bases(ex)}",
                      num=nl, den=len(ex), unit="circuits", audited=False))
-    # 5. cand_p21 (C34)
+    # 5. cs_P18_H24, the period-18 headline circuit (STATE item 13; audit 2026-10-11-E-024b sec. A-a)
     cp = []
-    for f in sorted(glob.glob(str(ROOT / "results/E-021-audit/cand_p21/b3_cand_*.json"))):
+    for f in sorted(glob.glob(str(ROOT / "results/E-024b-audit/cs_P18/b3_cand_*.json"))):
         cp += load(str(f).replace(str(ROOT) + "/", ""))
-    check(len(cp) > 0, "cand_p21 lift files present")
-    check(all(r["of"] == 4224 and r["lifting"] == 0 for r in cp), "C34: cand_p21 0/4224")
-    check(all(r["telescoping_bad"] == 0 and r["bad_obs"] == 0 and r["keys"] == 360 for r in cp), "C33 checks")
+    check(len(cp) == 64, f"A-a: 64 auditor lift groups (R=1..32 x 2 bases), got {len(cp)}")
+    check(all(r["of"] == 4224 and r["lifting"] == 0 for r in cp), "A-a: cs_P18_H24 0/4224")
+    check(all(r["telescoping_bad"] == 0 and r["bad_obs"] == 0 and r["keys"] == 360 for r in cp),
+          "Table I / template-identity checks")
     for b in "XZ":
-        check(sorted(r["R"] for r in cp if r["basis"] == b) == list(range(1, 15)) + [16], f"C34: R=1..14,16 ({b})")
-    rows.append(dict(name="period-21 circuit (Table I)", det=f"R = {rng(r['R'] for r in cp)}; {bases(cp)}",
+        check(sorted(r["R"] for r in cp if r["basis"] == b) == list(range(1, 33)), f"A-a: R=1..32 ({b})")
+    # experimenter's certification (R=1..36) must agree wherever both exist
+    ex24 = []
+    for b in "XZ":
+        ex24 += [json.loads(x) for x in (ROOT / f"results/E-024a-gross12-period/cert_cs_P18_H24_{b}.jsonl")
+                 .read_text().splitlines() if x.strip()]
+    check(all(r["spec"].endswith("cs_P18_H24.json") and r["of"] == 4224 and r["lifting"] == 0 for r in ex24),
+          "experimenter cert: 0/4224")
+    check({(r["basis"], r["R"]) for r in cp} <= {(r["basis"], r["R"]) for r in ex24}, "experimenter covers R=1..32")
+    print("experimenter cert R range", rng(r["R"] for r in ex24), bases(ex24))
+    rows.append(dict(name="period-18 circuit", det=f"R = {rng(r['R'] for r in cp)}; {bases(cp)}",
                      num=0, den=4224, unit="logicals per basis", audited=True))
     for r in rows:
         print(r)
