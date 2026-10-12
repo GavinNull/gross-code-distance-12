@@ -8,8 +8,8 @@ C12 (old novelty wording), C19–C30 (other BB codes, novelty notes), C37 (old P
 LER; replaced by one generic sentence with no numbers). Circuit names in the PDF: A = cs_P18_H24 (Table I),
 B = p18w (Table S1), C = cand_p21 (Table S2). Writer additions in revision e that are not claims: the definition of
 "non-interleaved" in the intro paraphrases SBB Cor. 1's hypothesis; "Since every CNOT order gives d_ext ≤ 11 … (their
-Prop. 4)" paraphrases SBB; author initials in the bibliography for 2308.07915, 2506.03094, 2108.10457, 2103.02202 were
-added from the writer's knowledge and must be checked on arXiv before release.
+Prop. 4)" paraphrases SBB; author names for 2308.07915, 2506.03094, 2108.10457 (Quantum 5, 605 (2021)) and 2103.02202 (Quantum 5, 497 (2021))
+were checked on their arXiv abstract pages on 2026-10-12 (revision e2).
 
 
 Every tag `[Cn]` in the draft maps to: the confirmed item in `research/STATE.md` ("已确认结果", item number),
@@ -92,6 +92,12 @@ C31–C37 (period 21) remain valid and are now used for the secondary circuit on
 | C46 | Uniqueness: among the 24 translation-coset colourings of index 2, 3, 4, 6, 8, 9 (3, 4, 3, 12, 1, 1 subgroups), one order type per colour, the only extended-code class with d_ext ≥ 11 on both sides is Fig. 12's (up to translation); witnesses re-verified; 48/48 UNSAT replay; 45 bad-triple types with verified weight-10 witnesses | 13 | `2026-10-11-E-024b.md` §3 | `results/E-024b-audit/` (u1_dext outputs) | Not "unique among all orders": per-check-free and index 12, 18, 24, 36 not done. Draft uses "d_ext ≥ 11 on both sides" / "d_ext = 11" (Fig. 12 has exactly 11, C11) |
 | C47 | Reduced symmetry (partial): |H| = 12 ⟨(1,2)⟩ excludes P ≤ 11; every |H| ≥ 2 excludes P = 8; spot-checked (P = 10 ⟨(1,2)⟩; P = 8 ⟨(6,3)⟩, ⟨(0,3)⟩), not fully re-audited; per-check-free and other subgroups at P = 12..17 undecided | 13 ("未决定") | `2026-10-11-E-024b.md` §A-c | `results/E-024b-audit/` (r3_cegar024a P10_s12, P8_s63, P8_s03) | Say "spot-checked"; E-025 (mixed families) unaudited — not cited |
 | C48 | LER: d_circ is a guarantee of the circuit; leading-order structural estimates (not rigorous bounds) ~4–5× ([[54,8,8]] morphing 6 vs 7) and ~10× (BB108 IBM ≤ 8 vs ours 10) at p = 1e-4; method cannot determine the ratio at p ≳ 5e-4; ratio grows more slowly than p^-1; practical decoders (BP-OSD, Relay-BP) at 5e-4–1e-3 on [[54]]: at most ~1.2–1.6× (95% upper limits), because decoders fail on similar small fractions of weight 3–5 fault sets; BB108 undetermined; gross circuits not evaluated | 12 | `2026-10-11-E-023.md` 声称 1 可用措辞, 声称 2 可用措辞, (c) | `results/E-023-audit/` (a9, a11, a12 outputs) | Never "MLE lower bound", "p^-1", or any original E-023 [[54]] decoder numbers (dense detector basis, void); no LER claim for gross circuits |
+
+### Revision e2 tag
+
+| tag | claim in draft (short) | STATE item | source | results path(s) | scope / wording constraint |
+|---|---|---|---|---|---|
+| C49 | Mechanism (Key idea, Fig. 1b): example weight-11 "10 data + 1 hook" logical (data 0, 1, 6, 12, 16, 19, 74, 78, 79, 91; hook {9,25} = last two qubits of X check 7 in Fig. 12), Z memory, R = 1, exact DEM. Fig. 12: hook from ancilla fault after 4th CNOT lands on 25, 9 at ticks 10, 11, after Z15, Z6 read 9 ⇒ undetected. Period 18: reversed order ⇒ same column only from fault after 2nd CNOT, spread to 8, 91, 82, 85 over ticks 8–18, seen late by Z15 and early by Z6; parity cycle hook→Z15→q12→Z18→q6→Z12→q0→Z6→hook forces odd parity at Z6. Over all 360 such logicals the minimal conflicting detector sets have 4 (128), 5 (184), 9 (41) or 10 (7) detectors (draft says "4 to 10") | — (illustration of item 13's certified circuit; not itself an audited claim) | lead message 2026-10-12, data-verified by the figure agent | `paper/figures/fig1_concept_data.json` (script `paper/scripts/fig1_concept_data.py`) | Explanatory only; the theorem rests on Lemma 2 (exact lift), not on this mechanism. Analysed at R = 1. Not independently audited — if the PI wants every number in the PDF audited, have the auditor re-derive the 4/5/9/10 distribution |
 
 Note on C21 reuse: the main-text sentence "Nor is ours the first BB circuit proven to reach the code distance" uses C21
 (IBM [[72,12,6]] = 6 with the 2603.22532 partial precedent).
