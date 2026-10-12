@@ -18,6 +18,7 @@
 % provide the few commands the draft uses from them
 \@namedef{ver@amssymb.sty}{}\@namedef{ver@amsfonts.sty}{}\@namedef{ver@hyperref.sty}{}\@namedef{opt@hyperref.sty}{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
 \providecommand{\mathbb}[1]{\mathbf{#1}}
+\providecommand{\square}{\mathord{\fboxsep=0pt\fbox{\rule{0pt}{1.2ex}\hspace{1.2ex}}}}
 \providecommand{\gtrsim}{\mathrel{\vcenter{\offinterlineskip\hbox{$>$}\kern0.2ex\hbox{$\sim$}}}}
 % fonts: only TeX Gyre Termes X (all shapes) and Latin Modern mono regular are cached
 \usepackage{fontspec}
@@ -34,6 +35,10 @@
 \DeclareMathSizes{17.28}{10}{7}{7}\DeclareMathSizes{20.74}{10}{7}{7}\DeclareMathSizes{24.88}{10}{7}{7}
 % section headings at body size (math in headings would need cmmi12, not cached)
 \renewcommand{\section}{\@startsection{section}{1}{\z@}{2.5ex plus 1ex}{1ex}{\normalfont\normalsize\bfseries}}
+% figures not yet delivered: show a framed placeholder instead of failing
+\AtBeginDocument{\let\preview@ig\includegraphics
+  \renewcommand{\includegraphics}[2][]{\IfFileExists{#2}{\preview@ig[#1]{#2}}%
+    {\fbox{\parbox[c][4cm][c]{0.9\columnwidth}{\centering\ttfamily [figure pending: \detokenize{#2}]}}}}}
 % revtex stand-ins
 \providecommand{\affiliation}[1]{\gdef\@affil{#1}}
 \providecommand{\onecolumngrid}{}
