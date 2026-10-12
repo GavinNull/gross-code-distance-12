@@ -86,7 +86,8 @@ GROUP = {  # the 8-element class of SBB-extended-code-preserving orders (draft, 
     "id": lambda o: o, "s12": lambda o: s(o, 0, 1), "s56": lambda o: s(o, 4, 5),
     "s12s56": lambda o: s(s(o, 0, 1), 4, 5),
 }
-GROUP.update({"rev·" + k: (lambda o, f=f: tuple(reversed(f(o)))) for k, f in list(GROUP.items())})
+# "rev·k": reverse first, then apply k (same convention as extract_class_orders.transform_name, "rev*k")
+GROUP.update({"rev·" + k: (lambda o, f=f: f(tuple(reversed(o)))) for k, f in list(GROUP.items())})
 _T = {"id": "", "s12": r"s_{12}", "s56": r"s_{56}", "s12s56": r"s_{12}s_{56}"}
 TEX = {k: ("id" if k == "id" else f"${v}$") for k, v in _T.items()}
 TEX.update({"rev·" + k: ("rev" if k == "id" else "rev " + f"${v}$") for k, v in _T.items()})
@@ -94,7 +95,11 @@ TEX.update({"rev·" + k: ("rev" if k == "id" else "rev " + f"${v}$") for k, v in
 
 def transform(src, dst):
     hits = [k for k, f in GROUP.items() if f(src) == dst]
-    check(len(hits) >= 1, f"order {dst} not in the 8-element class of {src}")
+    check(len(hits) == 1, f"order {dst} not uniquely in the 8-element class of {src}")
+    if hasattr(eco, "transform_name"):  # cross-check with the writer's Table-I extractor
+        w = eco.transform_name(list(src), list(dst))
+        check(w is not None and w.replace("*", "·").replace("s12·s56", "s12s56") == hits[0].replace("rev·id", "rev"),
+              f"transform naming differs from extract_class_orders: {w} vs {hits[0]}")
     return hits[0]
 
 
