@@ -127,6 +127,12 @@ Avoid in any title: "better", "optimal", "first … to reach code distance", LER
   Fig. 12 R = 1 4224/4224; weight-12 injection; any-R premises. Nothing is read from `results/`. 2026-10-10 from a
   clean output directory: ALL PASS, 1.3 CPU h / 42 min (`research/reproduction/2026-10-11-reproduce_gross12.log`).
   Not in the script (audit §复现命令 only): MITM cross-check, heuristic upper_bound, R = 14/16/20, cand1 / cand1c, P = 8 family.
+- Gross d_circ = 12 at period 18 (E-024a/b, `search/experiments/e024a/cs_P18_H24.json`, wrapping):
+  `bash scripts/reproduce_theorems.sh --skip-base --with-gross12-p18`, E-024b audit scripts only (no e024a code): legality +
+  extended code = Fig. 12; 4224 list reused from `--with-gross12` in the same OUT, else rebuilt; CP-SAT lift R = 1..32 both
+  bases 0/4224; Fig. 12 R = 1 4224/4224; weight-12 injection; gap-argument premises machine-checked (G = 52, layer-level
+  insertion periodicity => R' = 32) plus slab premise (A). 2026-10-12 clean OUT: ALL PASS, 1.8 CPU h / 34 min
+  (`research/reproduction/2026-10-12-reproduce_gross12_p18.log`). Not in the script: p18w, gsat/TimeSAT UNSAT, uniqueness.
 - Witnesses for negative results: `research/witnesses/` (E-015) and `results/E-014-E-015-audit/b8_gross_X_*.json`
   (gross two-colour). `results/` is not in git — a data archive is needed for release.
 - Upper-bound witnesses for the morphing results are in `results/E-017-*/witness_endcycle.json` and
