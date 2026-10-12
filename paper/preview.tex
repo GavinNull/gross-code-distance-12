@@ -35,10 +35,10 @@
 \DeclareMathSizes{17.28}{10}{7}{7}\DeclareMathSizes{20.74}{10}{7}{7}\DeclareMathSizes{24.88}{10}{7}{7}
 % section headings at body size (math in headings would need cmmi12, not cached)
 \renewcommand{\section}{\@startsection{section}{1}{\z@}{2.5ex plus 1ex}{1ex}{\normalfont\normalsize\bfseries}}
-% figures: scale to roughly one revtex column (8.6 cm) so float placement resembles the
-% two-column layout; missing files show a framed placeholder instead of failing
+% figures: \columnwidth-wide figures are drawn at ~one revtex column (0.62\textwidth),
+% \textwidth-wide (figure*) ones at full text width; missing files show a framed placeholder instead of failing
 \AtBeginDocument{\let\preview@ig\includegraphics
-  \renewcommand{\includegraphics}[2][]{\IfFileExists{#2}{\preview@ig[width=0.62\textwidth,height=0.5\textheight,keepaspectratio]{#2}}%
+  \renewcommand{\includegraphics}[2][]{\IfFileExists{#2}{{\columnwidth=0.62\textwidth\preview@ig[#1,height=0.6\textheight,keepaspectratio]{#2}}}%
     {\fbox{\parbox[c][4cm][c]{0.9\columnwidth}{\centering\ttfamily [figure pending: \detokenize{#2}]}}}}}
 % float parameters so that the large one-column figures can be placed near their text
 \renewcommand{\topfraction}{0.95}\renewcommand{\textfraction}{0.05}\renewcommand{\floatpagefraction}{0.6}
