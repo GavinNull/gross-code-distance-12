@@ -20,6 +20,23 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision e3 (2026-10-13, PI "fix everything")
+
+- Fig. 1 is a two-column figure (`figure*`, `width=\textwidth`, 7.0 × 4.75 in); caption rewritten for the new layout
+  (4×2 grid of orders in (a); in (b) the specific qubits and ticks, grey/red shading, late/early stars; (c) four steps
+  and the footer).
+- Mechanism wording follows the audit `research/audits/2026-10-12-fig1-mechanism.md`: "an ancilla fault between the
+  second and third CNOT"; the typicality sentence is the audited one verbatim (irreducible conflicting sets 4–10;
+  smallest 4, 5 or 9). The earlier counts 128/184/41/7 are refuted (deletion-order artefact) and are not used. The
+  general "parity cycle" sentence is now stated for the example only. C49 updated.
+- Intro: "IBM's architecture is built on the gross code, with parameters [[144,12,12]]" — the overfull line is gone
+  (the preview log has no overfull boxes).
+- Preview wrapper: \columnwidth figures at ~one revtex column, figure* at full text width. Checked visually: Fig. 1
+  labels are readable at full width (comparable to footnote-size text), Fig. 1 sits on the page after the Key idea
+  starts, Table I and Fig. 2 on the next page before Construction.
+- Word-equivalents: text 2282 + captions 536 (Fig. 1 390, Table I 69, Fig. 2 77) + areas 505 (Fig. 1 two-column
+  300/1.46 + 40 = 245; Fig. 2 150/1.22 + 20 = 143; Table I two-column 26 + 13×7 = 117) ≈ **3,323 of 3,750**.
+
 ## Revision e2 (2026-10-12): real figures, data-verified mechanism
 
 - Fig. 1 caption and the second Key-idea paragraph rewritten to the data-verified mechanism from
