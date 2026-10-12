@@ -20,6 +20,24 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision e2 (2026-10-12): real figures, data-verified mechanism
+
+- Fig. 1 caption and the second Key-idea paragraph rewritten to the data-verified mechanism from
+  `figures/fig1_concept_data.json`: reversing an order keeps the extended code but changes which fault realises a
+  hook column and when its spread reaches the neighbours; the cycle of four Z checks through the hook and three data
+  qubits then has odd parity, so a detector fires. Typicality ("4 to 10 detectors" in the minimal conflicting sets
+  over all 360 such logicals, R = 1) added with new tag C49 (explanatory, not an audited claim).
+- Bibliography: authors/journal refs of 2308.07915, 2506.03094, 2108.10457, 2103.02202 checked on arXiv abs pages.
+- Lemma 2 / Lemma 3 / Fig. 1(c) / SM S6–S7 all use R' = 32 (checked).
+- Table I is now `table*` (six columns would not fit the 8.6 cm revtex column). SM Table S3 got a paragraph column.
+- Preview (`preview.tex`): figures scaled to about one revtex column, float fractions relaxed, missing-figure
+  placeholder kept. Built with the real figures; checked visually: Table I and Figs. 1–2 sit next to their text.
+  At column width the labels inside Fig. 1 are very small — the figure agent should enlarge fonts (or the PI may
+  set Fig. 1 across both columns, which costs ≈ 150 more word-equivalents).
+- Word-equivalents: text 2254 (incl. Data availability) + captions 447 (Fig. 1 301, Table I 69, Fig. 2 77)
+  + Fig. 1 area 244 (aspect 0.67) + Fig. 2 area 143 (aspect 1.22) + Table I as two-column table 117
+  ≈ **3,205 of 3,750**. Abstract 165 words.
+
 ## Revision e (2026-10-12): restructured to ONE result (per `research/literature/2026-10-12-paper-structure-study.md` + lead decisions)
 
 `draft.tex` was rewritten from the study's outline. The PDF contains no internal process: claim tags render as nothing
@@ -67,8 +85,6 @@ Open items from revision e:
   figure agent's caption facts arrive. `figures/fig1_concept.pdf` and `figures/fig2_timing.pdf` did not exist at
   build time; the preview shows framed placeholders.
 - Table I has six columns; in two-column revtex it may need `table*` (check in the revtex build).
-- Bibliography initials for 2308.07915, 2506.03094, 2108.10457, 2103.02202 were filled in from the writer's
-  knowledge — verify on arXiv.
 - The data-availability sentence and SM S11 promise: circuits, the 4224-logical list, witnesses, clause sets of the
   unsatisfiable instances and a reproduction script. The archive must contain these (PI decision 7).
 
