@@ -25,7 +25,7 @@ import json
 import re
 import sys
 
-from fig_common import BLUE, COLW, GREEN, GREY, INK, ORANGE, PURPLE, ROOT, VERMILION, check, load, save, style
+from fig_common import BLUE, GREEN, GREY, INK, ORANGE, PURPLE, ROOT, VERMILION, check, load, save, style
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Rectangle
@@ -161,66 +161,82 @@ def check_b():
     return d, seq, rows, out, start, end
 
 
-def draw_a(ax, orders):
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0.95, 4.35)
+FS = 8.0          # every text element is 8 pt (two-column figure*, 7.0 in wide)
+W_IN, H_IN = 7.0, 4.75
+
+
+def inch_axes(fig, x, y, w, h):
+    """Axes whose data coordinates are inches inside the box (x, y, w, h in figure inches)."""
+    ax = fig.add_axes([x / W_IN, y / H_IN, w / W_IN, h / H_IN])
+    ax.set_xlim(0, w)
+    ax.set_ylim(0, h)
     ax.axis("off")
-    ax.text(0, 4.2, "(a)", fontsize=7.5, va="top", fontweight="bold")
-    # one check: ancilla + six CNOT targets in order
-    x0, dx, y = 0.75, 0.62, 3.45
-    ax.add_patch(plt.Circle((x0 - 0.45, y), 0.17, fc="white", ec=INK, lw=0.7))
-    ax.text(x0 - 0.45, y, "a", ha="center", va="center", fontsize=6)
+    return ax
+
+
+def draw_a(ax, orders):
+    h = ax.get_ylim()[1]
+    ax.text(0, h, "(a)", fontsize=FS + 1, va="top", fontweight="bold")
+    x0, dx, y = 0.62, 0.36, h - 0.42
+    ax.add_patch(plt.Circle((x0 - 0.33, y), 0.12, fc="white", ec=INK, lw=0.9))
+    ax.text(x0 - 0.33, y, "a", ha="center", va="center", fontsize=FS)
     for i in range(6):
-        ax.add_patch(Rectangle((x0 + i * dx - 0.22, y - 0.2), 0.44, 0.4, fc="white", ec=INK, lw=0.6))
-        ax.text(x0 + i * dx, y, f"$q_{i + 1}$", ha="center", va="center", fontsize=6)
-    ax.annotate("", xy=(x0 + 5 * dx + 0.3, y + 0.33), xytext=(x0 - 0.2, y + 0.33),
-                arrowprops=dict(arrowstyle="-|>", lw=0.5, color=GREY))
-    ax.text(x0 + 2.5 * dx, y + 0.5, "CNOT order", ha="center", va="center", fontsize=5.6, color=GREY)
-    # residual suffixes after a fault on the ancilla after the k-th CNOT
-    res = [(2, "{q_1,q_2}", BLUE), (3, "{q_1,q_2,q_3}", GREEN), (4, "{q_5,q_6}", ORANGE)]
+        ax.add_patch(Rectangle((x0 + i * dx - 0.14, y - 0.13), 0.28, 0.26, fc="white", ec=INK, lw=0.9))
+        ax.text(x0 + i * dx, y, f"$q_{i + 1}$", ha="center", va="center", fontsize=FS)
+    ax.annotate("", xy=(x0 + 5 * dx + 0.2, y + 0.24), xytext=(x0 - 0.15, y + 0.24),
+                arrowprops=dict(arrowstyle="-|>", lw=0.9, color=GREY))
+    ax.text(x0 + 5 * dx + 0.3, y + 0.24, "CNOT order", ha="left", va="center", fontsize=FS, color=GREY)
+    res = [(2, r"$\equiv\{q_1,q_2\}$", BLUE), (3, r"$\equiv\{q_1,q_2,q_3\}$", GREEN), (4, r"$=\{q_5,q_6\}$", ORANGE)]
     for j, (k, lab, col) in enumerate(res):
-        yy = y - 0.55 - 0.42 * j
-        xa, xb = x0 + k * dx - 0.22, x0 + 5 * dx + 0.22
-        ax.plot([xa, xb], [yy, yy], color=col, lw=2.2, solid_capstyle="butt")
-        ax.plot([x0 + (k - 1) * dx + dx / 2] * 2, [yy - 0.12, yy + 0.12], color=INK, lw=0.6)
-        eq = "=" if k == 4 else r"\equiv"
-        ax.text(xb + 0.08, yy, f"${eq}{lab}$", fontsize=5.6, va="center", ha="left")
-    ax.text(x0 - 0.55, y - 1.85, "residual of a fault after CNOT $k$ = suffix;\n"
-            r"$\equiv$: same extended-code column", fontsize=5.4, va="center", ha="left", color=GREY)
-    # the 8 orders: pair underlines coloured by set identity, triple bracket green
-    ax.text(5.6, 4.2, r"$\langle$rev$, s_{12}, s_{56}\rangle$: 8 orders, same three sets", fontsize=5.6,
-            va="center", ha="left")
+        yy = y - 0.32 - 0.18 * j
+        xa, xb = x0 + k * dx - 0.14, x0 + 5 * dx + 0.14
+        ax.plot([xa, xb], [yy, yy], color=col, lw=3.5, solid_capstyle="butt")
+        ax.plot([x0 + (k - 1) * dx + dx / 2] * 2, [yy - 0.07, yy + 0.07], color=INK, lw=1.0)
+        ax.text(xb + 0.06, yy, lab, fontsize=FS, va="center", ha="left")
+    ax.text(0.0, y - 0.92, "fault after CNOT $k$ spreads the suffix;  $\\equiv$: same extended-code column",
+            fontsize=FS, va="center", ha="left", color=GREY)
+    ax.text(0.0, y - 1.15, r"$\langle$rev$, s_{12}, s_{56}\rangle$: 8 orders, same three sets $\Rightarrow$ "
+            "one extended code", fontsize=FS, va="center", ha="left")
     colmap = {frozenset({1, 2}): BLUE, frozenset({5, 6}): ORANGE}
+    dd = 0.105
     for n, (k, o) in enumerate(orders.items()):
-        cx, cy = 6.55 + (n // 4) * 2.3, 3.55 - (n % 4) * 0.66
+        cx, cy = 0.08 + (n % 4) * 0.76, y - 1.5 - (n // 4) * 0.5
+        lab = k.replace("·", " ").replace("s12s56", "$s_{12}s_{56}$").replace("s12", "$s_{12}$") \
+            .replace("s56", "$s_{56}$")
+        ax.text(cx + 2.5 * dd, cy + 0.2, lab, fontsize=FS, ha="center", va="center", color=GREY)
         for i, q in enumerate(o):
-            ax.text(cx + i * 0.22, cy, str(q), fontsize=6, ha="center", va="center")
+            ax.text(cx + i * dd, cy, str(q), fontsize=FS, ha="center", va="center")
         for a, b in ((0, 2), (4, 6)):
-            ax.plot([cx + a * 0.22 - 0.09, cx + (b - 1) * 0.22 + 0.09], [cy - 0.19] * 2,
-                    color=colmap[frozenset(o[a:b])], lw=1.6, solid_capstyle="butt")
-        ax.plot([cx - 0.09, cx + 2 * 0.22 + 0.09], [cy + 0.2] * 2, color=GREEN, lw=0.9)
-        ax.text(cx - 0.2, cy, k.replace("·", " ").replace("s12s56", "$s_{12}s_{56}$").replace("s12", "$s_{12}$")
-                .replace("s56", "$s_{56}$"), fontsize=4.6, ha="right", va="center", color=GREY)
+            ax.plot([cx + a * dd - 0.045, cx + (b - 1) * dd + 0.045], [cy - 0.09] * 2,
+                    color=colmap[frozenset(o[a:b])], lw=2.2, solid_capstyle="butt")
+        ax.plot([cx - 0.045, cx + 2 * dd + 0.045], [cy + 0.085] * 2, color=GREEN, lw=1.4)
 
 
 def draw_b(axs, seq, rows, hk, start, end, d):
-    names = ["Fig. 12 (undetected)", "period 18 (detected)"]
+    names = ["Fig. 12: undetected", "period 18: detected"]
     ccol = {seq[0][0]: BLUE, seq[1][0]: ORANGE, seq[2][0]: GREEN, seq[3][0]: PURPLE}
     labels = ["hook"] + [f"data {r['q']}" for r in rows] + ["hook"]
     wt = {int(k): v for k, v in d["fig12"]["data_fault_ticks"].items()}
     for w, ax in enumerate(axs):
         h = hk["fig12" if w == 0 else "p18"]["hook"]
-        xmax = 12.6 if w == 0 else 19.6
-        ax.set_xlim(-0.5, xmax)
-        ax.set_ylim(-4.6, 0.7)
+        xmax = 12.8 if w == 0 else 19.8
+        ax.set_xlim(-0.6, xmax)
+        ax.set_ylim(-4.55, 0.55)
         ax.set_yticks([0, -1, -2, -3, -4], labels if w == 0 else [""] * 5)
-        ax.tick_params(axis="y", length=0, labelsize=6)
-        ax.set_xticks(range(0, int(xmax) + 1, 2 if w == 0 else 3))
-        ax.tick_params(axis="x", labelsize=5.6, length=2)
-        for s in ("top", "right", "left"):
-            ax.spines[s].set_visible(False)
-        ax.set_title(names[w], fontsize=6.3, pad=2, color=INK)
-        # checks: read marks on their two rows
+        ax.tick_params(axis="y", length=0, labelsize=FS)
+        ax.set_xticks(range(0, int(xmax) + 1, 4 if w == 0 else 6))
+        ax.tick_params(axis="x", labelsize=FS, length=3, width=0.9)
+        ax.spines["bottom"].set_linewidth(0.9)
+        for sp in ("top", "right", "left"):
+            ax.spines[sp].set_visible(False)
+        ax.set_title(names[w], fontsize=FS + 0.5, pad=4, color=INK if w == 0 else VERMILION)
+        # late region on each data row: after both of its cycle checks' reads
+        for i, row in enumerate(rows):
+            t0 = max(row["t_in"][w], row["t_out"][w])
+            if w == 0:
+                check(wt[row["q"]] >= t0, "Fig. 12 witness inside the late region")
+            ax.add_patch(Rectangle((t0 + 0.15, -(i + 1) - 0.22), xmax - t0, 0.44, fc=GREY if w == 0 else VERMILION,
+                                   alpha=0.22, ec="none"))
         chain = [(start, 0, h[start]["read"], 1, rows[0]["t_in"][w])]
         for i, row in enumerate(rows):
             nxt = rows[i + 1]["t_in"][w] if i + 1 < len(rows) else h[end]["read"]
@@ -228,51 +244,43 @@ def draw_b(axs, seq, rows, hk, start, end, d):
         for r, ya, ta, yb, tb in chain:
             col = ccol[r]
             for yy, tt in ((-ya, ta), (-yb, tb)):
-                ax.plot([tt, tt], [yy - 0.28, yy + 0.28], color=col, lw=1.6)
-            ax.plot([ta, tb], [-ya - 0.28, -yb + 0.28], color=col, lw=0.5, ls=(0, (2, 1.5)))
-            ax.text((ta + tb) / 2 + 0.25, -(ya + yb) / 2, f"$Z_{{{r}}}$", fontsize=5.2, color=col, va="center")
-        # hook deposits
+                ax.plot([tt, tt], [yy - 0.3, yy + 0.3], color=col, lw=2.8, solid_capstyle="butt")
+            ax.plot([ta, tb], [-ya - 0.3, -yb + 0.3], color=col, lw=1.0, ls=(0, (2.5, 1.5)))
+            xm = (ta + tb) / 2
+            ax.text(xm + (0.35 if w == 0 else 0.5), -(ya + yb) / 2, f"$Z_{{{r}}}$", fontsize=FS, color=col,
+                    va="center", ha="left")
         for yy, r in ((0, start), (-4, end)):
-            ax.plot([h[r]["dep"] + 0.4], [yy], marker="*", ms=6, color=VERMILION, mec="none")
-            ax.text(h[r]["dep"] + 0.4, yy + (0.36 if yy == 0 else -0.42), f"on {h[r]['q']}", fontsize=4.6,
-                    ha="center", va="center", color=GREY)
-        if w == 0:
-            for i, row in enumerate(rows):
-                ax.plot([wt[row["q"]] + 0.4], [-(i + 1)], marker="X", ms=4.5, color=INK, mec="none")
-            ax.text(xmax, 0.55, "all four checks silent", fontsize=5, ha="right", va="center", color=INK)
-        else:
-            for i, row in enumerate(rows):
-                y = -(i + 1)
-                ax.add_patch(Rectangle((row["t_in"][1] + 0.1, y - 0.16), xmax - row["t_in"][1], 0.32,
-                                       fc=VERMILION, alpha=0.18, ec="none"))
-            ax.text(xmax, 0.55, f"forced late (shaded) → $Z_{{{end}}}$ odd", fontsize=5, ha="right",
-                    va="center", color=VERMILION)
-    axs[0].set_xlabel("tick ($R=1$, $Z$ memory)", fontsize=6, labelpad=1)
-    axs[1].set_xlabel("tick", fontsize=6, labelpad=1)
+            late = h[r]["dep"] > h[r]["read"]
+            col = INK if late else VERMILION
+            ax.plot([h[r]["dep"] + 0.3], [yy], marker="*", ms=9, color=col, mec="none")
+            ax.text(h[r]["dep"] + 0.3, yy - 0.42, "late" if late else "early", fontsize=FS, ha="center",
+                    va="center", color=col)
+    axs[0].set_xlabel("tick ($R=1$)", fontsize=FS, labelpad=2)
+    axs[1].set_xlabel("tick ($R=1$)", fontsize=FS, labelpad=2)
 
 
 def draw_c(ax, c):
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 5.4)
-    ax.axis("off")
-    ax.text(0, 5.35, "(c)", fontsize=7.5, va="top", fontweight="bold")
+    h = ax.get_ylim()[1]
+    ax.text(0, h, "(c)", fontsize=FS + 1, va="top", fontweight="bold")
     steps = [
-        r"$d_{\rm ext}=11$ (exhaustive search) $\Rightarrow$ no undetected error of weight $\leq 10$",
-        f"weight 11: exact lift of all {c['n']} extended logicals, $R=1..{c['Rmax']}$: 0/{c['n']} lift",
-        f"gap argument ($D={c['D']}$, $G={c['G']}$): any $R$ reduces to $R\\leq {c['Rp']}$",
-        r"weight-12 logical injected, undetected $\Rightarrow$ $d_{\rm circ}=12$",
+        r"$d_{\rm ext}=11$ $\Rightarrow$ no undetected error of weight $\leq 10$",
+        f"lift of all {c['n']} weight-11 logicals, $R\\leq{c['Rmax']}$: none",
+        f"gap argument ($D={c['D']}$, $G={c['G']}$): any $R$ $\\to$ $R\\leq{c['Rp']}$",
+        r"weight-12 logical undetected $\Rightarrow$ $d_{\rm circ}=12$",
     ]
-    for i, s in enumerate(steps):
-        y = 4.55 - 0.95 * i
-        ax.add_patch(FancyBboxPatch((0.6, y - 0.32), 9.3, 0.64, boxstyle="round,pad=0.02,rounding_size=0.12",
-                                    fc="#f2f2f2", ec=INK, lw=0.5))
-        ax.text(0.3, y, f"{i + 1}", fontsize=6, ha="center", va="center", fontweight="bold")
-        ax.text(0.8, y, s, fontsize=5.6, ha="left", va="center")
+    for i, s_ in enumerate(steps):
+        y = h - 0.32 - 0.31 * i
+        ax.add_patch(FancyBboxPatch((0.25, y - 0.11), 2.75, 0.22, boxstyle="round,pad=0.01,rounding_size=0.05",
+                                    fc="#f2f2f2", ec=INK, lw=0.8))
+        ax.text(0.1, y, f"{i + 1}", fontsize=FS, ha="center", va="center", fontweight="bold")
+        ax.text(0.33, y, s_, fontsize=FS, ha="left", va="center")
         if i < 3:
-            ax.add_patch(FancyArrowPatch((5.25, y - 0.33), (5.25, y - 0.62), arrowstyle="-|>", mutation_scale=5,
-                                         lw=0.5, color=INK))
-    ax.text(0.6, 0.55, "non-interleaved: $d_{\\rm circ}\\leq d_{\\rm ext}=11$ (SBB Cor. 1, Prop. 4); "
-            "interleaved: not bound, the lift (2) decides", fontsize=5.3, va="center", color=INK)
+            ax.add_patch(FancyArrowPatch((1.6, y - 0.115), (1.6, y - 0.195), arrowstyle="-|>", mutation_scale=6,
+                                         lw=0.8, color=INK))
+    ax.text(0.0, h - 1.6, "non-interleaved: $d_{\\rm circ}\\leq d_{\\rm ext}=11$ (SBB Cor. 1, Prop. 4)",
+            fontsize=FS, va="center")
+    ax.text(0.0, h - 1.82, "interleaved: not bound by $d_{\\rm ext}$; the lift (step 2) decides", fontsize=FS,
+            va="center")
 
 
 def main():
@@ -281,16 +289,19 @@ def main():
     d, seq, rows, hk, start, end = check_b()
     print("cycle", seq, "rows", rows, "hook", hk, "start", start, "end", end)
     style()
-    fig = plt.figure(figsize=(COLW, 4.9))
-    axa = fig.add_axes([0.02, 0.775, 0.96, 0.22])
-    axb1 = fig.add_axes([0.11, 0.335, 0.33, 0.37])
-    axb2 = fig.add_axes([0.47, 0.335, 0.51, 0.37])
-    axc = fig.add_axes([0.02, 0.0, 0.96, 0.25])
+    plt.rcParams.update({"axes.linewidth": 0.9})
+    fig = plt.figure(figsize=(W_IN, H_IN))
+    axa = inch_axes(fig, 0.05, 2.08, 3.15, 2.64)
+    axc = inch_axes(fig, 0.05, 0.02, 3.15, 1.95)
+    fig.text(3.38 / W_IN, 4.72 / H_IN, "(b)", fontsize=FS + 1, fontweight="bold", va="top")
+    axb1 = fig.add_axes([3.98 / W_IN, 0.42 / H_IN, 1.22 / W_IN, 3.9 / H_IN])
+    axb2 = fig.add_axes([5.35 / W_IN, 0.42 / H_IN, 1.6 / W_IN, 3.9 / H_IN])
     draw_a(axa, orders)
-    fig.text(0.02, 0.745, "(b)", fontsize=7.5, fontweight="bold", va="center")
     draw_b([axb1, axb2], seq, rows, hk, start, end, d)
     draw_c(axc, c)
-    save(fig, "fig1_concept")
+    fig.savefig(ROOT / "paper/figures/fig1_concept.pdf")
+    fig.savefig(ROOT / "paper/figures/fig1_concept.png", dpi=300)
+    print("wrote fig1_concept.pdf / .png", W_IN, "x", H_IN, "in")
 
 
 if __name__ == "__main__":
