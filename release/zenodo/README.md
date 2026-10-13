@@ -104,6 +104,11 @@ length 2" discussed in the Key-idea paragraph. These lists are the input of Lemm
   weight-11 undetected error at R = 1 in the Z basis"): one fault set per circuit of
   `data/circuits/p8_colour_symmetric_944.json.gz` (circuit name `p8:k`).
 
+### `data/circuits/encoding_completeness_sample.json.gz`
+Legal deterministic colour-symmetric circuits at P = 17, 12 (pipelined) and 20 (common frame), drawn independently of
+the SAT encodings (seeds 1..25 each); full specification plus the CNOT time of every item. See
+`code/sat/completeness_sample.py`.
+
 ### `data/circuits/p8_colour_symmetric_944.json.gz`
 The 944 legal deterministic colour-symmetric period-8 circuits with orders in the class of Fig. 12, each as the
 (variant, start) of the six (type, colour) classes; expansion rule and checks in `code/p8_family.py`.
@@ -234,6 +239,7 @@ error for sufficiently many rounds (bulk Pauli-frame model, SM S9–S10); it is 
 | `code/sat/regenerate.py` | SM S10, S9 Table S3 | reruns a CEGAR loop with the shipped encoders and compares with the certificate (byte-identical clause sequence) |
 | `code/sat/soundness.py 17 0 60 15`, `… 17 0 4 4 all` | SM S10 "soundness of the clauses" | 144 + 847 = 991 model claims and 87 + 12 = 99 excluding clauses, each confirmed by the exact lift |
 | `code/p8_family.py enumerate / encoding / check` | SM S10 "completeness of the family encoding", "at P = 8 all 944 …" | independent backtracking enumeration = the 944 listed circuits; the primary SAT encoding at P = 8 without nogoods has exactly these 944 models; all legal, deterministic, extended code = Fig. 12's (their weight-11 witnesses: `verify_witnesses.py`) |
+| `code/sat/completeness_sample.py check` | SM S10 "75 independently sampled legal deterministic circuits at P = 12, 17 (pipelined) and 20 (common frame) are all models" | the circuits of `data/circuits/encoding_completeness_sample.json.gz` (drawn by an own CP-SAT sampler, `… sample`) are legal, deterministic, and models of the primary encoding |
 | `code/check_uniqueness_witnesses.py` | SM S10 "uniqueness of the order class" | all 3859 weight-≤10 witnesses behind the 48 uniqueness CNFs are genuine extended logicals of their assignment; the blocked survivors are Fig. 12 translates |
 
 Lemma 1 (reduction) and the deletion/splitting arguments of Lemma 3 are pen-and-paper (SM S5, S7); the scripts
@@ -262,6 +268,7 @@ Runtimes are single-core CPU times on an Apple M-series laptop (stim 1.16.0, ort
 | `code/sat/soundness.py 17 0 60 15` / `17 0 4 4 all` | `PASS … 144/144 … 87/87` / `PASS … 847/847 … 12/12` | 4 min / 2 min |
 | `code/p8_family.py enumerate`, `encoding`, `check` | one `PASS` each | 10 s, 30 s, 1 min |
 | `code/check_uniqueness_witnesses.py` | 48 `PASS` lines, 3859 witnesses | 6 s |
+| `code/sat/completeness_sample.py check` | 3 `PASS` lines: 25/25 legal, deterministic and models at P = 17, 20 (common frame), 12 | 7.5 min (`sample`: 10 min) |
 | `code/dext/run_dext.sh w10` | `PASS d_ext >= 11` for both bases (≈ 2.0 × 10^10 nodes per basis, 0 solutions) | ≈ 20 min |
 | `code/dext/run_dext.sh w11` | `PASS weight-11 list` for both bases: 254 (Z) and 257 (X) raw solutions, 6 174 513 371 and 5 819 348 553 nodes, 4224 logicals each | ≈ 1 h |
 

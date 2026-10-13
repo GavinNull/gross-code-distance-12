@@ -29,6 +29,7 @@ run code/compare_lifts.py
 run code/p8_family.py enumerate
 run code/p8_family.py encoding
 run code/p8_family.py check
+run code/sat/completeness_sample.py check
 run code/sat/soundness.py 17 0 60 15
 run code/sat/soundness.py 17 0 4 4 all
 echo "== d_ext searches"; OUT="$OUT/dext" P="$P" PYTHON="$PYTHON" sh code/dext/run_dext.sh both || FAIL=1
