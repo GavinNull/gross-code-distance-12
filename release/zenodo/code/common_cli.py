@@ -22,6 +22,10 @@ def parse_range(s: str) -> list[int]:
 
 
 def circuit(name: str):
+    """A, B, C, fig12, fig12_retiming_k, or p8:k (k-th circuit of data/circuits/p8_colour_symmetric_944.json.gz)."""
+    if name.startswith("p8:"):
+        import p8_family
+        return p8_family.expand(p8_family.load()[int(name[3:])])
     return load_schedule(CIRCUIT_FILES[name])
 
 

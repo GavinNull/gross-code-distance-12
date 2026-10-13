@@ -8,7 +8,7 @@ when injected alone), and their images (augmented with the H and L rows) are the
 weight-11 extended logical.
 
     python code/verify_witnesses.py                    # all files in witnesses/
-    python code/verify_witnesses.py --max-per-case 5   # quick: first 5 witnesses of every (circuit, basis, R)
+    python code/verify_witnesses.py --max-per-case 5 --max-cases 20   # quick sample
 """
 import argparse
 import gzip
@@ -24,6 +24,7 @@ from gross12.paths import WITNESSES
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--max-per-case", type=int, default=0)
+ap.add_argument("--max-cases", type=int, default=0, help="only the first N cases of every file")
 ap.add_argument("files", nargs="*")
 a = ap.parse_args()
 code = load_code()
@@ -31,7 +32,9 @@ V = Verdict()
 files = a.files or sorted(str(p) for p in WITNESSES.glob("weight11_*.json.gz"))
 for fn in files:
     D = json.load(gzip.open(fn))
-    for case in D["cases"]:
+    many = len(D["cases"]) > 60
+    agg = [0, 0, 0]
+    for case in D["cases"][: a.max_cases or None]:
         name, basis, R = case["circuit"], case["basis"], case["R"]
         spec = circuit(name)
         noisy = E.noisy_circuit(spec, code, R, basis)
@@ -68,6 +71,13 @@ for fn in files:
             ok_n += ok
             if not ok:
                 print("  failed:", name, basis, R, w["logical"], dets[:5], obs, len(sigs), imgs == want)
+        if many:
+            agg[0] += 1; agg[1] += ok_n; agg[2] += len(ws)
+            V.bad |= ok_n != len(ws)
+            continue
         V(ok_n == len(ws), f"[{name}] {basis} basis R={R}: {ok_n}/{len(ws)} weight-11 fault sets injected: no detector, "
                            f"observable flipped, 11 distinct mechanisms, images = the listed extended logical")
+    if many:
+        V(agg[1] == agg[2], f"[{fn.split('/')[-1]}] {agg[0]} circuits: {agg[1]}/{agg[2]} weight-11 fault sets injected: "
+                            f"no detector, observable flipped, 11 distinct mechanisms, images = the listed logical")
 V.exit()
