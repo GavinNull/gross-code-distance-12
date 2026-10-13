@@ -20,6 +20,27 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision f (2026-10-13; PI: single author, detailed AI disclosure, arXiv first)
+
+- Author block: single author, placeholders "[Name — PI to fill]" / "[Affiliation — PI to fill]".
+- Acknowledgments: concrete AI-use statement (agents = Claude, Anthropic, proposed hypotheses, wrote/ran search and
+  verification code, worked out constructions and proofs, independently re-checked each claim with separately
+  written code for every computation; the author directed the project, made all decisions, takes full
+  responsibility; no AI listed as author per APS policy). The PI may still add personal acknowledgements.
+- revtex fixes: `\date{\today}` (no empty "Dated"); SM tables/figures/equations get S-prefixed `\the…` and
+  `\theH…` (hyperref "@table.1 already defined" gone); `secnumdepth` set at the SM start so "SM S1…S11" references
+  resolve (they printed as "SM " before); Table I (`table*`) moved directly after Fig. 1 so it lands on page 3;
+  the standalone "Main result." heading removed.
+- Data availability now lists exactly: circuit specifications, the 4224-logical lists (each basis), the witnesses,
+  the certificates (clause sets of the unsatisfiable instances) and the reproduction scripts; SM S11 matches.
+- **`draft.pdf` (real revtex build: `cd paper && tectonic draft.tex`) is now the reference** — not committed yet,
+  per lead. Built and checked visually: page 1 title, single author, date, abstract and the intro in two columns;
+  Fig. 1 across the top of page 2; Table I across the top of page 3 with Fig. 2 in the right column; main text
+  ends on page 4, references on page 5, SM from page 6. Log: no overfull boxes, no undefined references, no
+  hyperref duplicates (only underfull warnings in the bibliography). Minor: Theorem 1 breaks across the column
+  bottom on page 3.
+- `preview.tex` still builds offline (stand-ins for the new hyperref counter macros added).
+
 ## Revision e3 (2026-10-13, PI "fix everything")
 
 - Fig. 1 is a two-column figure (`figure*`, `width=\textwidth`, 7.0 × 4.75 in); caption rewritten for the new layout
@@ -159,8 +180,7 @@ Avoid in any title: "better", "optimal", "first … to reach code distance", LER
 1. **Authors and affiliations** (placeholder block in `draft.tex`).
 2. **AI-use statement** (placeholder in the acknowledgments): how to disclose that the research and the draft were
    produced by AI agents (lead / experimenter / auditor / lit-scout / writer / figure agent).
-3. **revtex compile**: `revtex4-2` is not available offline and downloads are not allowed; someone with a TeX
-   installation (or arXiv's own build) must compile `draft.tex` once and check layout and length before release.
+3. ~~revtex compile~~ done in revision f (`tectonic draft.tex`, downloads allowed by the PI).
 4. **arXiv timing**: scoop risk for the gross-12 result is medium (2608.19917 v2 lists interleaved lower bounds as
    a next step; qldpc-challenge circuit tier accepts n = 144 entries). Releasing now vs waiting for a shorter
    period / reduced-symmetry results (E-025, unaudited) is the PI's trade-off.
