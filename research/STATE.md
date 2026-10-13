@@ -207,3 +207,4 @@
 - 期刊：暂不投，先只挂 arXiv。
 - 公开：PI 定稿后尽快挂 arXiv；挂出后再联系 Strikis/Browne/Beverland 和 IBM（信稿先给 PI 看）。
 - 允许下载 revtex4-2 编译正式 PDF；数据打包在本地，由 PI 上传 Zenodo 取得 DOI。
+- （2026-10-13 第二组选择题）单位写 "Independent researcher"；姓名待 PI 提供；Zenodo 许可证：数据 CC-BY 4.0、代码 MIT；arXiv 只投 quant-ph；联系信不抄送 Shaw/Terhal。
