@@ -1,0 +1,15 @@
+[project]
+name = "gross12-verification"
+version = "1.0.0"
+description = "Verification code and data for: A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT (code); CC-BY-4.0 (data)" }
+dependencies = [
+    "stim==1.16.0",
+    "numpy==2.2.6",
+    "ortools==9.15.6755",
+    "python-sat==1.9.dev15",
+]
+# Not an installable package: run the scripts in code/ from the package root (see README.md).
+[tool.uv]
+package = false

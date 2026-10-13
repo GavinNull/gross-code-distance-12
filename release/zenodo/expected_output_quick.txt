@@ -1,0 +1,196 @@
+== code/check_circuits.py A fig12
+PASS  gross code: HX, HZ equal the polynomial definition; k = 12; LX, LZ are logical operators of rank 12
+PASS  [A] legality: period 18, every check 6 CNOTs on its support inside its window at distinct steps, no data-qubit conflict (0 problems)
+PASS  [A] determinism: R = 1, 2, 3, 6 both bases: detectors/observables deterministic, noiseless circuit fires nothing (8/8)
+PASS  [A] reset steps [2, 15, 16, 17], measurement steps [0, 14, 15, 16]; windows crossing the period boundary: 144/144; X/Z switches per data qubit per period: {2: 48, 4: 96} (interleaved)
+PASS  [A] CNOT orders vs Fig. 12: {'rev*swaps': 144} (all in the 8-element class <rev, s12, s56>)
+PASS  [A] extended code, Z-basis memory: 360 merged columns, equal to the Fig. 12 column set
+PASS  [A] Z basis R=1: DEM image set = extended code (360 keys), template identity and logical effect hold for all 864 mechanisms
+PASS  [A] Z basis R=2: DEM image set = extended code (360 keys), template identity and logical effect hold for all 1584 mechanisms
+PASS  [A] Z basis R=3: DEM image set = extended code (360 keys), template identity and logical effect hold for all 2304 mechanisms
+PASS  [A] extended code, X-basis memory: 360 merged columns, equal to the Fig. 12 column set
+PASS  [A] X basis R=1: DEM image set = extended code (360 keys), template identity and logical effect hold for all 864 mechanisms
+PASS  [A] X basis R=2: DEM image set = extended code (360 keys), template identity and logical effect hold for all 1584 mechanisms
+PASS  [A] X basis R=3: DEM image set = extended code (360 keys), template identity and logical effect hold for all 2304 mechanisms
+PASS  [fig12] legality: period 8, every check 6 CNOTs on its support inside its window at distinct steps, no data-qubit conflict (0 problems)
+PASS  [fig12] determinism: R = 1, 2, 3, 6 both bases: detectors/observables deterministic, noiseless circuit fires nothing (8/8)
+PASS  [fig12] reset steps [0, 1, 4, 5], measurement steps [0, 3, 4, 7]; windows crossing the period boundary: 96/144; X/Z switches per data qubit per period: {2: 144} (non-interleaved)
+PASS  [fig12] CNOT orders vs Fig. 12: {'id': 144} (all in the 8-element class <rev, s12, s56>)
+PASS  [fig12] extended code, Z-basis memory: 360 merged columns, equal to the Fig. 12 column set
+PASS  [fig12] Z basis R=1: DEM image set = extended code (360 keys), template identity and logical effect hold for all 864 mechanisms
+PASS  [fig12] Z basis R=2: DEM image set = extended code (360 keys), template identity and logical effect hold for all 1584 mechanisms
+PASS  [fig12] Z basis R=3: DEM image set = extended code (360 keys), template identity and logical effect hold for all 2304 mechanisms
+PASS  [fig12] extended code, X-basis memory: 360 merged columns, equal to the Fig. 12 column set
+PASS  [fig12] X basis R=1: DEM image set = extended code (360 keys), template identity and logical effect hold for all 864 mechanisms
+PASS  [fig12] X basis R=2: DEM image set = extended code (360 keys), template identity and logical effect hold for all 1584 mechanisms
+PASS  [fig12] X basis R=3: DEM image set = extended code (360 keys), template identity and logical effect hold for all 2304 mechanisms
+== code/lift.py --circuit A --basis Z X --R 1-3
+{"circuit": "A", "basis": "Z", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.1, "first_lifting": []}
+PASS  lift circuit A basis Z R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.1 s)
+{"circuit": "A", "basis": "Z", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.4, "first_lifting": []}
+PASS  lift circuit A basis Z R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (2.4 s)
+{"circuit": "A", "basis": "Z", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 3.3, "first_lifting": []}
+PASS  lift circuit A basis Z R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (3.3 s)
+{"circuit": "A", "basis": "X", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 1.5, "first_lifting": []}
+PASS  lift circuit A basis X R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (1.5 s)
+{"circuit": "A", "basis": "X", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.4, "first_lifting": []}
+PASS  lift circuit A basis X R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (2.4 s)
+{"circuit": "A", "basis": "X", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 3.3, "first_lifting": []}
+PASS  lift circuit A basis X R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (3.3 s)
+== code/lift.py --circuit fig12 --basis Z X --R 1
+{"circuit": "fig12", "basis": "Z", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.7, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+PASS  lift circuit fig12 basis Z R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.7 s)
+{"circuit": "fig12", "basis": "X", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.1, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+PASS  lift circuit fig12 basis X R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.1 s)
+== code/premises.py --circuit A --rmax 32
+PASS  [A] structure (R = 2, 3, 5, 9, both bases): D = 18, starts independent of R, dm_max = 17 <= D - 1, S = 5, CNOTs inside windows, template orientation, detector set exact (0 problems)
+PASS  [A] G = max(2D + dm_max - 1, D + S + dm_max) = 52; a weight-11 undetected logical spans <= 10 (G - 1) = 510 layers
+PASS  [A] insertion (SD6, R = 6, 12, both bases): circuit(R+1) = circuit(R) + one 18-layer block inserted at any x in [4, 18R+0] (contiguous), 144 measurements per block
+PASS  [A] deletion: every weight-11 undetected logical maps into a circuit with R' <= 32 rounds; Lemma 2 covers R <= 32 (paper: G = 52, R' = 32)
+== code/inject_upper_bound.py A
+PASS  witness Z basis: weight 12, commutes with HZ, flips logical rows [0, 1, 4]
+PASS  witness X basis: weight 12, commutes with HX, flips logical rows [0, 1, 2]
+PASS  [A] Z basis R=1: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
+PASS  [A] Z basis R=3: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
+PASS  [A] Z basis R=6: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
+PASS  [A] Z basis R=10: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
+PASS  [A] X basis R=1: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
+PASS  [A] X basis R=3: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
+PASS  [A] X basis R=6: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
+PASS  [A] X basis R=10: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
+== code/verify_witnesses.py --max-per-case 10
+PASS  [fig12] Z basis R=1: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12] X basis R=1: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12] Z basis R=2: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12] X basis R=2: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12] Z basis R=3: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12] X basis R=3: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] Z basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] Z basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] Z basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] Z basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] Z basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] Z basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] X basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] X basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] X basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] X basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] X basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_0] X basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] Z basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] Z basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] Z basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] Z basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] Z basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] Z basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] X basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] X basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] X basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] X basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] X basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_1] X basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] Z basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] Z basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] Z basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] Z basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] Z basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] Z basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] X basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] X basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] X basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] X basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] X basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_2] X basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] Z basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] Z basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] Z basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] Z basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] Z basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] Z basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] X basis R=1: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] X basis R=2: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] X basis R=3: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] X basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] X basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [fig12_retiming_3] X basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+== code/check_certificates.py --max-clauses 45000
+skip  less_symmetry/P08_subgroup_0_3.cnf.gz (218726 clauses)
+skip  less_symmetry/P08_subgroup_1_2.cnf.gz (51248 clauses)
+skip  less_symmetry/P08_subgroup_4_2.cnf.gz (162810 clauses)
+skip  less_symmetry/P08_subgroup_6_0.cnf.gz (234182 clauses)
+skip  less_symmetry/P08_subgroup_6_3.cnf.gz (218294 clauses)
+skip  less_symmetry/P09_subgroup_1_2.cnf.gz (65732 clauses)
+skip  less_symmetry/P10_subgroup_1_2.cnf.gz (96996 clauses)
+skip  less_symmetry/P11_subgroup_1_2.cnf.gz (133180 clauses)
+PASS  min_period_primary_encoding/P08_pipelined.cnf.gz: 26948 clauses, 1552 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_primary_encoding/P09_pipelined.cnf.gz: 36063 clauses, 1826 variables, sha256 ok, CaDiCaL UNSAT in 0.7 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+skip  min_period_primary_encoding/P10_pipelined.cnf.gz (45936 clauses)
+skip  min_period_primary_encoding/P11_pipelined.cnf.gz (58344 clauses)
+skip  min_period_primary_encoding/P12_pipelined.cnf.gz (69631 clauses)
+skip  min_period_primary_encoding/P13_pipelined.cnf.gz (83571 clauses)
+skip  min_period_primary_encoding/P14_pipelined.cnf.gz (99087 clauses)
+skip  min_period_primary_encoding/P15_pipelined.cnf.gz (114844 clauses)
+skip  min_period_primary_encoding/P16_pipelined.cnf.gz (131538 clauses)
+skip  min_period_primary_encoding/P17_pipelined.cnf.gz (148627 clauses)
+PASS  min_period_primary_encoding/P20_common_frame.cnf.gz: 42775 clauses, 1937 variables, sha256 ok, CaDiCaL UNSAT in 2.4 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_second_encoding/P08_pipelined.cnf.gz: 31699 clauses, 2335 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_second_encoding/P09_pipelined.cnf.gz: 38292 clauses, 2638 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_second_encoding/P10_pipelined.cnf.gz: 44910 clauses, 2905 variables, sha256 ok, CaDiCaL UNSAT in 0.4 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+skip  min_period_second_encoding/P11_pipelined.cnf.gz (53067 clauses)
+skip  min_period_second_encoding/P12_pipelined.cnf.gz (60717 clauses)
+skip  min_period_second_encoding/P13_pipelined.cnf.gz (68851 clauses)
+skip  min_period_second_encoding/P14_pipelined.cnf.gz (76446 clauses)
+skip  min_period_second_encoding/P15_pipelined.cnf.gz (84753 clauses)
+skip  min_period_second_encoding/P16_pipelined.cnf.gz (93354 clauses)
+skip  min_period_second_encoding/P17_pipelined.cnf.gz (101587 clauses)
+PASS  order_class_uniqueness/0_0__1_0_Xerrors.cnf.gz: 30210 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_0_Zerrors.cnf.gz: 22290 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_1_Xerrors.cnf.gz: 24162 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_1_Zerrors.cnf.gz: 22794 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_2_Xerrors.cnf.gz: 23088 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_2_Zerrors.cnf.gz: 22944 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_3_Xerrors.cnf.gz: 25026 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_3_Zerrors.cnf.gz: 21642 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_4_Xerrors.cnf.gz: 26322 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_4_Zerrors.cnf.gz: 23874 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_5_Xerrors.cnf.gz: 25104 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_5_Zerrors.cnf.gz: 24096 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__3_1_Xerrors.cnf.gz: 21714 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__3_1_Zerrors.cnf.gz: 19554 clauses, 1566 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__3_2_Xerrors.cnf.gz: 23514 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__3_2_Zerrors.cnf.gz: 19554 clauses, 1566 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_1__4_0_Xerrors.cnf.gz: 17788 clauses, 1548 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_1__4_0_Zerrors.cnf.gz: 18220 clauses, 1548 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_1__6_0_Xerrors.cnf.gz: 21138 clauses, 1566 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_1__6_0_Zerrors.cnf.gz: 19842 clauses, 1566 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_2__2_0_Xerrors.cnf.gz: 18796 clauses, 1548 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_2__2_0_Zerrors.cnf.gz: 17860 clauses, 1476 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_2__2_1_Xerrors.cnf.gz: 20020 clauses, 1548 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_2__2_1_Zerrors.cnf.gz: 17572 clauses, 1476 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_2__4_0_Xerrors.cnf.gz: 25424 clauses, 1728 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_2__4_0_Zerrors.cnf.gz: 22472 clauses, 1656 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__2_0_Xerrors.cnf.gz: 23586 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__2_0_Zerrors.cnf.gz: 22578 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__2_1_Xerrors.cnf.gz: 23088 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__2_1_Zerrors.cnf.gz: 22800 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__2_2_Xerrors.cnf.gz: 24810 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__2_2_Zerrors.cnf.gz: 24666 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__3_0_Xerrors.cnf.gz: 23112 clauses, 1701 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_3__3_0_Zerrors.cnf.gz: 23472 clauses, 1773 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m2_01_Xerrors.cnf.gz: 14294 clauses, 1458 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m2_01_Zerrors.cnf.gz: 14366 clauses, 1458 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m2_10_Xerrors.cnf.gz: 15014 clauses, 1458 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m2_10_Zerrors.cnf.gz: 14726 clauses, 1458 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m2_11_Xerrors.cnf.gz: 14006 clauses, 1458 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m2_11_Zerrors.cnf.gz: 14222 clauses, 1458 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_01_Xerrors.cnf.gz: 16077 clauses, 1503 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_01_Zerrors.cnf.gz: 16365 clauses, 1503 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_10_Xerrors.cnf.gz: 16149 clauses, 1503 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_10_Zerrors.cnf.gz: 15069 clauses, 1431 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_11_Xerrors.cnf.gz: 14496 clauses, 1431 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_11_Zerrors.cnf.gz: 15288 clauses, 1503 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_12_Xerrors.cnf.gz: 14637 clauses, 1503 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/m3_12_Zerrors.cnf.gz: 16005 clauses, 1503 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+skip  window_explanation/P24_window14_X0.cnf.gz (142974 clauses)
+skip  window_explanation/P24_window14_Z2.cnf.gz (144788 clauses)
+ALL PASS

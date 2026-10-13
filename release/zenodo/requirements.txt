@@ -1,0 +1,14 @@
+# Exact versions used for every computation in this data set (Python 3.12, CPython).
+# Direct dependencies: stim, numpy, ortools (CP-SAT), python-sat (CaDiCaL 1.5.3, Glucose 4, MiniSat 2.2).
+stim==1.16.0
+numpy==2.2.6
+ortools==9.15.6755
+python-sat==1.9.dev15
+# transitive (pinned for reproducibility)
+absl-py==2.5.0
+immutabledict==4.3.1
+pandas==3.0.6
+protobuf==6.33.6
+python-dateutil==2.9.0.post0
+six==1.17.0
+typing-extensions==4.16.0
