@@ -8,3 +8,8 @@ results/
 references/*.pdf
 references/strikis-zenodo/
 .claude/worktrees/
+release/*.tar.gz
+release/zenodo/certificates/
+release/zenodo/data/
+release/zenodo/witnesses/
+release/arxiv/main.pdf

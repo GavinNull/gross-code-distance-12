@@ -6,7 +6,7 @@ type: dataset
 authors:
   - family-names: "Pan"
     given-names: "Guancheng"
-    affiliation: "Independent researcher"
+    affiliation: "Zhejiang University"
     email: "3250101086@zju.edu.cn"
 version: "1.0.0"
 doi: "[Zenodo DOI -- assigned on upload]"
