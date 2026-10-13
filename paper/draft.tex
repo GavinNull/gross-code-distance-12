@@ -26,9 +26,9 @@
 
 \title{A single-ancilla syndrome circuit with circuit distance 12 for the gross code}
 
-\author{[AUTHORS --- PI to decide]}
-\affiliation{[AFFILIATIONS --- PI to decide]}
-\date{}
+\author{[Name --- PI to fill]}
+\affiliation{[Affiliation --- PI to fill]}
+\date{\today}
 
 \begin{abstract}
 The gross code $\code{144,12,12}$ is the flagship bivariate-bicycle code, but what
@@ -149,6 +149,28 @@ circuits obey $\dcirc\le\dext=11$; for interleaved circuits the lift decides.}
 \label{fig:concept}
 \end{figure*}
 
+\begin{table*}[t]
+\caption{The period-18 circuit. Checks are grouped by type and colour
+$(x+y)\bmod 3$ of their position $(x,y)$ on the $12\times6$ torus; all 24 checks
+of a class share reset step, CNOT order (labels $A=x^3+y+y^2\mapsto A_1A_2A_3$,
+$B=y^3+x+x^2\mapsto B_1B_2B_3$), CNOT steps and measurement step, all modulo 18.
+A window that passes step 17 continues in the next period. Last column: map from
+the Fig.~12 order of the class.}
+\label{tab:circuit}
+\begin{ruledtabular}
+\begin{tabular}{lcllcl}
+class & reset & CNOT order & CNOT steps & meas. & map\\
+\hline
+$X_0$ & 17 & $A_1A_2A_3B_3B_1B_2$ & 0, 1, 2, 8, 9, 15 & 16 & rev\,$s_{56}$\\
+$X_1$ & 15 & $A_1A_2A_3B_1B_3B_2$ & 16, 3, 4, 5, 10, 13 & 14 & rev\\
+$X_2$ & 17 & $A_3A_1A_2B_3B_1B_2$ & 0, 1, 5, 6, 7, 15 & 16 & rev\,$s_{56}$\\
+$Z_0$ & 17 & $B_2B_1B_3A_2A_1A_3$ & 0, 7, 8, 9, 13, 14 & 15 & rev\,$s_{56}$\\
+$Z_1$ & 2 & $B_2B_3B_1A_3A_2A_1$ & 3, 4, 9, 10, 11, 17 & 0 & rev\,$s_{12}s_{56}$\\
+$Z_2$ & 16 & $B_2B_1B_3A_3A_2A_1$ & 17, 5, 6, 12, 13, 14 & 15 & rev\,$s_{56}$\\
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
 % ---------------------------------------------------------------------------
 \paragraph{Key idea.}
 Interleaving decouples $\dcirc$ from $\dext$ in one direction only: $\dcirc\ge\dext$
@@ -188,27 +210,7 @@ Fig.~12 orders themselves this is impossible in every family of retimings we cou
 decide\cl{16}.
 
 % ---------------------------------------------------------------------------
-\begin{table*}[t]
-\caption{The period-18 circuit. Checks are grouped by type and colour
-$(x+y)\bmod 3$ of their position $(x,y)$ on the $12\times6$ torus; all 24 checks
-of a class share reset step, CNOT order (labels $A=x^3+y+y^2\mapsto A_1A_2A_3$,
-$B=y^3+x+x^2\mapsto B_1B_2B_3$), CNOT steps and measurement step, all modulo 18.
-A window that passes step 17 continues in the next period. Last column: map from
-the Fig.~12 order of the class.}
-\label{tab:circuit}
-\begin{ruledtabular}
-\begin{tabular}{lcllcl}
-class & reset & CNOT order & CNOT steps & meas. & map\\
-\hline
-$X_0$ & 17 & $A_1A_2A_3B_3B_1B_2$ & 0, 1, 2, 8, 9, 15 & 16 & rev\,$s_{56}$\\
-$X_1$ & 15 & $A_1A_2A_3B_1B_3B_2$ & 16, 3, 4, 5, 10, 13 & 14 & rev\\
-$X_2$ & 17 & $A_3A_1A_2B_3B_1B_2$ & 0, 1, 5, 6, 7, 15 & 16 & rev\,$s_{56}$\\
-$Z_0$ & 17 & $B_2B_1B_3A_2A_1A_3$ & 0, 7, 8, 9, 13, 14 & 15 & rev\,$s_{56}$\\
-$Z_1$ & 2 & $B_2B_3B_1A_3A_2A_1$ & 3, 4, 9, 10, 11, 17 & 0 & rev\,$s_{12}s_{56}$\\
-$Z_2$ & 16 & $B_2B_1B_3A_3A_2A_1$ & 17, 5, 6, 12, 13, 14 & 15 & rev\,$s_{56}$\\
-\end{tabular}
-\end{ruledtabular}
-\end{table*}
+
 
 \paragraph{Construction.}
 We searched schedules that are symmetric under the 24 translations preserving the
@@ -237,7 +239,7 @@ CNOTs of a round form two contiguous blocks.}
 \end{figure}
 
 % ---------------------------------------------------------------------------
-\paragraph{Main result.}
+
 \begin{theorem}\label{thm:main}
 Under SD6 noise, the circuit of Table~\ref{tab:circuit} has $\dcirc=12$ in both
 memory bases for every number of rounds $R\ge1$.
@@ -340,12 +342,17 @@ The main open question is whether $\dcirc=12$ can be reached at period 8, or at 
 period below 18, by less symmetric schedules.
 
 \paragraph{Data availability.}
-The circuits, the list of 4224 weight-11 extended logicals, the upper-bound witness
-and the verification code are available at [Zenodo DOI --- PI to decide].
+The circuit specifications, the lists of 4224 weight-11 extended logicals for each
+basis, the witnesses, the certificates (clause sets of the unsatisfiable instances)
+and the reproduction scripts are available at [Zenodo DOI --- PI to decide].
 
 \begin{acknowledgments}
-[ACKNOWLEDGEMENTS --- PI to decide.]
-[AI-use statement --- PI to decide.]
+\emph{AI use.} This research was carried out with AI agents (Claude, Anthropic).
+The agents proposed hypotheses, wrote and ran the search and verification code,
+worked out the constructions and proofs, and independently re-checked each claim
+reported here, using separately written code for every computation. The author directed the project, made all decisions
+at its decision points, and takes full responsibility for the content. In line
+with APS policy, no AI system is listed as an author.
 \end{acknowledgments}
 
 % ===========================================================================
@@ -393,12 +400,18 @@ Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
 \begin{center}
 \textbf{\large Supplemental Material}
 \end{center}
+\setcounter{secnumdepth}{1}
 \setcounter{section}{0}
 \renewcommand{\thesection}{S\arabic{section}}
 \setcounter{table}{0}
 \renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theHtable}{S\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theHfigure}{S\arabic{figure}}
 \setcounter{equation}{0}
 \renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\theHequation}{S\arabic{equation}}
 
 The sections follow the order of the main text. S1--S2 fix notation and the
 circuits; S3--S8 contain the proof of Theorem~\ref{thm:main}; S9 concerns Fig.~12
@@ -746,9 +759,11 @@ computation of Lemma~\ref{lem:lift}; the enumeration of period-8 schedules; and 
 minimum-period runs. The arguments of Lemmas~\ref{lem:reduction} and \ref{lem:gap}
 were checked independently, and their structural premises (template identity,
 image set, periodicity, detector structure) were verified by computer for every
-circuit. The data set contains the three circuits, the Fig.~12 circuit, the 4224
-weight-11 extended logicals per basis, the upper-bound witnesses, the clause sets of
-the unsatisfiable instances, and a script that reproduces the lower-bound
-computations; it is available at [Zenodo DOI --- PI to decide].
+circuit. The data set (Data availability) contains the circuit specifications (circuits A, B,
+C and Fig.~12), the lists of 4224 weight-11 extended logicals for each basis, the
+witnesses (the weight-12 upper-bound witnesses and the weight-11 witnesses for
+Fig.~12 and its retimings), the certificates (clause sets of the unsatisfiable
+instances), and the reproduction scripts for the lower-bound computations; it is
+available at [Zenodo DOI --- PI to decide].
 
 \end{document}
