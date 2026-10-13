@@ -209,3 +209,4 @@
 - 允许下载 revtex4-2 编译正式 PDF；数据打包在本地，由 PI 上传 Zenodo 取得 DOI。
 - （2026-10-13 第二组选择题）单位写 "Independent researcher"；姓名待 PI 提供；Zenodo 许可证：数据 CC-BY 4.0、代码 MIT；arXiv 只投 quant-ph；联系信不抄送 Shaw/Terhal。
 - （2026-10-13）单位改为 Zhejiang University（与浙大邮箱一致），PI 选择。
+- （2026-10-13）PI 指示开源：整个研究仓库及历史已公开到 https://github.com/GavinNull/gross-code-distance-12（不含 .env、results/、Zenodo 大文件）。
