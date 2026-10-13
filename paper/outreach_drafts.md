@@ -44,5 +44,5 @@ Best regards,
 
 注意事项：
 - 信里只写论文和复核过的结论里有的内容，不提尚未公开的 morphing 判据工作。
-- 是否同时抄送 Shaw、Terhal，由 PI 决定。本文已不讨论 morphing，建议不抄送。
+- PI 已决定：不抄送 Shaw、Terhal。
 - 是否向 IonQ 询问其 d_circ = 9 的计算方法，与本文无关，建议以后再说。
