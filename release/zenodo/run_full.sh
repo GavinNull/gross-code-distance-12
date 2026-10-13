@@ -21,5 +21,15 @@ run code/inject_upper_bound.py A B C
 for f in "$OUT"/lift_*.log; do grep -E '^(PASS|FAIL)' "$f"; grep -q '^FAIL' "$f" && FAIL=1; grep -q '^PASS' "$f" || FAIL=1; done
 run code/verify_witnesses.py
 run code/check_certificates.py --family
+run code/check_uniqueness_witnesses.py
+for j in "primary 8" "primary 12" "primary 20 --common-frame" "second 8" "second 12" "second 9 --sub 1,2"; do
+  run code/sat/regenerate.py $j
+done
+run code/compare_lifts.py
+run code/p8_family.py enumerate
+run code/p8_family.py encoding
+run code/p8_family.py check
+run code/sat/soundness.py 17 0 60 15
+run code/sat/soundness.py 17 0 4 4 all
 echo "== d_ext searches"; OUT="$OUT/dext" P="$P" PYTHON="$PYTHON" sh code/dext/run_dext.sh both || FAIL=1
 [ "$FAIL" -eq 0 ] && echo "ALL PASS" || { echo "SOME CHECKS FAILED"; exit 1; }

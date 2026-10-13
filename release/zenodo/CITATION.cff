@@ -1,12 +1,13 @@
-# Placeholder -- the author fills in name, ORCID, DOI and arXiv identifier before publication.
+# DOI, release date and arXiv identifier are placeholders until publication.
 cff-version: 1.2.0
 message: "If you use this data set or code, please cite the paper and this data set."
 title: "Data and verification code for: A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
 type: dataset
 authors:
-  - family-names: "[Family name -- PI to fill]"
-    given-names: "[Given name -- PI to fill]"
+  - family-names: "Pan"
+    given-names: "Guancheng"
     affiliation: "Independent researcher"
+    email: "3250101086@zju.edu.cn"
 version: "1.0.0"
 doi: "[Zenodo DOI -- assigned on upload]"
 license: ["CC-BY-4.0", "MIT"]
@@ -15,8 +16,8 @@ preferred-citation:
   type: article
   title: "A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
   authors:
-    - family-names: "[Family name -- PI to fill]"
-      given-names: "[Given name -- PI to fill]"
+    - family-names: "Pan"
+      given-names: "Guancheng"
   identifiers:
     - type: other
       value: "arXiv:[to be assigned]"

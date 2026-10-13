@@ -31,17 +31,17 @@ PASS  lift circuit A basis Z R=1: 0/4224 weight-11 logicals lift (expected 0); t
 PASS  lift circuit A basis Z R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (2.4 s)
 {"circuit": "A", "basis": "Z", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 3.3, "first_lifting": []}
 PASS  lift circuit A basis Z R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (3.3 s)
-{"circuit": "A", "basis": "X", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 1.5, "first_lifting": []}
-PASS  lift circuit A basis X R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (1.5 s)
-{"circuit": "A", "basis": "X", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.4, "first_lifting": []}
-PASS  lift circuit A basis X R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (2.4 s)
-{"circuit": "A", "basis": "X", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 3.3, "first_lifting": []}
-PASS  lift circuit A basis X R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (3.3 s)
+{"circuit": "A", "basis": "X", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.1, "first_lifting": []}
+PASS  lift circuit A basis X R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.1 s)
+{"circuit": "A", "basis": "X", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 4.2, "first_lifting": []}
+PASS  lift circuit A basis X R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (4.2 s)
+{"circuit": "A", "basis": "X", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 5.0, "first_lifting": []}
+PASS  lift circuit A basis X R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (5.0 s)
 == code/lift.py --circuit fig12 --basis Z X --R 1
 {"circuit": "fig12", "basis": "Z", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.7, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 PASS  lift circuit fig12 basis Z R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.7 s)
-{"circuit": "fig12", "basis": "X", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.1, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
-PASS  lift circuit fig12 basis X R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.1 s)
+{"circuit": "fig12", "basis": "X", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.2, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+PASS  lift circuit fig12 basis X R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.2 s)
 == code/premises.py --circuit A --rmax 32
 PASS  [A] structure (R = 2, 3, 5, 9, both bases): D = 18, starts independent of R, dm_max = 17 <= D - 1, S = 5, CNOTs inside windows, template orientation, detector set exact (0 problems)
 PASS  [A] G = max(2D + dm_max - 1, D + S + dm_max) = 52; a weight-11 undetected logical spans <= 10 (G - 1) = 510 layers
@@ -58,7 +58,7 @@ PASS  [A] X basis R=1: weight-12 injection fires no detector, flips observables 
 PASS  [A] X basis R=3: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
 PASS  [A] X basis R=6: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
 PASS  [A] X basis R=10: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
-== code/verify_witnesses.py --max-per-case 10
+== code/verify_witnesses.py --max-per-case 10 --max-cases 60
 PASS  [fig12] Z basis R=1: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
 PASS  [fig12] X basis R=1: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
 PASS  [fig12] Z basis R=2: 10/10 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
@@ -113,7 +113,33 @@ PASS  [fig12_retiming_3] X basis R=3: 1/1 weight-11 fault sets injected: no dete
 PASS  [fig12_retiming_3] X basis R=4: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
 PASS  [fig12_retiming_3] X basis R=5: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
 PASS  [fig12_retiming_3] X basis R=6: 1/1 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed extended logical
+PASS  [weight11_p8_colour_symmetric_944.json.gz] 60 circuits: 60/60 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed logical
 == code/check_certificates.py --max-clauses 45000
+PASS  fig12_retimings/primary_P08_pipelined.cnf.gz: 26402 clauses, 1518 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  fig12_retimings/primary_P09_pipelined.cnf.gz: 32577 clauses, 1696 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  fig12_retimings/primary_P10_pipelined.cnf.gz: 40665 clauses, 1920 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+skip  fig12_retimings/primary_P11_pipelined.cnf.gz (51221 clauses)
+skip  fig12_retimings/primary_P12_pipelined.cnf.gz (59985 clauses)
+skip  fig12_retimings/primary_P16_common_frame_nosym.cnf.gz (654106 clauses)
+skip  fig12_retimings/primary_P38_common_frame.cnf.gz (113566 clauses)
+PASS  fig12_retimings/second_P08_sym24.cnf.gz: 30016 clauses, 2203 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+skip  fig12_retimings/second_P09_subgroup_0_3__2_1.cnf.gz (53662 clauses)
+skip  fig12_retimings/second_P09_subgroup_0_3__3_0.cnf.gz (73226 clauses)
+skip  fig12_retimings/second_P09_subgroup_0_3__6_0.cnf.gz (134900 clauses)
+skip  fig12_retimings/second_P09_subgroup_1_2.cnf.gz (48598 clauses)
+skip  fig12_retimings/second_P09_subgroup_1_5.cnf.gz (48598 clauses)
+skip  fig12_retimings/second_P09_subgroup_2_1.cnf.gz (91446 clauses)
+skip  fig12_retimings/second_P09_subgroup_2_4.cnf.gz (95082 clauses)
+skip  fig12_retimings/second_P09_subgroup_3_3.cnf.gz (135734 clauses)
+skip  fig12_retimings/second_P09_subgroup_4_2.cnf.gz (166226 clauses)
+skip  fig12_retimings/second_P09_subgroup_4_5.cnf.gz (89090 clauses)
+PASS  fig12_retimings/second_P09_sym24.cnf.gz: 33976 clauses, 2383 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+skip  fig12_retimings/second_P10_subgroup_0_3__3_0.cnf.gz (91799 clauses)
+skip  fig12_retimings/second_P10_subgroup_1_2.cnf.gz (65192 clauses)
+skip  fig12_retimings/second_P10_subgroup_2_4.cnf.gz (122562 clauses)
+PASS  fig12_retimings/second_P10_sym24.cnf.gz: 38505 clauses, 2597 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+skip  fig12_retimings/second_P11_sym24.cnf.gz (45582 clauses)
+skip  fig12_retimings/second_P12_sym24.cnf.gz (51171 clauses)
 skip  less_symmetry/P08_subgroup_0_3.cnf.gz (218726 clauses)
 skip  less_symmetry/P08_subgroup_1_2.cnf.gz (51248 clauses)
 skip  less_symmetry/P08_subgroup_4_2.cnf.gz (162810 clauses)
@@ -193,4 +219,81 @@ PASS  order_class_uniqueness/m3_12_Xerrors.cnf.gz: 14637 clauses, 1503 variables
 PASS  order_class_uniqueness/m3_12_Zerrors.cnf.gz: 16005 clauses, 1503 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 skip  window_explanation/P24_window14_X0.cnf.gz (142974 clauses)
 skip  window_explanation/P24_window14_Z2.cnf.gz (144788 clauses)
+== code/sat/regenerate.py primary 8
+P=8 common_frame=0 classes=3 logical reps=184 skipped=168 det pairs=27 vars=1344
+{'it': 1, 'lifting': 160, 'nogoods': 160, 'sec': 0.2}
+STATUS UNSAT it=2
+status UNSAT; 26948 clauses (22381 family, 4567 nogoods); {'status': 'UNSAT', 'iterations': 2, 'nogoods': 160, 'sec': 0.2}
+PASS  IDENTICAL: clause sequence equals P08_pipelined.cnf.gz byte for byte (after the comment header)
+== code/sat/regenerate.py second 10
+P=10 |H|=24 classes=3 items=36 reps=184 skipped=168 det_pairs=27 clauses=35011 vars=2401
+{'it': 1, 'lifting': 132, 'sec': 0.2}
+{'it': 2, 'lifting': 119, 'sec': 0.3}
+{'it': 3, 'lifting': 88, 'sec': 0.3}
+{'it': 10, 'lifting': 98, 'sec': 0.7}
+{'it': 20, 'lifting': 80, 'sec': 1.4}
+STATUS UNSAT it=23
+status UNSAT; 44910 clauses (35012 family, 9898 nogoods); {'status': 'UNSAT', 'iterations': 23, 'sec': 1.6, 'subgroup_order': 24}
+PASS  IDENTICAL: clause sequence equals P10_pipelined.cnf.gz byte for byte (after the comment header)
+== code/compare_lifts.py --circuit A fig12 --R 1 --methods cpsat dp mitm
+PASS  [A] basis Z R=1: cpsat 0/4224 (2.3 s), dp 0/4224 (0.5 s), mitm 0/4224 (0.7 s) -- identical sets of lifting logicals
+PASS  [A] basis Z R=1: 0 lifting logicals (expected 0)
+PASS  [A] basis X R=1: cpsat 0/4224 (1.5 s), dp 0/4224 (0.6 s), mitm 0/4224 (0.8 s) -- identical sets of lifting logicals
+PASS  [A] basis X R=1: 0 lifting logicals (expected 0)
+PASS  [fig12] basis Z R=1: cpsat 4224/4224 (2.1 s), dp 4224/4224 (0.5 s), mitm 4224/4224 (0.6 s) -- identical sets of lifting logicals
+PASS  [fig12] basis Z R=1: 4224 lifting logicals (expected 4224)
+PASS  [fig12] basis X R=1: cpsat 4224/4224 (2.1 s), dp 4224/4224 (0.5 s), mitm 4224/4224 (0.6 s) -- identical sets of lifting logicals
+PASS  [fig12] basis X R=1: 4224 lifting logicals (expected 4224)
+== code/check_uniqueness_witnesses.py
+PASS  m2_10_Xerrors: 46/46 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m2_10_Zerrors: 42/42 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m2_01_Xerrors: 36/36 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m2_01_Zerrors: 37/37 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m2_11_Xerrors: 32/32 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m2_11_Zerrors: 35/35 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m3_10_Xerrors: 48/48 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m3_10_Zerrors: 42/42 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m3_01_Xerrors: 47/47 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m3_01_Zerrors: 51/51 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m3_11_Xerrors: 34/34 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  m3_11_Zerrors: 36/36 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  m3_12_Xerrors: 27/27 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  m3_12_Zerrors: 46/46 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_1__4_0_Xerrors: 57/57 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_1__4_0_Zerrors: 63/63 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_2__2_0_Xerrors: 71/71 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_2__2_0_Zerrors: 67/67 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_2__2_1_Xerrors: 88/88 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_2__2_1_Zerrors: 63/63 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_0_Xerrors: 202/202 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_0_Zerrors: 92/92 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_1_Xerrors: 118/118 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_1_Zerrors: 99/99 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_2_Xerrors: 103/103 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  0_0__1_2_Zerrors: 101/101 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  0_0__1_3_Xerrors: 130/130 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_3_Zerrors: 83/83 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_4_Xerrors: 148/148 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_4_Zerrors: 114/114 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__1_5_Xerrors: 131/131 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  0_0__1_5_Zerrors: 117/117 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  0_0__3_1_Xerrors: 84/84 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__3_1_Zerrors: 63/63 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__3_2_Xerrors: 109/109 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_0__3_2_Zerrors: 63/63 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_1__6_0_Xerrors: 85/85 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_1__6_0_Zerrors: 67/67 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_3__2_0_Xerrors: 110/110 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_3__2_0_Zerrors: 96/96 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_3__2_1_Xerrors: 103/103 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  0_3__2_1_Zerrors: 99/99 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  0_3__2_2_Xerrors: 127/127 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_3__2_2_Zerrors: 125/125 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_2__4_0_Xerrors: 108/108 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_2__4_0_Zerrors: 76/76 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
+PASS  0_3__3_0_Xerrors: 71/71 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+PASS  0_3__3_0_Zerrors: 67/67 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
+3859 witnesses checked, 0 failures
+== code/p8_family.py enumerate
+PASS  P = 8 colour-symmetric family: backtracking enumeration gives 944 circuits (944 distinct up to global time shift), equal to the 944 listed (10 s)
 ALL PASS
