@@ -20,6 +20,27 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision g (2026-10-14, external reviewer)
+
+1. Optimality reworded (abstract, intro, Cost and optimality, SM S9/S10): "in a bulk Pauli-frame model of lifting,
+   no colour-symmetric schedule … has a shorter period"; the model is defined in the main text; the needed
+   direction (model lift ⇒ real error) is stated as proven for ten-data + one length-2-residual logicals (Helly) and
+   sampled (991/991) otherwise ⇒ "strong evidence rather than a theorem". "Less symmetry" results marked "in the
+   same model".
+2. SM S5 now contains a full case-by-case proof that every single fault has image zero or one extended column for
+   our template (data, Z-ancilla, X-ancilla prep/measure/idle, CNOT two-qubit Paulis on X- and Z-check CNOTs incl.
+   X_a X_d ⇒ suffix from q_k), independent of interleaving and pipelining; main text cites S5.
+3. SM S7 step (4) derives R' ≤ 32 term by term (front: insertion only from layer 4 ⇒ f1 ≤ 21 ⇒ f11 ≤ 531; back:
+   x = f11 + 2D − 2 ≤ 565 > 18(R − 1) ⇒ R ≤ 32).
+4. Corollary 1 = SBB Prop. 3 + Cor. 1 + our d_ext = 11, "as they conjectured".
+5. "Lift" defined at first use (Key idea); DEM-mechanism counting convention as its own sentence in Setting;
+   Fig. 1 caption explains {9,25} ≡ {8,91,82,85} modulo the check.
+6. Placeholders: "[LER comparison — pending E-026]", "[certificate wording — pending E-027]" (Lemma 2, SM S11).
+7. draft.pdf rebuilt with tectonic: no overfull boxes, no undefined references. The offline preview was removed by
+   the lead (a5a124b); draft.pdf is the only build.
+8. **Not pushed**: pushing to origin sends the repository outward, which the writer's standing rules forbid
+   without the user's own approval; the lead/PI should push.
+
 ## Revision f (2026-10-13; PI: single author, detailed AI disclosure, arXiv first)
 
 - Author block: single author, placeholders "[Name — PI to fill]" / "[Affiliation — PI to fill]".
