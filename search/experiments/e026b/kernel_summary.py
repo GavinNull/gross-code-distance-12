@@ -70,3 +70,32 @@ for m, dd in out.items():
               "D5 p18 %.3g CI %s" % (p18["D5_coef"], p18["D5_coef_ci"] and [f"{x:.3g}" for x in p18["D5_coef_ci"]]),
               "fig12 D5 %.3g" % cc["fig12"]["D5_coef"] if "fig12" in cc else "")
 (OUT / "kernel_summary.json").write_text(json.dumps(out, indent=1))
+
+# lambda_max: largest lambda at which p18 (practical-decoder leading-order model) is below the IBM proxy at p = 1e-4
+# (if it is below at 1e-4 it is below on [p_lo, 1e-4] too, since both go as p^5 there).  g < 1 <=> p18 wins at 1e-4.
+P0 = 1e-4
+lam_max = {}
+for dec in ("bposd", "relay5"):
+    for unit, fac in (("round", 1.0), ("layer", PERIOD["ibm"] / PERIOD["p18"])):
+        pts = []
+        for m, dd in out.items():
+            if not m.startswith("lam") or dec not in dd or "p18" not in dd[dec]:
+                continue
+            p18 = dd[dec]["p18"]; C5 = lrow[m]["C5_ibm_proxy"]
+            vals = [p18["D5_coef"]] + (p18["D5_coef_ci"] or [p18["D5_coef"]] * 2)
+            g = [fac * (v + p18["A6_coef"] * P0) / C5 for v in vals]
+            pts.append((float(m[3:]), g))
+        pts.sort()
+        est = []
+        for k in range(3):
+            x = None
+            for (l1, g1), (l2, g2) in zip(pts, pts[1:]):
+                if g1[k] < 1 <= g2[k]:
+                    t = np.log(1 / g1[k]) / np.log(g2[k] / g1[k]); x = l1 + t * (l2 - l1); break
+            if x is None and all(g[k] < 1 for _, g in pts):
+                x = ">1"
+            est.append(x)
+        lam_max[f"{dec}_{unit}"] = {"point": est[0], "D5_lowCI": est[1], "D5_highCI": est[2],
+                                    "g_by_lambda": {l: [round(v, 4) for v in g] for l, g in pts}}
+        print("lambda_max vs IBM proxy", dec, unit, est, {l: round(g[0], 3) for l, g in pts})
+(OUT / "kernel_summary.json").write_text(json.dumps({"by_model": out, "lambda_max_vs_ibm_proxy_at_1e-4": lam_max}, indent=1))
