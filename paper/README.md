@@ -20,6 +20,14 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision h2 (2026-10-15)
+
+E-027 audited (C51). Lemma 2 and SM S6 describe the selector-disjunction batches; S10/S11 give the total of 129
+unsatisfiable clause sets with DRAT proofs and define "accompanied" (≤ 100 MB included, larger by SHA-256 +
+byte-identical regeneration script); Table S3 re-runs "each accompanied by a DRAT proof"; S11 notes that the template
+and the Lemma 1 reduction are not certificate-covered. Packaging note from the audit: MANIFEST.sha256 must be
+regenerated before release (it predates the len-2-only proofs).
+
 ## Revision h (2026-10-14)
 
 - Table S3: all rows proven via the length-2-only re-runs (option A); Corollary 1 restored.
