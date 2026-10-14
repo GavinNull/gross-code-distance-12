@@ -224,3 +224,6 @@ PI 转来一份外部审读（结论：扎实，新颖性完好；短板是实�
   Lemma 2 的 lift 全覆盖：A（R ≤ 32）、B（R ≤ 24）、C（R ≤ 14 与 16），两基底，全部 4224 个逻辑，编成 CNF，全部无解，DRAT 和 LRAT 均验证通过。Fig. 12 阳性对照 4224/4224 有解。
   **未做到**：d_ext = 11 和 4224 列表的完备性没有拿到证书。直接 CNF 编码在权重 6 就超出 CDCL 求解器的能力，这两项仍只由两套独立的 DFS 支撑。
   数据包 230 MB（大证明只发 sha256 和重生成脚本）。可用措辞：“every infeasibility claim decided by a SAT or CP solver is accompanied by a DRAT proof verified with drat-trim (LRAT core with cake_lpr)”；不能写 “every computer-assisted step is certified”。
+- **E-026 复核（2026-10-14，`research/audits/2026-10-14-E-026.md`）**：头条 CONFIRMED。比较公平，3168 个空闲位置的计数正确，没有新电路特有的解码器病态；按故障质量对齐后三个电路表现相当。差距就是新电路每轮故障质量约大 2.8 倍的直接后果。独立复现：2e-3 处 p18/IBM = 1.52e3 [1.10e3, 2.14e3]。
+  措辞必须改：“worse at every sampled p ≥ 10⁻³: above pseudo-threshold for p ≥ 3×10⁻³, ≈10³× at 2×10⁻³, ≥3× at 10⁻³ (direct bound)”；所有比值都要写明是在相同的实际解码器（BP-OSD / Relay-BP）下。
+  对 IBM 的低 p 无交叉：UNVERIFIED（理想解码下 p⁶ 对 p⁵ 必然在某个 p ≲ 5e-4 交叉）。“解码器掩盖距离”部分被推翻：干净的解码器特有失败只有 Fig. 12 的权重 4。对 Fig. 12 的系数比约 26（只在已枚举族上成立）。
