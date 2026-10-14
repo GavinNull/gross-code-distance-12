@@ -5,7 +5,7 @@
 #   Lemma 3 premises (A: gap argument; B: slab premise; C: round separation); upper bound; witnesses; certificates
 #   DRAT proofs (about 12 more CPU hours; skipped with NO_PROOFS=1; builds the tools with code/proofs/build_tools.sh,
 #   which downloads CaDiCaL, drat-trim and cake_lpr from their official repositories, unless CADICAL / DRAT_TRIM point
-#   to existing binaries): every shipped proof checked with drat-trim, the 13 proofs over 100 MB regenerated and
+#   to existing binaries): every shipped proof checked with drat-trim, the 14 proofs over 100 MB regenerated and
 #   checked, and the Lemma 2 lift batches of circuits A (R <= 32), B (R <= 24), C (R <= 14, 16) refuted with DRAT
 #   proofs checked by drat-trim (LRAT core by cake_lpr when built), with the CNF sha256 compared to the records.
 # Usage: P=4 sh run_full.sh       (PYTHON = interpreter of the environment with requirements.txt; default python)
@@ -32,6 +32,7 @@ run code/check_uniqueness_witnesses.py
 for j in "primary 8" "primary 12" "primary 20 --common-frame" "second 8" "second 12" "second 9 --sub 1,2"; do
   run code/sat/regenerate.py $j
 done
+for n in $("$PYTHON" code/sat/len2only.py list); do run code/sat/len2only.py "$n"; done
 run code/compare_lifts.py
 run code/p8_family.py enumerate
 run code/p8_family.py encoding

@@ -21,10 +21,12 @@ run code/verify_witnesses.py --max-per-case 10 --max-cases 60
 run code/check_certificates.py --max-clauses 45000
 run code/sat/regenerate.py primary 8
 run code/sat/regenerate.py second 10
+run code/sat/len2only.py primary_P10_pipelined
 run code/compare_lifts.py --circuit A fig12 --R 1 --methods cpsat dp mitm
 run code/check_uniqueness_witnesses.py
 run code/p8_family.py enumerate
 if [ -x "$CADICAL" ] && [ -x "$DRAT_TRIM" ]; then
+  [ -x "$CAKE_LPR" ] || echo "SKIP  cake_lpr not found: LRAT cores are not checked (recorded as \"not run\")"
   run code/proofs/check_proofs.py --max-bytes 2e6
   /bin/rm -rf proof_run_quick
   run code/proofs/run_lift_certs.py A 1-2 proof_run_quick --compare certificates/proofs/lift_circuit_A.jsonl
