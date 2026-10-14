@@ -51,8 +51,9 @@ for key, r in sorted(rows.items(), key=lambda x: (x[0][0], x[0][3], -x[0][2], x[
         rr = r["draws"] / ref["draws"]
         r[f"ratio_vs_{nm}"] = [r["eps"] / ref["eps"] if ref["eps"] > 0 else None,
                                float(np.quantile(rr, 0.025)), float(np.quantile(rr, 0.975))]
-        rl = rr * PERIOD[c] / PERIOD[nm]
-        r[f"ratio_per_layer_vs_{nm}"] = [r[f"ratio_vs_{nm}"][0] * PERIOD[c] / PERIOD[nm] if ref["eps"] > 0 else None,
+        # per layer = per round / period  ->  (eps_c / P_c) / (eps_nm / P_nm) = ratio * P_nm / P_c
+        rl = rr * PERIOD[nm] / PERIOD[c]
+        r[f"ratio_per_layer_vs_{nm}"] = [r[f"ratio_vs_{nm}"][0] * PERIOD[nm] / PERIOD[c] if ref["eps"] > 0 else None,
                                          float(np.quantile(rl, 0.025)), float(np.quantile(rl, 0.975))]
     out.append({k: v for k, v in r.items() if k != "draws"})
     rat = " ".join(f'{k[9:]}={v[0]:.3g}[{v[1]:.3g},{v[2]:.3g}]' for k, v in r.items()

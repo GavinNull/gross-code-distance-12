@@ -34,7 +34,7 @@ for m in models:
     C5 = math.exp(18.04) * (mass / ibm_m[1.0]) ** 5
     # p18 per round A6 p^6 < C5 p^5  <=>  p < C5/A6 ; per layer: A6 p^6/18 < C5 p^5/8 <=> p < C5*18/(8*A6)
     row = dict(model=m, lam=lam, A6_p18=A[m]["p18"], A6_fig12=A[m]["fig12"], ratio_round=r,
-               ratio_layer=r * PERIOD["p18"] / PERIOD["fig12"], C5_ibm_proxy=C5,
+               ratio_layer=r * PERIOD["fig12"] / PERIOD["p18"], C5_ibm_proxy=C5,
                pstar_round_vs_ibm=C5 / A[m]["p18"], pstar_layer_vs_ibm=C5 * PERIOD["p18"] / (PERIOD["ibm"] * A[m]["p18"]))
     rows.append(row)
     print(json.dumps({k: (f"{v:.3g}" if isinstance(v, float) else v) for k, v in row.items()}))
