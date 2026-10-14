@@ -61,7 +61,8 @@ def job(args):
             f.write(json.dumps(rec) + "\n")
         print(("PASS" if rec["ok"] else "FAIL"), name, f"{rec['instances']} instances, {rec['clauses']} clauses:",
               rec["solver"]["answer"], "drat-trim", rec.get("drat_trim", {}).get("verdict", "-"),
-              "cake_lpr", rec.get("cake_lpr", {}).get("verdict", "-"),
+              "cake_lpr", {"not run": "SKIP (not run)"}.get(rec.get("cake_lpr", {}).get("verdict", "-"),
+                                                           rec.get("cake_lpr", {}).get("verdict", "-")),
               *([f"cnf sha256 {'= record' if rec['cnf_matches_record'] else 'DIFFERS'}, proof "
                  f"{'= record' if rec['drat_matches_record'] else 'differs from record'}"] if ref is not None else []),
               flush=True)

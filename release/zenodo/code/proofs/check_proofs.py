@@ -8,8 +8,8 @@ the reference machine).  Proofs up to the size limit are shipped as certificates
     python code/proofs/check_proofs.py --max-bytes 20e6   # only shipped proofs below 20 MB (quick)
     python code/proofs/check_proofs.py --regenerate NAME… # proofs not shipped: re-solve with CaDiCaL, check the new
                                                           # proof with drat-trim (and cake_lpr), compare its sha256
-    python code/proofs/check_proofs.py --regenerate unshipped   # the 13 proofs over 100 MB (about 2.5 CPU hours)
-    python code/proofs/check_proofs.py --regenerate all         # every certificate (about 2.7 CPU hours)
+    python code/proofs/check_proofs.py --regenerate unshipped   # the 14 proofs over 100 MB (about 2.9 CPU hours)
+    python code/proofs/check_proofs.py --regenerate all         # every certificate (about 3.2 CPU hours)
 Tools: $CADICAL, $DRAT_TRIM, $CAKE_LPR (see code/proofs/build_tools.sh).
 """
 import argparse
@@ -53,7 +53,7 @@ try:
             same = rec.get("drat_sha256") == r["drat_sha256"]
             V(rec["ok"] and rec["cnf_sha256"] == r["cnf_sha256"],
               f"{name}: re-solved {rec['solver']['answer']}, drat-trim {rec.get('drat_trim', {}).get('verdict')}, "
-              f"cake_lpr {rec.get('cake_lpr', {}).get('verdict', 'not run')}; proof "
+              f"cake_lpr {'SKIP (not run)' if rec.get('cake_lpr', {}).get('verdict') == 'not run' else rec.get('cake_lpr', {}).get('verdict')}; proof "
               f"{'identical to' if same else 'differs from'} the recorded one ({rec.get('drat_bytes')} bytes)")
             continue
         if not shipped.exists():

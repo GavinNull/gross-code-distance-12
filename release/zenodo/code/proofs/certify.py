@@ -3,7 +3,9 @@
 For each instance:
   1. CaDiCaL solves the CNF and writes a DRAT proof (binary format);           exit code 20 = UNSAT
   2. drat-trim checks the DRAT proof (backward checking) and writes the core lemmas as an LRAT proof;
-  3. cake_lpr (the formally verified CakeML checker) checks that LRAT proof   (optional; skipped if absent).
+  3. cake_lpr (the formally verified CakeML checker) checks that LRAT proof   (optional; if absent the record says
+     "cake_lpr": {"verdict": "not run"} and the output says SKIP; its verdict is read from its output line
+     "s VERIFIED UNSAT", never from its exit status, which is 0 also on failure).
 The result record has the solver answer, the checker verdicts, wall/CPU seconds of each step, proof sizes and
 sha256 of the CNF (uncompressed), the DRAT proof and the LRAT proof.
 
@@ -102,16 +104,21 @@ def certify(cnf, outdir, name, timeout=7200, keep=False):
             if shutil.which(CAKE_LPR) or Path(CAKE_LPR).exists():
                 code3, text3, wall3, cpu3 = run([CAKE_LPR, str(plain), str(lrat)], timeout,
                                                 outdir / f"{name}.cake_lpr.log")
-                ok = "s VERIFIED UNSAT" in text3
+                # judged by the output line only: cake_lpr exits with status 0 also when the check fails
+                ok = any(l.strip() == "s VERIFIED UNSAT" for l in text3.splitlines())
                 rec["cake_lpr"] = {"verdict": "VERIFIED UNSAT" if ok else ("TIMEOUT" if code3 is None else "FAILED"),
                                    "wall_s": round(wall3, 2), "cpu_s": round(cpu3, 2)}
+            else:
+                rec["cake_lpr"] = {"verdict": "not run"}       # checker absent: recorded as such, never as a pass
     if not keep:
         for p in (drat, lrat):
             if p.exists():
                 p.unlink()
     plain.unlink()
+    # ok = UNSAT and the DRAT proof verified by drat-trim; a cake_lpr check that ran must also succeed, a cake_lpr
+    # check that did not run is reported as "not run" (SKIP) and does not count as a check
     rec["ok"] = (rec["solver"]["answer"] == "UNSAT" and rec.get("drat_trim", {}).get("verdict") == "VERIFIED"
-                 and rec.get("cake_lpr", {"verdict": "VERIFIED UNSAT"})["verdict"] == "VERIFIED UNSAT")
+                 and rec.get("cake_lpr", {}).get("verdict") in ("VERIFIED UNSAT", "not run"))
     return rec
 
 
@@ -145,8 +152,9 @@ def main(argv):
         rec = certify(job[1], pos[2], job[0], opts["--timeout"], keep)
         with res.open("a") as f:
             f.write(json.dumps(rec) + "\n")
+        ck = rec.get("cake_lpr", {}).get("verdict")
         print(("PASS" if rec["ok"] else "FAIL"), rec["name"], rec["solver"], rec.get("drat_trim"),
-              rec.get("cake_lpr"), flush=True)
+              "cake_lpr SKIP (not run)" if ck == "not run" else rec.get("cake_lpr"), flush=True)
         return rec["ok"]
 
     with ThreadPoolExecutor(opts["--workers"]) as ex:
