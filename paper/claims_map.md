@@ -1,5 +1,16 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision h2 (2026-10-15).** C51 (E-027) is now **audited**: `research/audits/2026-10-15-E-027.md`, all CONFIRMED
+(batches with selector disjunction checked structurally on 4 batches; 9 shipped and 3 regenerated large proofs and
+4 lift-batch proofs reproduced byte-identically; 129 records). Text now: lift instances combined into batches by a
+selector disjunction (unsat batch ⇒ unsat members), each batch DRAT-refuted, drat-trim + cake_lpr; 129 unsatisfiable
+clause sets (104 all-logical obstruction/optimality + 25 length-2-only for Table S3), each with a DRAT proof;
+"accompanied" = included if ≤ 100 MB, otherwise SHA-256 hash + byte-identical regeneration script. Table S3 len-2-only
+re-runs "each accompanied by a DRAT proof" (note: of the 25, the auditor re-ran 10 and record-checked 15). S11 states
+the certificates cover solver decisions only; template and Lemma 1 reduction are pen-and-paper / code-level (S5).
+Limitation sentence kept verbatim.
+
+
 **Revision h (2026-10-14).**
 - C16: all Table S3 rows now re-solved UNSAT with only the 360/basis ten-data + one-length-2-residual logicals
   (the last 5 in `results/revg-len2only/run.log`) ⇒ daggers dropped, audit option (A) sentence used, Corollary 1's
