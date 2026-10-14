@@ -1,5 +1,23 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision h (2026-10-14).**
+- C16: all Table S3 rows now re-solved UNSAT with only the 360/basis ten-data + one-length-2-residual logicals
+  (the last 5 in `results/revg-len2only/run.log`) ⇒ daggers dropped, audit option (A) sentence used, Corollary 1's
+  retiming claim restored to all Table S3 families. "Each accompanied by a DRAT proof" is NOT written for the
+  len-2-only instances (pending lead confirmation); text says "(certificates in the data set)".
+- **New C50 (E-026, LER):** STATE E-026 + audit `research/audits/2026-10-14-E-026.md` §4 (rows 1, 2, 4, 5, 7, 10;
+  wording used: worse at every sampled p ≥ 1e-3; above pseudo-threshold for p ≥ 3e-3; ≈1.5e3× worse than IBM at
+  2e-3; ≥ 3× at 1e-3 (direct bound); 3168 vs 288 idle locations, 2.8× fault mass; matched fault mass ⇒ alike;
+  ⌈d/2⌉ = 6 for both; ≈26× coefficient for enumerated families). Not written: "no crossover with IBM at low p"
+  (UNVERIFIED), the ≈4e2 extrapolation. Placeholder "[idle-noise sensitivity — pending E-026b]".
+- **New C51 (E-027, certificates):** `research/journal/2026-10-14-E-027-certificates.md` + STATE line 223
+  (104/104 CaDiCaL UNSAT, drat-trim VERIFIED, cake_lpr VERIFIED; lift CNFs for A R ≤ 32, B R ≤ 24, C R ≤ 14,16;
+  Fig. 12 R = 1 control 4224/4224 SAT). **Status: experimenter-reported; no auditor report on E-027 was available
+  to the writer at revision h** — the lead decided to use the wording. Limitation sentence (d_ext = 11 and the
+  4224-list completeness have no checkable certificate) added in SM S4 and S11. Not written: "every
+  computer-assisted step is certified".
+
+
 **Revision g3 (2026-10-14, audit `research/audits/2026-10-14-revg-proofs.md`).** S5 and S7 CONFIRMED; wording fixes
 applied verbatim (S5 opening and (c); S7 first-round detector reason b − a ≤ 21 < G; main-text insertion range
 4 ≤ x ≤ 18R; 2D − 3 noted as sufficient, 2D − 2 kept). Frame-model sentence in "Cost and optimality" made
