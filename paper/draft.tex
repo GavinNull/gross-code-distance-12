@@ -46,8 +46,11 @@ the minimum-weight extended-code logicals becomes an undetected circuit error; t
 proof combines two short arguments with an exact computation.
 The price is a period of 18 time steps per round instead of 8; in a bulk
 Pauli-frame model of lifting, no colour-symmetric schedule of this kind has a shorter
-period. Combining their bounds with an exhaustive computation of the extended-code
-distance confirms their conjecture that the original circuit has $\dcirc=11$.
+period. The answer is structural: with idle noise and practical decoders, the longer
+period makes this circuit's logical error rate higher than that of the existing
+circuits at every noise level we sampled. Combining their bounds with an exhaustive
+computation of the extended-code distance also confirms their conjecture that the
+original circuit has $\dcirc=11$.
 \end{abstract}
 
 \maketitle
@@ -83,7 +86,10 @@ of rounds (Theorem~\ref{thm:main})\cl{41,40}. The idea (Fig.~\ref{fig:concept}) 
 to exploit the gap between Prop.~3 and Cor.~1: we keep the extended code of Fig.~12,
 with $\dext=11$, and choose CNOT orders and times such that none of its
 minimum-weight logicals can be realised by eleven undetected circuit faults. The
-cost is time: the period is 18 steps per round instead of 8\cl{44}. Together with SBB's
+cost is time: the period is 18 steps per round instead of 8\cl{44}. Our answer is
+therefore an existence result about circuit structure; under circuit-level noise
+with idling and with practical decoders, the longer period outweighs the gain in
+distance at the noise levels we sampled (Discussion)\cl{50}. Together with SBB's
 Prop.~3 and Cor.~1, our computation of $\dext$ confirms their conjecture that Fig.~12
 has $\dcirc=11$\cl{10}.
 
@@ -292,7 +298,9 @@ same program finds a realisation for all 4224 logicals in Fig.~12. The computati
 was carried out with two independent implementations, and the inputs ($\dext=11$
 and the list of 4224 logicals) with two independent exhaustive searches
 (SM~\ref{sm:dext}, \ref{sm:lift})\cl{11,13}.
-\textbf{[certificate wording --- pending E-027]}
+Each infeasible lift instance of this finite-$R$ computation was also encoded as
+CNF and refuted with a DRAT proof checked by an independent proof checker
+(SM~\ref{sm:lift})\cl{51}.
 
 \begin{lemma}[All rounds]\label{lem:gap}
 If a weight-11 undetected logical existed for some $R$, one would exist for some
@@ -327,8 +335,7 @@ symmetric search over the extended code and reproduced with an independently bui
 instance and a second symmetry group\cl{10,11}. Retiming Fig.~12 without changing its orders does not help: among
 schedules of period $\le8$ there are four conflict-free ones up to translation, all
 with weight-11 undetected errors, and in the bulk, every legal circuit keeping the
-orders has such an error in each longer-period family marked $^\dagger$ in
-Table~\ref{tab:fig12} (SM~\ref{sm:fig12})\cl{14,15,16,17}.
+orders has such an error in each longer-period family of Table~\ref{tab:fig12} (SM~\ref{sm:fig12})\cl{14,15,16,17}.
 
 % ---------------------------------------------------------------------------
 \paragraph{Cost and optimality.}
@@ -367,14 +374,26 @@ search into a lift problem against a finite list of minimum-weight extended
 logicals, which can be decided exactly and certified; the same approach applies to
 other single-ancilla circuits whose distance is limited by Cor.~1 of SBB.
 
-\textbf{[LER comparison --- pending E-026]}
+\emph{Practical performance.} We compared the period-18 circuit with Fig.~12 and
+the IBM circuit using the same template, the same SD6 noise (idle depolarization on
+every idle qubit in every layer), $R=12$, and identical BP-OSD and Relay-BP decoders
+with exact priors. Under this model the period-18 circuit is worse at every sampled
+$p\ge10^{-3}$: it is above its pseudo-threshold for $p\ge3\times10^{-3}$, about
+$1.5\times10^3$ times worse than the IBM circuit at $p=2\times10^{-3}$, and at least
+3 times worse at $10^{-3}$ (a direct-sampling bound). The reason is fault mass: the
+longer period has 3168 idle locations per round instead of 288, eleven times as many,
+and 2.8 times the total fault probability per round; at matched fault mass the
+circuits perform alike. Raising $\dcirc$ from 11 to 12 does not change the leading
+power of an ideal decoder ($\lceil\dcirc/2\rceil=6$ for both), and for the enumerated
+families of weight-12 logicals the leading-order coefficient of the period-18 circuit
+is about 26 times that of Fig.~12. $\dcirc=12$ is thus a structural property of the
+circuit and not a practical improvement under this noise model\cl{50}.
+\textbf{[idle-noise sensitivity --- pending E-026b]}
 
-$\dcirc$ is a property of the circuit, independent of the decoder; whether the
-longer period, with its additional idle locations, lowers the logical error rate at
-practical noise levels and with practical decoders is not evaluated here. Our
-results also do not cover correlated faults, leakage or CZ-native compilations.
-The main open question is whether $\dcirc=12$ can be reached at period 8, or at any
-period below 18, by less symmetric schedules.
+Our results do not cover correlated faults, leakage or CZ-native compilations. The
+main open question is whether $\dcirc=12$ can be reached at period 8, or at any
+period below 18, by less symmetric schedules; a shorter period would reduce the idle
+cost that currently outweighs the gain in distance.
 
 \paragraph{Data availability.}
 The circuit specifications, the lists of 4224 weight-11 extended logicals for each
@@ -583,7 +602,10 @@ instances, and under a second symmetry group of order 8 (45 orbits,
 $\approx5\times10^{10}$ nodes per basis); weight 11 is attained. Hence $\dext=11$.
 At $W=11$, two different search programs enumerate the same 4224 extended logicals
 per basis, all in free orbits of the 24-element group (176 orbits); 360 of them
-consist of ten data columns and one residual of length 2.
+consist of ten data columns and one residual of length 2. Both $\dext=11$ and the
+completeness of the list of 4224 weight-11 logicals rest on two independent
+exhaustive searches; we did not obtain a checkable proof certificate for them (a
+direct CNF encoding is beyond CDCL solvers already at weight 6).
 
 % ---------------------------------------------------------------------------
 \section{Proof of Lemma~\ref{lem:reduction}}\label{sm:reduction}\cl{33}
@@ -670,6 +692,13 @@ B: $R=1,\dots,24$; circuit C: $R=1,\dots,14$ and $16$, plus a solver-free
 meet-in-the-middle check (split the eleven groups in two halves, enumerate all
 detector sums of each half, intersect) for $R\le3$; all infeasible. Positive
 control: on Fig.~12 the same programs find a realisation for all 4224 logicals.
+
+\emph{Certificates.} For circuits A ($R\le32$), B ($R\le24$) and C ($R\le14$ and 16),
+both bases and all 4224 logicals, the lift instances were encoded as CNF and refuted
+by CaDiCaL; each refutation is a DRAT proof verified with drat-trim, whose LRAT core
+was verified with the formally verified checker cake\_lpr. As a positive control,
+every one of the 4224 Fig.~12 instances at $R=1$ is satisfiable and decodes to a valid
+lift\cl{51}.
 
 % ---------------------------------------------------------------------------
 \section{Proof of Lemma~\ref{lem:gap}}\label{sm:gap}\cl{35,43}
@@ -785,24 +814,27 @@ schedule has a genuine weight-11 undetected error for sufficiently many rounds. 
 blocking implies exact blocking) is not used and fails at the initial time boundary,
 where the exact lift can succeed via first-round detectors. Blocking a model-liftable logical requires a negative cycle
 in its constraint graph; we encode this for all modelled logicals, for CP-SAT and in
-a lazy-clause SAT loop. The resulting status for retimings that keep the Fig.~12 orders is given
+a lazy-clause SAT loop. The certificates block every model-liftable logical.
+Re-running the same encoders with only the 360 logicals per basis of the form ten
+data columns plus one length-2 residual gives UNSAT for every row of
+Table~\ref{tab:fig12} (certificates in the data set), so each obstruction rests only
+on the direction proven above\cl{16}. The resulting status for retimings that keep the Fig.~12 orders is given
 in Table~\ref{tab:fig12}. Per-check-free pipelined schedules with $P\ge9$ and
 different CNOT orders are not covered; the latter is how the new circuits escape.
 
 \begin{table}[h]
 \caption{Retimings of Fig.~12 that keep its CNOT orders. ``Obstructed'': no legal
 deterministic circuit of the family blocks every model-liftable weight-11 logical.
-Rows marked $^\dagger$ were re-solved with only the ten-data-plus-one-length-2-residual
-logicals and are therefore proven; the others are obstructed within the frame model.}
+Each row was also re-solved with only the ten-data-plus-one-length-2-residual
+logicals, which again gives UNSAT; every obstruction is therefore proven.}
 \label{tab:fig12}
 \begin{ruledtabular}
 \begin{tabular}{p{0.7\linewidth}l}
 family & status\\
 \hline
-24-translation symmetric, common frame, any $P$ & obstructed$^\dagger$\\
-24-translation symmetric, pipelined, $P=8,\dots,12$ & obstructed$^\dagger$\\
-subgroup-invariant pipelined, $P=9$: three subgroups of order 12, three of order 6, one of order 8 and two of order 4 & obstructed$^\dagger$\\
-subgroup-invariant pipelined, $P=9$: the subgroup of order 3 & obstructed\\
+24-translation symmetric, common frame, any $P$ & obstructed\\
+24-translation symmetric, pipelined, $P=8,\dots,12$ & obstructed\\
+subgroup-invariant pipelined, $P=9$: three subgroups of order 12, three of order 6, one of order 8, two of order 4 and one of order 3 & obstructed\\
 subgroup-invariant pipelined, $P=10$: one subgroup each of order 12, 8, 6 & obstructed\\
 no symmetry, common frame, $P\le16$ & obstructed (one encoding)\\
 other pipelined families with $P\ge9$; symmetric pipelined $P\ge13$ & open\\
@@ -826,7 +858,10 @@ common-frame family, sampled without the blocking clauses, all have liftable
 weight-11 logicals.
 
 \emph{Minimum period.} With the same model and no circuit fixed, pipelined schedules
-with $P=8,\dots,17$ and common-frame schedules with $P=20$ are unsatisfiable. For the
+with $P=8,\dots,17$ and common-frame schedules with $P=20$ are unsatisfiable. Every
+unsatisfiable clause set in the data set is accompanied by a DRAT proof produced by
+CaDiCaL and verified with drat-trim; the LRAT core was additionally verified with
+cake\_lpr\cl{51}. For the
 pipelined case a second, independent encoding (absolute times, one-sided difference
 literals) agrees for $P=8,\dots,17$. The final clause sets were re-solved from scratch
 by independent SAT solvers (three for $P=20$ common frame and $P=12$, two for
@@ -881,7 +916,11 @@ C and Fig.~12), the lists of 4224 weight-11 extended logicals for each basis, th
 witnesses (the weight-12 upper-bound witnesses and the weight-11 witnesses for
 Fig.~12 and its retimings), the certificates (clause sets of the unsatisfiable
 instances), and the reproduction scripts for the lower-bound computations; it is
-available at [Zenodo DOI --- PI to decide].
-\textbf{[certificate wording --- pending E-027]}
+available at [Zenodo DOI --- PI to decide]. Every unsatisfiable clause set in the
+data set is accompanied by a DRAT proof produced by CaDiCaL and verified with
+drat-trim; the LRAT core was additionally verified with cake\_lpr. Limitation:
+$\dext=11$ and the completeness of the list of 4224 weight-11 logicals rest on two
+independent exhaustive searches; we did not obtain a checkable proof certificate for
+them (a direct CNF encoding is beyond CDCL solvers already at weight 6).
 
 \end{document}
