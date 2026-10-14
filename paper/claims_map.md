@@ -1,5 +1,17 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision i (2026-10-15).** **New C52 (E-026b, idle sensitivity, audited `research/audits/2026-10-15-E-026b.md`):**
+main-text "Role of idle noise" paragraph = audit §7 wording, lightly adapted (numbers and caveats unchanged; "type-(b)
+weight-12" rendered as "weight-12 families … one type of weight-12 logical is not enumerated"); abstract and
+Discussion sentence (λ = 0 beats Fig. 12 at p = 4e-3; λ = 0.1 loses) from audit §2; SM S11 table = journal
+`research/journal/2026-10-14-E-026b-idle-sensitivity.md` direct-sampling tables (per-round ratios; λ = 0, 0.1, 0.3,
+si1000cx) + audit §2b independent re-sampling (0.37 [0.28, 0.49], 2.73 [2.14, 3.47]) + audit §4 layer counts
+(18 = 12 CX-only + 6 M/R; Fig. 12 2 + 6; duration ratio 1.1–1.3) + audit §5 (compilation +11.8% / +6–9% mass) + audit
+§3a/3b (A6 ratios 0.0104, 0.084, 0.84, 26; crossing ≈ 0.32; F = 0.3/2/3 → 0.50/0.24/0.20). Not used: "ties IBM",
+"per unit time", calling si1000cx "SI1000", IBM λ ≈ 0.6. SM sections renumbered: S11 idle noise, S12 verification.
+Final pass: no internal process strings in draft.tex; the only placeholder left is the Zenodo DOI.
+
+
 **Revision h2 (2026-10-15).** C51 (E-027) is now **audited**: `research/audits/2026-10-15-E-027.md`, all CONFIRMED
 (batches with selector disjunction checked structurally on 4 batches; 9 shipped and 3 regenerated large proofs and
 4 lift-batch proofs reproduced byte-identically; 129 records). Text now: lift instances combined into batches by a
