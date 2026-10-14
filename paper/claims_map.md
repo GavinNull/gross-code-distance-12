@@ -1,5 +1,18 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision g (2026-10-14, external review).** No numbers changed. C45 (minimum periods) is now worded as a
+model statement: UNSAT of the bulk Pauli-frame model means every schedule of the family has a *model-liftable*
+weight-11 logical; the needed direction (model lift ⇒ genuine undetected error for sufficiently many rounds) is
+proven (E-018 audit C1, Helly argument, 75 injections) only for logicals of ten data errors + one length-2
+residual; for logicals with several residual columns it is confirmed on 991/991 sampled cases (E-024b audit §2.3)
+but not proven ⇒ "strong evidence, not a theorem". The Fig. 12 retiming obstructions (C16) use only single
+length-2-residual logicals, so their direction is the proven one. C10 / Corollary 1 is now phrased as SBB Prop. 3 +
+Cor. 1 + our d_ext = 11. Lemma 1's single-fault image property (SBB Table I) is proved case by case in SM S5 for
+our template (writer's proof; check by auditor recommended). S7 now derives R' = 32 term by term from
+`results/E-024a-gross12-period/anyr2_cs_P18_H24.json` (lo = 4, c_hi = −18, span 510). Placeholders:
+"[LER comparison — pending E-026]" (Discussion), "[certificate wording — pending E-027]" (Lemma 2, SM S11).
+
+
 **Revision e (2026-10-12, restructure to one result).** Tags render as nothing in the PDF (`\showclaimtagsfalse`)
 but stay in the source. Tags used in revision e: C10, C11, C13–C18, C31–C36, C38–C47 (SM sections carry hidden tags
 too: S2 C31/C41/C43, S3 C32/C42, S4 C11/C13, S5 C33, S6 C34/C42, S7 C35/C43, S8 C36/C42, S9 C10/C13–C18,
