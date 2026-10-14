@@ -1,0 +1,30 @@
+id: E-027-certificates
+title: Checkable certificates for the computer-assisted parts (review response, 2026-10-14)
+owner: experimenter
+hypothesis: >
+  The infeasibility claims behind Theorem 1 (Lemma 2 lift, R <= 32) and the optimality statements (SM S10 CNFs)
+  can be backed by DRAT proofs checked by drat-trim (and the LRAT cores by the verified checker cake_lpr);
+  d_ext = 11 and the 4224-list get a third, methodologically different (SAT) confirmation where feasible.
+tools:
+  build: sh search/experiments/e027/build_tools.sh     # CaDiCaL, drat-trim, cake_lpr under tools/ (gitignored); commits in tools/VERSIONS.txt
+  env: CADICAL=tools/cadical/build/cadical DRAT_TRIM=tools/drat-trim/drat-trim CAKE_LPR=tools/cake_lpr/cake_lpr
+parts:
+  part1_dext_sat:
+    encoder: search/experiments/e027/dext_cnf.py      # H x = 0, L x != 0, |x| <= w (Tseitin XOR chunks, Sinz counter)
+    note: scaling probe first; full w = 10 / w = 11 only if the probe says it fits the budget
+  part2_lift:
+    encoder: search/experiments/e027/lift_cnf.py      # batch CNF per (circuit, basis, R): disjunction of the 4224 lift instances
+    command: uv run python search/experiments/e027/run_lift_certs.py A 1-32 results/E-027-certificates/lift_A --workers 1
+    control: uv run python search/experiments/e027/run_lift_certs.py fig12 1 results/E-027-certificates/lift_fig12 --expect sat
+  part3_existing_certificates:
+    command: uv run python search/experiments/e027/certify.py many results/E-027-certificates/part3/jobs.tsv results/E-027-certificates/part3/proofs results/E-027-certificates/part3/results.jsonl --workers 2 --timeout 7200 --keep
+    timeout_per_step_s: 7200
+  part4_release:
+    files: release/zenodo/certificates/proofs/, release/zenodo/code/proofs/, run_full.sh, README.md, MANIFEST (scripts/zenodo/make_archive.sh)
+seeds: none (CaDiCaL default options, deterministic)
+budget:
+  cpu_hours: 25
+  workers: 3            # a simulation (E-026) uses the rest of the machine
+  llm_tokens: 0         # no external LLM API
+results: results/E-027-certificates/
+journal: research/journal/2026-10-14-E-027-certificates.md
