@@ -56,7 +56,7 @@ def main():
     ap.add_argument("--workers", type=int, default=6); ap.add_argument("--seed", type=int, default=26201)
     ap.add_argument("--tag", default="fw")
     a = ap.parse_args(); assert a.workers <= 6
-    ws = [int(x) for x in a.w.split(",")] if "," in a.w else list(range(*[int(x) for x in a.w.split(":")]))
+    ws = list(range(*[int(x) for x in a.w.split(":")])) if ":" in a.w else [int(x) for x in a.w.split(",")]
     od = OUT / a.tag; od.mkdir(parents=True, exist_ok=True)
     jobs = [(c, bs, a.R, w, b, a.n, a.seed, od, None) for b in range(a.batches) for w in ws
             for c in a.circ.split(",") for bs in a.basis.split(",")]
