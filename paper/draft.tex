@@ -69,9 +69,9 @@ circuits, in which each check is measured by one dedicated ancilla coupled by CN
 They append to the check matrix the ``residual'' errors that an ancilla fault
 spreads onto the data, obtaining an extended code of distance $\dext$, and show
 that $\dcirc\ge\dext$ for every such circuit (their Prop.~3), while
-$\dcirc\le\dext$ holds when the circuit is \emph{non-interleaved}, i.e.\ when on
-every data qubit all $X$-check CNOTs of a round precede all $Z$-check CNOTs or vice
-versa (their Cor.~1). Since every CNOT order gives $\dext\le11$ for the gross
+$\dcirc\le\dext$ holds when the circuit is \emph{non-interleaved} in their sense, i.e.\ when
+all $X$-type CNOTs precede all overlapping $Z$-type CNOTs or vice versa
+(their Sec.~II\,A and Cor.~1). Since every CNOT order gives $\dext\le11$ for the gross
 code, non-interleaved circuits are capped at 11 (their Prop.~4); their depth-8
 circuit (their Fig.~12, hereafter ``Fig.~12'') was conjectured to reach it. They
 left open ``whether any interleaved circuit can achieve circuit distance
@@ -90,12 +90,22 @@ has $\dcirc=11$\cl{10}.
 Exact circuit distances are known for hypergraph-product codes~\cite{ManesClaes},
 for the smallest BB circuit from exact solvers~\cite{Webster2026}, and as
 certificates for other qLDPC constructions~\cite{Liang2026,SunCai2026}; for larger
-BB circuits reported values are typically upper bounds from randomized search. Morphing
-circuits with the same qubit count~\cite{ShawTerhal2025,Wills2026} act on a
-different $\code{144,12,12}$ code and have no dedicated ancillas. Lower bounds for
-interleaved circuits were proposed as future work in Ref.~\cite{Nguyen2026}; our
-route through a fixed extended code is different. Position-dependent CNOT orders
-are an established tool~\cite{TomitaSvore,KishonyFowler,Strikis2026}\cl{40}.
+BB circuits reported values are typically upper bounds from randomized search.
+Shaw and Terhal's morphing circuit for the $\code{288,12,18}$ code uses the same
+number of qubits, has no dedicated ancillas, and at the end of each cycle acts on a
+$\code{144,12,12}$ code that they call ``a second `gross' code''; its circuit distance
+is reported as an upper bound, $\le12$~\cite{ShawTerhal2025}. Ref.~\cite{Wills2026}
+(App.~C) describes a morphing idling circuit for the gross code that is ``believed to
+have circuit distance 12'', without giving the circuit; presumably it is this one. We
+note that this end-cycle code is not equivalent to the gross code under qubit
+permutations and local Cliffords, since its minimum stabiliser weight is 9 rather
+than 6\cl{2}. SBB also show that the distance of an interleaved circuit is
+lower-bounded by that of its non-interleaved counterpart~\cite{Strikis2026};
+Ref.~\cite{Nguyen2026} proposed using this bound to screen interleaved schedules,
+leaving the search to future work. For the gross code that bound gives at most 11,
+so our route through a fixed extended code is different. Check-dependent CNOT
+orders, by check type~\cite{TomitaSvore} or by colour class~\cite{KishonyFowler,Strikis2026},
+are an established tool\cl{40}.
 
 % ---------------------------------------------------------------------------
 \paragraph{Setting.}
@@ -118,7 +128,7 @@ CNOT deposits the residual $\{q_{k+1},\dots,q_6\}$ on the data. The extended cod
 of a basis appends all residual columns $(Hs,Ls)$ of the relevant checks to the
 data columns ($H$: check matrix, $L$: logical operators). Every single fault,
 propagated to the readout, has a data image that is zero or one extended-code
-column (SBB, Table~I; proved for our template in SM~\ref{sm:reduction}). For Fig.~12, $\dext=11$ in both bases, with exactly 4224
+column (SBB, Table~I and the proof of their Prop.~3; proved for our template in SM~\ref{sm:reduction}). For Fig.~12, $\dext=11$ in both bases, with exactly 4224
 weight-11 extended logicals per basis, all realisable in Fig.~12 by eleven
 undetected faults\cl{11,13}.
 
@@ -403,6 +413,8 @@ extraction, thresholds and idle robustness, arXiv:2609.39522 (v2, 2026).
 \bibitem{ShawTerhal2025} M.~H.~Shaw and B.~M.~Terhal, Lowering connectivity
 requirements for bivariate bicycle codes using morphing circuits, Phys.\ Rev.\
 Lett.\ \textbf{134}, 090602 (2025), arXiv:2407.16336.
+\bibitem{ShawTerhal2026} M.~H.~Shaw and B.~M.~Terhal, Optimising quantum error
+correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
 \bibitem{Wills2026} A.~Wills, M.~E.~Beverland, L.~S.~Bishop, J.~M.~Gambetta,
 P.~Rall, V.~Siddhu, and A.~W.~Cross, Concatenating algebraic codes over high-rate
 quantum LDPC codes, arXiv:2605.21898 (v2, 2026).
@@ -705,6 +717,10 @@ $18(R-1)<f_{11}+2D-2\le531+34=565$, so $R-1\le31$ and $R\le32$. (Using $2D-1$ in
 place of $2D-2$, as a more conservative variant does, gives the same bound.) Thus
 every weight-11 undetected logical of a circuit with $R$ rounds yields one of a
 circuit with at most 32 rounds, and with Lemma~\ref{lem:lift} none exists for any $R$.
+
+For circuits that alternate with their time reverse, Shaw and Terhal reduce any
+number of rounds to a single round~\cite{ShawTerhal2026}; the gap argument above
+needs no such symmetry.
 
 \emph{Circuits B and C.} For circuit C, rounds are separated in time; a fault-free
 round inside the span of $F$ splits it as in (2), so $F$ occupies at most 11
