@@ -1,5 +1,15 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision g3 (2026-10-14, audit `research/audits/2026-10-14-revg-proofs.md`).** S5 and S7 CONFIRMED; wording fixes
+applied verbatim (S5 opening and (c); S7 first-round detector reason b − a ≤ 21 < G; main-text insertion range
+4 ≤ x ≤ 18R; 2D − 3 noted as sufficient, 2D − 2 kept). Frame-model sentence in "Cost and optimality" made
+conditional; model-liftable defined with pairing in S9. **C16 changed (audit item 3b):** the Table S3 certificates
+use all 4224 logicals; a re-run with only the 360/basis ten-data + one-length-2-residual logicals gave UNSAT for
+20 instances (sym24 common frame P = 38; sym24 pipelined P = 8..12, both encodings; nine P = 9 subgroups) ⇒ those
+rows carry † ("proven"); P = 9 ⟨(4,2)⟩ (order 3), the three P = 10 subgroups and no-symmetry common frame P ≤ 16 are
+pending ⇒ "obstructed within the frame model". Corollary 1's retiming sentence restricted to the † families.
+
+
 **Revision g2 (2026-10-14, reference audit `research/literature/2026-10-14-reference-audit.md`).** C2 is used again
 (intro): "this end-cycle code is not equivalent to the gross code under qubit permutations and local Cliffords, since
 its minimum stabiliser weight is 9 rather than 6" — our result, E-017 audit §4.2 (exactly 9 vs 6), not attributed to
