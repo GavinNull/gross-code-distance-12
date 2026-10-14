@@ -20,6 +20,14 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision i (2026-10-15)
+
+E-026b (idle sensitivity) added: main-text paragraph from the audit's §7, one sentence each in abstract and Discussion,
+new SM S11 with Table S4 and the leading-order caveats; S12 is now verification and data. Length (advisory, arXiv
+first): 13 pages in total (main text and references end on page 6, SM pages 7–13); abstract 256 words; main text
+3219 words + captions 570 + figure/table areas 505 ≈ 4,300 word-equivalents (above the PRL 3,750 guide). Only
+placeholder left: Zenodo DOI. Packaging reminder: regenerate MANIFEST.sha256.
+
 ## Revision h2 (2026-10-15)
 
 E-027 audited (C51). Lemma 2 and SM S6 describe the selector-disjunction batches; S10/S11 give the total of 129
