@@ -20,6 +20,13 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision g3 (2026-10-14, audit of revision g proofs)
+
+S5/S7 wording fixes from `research/audits/2026-10-14-revg-proofs.md`; frame-model statements made conditional on the
+proven (single length-2 residual) case; Table S3 rows marked † where the len-2-only re-run is UNSAT (20 instances),
+others "within the frame model" (5 instances still running — update when the lead forwards results; if all UNSAT,
+switch to the audit's option (A) sentence and dagger every row). Placeholders E-026/E-027 unchanged.
+
 ## Revision g2 (2026-10-14, reference audit)
 
 Applied the three required fixes of `research/literature/2026-10-14-reference-audit.md` (Wills/Shaw–Terhal attribution
