@@ -210,3 +210,9 @@
 - （2026-10-13 第二组选择题）单位写 "Independent researcher"；姓名待 PI 提供；Zenodo 许可证：数据 CC-BY 4.0、代码 MIT；arXiv 只投 quant-ph；联系信不抄送 Shaw/Terhal。
 - （2026-10-13）单位改为 Zhejiang University（与浙大邮箱一致），PI 选择。
 - （2026-10-13）PI 指示开源：整个研究仓库及历史已公开到 https://github.com/GavinNull/gross-code-distance-12（不含 .env、results/、Zenodo 大文件）。
+
+## 外部审读意见与应对（2026-10-14）
+PI 转来一份外部审读（结论：扎实，新颖性完好；短板是实用意义）。PI 决定：允许下载并编译 CaDiCaL、drat-trim，用来生成 DRAT/LRAT 证书；补完模拟和证书后，先写信给 Beverland/Strikis，再挂 arXiv。
+- E-026：gross 逻辑错误率对比（新电路 / Fig. 12 / IBM），BP-OSD 与 Relay-BP，估交叉点 p*，统计 weight-12 最小失效机制数。
+- E-027：证书升级：用原理不同的第三种方法确认 d_ext = 11 和 4224 列表的完备性；为无解实例生成 DRAT/LRAT 证明，并用独立检查器验证。
+- 文字：最优性改为“在 bulk 帧模型内”；S5 自证 Table I；S7 展开 Lemma 3 的算术；Corollary 收紧；补一句定义 lift；DEM 机制计数约定提前；Fig. 1 中 {9,25} 与 85/82 的关系加一句说明；参考文献与原文逐字核对。
