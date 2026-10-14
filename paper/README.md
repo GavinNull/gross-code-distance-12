@@ -20,6 +20,17 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision h (2026-10-14)
+
+- Table S3: all rows proven via the length-2-only re-runs (option A); Corollary 1 restored.
+- E-027 certificates: Lemma 2 sentence (DRAT-certified finite-R computation), SM S6 certificate paragraph, SM S10/S11
+  DRAT/drat-trim/cake_lpr sentence, SM S4/S11 limitation (no certificate for d_ext = 11 / 4224 list). E-027 has no
+  audit yet (flag to lead).
+- E-026 LER: "Practical performance" paragraph in the Discussion in the audited wording; abstract and intro now frame
+  the result as a structural/existence answer with the practical cost in one sentence each; the old
+  "LER not evaluated here" sentence removed. Placeholder left: "[idle-noise sensitivity — pending E-026b]".
+- draft.pdf rebuilt: no overfull boxes or undefined references; main text ends on page 5.
+
 ## Revision g3 (2026-10-14, audit of revision g proofs)
 
 S5/S7 wording fixes from `research/audits/2026-10-14-revg-proofs.md`; frame-model statements made conditional on the
