@@ -20,6 +20,15 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision g2 (2026-10-14, reference audit)
+
+Applied the three required fixes of `research/literature/2026-10-14-reference-audit.md` (Wills/Shaw–Terhal attribution
+with our own non-equivalence observation, SBB lower bound vs Nguyen future work, check-dependent CNOT orders) plus
+the optional items: non-interleaved defined "in their sense" (SBB Sec. II A); "SBB, Table I and the proof of their
+Prop. 3"; Shaw–Terhal 2604.09797 cited in SM S7 for the time-reversal single-round reduction (bibitem restored).
+Stim-documentation note not added (the Stim paper already describes grouping by detector/observable effects).
+draft.pdf rebuilt: no warnings of note. Remaining reference item: re-check Webster 2026 Sec. 5.5.3 / Table 28.
+
 ## Revision g (2026-10-14, external reviewer)
 
 1. Optimality reworded (abstract, intro, Cost and optimality, SM S9/S10): "in a bulk Pauli-frame model of lifting,
