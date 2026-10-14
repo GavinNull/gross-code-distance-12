@@ -78,3 +78,6 @@
 - HTML：2603.05481v2（截断在参考文献 [21]，附录没读到）、2407.16336v3（Table I 后文字）、2608.19917v2（Conclusion 与参考文献 [27] [28]）、2605.21898v2 和 2603.22532v2（都截断）。
 - PDF 文字抽取：2603.05481v2（Sec. II A、IV B–C、TABLE I、App. H、FIG. 10–12）、2308.07915v2（第 5 节）、2506.03094（Table 4）、2605.21898v2（App. C、Table 5、参考文献 [ST25]）、2308.15520（Theorem 2）、2609.39522v2、2609.37231、1404.3747、2603.28852、2108.10457（Table 2）、2103.02202。2603.22532v2 的 PDF 超过抓取上限，没读到。
 - Quantum 期刊页：q-2025-01-30-1618（官方 BibTeX）。
+
+## 补核（lead，2026-10-14，浏览器读 arxiv.org/html/2603.22532v2 全文）
+Webster2026 Sec. 5.5.3 原文：“Gurobi performed very well giving the lowest distance of all algorithms in 4 of the 7 members of the circuit family, though it completed within 8 hours only for the first member of the family.” → 草稿“精确求解器只算完最小的 BB 电路”**OK**，此项不再待办。
