@@ -220,3 +220,7 @@ PI 转来一份外部审读（结论：扎实，新颖性完好；短板是实�
 - **E-026（experimenter，2026-10-14，未复核，auditor 复核中）gross 逻辑错误率对比**：SD6（含空闲噪声）下，新周期 18 电路在 p ∈ [1e-3, 5e-3] 所有实测点、两种解码器下都比 Fig. 12 和 IBM **差 1–3 个数量级**（2e-3 时比 IBM 差约 1.4e3 倍；赝阈值约 2e-3）。没有交叉点。
   原因是空闲噪声：每轮 3168 个空闲位置，另外两个电路是 288 个，每轮故障概率质量约是它们的 2.9 倍。d_circ 11 → 12 不改变理想解码的领头幂次（⌈d/2⌉ 都是 6），系数估计约大 26 倍。解码器在权重 ≤ 5 就失败，掩盖了距离。
   → 论文必须定位为存在性 / 结构结果；待补空闲噪声敏感性分析（E-026b）。
+- **E-027（experimenter，2026-10-14）证书升级**：数据包里全部 104 个无解实例由 CaDiCaL 3.0.1 生成 DRAT 证明，drat-trim 104/104 通过，LRAT 核心经形式化验证的检查器 cake_lpr 104/104 通过。
+  Lemma 2 的 lift 全覆盖：A（R ≤ 32）、B（R ≤ 24）、C（R ≤ 14 与 16），两基底，全部 4224 个逻辑，编成 CNF，全部无解，DRAT 和 LRAT 均验证通过。Fig. 12 阳性对照 4224/4224 有解。
+  **未做到**：d_ext = 11 和 4224 列表的完备性没有拿到证书。直接 CNF 编码在权重 6 就超出 CDCL 求解器的能力，这两项仍只由两套独立的 DFS 支撑。
+  数据包 230 MB（大证明只发 sha256 和重生成脚本）。可用措辞：“every infeasibility claim decided by a SAT or CP solver is accompanied by a DRAT proof verified with drat-trim (LRAT core with cake_lpr)”；不能写 “every computer-assisted step is certified”。
