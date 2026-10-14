@@ -226,7 +226,7 @@ proper subset does) has between 4 and 10 detectors; the smallest such set has 4,
 or 9 detectors\cl{49}. Circuit design becomes a finite problem: find orders in the
 class and CNOT times for which none of the 4224 known logicals lifts. With the
 Fig.~12 orders themselves this is impossible in every family of retimings we could
-decide\cl{16}.
+decide (SM~\ref{sm:fig12})\cl{16}.
 
 % ---------------------------------------------------------------------------
 
@@ -306,8 +306,9 @@ span of a check, no detector could respond to both the faults before and after t
 window; both parts would be undetected, their observables would add to a nonzero
 value, and one part would have weight $\le10$, contradicting
 Lemma~\ref{lem:reduction}. So a weight-11 logical spans at most $10\times51$ layers.
-The noisy circuit is periodic: inserting an 18-layer block at any layer from the
-fourth on yields the circuit with one more round. Deleting fault-free blocks before
+The noisy circuit is periodic: inserting an 18-layer block at any layer $x$ with
+$4\le x\le18R$ (layers numbered from 0) turns the $R$-round circuit into the
+$(R+1)$-round one. Deleting fault-free blocks before
 and after the logical leaves every detector it touches unchanged, which maps it into
 a circuit with at most 32 rounds (SM~\ref{sm:gap}). $\square$\cl{43}
 
@@ -325,9 +326,9 @@ non-interleaved circuits) combined with our value $\dext=11$, obtained by a comp
 symmetric search over the extended code and reproduced with an independently built
 instance and a second symmetry group\cl{10,11}. Retiming Fig.~12 without changing its orders does not help: among
 schedules of period $\le8$ there are four conflict-free ones up to translation, all
-with weight-11 undetected errors, and in the bulk, every legal circuit of several
-longer-period families keeping the orders has such an error
-(SM~\ref{sm:fig12})\cl{14,15,16,17}.
+with weight-11 undetected errors, and in the bulk, every legal circuit keeping the
+orders has such an error in each longer-period family marked $^\dagger$ in
+Table~\ref{tab:fig12} (SM~\ref{sm:fig12})\cl{14,15,16,17}.
 
 % ---------------------------------------------------------------------------
 \paragraph{Cost and optimality.}
@@ -337,11 +338,11 @@ locations\cl{44}. Whether a shorter period is possible we can answer only within
 model. In a bulk Pauli-frame model of lifting (SM~\ref{sm:fig12}), a data error is
 seen by a check at the first readout after it, and a weight-11 extended logical is
 \emph{model-liftable} if its errors can be timed so that every check sees an even
-number of them between consecutive readouts. A model lift yields a genuine
-weight-11 undetected error once the number of rounds is large enough; we prove this
-for logicals of ten data errors and one residual of length two (a one-dimensional
-Helly argument, SM~\ref{sm:fig12}) and confirmed it on the exact detector error model
-in all 991 sampled cases, including logicals with several residual columns.
+number of them between consecutive readouts. For logicals of ten data errors and
+one residual of length two, a model lift yields a genuine weight-11 undetected error
+once the number of rounds is large enough (a one-dimensional Helly argument,
+SM~\ref{sm:fig12}); for other logicals we confirmed this on the exact detector error
+model in all 991 sampled cases, including logicals with several residual columns.
 This is the direction a non-existence claim needs. Among schedules symmetric under
 the 24 colour-preserving translations with orders in the class of Fig.~12, the model
 admits no schedule with period $P\le17$ in which no weight-11 logical is
@@ -587,9 +588,8 @@ consist of ten data columns and one residual of length 2.
 % ---------------------------------------------------------------------------
 \section{Proof of Lemma~\ref{lem:reduction}}\label{sm:reduction}\cl{33}
 We work in a $Z$-basis memory; the $X$ basis follows by exchanging the roles of $X$
-and $Z$ and of the two check types. Only the $X$ components of errors on data
-qubits affect the $Z$-type detectors and the $Z$-type logical observables, so for a
-fault we track its \emph{data $X$ frame}: the set $s$ of data qubits carrying an $X$
+and $Z$ and of the two check types. In a $Z$-basis memory only $X$ components
+matter. For a fault we track its \emph{data $X$ frame}: the set $s$ of data qubits carrying an $X$
 error after the fault has been propagated through the rest of the circuit to the
 final data readout. Its \emph{image} is the column $(H_Zs,\,L_Zs)$.
 
@@ -604,7 +604,7 @@ which are never controls and are measured and reset without acting back on the
 data); (b) an $X$ on a $Z$-check ancilla never reaches the data; (c) an $X$ on an
 $X$-check ancilla after its $k$-th CNOT of an instance is copied onto exactly the
 targets $q_{k+1},\dots,q_6$ of the remaining CNOTs of that instance and is then
-removed by the $X$-basis measurement and the next preparation. These statements use
+discarded by the next preparation (the $X$-basis measurement does not see it). These statements use
 only the direction of each gate, not the relative timing of different checks, so
 they hold for interleaved and pipelined schedules alike.
 
@@ -688,8 +688,9 @@ If all faults of $F_>$ lie at layers $\ge b$, measurements before $b$ are unaffe
 \emph{(2) Splitting.} Let $F=F_<\cup F_>$ be a weight-11 undetected logical with no
 fault strictly between $a$ and $b$. A comparison detector $(c,j)$ responds to $F_<$
 only if $s(c,j-1)<a+D-1$ and to $F_>$ only if the measurement of instance $j$, at
-$s(c,j-1)+D+\Delta_c\le a+2D+\Delta-2$, is at a layer $\ge b$. The first-round
-detectors are analogous, and a final detector responds to both only if
+$s(c,j-1)+D+\Delta_c\le a+2D+\Delta-2$, is at a layer $\ge b$. A first-round
+detector $(c,0)$ responds to $F_>$ only if $b\le s_c+\Delta_c\le21$, so with $a\ge0$
+it responds to both parts only if $b-a\le21<G$. A final detector responds to both only if
 $b-a<D+S+\Delta$. Hence for $b-a\ge G=\max(2D+\Delta-1,\,D+S+\Delta)=52$ no detector
 responds to both parts; each part is undetected, their logical effects add to a
 nonzero value, and one part has weight $\le10$, contradicting Lemma~1. Consecutive
@@ -714,7 +715,8 @@ afterwards $f_1\le21$ and hence $f_{11}\le21+510=531$. \emph{Back:} a block can 
 deleted at $x=f_{11}+2D-2$ as long as this $x$ is an admissible insertion point,
 $x\le18(R-1)$. When no further deletion is possible,
 $18(R-1)<f_{11}+2D-2\le531+34=565$, so $R-1\le31$ and $R\le32$. (Using $2D-1$ in
-place of $2D-2$, as a more conservative variant does, gives the same bound.) Thus
+place of $2D-2$, as a more conservative variant does, gives the same bound; the
+threshold $2D-3$ would already suffice.) Thus
 every weight-11 undetected logical of a circuit with $R$ rounds yields one of a
 circuit with at most 32 rounds, and with Lemma~\ref{lem:lift} none exists for any $R$.
 
@@ -762,8 +764,9 @@ that fires no detector and flips the observable.
 bulk. A data $X$ error at time $\theta$ on qubit $w$ is first seen by $Z$ check $c$
 (readouts at $T_c+nP$) in instance $H_c=\min\{n:T_c+nP>\theta\}$, i.e.\ for
 $\theta\in(T_c+(H_c-1)P,\,T_c+H_cP)$. A weight-11 logical is \emph{model-liftable}
-if instance indices $H_c$ can be chosen such that every check sees each of its
-errors in the same instance (so all comparison detectors cancel) and, for every
+if instance indices $H_c$ can be chosen such that the errors seen by each check can
+be paired, both errors of a pair being seen in the same instance (so all comparison
+detectors cancel), and, for every
 data error, the intervals of its three checks have a common point. For three open
 intervals of length $P$ on the line, pairwise intersection, which is a difference
 constraint $H_c-H_d\le\lfloor(T_d-T_c)/P\rfloor+1$, implies a common point
@@ -776,28 +779,30 @@ eleven faults, placed away from the time boundaries, form a genuine undetected
 logical error; this was derived independently twice and confirmed by 75 direct
 injections, each firing no detector and flipping the observable. Non-existence
 statements need exactly this direction: an unsatisfiable search for a schedule in
-which no logical is model-liftable shows that every schedule has a model-liftable,
-hence genuine, weight-11 error for sufficiently many rounds. The converse (model
+which no logical is model-liftable shows that every schedule has a model-liftable
+weight-11 logical, and when the search uses only logicals of the proven form, every
+schedule has a genuine weight-11 undetected error for sufficiently many rounds. The converse (model
 blocking implies exact blocking) is not used and fails at the initial time boundary,
-where the exact lift can succeed via first-round detectors. Blocking every ``ten data + one residual'' logical then
-requires a negative cycle for each, which we encode for CP-SAT and in a lazy-clause
-SAT loop. The resulting status for retimings that keep the Fig.~12 orders is given
+where the exact lift can succeed via first-round detectors. Blocking a model-liftable logical requires a negative cycle
+in its constraint graph; we encode this for all modelled logicals, for CP-SAT and in
+a lazy-clause SAT loop. The resulting status for retimings that keep the Fig.~12 orders is given
 in Table~\ref{tab:fig12}. Per-check-free pipelined schedules with $P\ge9$ and
 different CNOT orders are not covered; the latter is how the new circuits escape.
 
 \begin{table}[h]
-\caption{Retimings of Fig.~12 that keep its CNOT orders. ``Obstructed'': every legal
-deterministic circuit of the family has a weight-11 undetected error for
-sufficiently many rounds.}
+\caption{Retimings of Fig.~12 that keep its CNOT orders. ``Obstructed'': no legal
+deterministic circuit of the family blocks every model-liftable weight-11 logical.
+Rows marked $^\dagger$ were re-solved with only the ten-data-plus-one-length-2-residual
+logicals and are therefore proven; the others are obstructed within the frame model.}
 \label{tab:fig12}
 \begin{ruledtabular}
 \begin{tabular}{p{0.7\linewidth}l}
 family & status\\
 \hline
-24-translation symmetric, common frame, any $P$ & obstructed\\
-24-translation symmetric, pipelined, $P=8,\dots,11$ & obstructed\\
-24-translation symmetric, pipelined, $P=12$ & obstructed (one encoding)\\
-subgroup-invariant pipelined, $P=9$: three subgroups of order 12, three of order 6, and subgroups of order 8, 4 (two) and 3 & obstructed\\
+24-translation symmetric, common frame, any $P$ & obstructed$^\dagger$\\
+24-translation symmetric, pipelined, $P=8,\dots,12$ & obstructed$^\dagger$\\
+subgroup-invariant pipelined, $P=9$: three subgroups of order 12, three of order 6, one of order 8 and two of order 4 & obstructed$^\dagger$\\
+subgroup-invariant pipelined, $P=9$: the subgroup of order 3 & obstructed\\
 subgroup-invariant pipelined, $P=10$: one subgroup each of order 12, 8, 6 & obstructed\\
 no symmetry, common frame, $P\le16$ & obstructed (one encoding)\\
 other pipelined families with $P\ge9$; symmetric pipelined $P\ge13$ & open\\
