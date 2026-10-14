@@ -15,12 +15,16 @@ Citation: see `CITATION.cff` (placeholder).
 ## 1. Quick start
 
 Requirements: Python 3.12, a C compiler (`cc`, only for the exhaustive searches of `code/dext/`), ~2 GB RAM.
+For the DRAT proofs (section 3, `certificates/proofs/`): git, make and a C/C++ compiler;
+`sh code/proofs/build_tools.sh` downloads CaDiCaL, drat-trim and cake_lpr from their official repositories at pinned
+commits and builds them into `tools/` (or set `CADICAL`, `DRAT_TRIM`, `CAKE_LPR` to existing binaries).
 
 ```sh
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
 #   (or: python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt)
-PYTHON=.venv/bin/python sh run_quick.sh          # about 5 CPU minutes
-PYTHON=.venv/bin/python P=4 sh run_full.sh       # about 4 CPU hours (about 1.2 hours with P = 4)
+sh code/proofs/build_tools.sh                    # optional: proof tools (run_full.sh calls it when needed)
+PYTHON=.venv/bin/python sh run_quick.sh          # about 9 CPU minutes (5 without the proof tools)
+PYTHON=.venv/bin/python P=4 sh run_full.sh       # about 16 CPU hours; NO_PROOFS=1: about 4 CPU hours
 ```
 
 All scripts are run from the package root. Every check prints a line starting with `PASS` or `FAIL`; the drivers end
@@ -216,6 +220,74 @@ UNSAT = proved unsatisfiable from scratch by that solver; budget = Glucose (≤ 
 Meaning of UNSAT for the period families: every legal deterministic circuit of the family has a weight-11 undetected
 error for sufficiently many rounds (bulk Pauli-frame model, SM S9–S10); it is not a statement at fixed small `R`.
 
+### `certificates/proofs/` — DRAT proofs checked with drat-trim
+
+Every infeasibility claim that rests on a SAT/CP computation is accompanied by a DRAT proof checked with drat-trim;
+in addition, drat-trim's LRAT output (the core of the proof) was checked with cake_lpr, a proof checker verified in
+CakeML. Tools (`TOOLS.txt`): CaDiCaL 3.0.1 (commit `c607304`), drat-trim (commit `2e3b2dc`), cake_lpr (commit `a36874a`,
+ARMv8 build). The pipeline (`code/proofs/certify.py`): CaDiCaL solves the plain DIMACS file and writes a binary DRAT
+proof; drat-trim checks it (backward checking, default options) and writes the LRAT core; cake_lpr checks the LRAT
+core. Sanity tests of the pipeline: a proof truncated to half its lemmas, and the full proof against a CNF with the
+CEGAR nogoods removed (satisfiable), are both rejected by drat-trim.
+
+**(a) The 104 unsatisfiable instances of `certificates/` (SM S10).** `certificates_proofs.jsonl`: one record per
+CNF (sha256 of the CNF, of the DRAT proof and of the LRAT core, sizes, verdicts, CPU seconds). Result: **104/104
+UNSAT, 104/104 DRAT proofs `s VERIFIED` by drat-trim, 104/104 LRAT cores `s VERIFIED UNSAT` by cake_lpr; no
+timeouts** (limit 7200 s per step). Total 2.7 CPU h (CaDiCaL 1.1 h, drat-trim 1.4 h, cake_lpr 0.2 h); DRAT proofs
+5.7 GB in total. The 91 proofs up to 100 MB are shipped in `drat/*.drat.xz` (xz; 810 MB uncompressed, 195 MB
+compressed); for the 13 larger ones only the sha256 is shipped, `code/proofs/check_proofs.py --regenerate unshipped`
+regenerates and checks them. The largest:
+
+| certificate | clauses | DRAT | CaDiCaL | drat-trim | cake_lpr |
+|---|---|---|---|---|---|
+| `less_symmetry/P11_subgroup_1_2` | 133180 | 1569 MB | 1881 s | 2622 s | 350 s |
+| `min_period_primary_encoding/P17_pipelined` | 148627 | 508 MB | 372 s | 418 s | 98 s |
+| `min_period_primary_encoding/P16_pipelined` | 131538 | 426 MB | 279 s | 272 s | 60 s |
+| `less_symmetry/P08_subgroup_6_3` | 218294 | 395 MB | 169 s | 303 s | 47 s |
+| `less_symmetry/P08_subgroup_6_0` | 234182 | 384 MB | 134 s | 199 s | 36 s |
+| `min_period_primary_encoding/P15_pipelined` | 114844 | 314 MB | 212 s | 211 s | 53 s |
+| `fig12_retimings/primary_P16_common_frame_nosym` | 654106 | 287 MB | 94 s | 57 s | 9 s |
+| `less_symmetry/P10_subgroup_1_2` | 96996 | 252 MB | 158 s | 206 s | 38 s |
+| `min_period_primary_encoding/P14_pipelined` | 99087 | 227 MB | 138 s | 140 s | 34 s |
+| `min_period_primary_encoding/P13_pipelined` | 83571 | 151 MB | 82 s | 89 s | 24 s |
+| `less_symmetry/P08_subgroup_0_3` | 218726 | 134 MB | 26 s | 17 s | 4 s |
+| `less_symmetry/P08_subgroup_4_2` | 162810 | 119 MB | 12 s | 7 s | 2 s |
+| `window_explanation/P24_window14_Z2` | 144788 | 108 MB | 58 s | 68 s | 10 s |
+
+`logs/` holds the drat-trim and cake_lpr output of every check. As before, a proof certifies only that the clause set
+is unsatisfiable; that the clauses encode the stated family (and that the CEGAR nogoods are sound) is argued in SM S10
+and checked by the scripts of section 4.
+
+**(b) Lemma 2: the lift instances.** A lift instance (circuit, basis, R, one of the 4224 weight-11 logicals) is
+the CP-SAT model of SM S6 written as CNF (`code/proofs/lift_cnf.py`): one variable per DEM mechanism of the eleven
+image groups, exactly one per group (at-least-one clause; pairwise or ladder at-most-one), and for every detector
+touched by these mechanisms the XOR of its mechanisms = 0 (Tseitin chain, pieces of at most 5 literals). The
+instances of one (circuit, basis, R) are combined into batch CNFs as a disjunction: selector `t_i` per logical,
+clause `(t_1 ∨ … ∨ t_m)`, every clause of instance `i` extended by `¬t_i` (disjoint variables), so a batch is UNSAT
+iff none of its instances lifts. Batch `s` of `K = max(1, ⌈R/2⌉)` holds the logicals `i ≡ s (mod K)`. Coverage:
+
+| circuit | R | bases | batch CNFs | instances | result | CPU (solve + both checks) |
+|---|---|---|---|---|---|---|
+| A (Theorem 1) | 1–32 | Z, X | 544 | 270 336 = 4224 × 32 × 2 | all UNSAT, DRAT verified by drat-trim, LRAT core verified by cake_lpr | 4.8 h |
+| B | 1–24 | Z, X | 312 | 202 752 = 4224 × 24 × 2 | all UNSAT, drat-trim and cake_lpr verified | 2.2 h |
+| C | 1–14, 16 | Z, X | 128 | 126 720 = 4224 × 15 × 2 | all UNSAT, drat-trim and cake_lpr verified | 0.95 h |
+
+The batch CNFs (up to 2.65 M clauses) and their proofs (up to 87 MB each, 41 GB for circuit A) are not shipped:
+`lift_circuit_{A,B,C}.jsonl` records for every batch the sha256 of the CNF, of the DRAT proof and of the LRAT core,
+the verdicts and times, and the DEM statistics; `code/proofs/run_lift_certs.py … --compare` regenerates the CNFs
+(deterministic: their sha256 must equal the records), refutes and checks them again. Positive control of the
+encoding (`code/proofs/lift_control.py fig12 Z 1`, `… X 1`, `lift_control.txt`): for Fig. 12 at R = 1, all 4224
+single-logical CNFs are SAT and each CaDiCaL model decodes to one mechanism per group with all detector sums zero.
+The input of the CNF (the DEM groups) is built by the same code as for CP-SAT and passes the same checks (template
+identity, image set = extended code).
+
+**(c) Not certified by DRAT: `d_ext = 11` and the completeness of the 4224 list.** These rest on the two exhaustive
+depth-first searches of SM S4 (`code/dext/`). A CNF encoding of "`H x = 0`, `L x ≠ 0`, `|x| ≤ w`" (XOR rows by
+Tseitin chains, sequential counter) is out of reach for CDCL: CaDiCaL needs 5 s, 39 s and 182 s for `w = 3, 4, 5`
+and does not finish `w = 6` in 10 minutes (a reformulation through the data-qubit image `e = M x` with the weight-6
+checks of the code: 21 s, 127 s, > 600 s); extrapolated, `w = 10` would take of the order of 10^6 CPU seconds, i.e.
+far beyond what a DRAT proof could document. CP-SAT does not finish `w = 5` in 10 minutes either.
+
 ---------------------------------------------------------------------------------------------------------------------
 
 ## 4. Scripts and how they map to the paper
@@ -234,6 +306,10 @@ error for sufficiently many rounds (bulk Pauli-frame model, SM S9–S10); it is 
 | `code/inject_upper_bound.py A B C` | SM S8 | weight-12 injection, `R = 1, 3, 6, 10`, both bases; omitting any flip is detected |
 | `code/verify_witnesses.py` | Corollary 1, SM S9 | every weight-11 fault set fires no detector, flips an observable, consists of 11 distinct mechanisms and realises the listed extended logical |
 | `code/check_certificates.py` | SM S10 | sha256 and from-scratch CaDiCaL re-solve: UNSAT for every certificate |
+| `code/proofs/check_proofs.py` | SM S10 | drat-trim check of every shipped DRAT proof against its CNF (sha256 of both compared); `--regenerate unshipped`: the 13 proofs over 100 MB are regenerated with CaDiCaL and checked with drat-trim and cake_lpr |
+| `code/proofs/run_lift_certs.py A 1-32 OUT --compare certificates/proofs/lift_circuit_A.jsonl` | Lemma 2, SM S6 | the lift batch CNFs (all 4224 logicals, both bases, every R) are regenerated (sha256 = record), refuted by CaDiCaL with a DRAT proof, checked by drat-trim and (LRAT core) by cake_lpr; same for B (`1-24`) and C (`1-14,16`) |
+| `code/proofs/lift_control.py fig12 Z 1` | Lemma 2 positive control | all 4224 single-logical lift CNFs of Fig. 12 at R = 1 are SAT, each model decodes to a valid lift |
+| `code/proofs/build_tools.sh` | — | downloads (official repositories, pinned commits) and builds CaDiCaL, drat-trim, cake_lpr into `tools/` |
 | `code/class_table.py A` | Table I, S1, S2 | prints the specification grouped by (type, colour) class |
 | `code/compare_lifts.py` | Lemma 2, SM S6, S11 ("two independent implementations") | runs three lift implementations — CP-SAT (`gross12/ext.py`), frontier dynamic programming and solver-free meet-in-the-middle (`code/lift_independent.py`, own DEM parsing and own extended-code construction) — on circuit A (`R = 1..3`) and Fig. 12 (`R = 1`), both bases, and checks that they return the same set of lifting logicals; `lift_independent.py --method dp --R 1-32` runs the second implementation alone on any range |
 | `code/sat/regenerate.py` | SM S10, S9 Table S3 | reruns a CEGAR loop with the shipped encoders and compares with the certificate (byte-identical clause sequence) |
@@ -254,7 +330,7 @@ Runtimes are single-core CPU times on an Apple M-series laptop (stim 1.16.0, ort
 
 | command | expected result | CPU time |
 |---|---|---|
-| `sh run_quick.sh` | `ALL PASS` (see `expected_output_quick.txt`) | 4 min |
+| `sh run_quick.sh` | `ALL PASS` (see `expected_output_quick.txt`) | 9 min (4 min without the proof tools) |
 | `code/check_circuits.py A B C fig12` | 45 `PASS` lines | 0.5 min |
 | `code/lift.py --circuit A --basis Z X --R 1-3` | 6 × `PASS … 0/4224 … lift (expected 0)` | 15 s |
 | `code/lift.py --circuit A --basis Z X --R 1-32` | 64 × `PASS … 0/4224` | ≈ 1 h |
@@ -263,6 +339,10 @@ Runtimes are single-core CPU times on an Apple M-series laptop (stim 1.16.0, ort
 | `code/inject_upper_bound.py A B C` | 26 `PASS` lines | 1 min |
 | `code/verify_witnesses.py` | 55 `PASS` lines (25 344 + 48 + 944 fault sets) | 22 min |
 | `code/check_certificates.py` | 104 `PASS` lines (one per certificate), all `UNSAT` | 40 min (one instance, `less_symmetry/P11_subgroup_1_2`, takes 16 min) |
+| `code/proofs/check_proofs.py` | 91 `PASS … drat-trim VERIFIED` lines, 13 `skip` (not shipped) | 8 min |
+| `code/proofs/check_proofs.py --regenerate unshipped` | 13 `PASS` lines | 2.5 h (`less_symmetry/P11_subgroup_1_2`: 1.3 h) |
+| `code/proofs/run_lift_certs.py A 1-32 …` / `B 1-24` / `C 1-14,16` | one `PASS` line per batch (544 / 312 / 128), `UNSAT`, `drat-trim VERIFIED`, `cake_lpr VERIFIED UNSAT`, `cnf sha256 = record` | 6 h / 2.6 h / 1.2 h (incl. CNF generation) |
+| `code/proofs/lift_control.py fig12 Z 1` | `PASS … 4224/4224 single instances SAT` | 1 min |
 | `code/compare_lifts.py` | 16 `PASS` lines, identical sets for CP-SAT, DP and MITM | 4 min (MITM at `R = 3`: 3 min) |
 | `code/sat/regenerate.py primary 12` | `PASS IDENTICAL …` | 30 s |
 | `code/sat/soundness.py 17 0 60 15` / `17 0 4 4 all` | `PASS … 144/144 … 87/87` / `PASS … 847/847 … 12/12` | 4 min / 2 min |
