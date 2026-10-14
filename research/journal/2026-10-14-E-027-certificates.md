@@ -18,7 +18,7 @@
 流程自检（`results/E-027-certificates/tamper/`，P09_pipelined）：完整证明 VERIFIED；只保留前一半引理 → NOT VERIFIED；
 完整证明配上去掉 CEGAR nogood 的 CNF（可满足）→ NOT VERIFIED。另：去掉最后的空子句 drat-trim 仍 VERIFIED（单元传播已冲突，属正常行为）。
 
-## (3) 已有 104 个 UNSAT 证书（SM S10）
+## (3) 已有 104 个 UNSAT 证书（SM S10）——第一批，共 129 = 104 + 25（第二批见下节）
 
 `results/E-027-certificates/part3/results.jsonl`。**104/104 CaDiCaL UNSAT，104/104 drat-trim `s VERIFIED`，104/104 cake_lpr `s VERIFIED UNSAT`，无超时。**
 CPU 2.67 h（求解 1.08、drat-trim 1.36、cake_lpr 0.23）。DRAT 合计 5.68 GB；> 100 MB 的 13 个，最大 `less_symmetry/P11_subgroup_1_2`
@@ -26,6 +26,19 @@ CPU 2.67 h（求解 1.08、drat-trim 1.36、cake_lpr 0.23）。DRAT 合计 5.68 
 P08_subgroup_6_3 395 MB、6_0 384 MB、P15 314 MB、P16 common-frame nosym 287 MB、P10_subgroup_1_2 252 MB、P14 227 MB、P13 151 MB、
 P08_subgroup_0_3 134 MB、4_2 119 MB、window Z2 108 MB。各组：uniqueness 48 个最大 0.3 MB；second encoding 最大 70 MB；fig12_retimings 最大 287 MB。
 发布：≤ 100 MB 的 91 个证明以 xz 打包（810 MB → 195 MB），13 个大证明只给 sha256 + `check_proofs.py --regenerate unshipped`（约 2.5 CPU h）。
+
+## (3b) 追加（lead 要求）：Table S3 只用长度 2 残余逻辑的 25 个实例——第二批
+
+lead 的复核脚本 `research/audits/2026-10-14-revg-scripts/g4_len2only.py` 把 Table S3 的 CEGAR 帧模型限制在每侧 360 个
+“十个数据列 + 一个长度 2 残余”逻辑上（SM S9 证明了这类逻辑的“模型提升 ⇒ 电路权重 11 不可检测”方向），25 行全部 UNSAT。
+我写了发布包内的 `code/sat/len2only.py`（只包装 frame.prepare 过滤记录，CEGAR 驱动不动；过滤条件独立重写：恰一个残余且等于该校验最后两个 CNOT 目标），
+`scripts/zenodo/build_len2only.py` 生成 `release/zenodo/certificates/fig12_retimings_len2only/`（25 × cnf.gz + log.json）。
+- 25/25 CEGAR UNSAT，迭代数与保留记录数逐行等于 lead 独立运行（g4_len2only*.json）；生成共 12 CPU min（nosym 10 min）。
+- 25/25 CaDiCaL UNSAT、drat-trim VERIFIED、cake_lpr VERIFIED UNSAT；0.5 CPU h；DRAT 合计 0.89 GB；最大 primary_P16_common_frame_nosym
+  （619 781 子句，640 MB，求解 769 s、drat-trim 669 s、cake 65 s，不随包发，只给 sha256），其余 24 个 ≤ 80 MB 随包发。
+- `code/check_certificates.py --family` 对该目录（≤ 200k 子句）全部 PASS、family alone SAT；快测加了 `len2only.py primary_P10_pipelined`（逐字节相同）。
+- 合计：129/129 UNSAT，129/129 drat-trim VERIFIED，129/129 cake_lpr VERIFIED UNSAT，无超时；3.2 CPU h；DRAT 6.6 GB；随包 115 个（256 MB xz），14 个只给 sha256。
+- 复现性：3 个不随包的大证明（P08_subgroup_0_3、4_2、window Z2）重新生成后 sha256 与记录相同；快测 4 个 lift 批也相同。
 
 ## (2) Lemma 2：lift 实例的 DRAT 证书
 
@@ -62,6 +75,13 @@ CaDiCaL 标度（单核，Z 侧，墙钟）：
 w = 11 的“枚举 + 阻断 + 最终 UNSAT”更难，未尝试。**结论：d_ext = 11 与 4224 列表完备性仍只由两套独立 DFS（SM S4）支撑，没有 DRAT 证书；第三种方法本实验没有给出。**
 可能的出路（未做）：带高斯消元 / BDD 证明的检查链（如 FRAT-XOR、pgbdd），需另批下载。
 
+## 发布包修订（lead 第二条要求）
+
+- “accompanied by a DRAT proof” 在 README 中精确定义：CNF 随包（lift 批由确定性编码器重生成并记 sha256）；≤ 100 MB 的证明随包，其余记 sha256/大小并可用脚本重生；所有检查日志随包（lift 984 批的日志合成 `logs/lift_circuit_{A,B,C}_logs.txt.gz`）。
+- certify.py：cake_lpr 不存在时记录 `"cake_lpr": {"verdict": "not run"}`、输出 SKIP，不再当作通过；判定只看输出行 `s VERIFIED UNSAT`（cake_lpr 失败时退出码也是 0）。
+  测试：不存在 → not run；假 cake（只打印注释、exit 0）→ FAILED、整体 FAIL；真 cake → VERIFIED UNSAT。run_quick 在缺 cake_lpr 时打印 SKIP 行。
+- release/zenodo 下出现一个不属于发布设计的 `uv.lock`（20:04 生成，非我的命令所建，泄漏扫描因其中的日期失败），移到 scratchpad（未删）。
+
 ## 发布包（release/zenodo，`make_archive.sh` 泄漏扫描通过，tar.gz 230 MB、685 个文件）
 
 - `code/proofs/`：certify.py、lift_cnf.py、run_lift_certs.py（`--compare` 比对 sha256）、lift_control.py、check_proofs.py（`--regenerate unshipped|all|NAME`）、build_tools.sh（固定提交号）。
@@ -72,8 +92,9 @@ w = 11 的“枚举 + 阻断 + 最终 UNSAT”更难，未尝试。**结论：d_
 
 ## 建议论文措辞（供 lead 取舍）
 
-- SM S10：“Every unsatisfiable clause set in the data set is accompanied by a DRAT proof produced by CaDiCaL 3.0.1 and verified with drat-trim;
-  the LRAT core emitted by drat-trim was additionally verified with the formally verified checker cake_lpr (104/104, no timeouts).”
+- SM S10：“Every unsatisfiable clause set in the data set (129: the 104 optimality/uniqueness instances and the 25 Table S3 instances restricted
+  to the proven direction) is accompanied by a DRAT proof produced by CaDiCaL 3.0.1 and verified with drat-trim; the LRAT core emitted by
+  drat-trim was additionally verified with the formally verified checker cake_lpr (129/129, no timeouts).”
 - SM S6：“For circuits A ($R\le32$), B ($R\le24$) and C ($R\le14$ and $16$), both bases and all 4224 logicals, the lift instances were encoded as CNF
   and refuted by CaDiCaL; each refutation is a DRAT proof verified with drat-trim (LRAT core verified with cake_lpr).”
 - SM S4 / S11 必须保留限定：“$d_{\rm ext}=11$ and the completeness of the list rest on two independent exhaustive searches; we did not obtain a
@@ -83,4 +104,4 @@ w = 11 的“枚举 + 阻断 + 最终 UNSAT”更难，未尝试。**结论：d_
 ## CPU 用量（约）
 
 part 3：2.67 h；lift 求解 + 检查：7.91 h；lift CNF 生成（Python，约 6.5 s/批 × 984 批）：约 1.8 h；d_ext 探测：约 0.55 h；
-对照、篡改测试、工具编译、xz 打包、快测：约 0.4 h。合计约 13.3 CPU h（≤ 25）。
+对照、篡改测试、工具编译、xz 打包、快测：约 0.4 h。合计约 13.3 CPU h；追加 len2-only 与修订约 1.0 CPU h，总计约 14.3 CPU h（≤ 25）。
