@@ -1,5 +1,18 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision g2 (2026-10-14, reference audit `research/literature/2026-10-14-reference-audit.md`).** C2 is used again
+(intro): "this end-cycle code is not equivalent to the gross code under qubit permutations and local Cliffords, since
+its minimum stabiliser weight is 9 rather than 6" — our result, E-017 audit §4.2 (exactly 9 vs 6), not attributed to
+Wills. Wills 2605.21898 App. C is cited only for "believed to have circuit distance 12" (circuit not given;
+"presumably" the Shaw–Terhal one). The interleaved lower bound is attributed to SBB (Theorem 1, Eq. (12));
+Nguyen 2608.19917 only proposed using it to screen schedules. "Check-dependent CNOT orders, by check type
+[Tomita–Svore] or by colour class [Kishony–Fowler, SBB]". Non-interleaved defined in SBB's sense (Sec. II A).
+Shaw–Terhal 2604.09797 cited once in SM S7 as the time-reversal single-round reduction (relevance from
+`2026-10-10-gross-d12-novelty.md` and the reference audit; its full text was not re-read). Open from the reference
+audit: Webster 2026 "smallest BB circuit exact" was UNVERIFIABLE this time (old note supports it) — re-check
+Sec. 5.5.3 / Table 28 before submission.
+
+
 **Revision g (2026-10-14, external review).** No numbers changed. C45 (minimum periods) is now worded as a
 model statement: UNSAT of the bulk Pauli-frame model means every schedule of the family has a *model-liftable*
 weight-11 logical; the needed direction (model lift ⇒ genuine undetected error for sufficiently many rounds) is
