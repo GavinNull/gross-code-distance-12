@@ -1,0 +1,66 @@
+id: E-026b-idle-sensitivity
+hypothesis: follow-up of E-026 (lead request 2026-10-14) / practical value of the proven gross d_circ = 12 as a function of idle noise
+question: >
+  E-026 showed that under SD6 with idle noise (p_idle = p) the period-18 d_circ = 12 gross circuit
+  (search/experiments/e024a/cs_P18_H24.json) loses to SBB Fig. 12 and IBM depth-8 by 1-3 orders of magnitude, because it
+  has ~11x more idle locations per round (3168 vs 288). For which idle strength p_idle = lambda * p (all other SD6
+  components unchanged) does d_circ = 12 pay off?  (a) lambda = 0: does p18 beat Fig. 12 and/or IBM anywhere, where?
+  (b) largest lambda at which p18 still wins at some p >= 1e-4 by the leading-order estimate; (c) same per unit time.
+noise: >
+  Implemented in search/experiments/e026b/common.py by POST-PROCESSING the evaluator's sd6 circuit (evaluators/ untouched):
+  the three circuits have no single-qubit gates, so every DEPOLARIZE1 in the sd6 output is the idle channel (asserted:
+  its targets are exactly the untouched qubits of that layer); its probability is multiplied by lambda (dropped at 0).
+  Validation done before this file (probe.json, no LER): lam1 output is bit-identical to evaluator sd6 for all 3 circuits
+  x 2 bases; lam0 DEM equals evaluator uniform_depolarizing(idle=False) DEM exactly. A short sampling re-check against the
+  E-026 csv at lambda = 1 is part of the run (stage V).
+  Hardware reference "si1000cx": SI1000 coefficients (arXiv:2108.10457 Table 2 = evaluators.noise.SI1000_SPEC: CX
+  DEPOLARIZE2(p), reset 2p, measure 5p, idle p/10, ResonatorIdle 2p on idle qubits of layers containing M/R) applied to
+  the CX template with CX treated as native. The evaluator's standard si1000 refuses CX (native CZ only, issue N2), so
+  the standard SI1000 is NOT run; si1000cx is a declared deviation.
+  Structural probe (probe.json, per bulk round, summed DEM prior at p = 1e-3, Z basis): lam0 0.796 / 0.796 / 0.796
+  (p18 / fig12 / ibm); lam0.1 1.003 / 0.815 / 0.815; lam0.3 1.416 / 0.853 / 0.853; lam1 2.856 / 0.987 / 0.987;
+  si1000cx 2.53 / 1.55 / 1.55. 720 DEM columns per round in every case (same column set, only priors change).
+method: >
+  V. Validation at lambda = 1: re-sample two E-026 points with the post-processed circuit (ibm BP-OSD 4e-3, p18 BP-OSD 2e-3)
+     and check consistency (two-proportion, 95%) with E-026's csv.
+  A. Direct sampling, same template, R = 12, both bases, same decoders as E-026 (BP-OSD IBM parameters via stimbposd;
+     Relay-BP relay5), models lam0, lam0.1, lam0.3 (lam1 = E-026 data reused), p in {1e-3, 1.5e-3, 2e-3, 3e-3, 4e-3}
+     as far as the budget allows; si1000cx at a reduced set of p. Stop rule per point: max_errors (40-100) or a shot cap;
+     unreachable points reported as upper bounds. Per-round eps_b = 1 - (1-P_b)^(1/12), eps = eps_Z + eps_X,
+     95% Jeffreys intervals (beta posterior MC), ratio intervals from the same draws. Per layer = per round / period
+     (18 vs 8). Crossovers by log-log interpolation between adjacent sampled points where the ratio CI changes side.
+  B. Leading order (ideal most-likely-error decoder), exact enumerated families of E-026 (fig12: complete W11 + W12 type
+     (b); p18: W12 type (b); type (a) W12 NOT enumerated for either; ibm NOT enumerated): re-enumerate at R = 2, 3 storing
+     each term's (extended column, detector mask) key, then re-weight every term with its DEM prior under each model
+     (terms whose faults are all idle vanish at lambda = 0, removing that logical). Report surviving counts per round
+     and A6 (p^6 coefficient) per lambda on a fine lambda grid; lambda* where A6(p18) = A6(fig12). vs IBM only a proxy
+     (IBM 2308.07915 Table 6 BP-OSD fit p^5 e^18.04, which is for lambda ~ 1; for lambda < 1 the true IBM coefficient
+     is lower) because no IBM enumeration exists.
+prediction: >
+  (written after probe.json only; no LER or timing run with the new models yet)
+  1) Validation: both re-sampled lambda = 1 points consistent with E-026 at 95%.
+  2) lambda = 0 (equal fault mass): p18 and fig12 within a factor 3 of each other at 3e-3..4e-3 (both decoders);
+     p18 BETTER than fig12 at 1.5e-3..2e-3 by 1.5-5x for BP-OSD (d 12 vs 11 and many fewer low-weight logicals), but the
+     CI may not exclude 1 at the lowest sampled p. vs IBM: p18 within 0.5-3x of ibm at 3e-3..4e-3; p18 better than ibm
+     at <= 2e-3 is possible but predicted not significant within budget. Per layer (x 2.25 penalty): p18 does NOT beat
+     either circuit anywhere in [1e-3, 4e-3].
+  3) lambda = 0.1: p18 worse than fig12 by 1.5-5x at 2e-3..4e-3; lambda = 0.3: worse by 5-50x; no crossover in the
+     sampled range for lambda >= 0.1 against either circuit.
+  4) Leading order: A6(p18)/A6(fig12) < 1 at lambda = 0 (predicted 0.01-0.3, since p18 has ~1% of fig12's enumerated
+     W12(b) count and no W11) and crosses 1 at lambda* in 0.03-0.2. At lambda = 0 a few % of fig12 W11 logicals may
+     vanish (those needing an idle-only term), but most survive (d_circ(fig12) stays 11).
+     Per layer the crossing moves to lower lambda (factor 2.25 on A6 requires a (2.25)^(1/6) ~ 1.14 smaller mass ratio).
+  5) si1000cx: p18 worse than both by > 10x at every sampled p (fault mass 1.63x, ResonatorIdle 2p on most idle slots).
+  6) Relay-BP and BP-OSD give the same ordering at every point.
+budget:
+  cpu_hours: 25
+  max_workers: 4
+  llm_tokens: 0
+seeds:
+  sinter: sinter internal (recorded in csv); no other randomness except Jeffreys MC (numpy seed 1)
+commands:
+  probe: uv run python -m search.experiments.e026b.probe
+  direct: uv run python -m search.experiments.e026b.direct --help
+  lead: PYTHONPATH=.:tests uv run python -m search.experiments.e026b.lead
+outputs: results/E-026b-idle-sensitivity/
+journal: research/journal/2026-10-14-E-026b-idle-sensitivity.md
