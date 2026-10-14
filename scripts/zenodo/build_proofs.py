@@ -59,6 +59,16 @@ for circ in "ABC":
         for r in lift:
             f.write(json.dumps(r) + "\n")
     print(circ, len(lift), "lift batch records, all ok:", all(r["ok"] for r in lift))
+    import gzip
+    nlog = 0
+    with gzip.open(OUT / "logs" / f"lift_circuit_{circ}_logs.txt.gz", "wt") as f:
+        for r in lift:
+            for tool in ("cadical", "drat-trim", "cake_lpr"):
+                lg = RES / f"lift_{circ}/work/{r['name']}.{tool}.log"
+                if lg.exists():
+                    f.write(f"==> {r['name']}.{tool}.log\n" + lg.read_text())
+                    nlog += 1
+    print(" ", nlog, "checker logs")
 ctl = RES / "control.txt"
 if ctl.exists():
     shutil.copyfile(ctl, OUT / "lift_control.txt")
