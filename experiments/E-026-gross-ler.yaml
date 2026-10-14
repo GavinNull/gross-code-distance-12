@@ -1,0 +1,68 @@
+id: E-026-gross-ler
+hypothesis: external-review request (STATE 2026-10-14) / practical value of the proven gross d_circ = 12
+question: >
+  Under SD6 with idle noise, how does the per-round logical error rate (LER) of the new period-18 gross circuit
+  (search/experiments/e024a/cs_P18_H24.json, d_circ = 12 proven, confirmed item 13) compare with SBB Fig. 12
+  (period 8, d_circ = 11 proven, item 3) and the IBM depth-8 circuit (arXiv:2308.07915, d_circ <= 10)?
+  Is there a crossover p* below which the new circuit wins, and by how much?
+circuits: >
+  All three through the same evaluator template (evaluators.candidate.memory_circuit, read-only): explicit local
+  detectors (check round j vs j-1, data readout vs last round), same layout, same noise insertion (evaluators.noise sd6:
+  CX DEPOLARIZE2(p), reset flip p, pre-measurement flip p, DEPOLARIZE1(p) on every qubit idle in a layer).
+  Structural probe done before writing this file (probe.json, no LER): per bulk round all three have 720 DEM columns
+  per basis; summed prior lambda per round at p = 1e-3 is 2.86 (p18), 0.987 (fig12), 0.987 (ibm), i.e. the new
+  circuit carries 2.9x the fault mass per round (3168 vs 288 idle locations per round). Column degree mean 4.08 (p18,
+  fig12) vs 3.49 (ibm), max 9 / 9 / 6 (local basis; no dense derived detectors).
+method: >
+  A. Direct sampling (sinter, num_workers <= 6), both memory bases (Z, X), R = 12 rounds (IBM N_c = d convention)
+     plus R = 24 at selected points to remove the boundary (per-round from the R-difference), p in
+     {5e-3, 4e-3, 3e-3, 2e-3, 1.5e-3, 1e-3} as far as budget allows (stop rule: 200 errors or a per-point CPU cap;
+     points that cannot be reached are reported as upper bounds, never extrapolated silently).
+     Decoders identical for all circuits: BP-OSD with IBM parameters (stimbposd: min-sum, 10000 iterations,
+     ms_scaling_factor 0 (adaptive), OSD-CS order 7) and Relay-BP (relay_bp sinter decoder, relay5 parameters of
+     E-006/E-016: gamma0 0.1, pre_iter 80, num_sets 300, set_max_iter 60, gamma interval (-0.24, 0.66), stop_nconv 5).
+     Per-round LER eps_b = 1 - (1 - P_b(R))^(1/R) per basis; combined eps = eps_Z + eps_X (independent-basis
+     approximation, same for all circuits). Wilson/Clopper-Pearson 95% CIs; ratio CIs by bootstrap.
+     Also report LER per unit time (per layer = per-round / period), because one p18 round takes 18 layers vs 8.
+  B. Minimum-weight undetectable logicals (deliverable 2): randomized min-weight search on the per-basis DEM
+     (random logical/stabiliser eta, BP-OSD, E-016 method) + spatial translation closure (the circuits' symmetry
+     groups) + time-translation closure, at weights d_circ .. d_circ+1; saturation by repeat runs with independent
+     seeds (growth and Lincoln-Petersen). Leading-order ideal (most-likely-error) estimate:
+     ibm ~ p^5 from W10 5|5 splits; fig12 ~ p^6 from W11 6|5 and W12 6|6 splits; p18 ~ p^6 from W12 6|6 splits.
+     These are leading-order structural estimates, not bounds (E-023 audit), reported only where the expansion is
+     plausibly convergent (p <~ 1e-4) and with the enumeration-completeness uncertainty.
+  C. Decoder minimum failure weight (deliverable 3): fixed-weight sampling at small w (w = 2..8) per circuit/basis
+     and, where enumerated, decoding the ceil(d/2)-1 and smaller subsets of the found minimum-weight logicals
+     (structural kernel), as in E-023 (local detectors this time).
+  Positive control: reproduce IBM 2308.07915 Table 6 fit p_L(p) = p^5 exp(18.04 + 1337 p - 96007 p^2) at
+  p = 4e-3 and 5e-3 with the IBM circuit + BP-OSD (this pipeline's convention differs from the paper's: noisy
+  initial/final boundary, independent X/Z; E-002 measured 0.86-1.18x the fit with the same convention).
+  Decoder cross-check BP-OSD vs Relay-BP on every point.
+prediction: >
+  (written before any LER/timing run; only probe.json had been computed)
+  1) Positive control: IBM BP-OSD combined per-round LER at 4e-3 and 5e-3 within 0.8x-1.35x of the paper fit
+     (3.17e-3, 1.55e-2) and consistent with E-002 (3.34e-3, 1.83e-2).
+  2) fig12 vs ibm at 3e-3..5e-3: ratio fig12/ibm within 0.8-1.5 (E-003 audit: 1.12 [0.87, 1.45] at boundary-matched
+     5e-3), i.e. no measurable gain from d_circ 11 at practical p.
+  3) p18 is clearly WORSE than both at every sampled p in [1e-3, 5e-3]: per-round LER ratio p18/ibm >= 5 at 3e-3
+     and >= 3 at 1e-3 (2.9x fault mass per round, local slope ~6-8); p18 is at or above its pseudo-threshold at 5e-3.
+     Per unit time the gap is a further 2.25x.
+  4) No crossover in the sampled range. Leading-order (ideal decoder) crossover p18 vs ibm somewhere in
+     1e-6 .. 1e-4 (most likely ~1e-5); p18 vs fig12 has the same leading power p^6, so p18 wins over fig12 only if its
+     W12 tie coefficient is smaller than fig12's W11+W12 coefficient - predicted NOT to win (the 2.9^6 ~ 600x
+     prior-mass penalty dominates).
+  5) Decoders mask distance: BP-OSD and Relay-BP first fail at weight <= 5 on all three circuits (below ceil(d/2) = 6
+     for p18 and fig12), so the practical-decoder crossover (if any) is lower still than the ideal one.
+  6) Enumeration: fig12 W11 per bulk round O(1e3-1e4) per basis; p18 W12 O(1e4-1e5) per basis (lower bounds;
+     probably not saturated).
+budget:
+  cpu_hours: 40
+  max_workers: 6
+  llm_tokens: 0
+seeds:
+  sinter: sinter internal (recorded in csv metadata); fixed-weight / enumeration seeds 26001+
+commands:
+  probe: uv run python -m search.experiments.e026.probe
+  direct: uv run python -m search.experiments.e026.direct --help
+outputs: results/E-026-gross-ler/
+journal: research/journal/2026-10-14-E-026-gross-ler.md
