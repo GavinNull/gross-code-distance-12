@@ -298,8 +298,10 @@ same program finds a realisation for all 4224 logicals in Fig.~12. The computati
 was carried out with two independent implementations, and the inputs ($\dext=11$
 and the list of 4224 logicals) with two independent exhaustive searches
 (SM~\ref{sm:dext}, \ref{sm:lift})\cl{11,13}.
-Each infeasible lift instance of this finite-$R$ computation was also encoded as
-CNF and refuted with a DRAT proof checked by an independent proof checker
+The infeasible lift instances of this finite-$R$ computation were also encoded as
+CNF and combined into batches by a selector disjunction, so that unsatisfiability of
+a batch implies that of each member; each batch was refuted with a DRAT proof
+verified with drat-trim, whose LRAT core was verified with cake\_lpr
 (SM~\ref{sm:lift})\cl{51}.
 
 \begin{lemma}[All rounds]\label{lem:gap}
@@ -694,9 +696,13 @@ detector sums of each half, intersect) for $R\le3$; all infeasible. Positive
 control: on Fig.~12 the same programs find a realisation for all 4224 logicals.
 
 \emph{Certificates.} For circuits A ($R\le32$), B ($R\le24$) and C ($R\le14$ and 16),
-both bases and all 4224 logicals, the lift instances were encoded as CNF and refuted
-by CaDiCaL; each refutation is a DRAT proof verified with drat-trim, whose LRAT core
-was verified with the formally verified checker cake\_lpr. As a positive control,
+both bases and all 4224 logicals, the lift instances were encoded as CNF. Instances
+were combined into batches by a selector disjunction: the batch formula is the
+disjunction of its members, each guarded by its own selector variable, with no
+variables shared between members, so that unsatisfiability of a batch implies that
+of each member. Each batch was refuted by CaDiCaL; each refutation is a DRAT proof
+verified with drat-trim, whose LRAT core was verified with the formally verified
+checker cake\_lpr. As a positive control,
 every one of the 4224 Fig.~12 instances at $R=1$ is satisfiable and decodes to a valid
 lift\cl{51}.
 
@@ -817,7 +823,7 @@ in its constraint graph; we encode this for all modelled logicals, for CP-SAT an
 a lazy-clause SAT loop. The certificates block every model-liftable logical.
 Re-running the same encoders with only the 360 logicals per basis of the form ten
 data columns plus one length-2 residual gives UNSAT for every row of
-Table~\ref{tab:fig12} (certificates in the data set), so each obstruction rests only
+Table~\ref{tab:fig12}, each accompanied by a DRAT proof, so each obstruction rests only
 on the direction proven above\cl{16}. The resulting status for retimings that keep the Fig.~12 orders is given
 in Table~\ref{tab:fig12}. Per-check-free pipelined schedules with $P\ge9$ and
 different CNOT orders are not covered; the latter is how the new circuits escape.
@@ -859,9 +865,11 @@ weight-11 logicals.
 
 \emph{Minimum period.} With the same model and no circuit fixed, pipelined schedules
 with $P=8,\dots,17$ and common-frame schedules with $P=20$ are unsatisfiable. Every
-unsatisfiable clause set in the data set is accompanied by a DRAT proof produced by
-CaDiCaL and verified with drat-trim; the LRAT core was additionally verified with
-cake\_lpr\cl{51}. For the
+unsatisfiable clause set in the data set (129 in total: 104 for the obstruction and
+optimality instances with all logicals, and 25 length-2-only instances for
+Table~\ref{tab:fig12}) is accompanied by a DRAT proof produced by CaDiCaL and
+verified with drat-trim; the LRAT core was additionally verified with
+cake\_lpr (S11)\cl{51}. For the
 pipelined case a second, independent encoding (absolute times, one-sided difference
 literals) agrees for $P=8,\dots,17$. The final clause sets were re-solved from scratch
 by independent SAT solvers (three for $P=20$ common frame and $P=12$, two for
@@ -917,8 +925,15 @@ witnesses (the weight-12 upper-bound witnesses and the weight-11 witnesses for
 Fig.~12 and its retimings), the certificates (clause sets of the unsatisfiable
 instances), and the reproduction scripts for the lower-bound computations; it is
 available at [Zenodo DOI --- PI to decide]. Every unsatisfiable clause set in the
-data set is accompanied by a DRAT proof produced by CaDiCaL and verified with
-drat-trim; the LRAT core was additionally verified with cake\_lpr. Limitation:
+data set (129 in total: 104 for the obstruction and optimality instances with all
+logicals, and 25 length-2-only instances for Table~\ref{tab:fig12}), and every batch
+of the lift computation, is accompanied by a DRAT proof produced by CaDiCaL and
+verified with drat-trim; the LRAT core was additionally verified with cake\_lpr.
+Here ``accompanied'' means: proofs of up to 100~MB are included in the data set;
+larger ones are identified by their SHA-256 hash and can be regenerated
+byte-identically with the included script. The certificates cover the solver
+decisions only; the circuit template and the reduction of Lemma~\ref{lem:reduction}
+are covered by the pen-and-paper proofs and code-level checks of S5. Limitation:
 $\dext=11$ and the completeness of the list of 4224 weight-11 logicals rest on two
 independent exhaustive searches; we did not obtain a checkable proof certificate for
 them (a direct CNF encoding is beyond CDCL solvers already at weight 6).
