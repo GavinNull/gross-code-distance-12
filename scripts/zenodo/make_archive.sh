@@ -7,7 +7,7 @@ set -eu
 cd "$(dirname "$0")/../../release"
 find zenodo -name __pycache__ -type d -prune -exec /bin/rm -r {} +
 find zenodo -name .DS_Store -exec /bin/rm {} +
-for d in zenodo/dext_run zenodo/full_run zenodo/proof_run_quick zenodo/tools zenodo/.venv zenodo/uv.lock; do [ -e "$d" ] && /bin/rm -r "$d"; done
+for d in zenodo/dext_run zenodo/full_run zenodo/proof_run_quick zenodo/dcirc_run zenodo/dcirc_run_quick zenodo/tools zenodo/.venv zenodo/uv.lock; do [ -e "$d" ] && /bin/rm -r "$d"; done
 PAT='E-0[0-9][0-9]|audit|results/|search/experiments|research/|qec-ai|ephemeral|/Users/|/private/|/tmp/|experimenter|lead agent|claims_map|STATE\.md|evaluators?\b|2026-10-[0-9]'
 bad=0
 for f in $(find zenodo -type f); do

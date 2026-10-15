@@ -12,6 +12,7 @@ release/*.tar.gz
 release/zenodo/certificates/
 release/zenodo/data/
 release/zenodo/witnesses/
+release/zenodo/logs/
 release/arxiv/main.pdf
 tools/
 release/zenodo/uv.lock
