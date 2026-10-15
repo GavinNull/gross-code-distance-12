@@ -25,23 +25,23 @@ PASS  [fig12] X basis R=1: DEM image set = extended code (360 keys), template id
 PASS  [fig12] X basis R=2: DEM image set = extended code (360 keys), template identity and logical effect hold for all 1584 mechanisms
 PASS  [fig12] X basis R=3: DEM image set = extended code (360 keys), template identity and logical effect hold for all 2304 mechanisms
 == code/lift.py --circuit A --basis Z X --R 1-3
-{"circuit": "A", "basis": "Z", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.6, "first_lifting": []}
-PASS  lift circuit A basis Z R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.6 s)
-{"circuit": "A", "basis": "Z", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.9, "first_lifting": []}
-PASS  lift circuit A basis Z R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (2.9 s)
-{"circuit": "A", "basis": "Z", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 5.5, "first_lifting": []}
-PASS  lift circuit A basis Z R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (5.5 s)
-{"circuit": "A", "basis": "X", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 3.0, "first_lifting": []}
-PASS  lift circuit A basis X R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (3.0 s)
-{"circuit": "A", "basis": "X", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 4.6, "first_lifting": []}
-PASS  lift circuit A basis X R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (4.6 s)
-{"circuit": "A", "basis": "X", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 6.3, "first_lifting": []}
-PASS  lift circuit A basis X R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (6.3 s)
+{"circuit": "A", "basis": "Z", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.3, "first_lifting": []}
+PASS  lift circuit A basis Z R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.3 s)
+{"circuit": "A", "basis": "Z", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.5, "first_lifting": []}
+PASS  lift circuit A basis Z R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (2.5 s)
+{"circuit": "A", "basis": "Z", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 3.4, "first_lifting": []}
+PASS  lift circuit A basis Z R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (3.4 s)
+{"circuit": "A", "basis": "X", "R": 1, "lifting": 0, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 1.6, "first_lifting": []}
+PASS  lift circuit A basis X R=1: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 864 mechanisms; image set = 360 extended columns (1.6 s)
+{"circuit": "A", "basis": "X", "R": 2, "lifting": 0, "of": 4224, "mechanisms": 1584, "zero_image": 144, "bad_obs": 0, "telescoping_bad": 0, "detectors": 216, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.4, "first_lifting": []}
+PASS  lift circuit A basis X R=2: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 1584 mechanisms; image set = 360 extended columns (2.4 s)
+{"circuit": "A", "basis": "X", "R": 3, "lifting": 0, "of": 4224, "mechanisms": 2304, "zero_image": 216, "bad_obs": 0, "telescoping_bad": 0, "detectors": 288, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 3.4, "first_lifting": []}
+PASS  lift circuit A basis X R=3: 0/4224 weight-11 logicals lift (expected 0); template identity holds for all 2304 mechanisms; image set = 360 extended columns (3.4 s)
 == code/lift.py --circuit fig12 --basis Z X --R 1
-{"circuit": "fig12", "basis": "Z", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 5.3, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
-PASS  lift circuit fig12 basis Z R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (5.3 s)
-{"circuit": "fig12", "basis": "X", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 4.0, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
-PASS  lift circuit fig12 basis X R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (4.0 s)
+{"circuit": "fig12", "basis": "Z", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.7, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+PASS  lift circuit fig12 basis Z R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.7 s)
+{"circuit": "fig12", "basis": "X", "R": 1, "lifting": 4224, "of": 4224, "mechanisms": 864, "zero_image": 72, "bad_obs": 0, "telescoping_bad": 0, "detectors": 144, "image_keys": 360, "image_set_equals_extended_code": true, "sec": 2.1, "first_lifting": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+PASS  lift circuit fig12 basis X R=1: 4224/4224 weight-11 logicals lift (expected 4224); template identity holds for all 864 mechanisms; image set = 360 extended columns (2.1 s)
 == code/premises.py --circuit A --rmax 32
 PASS  [A] structure (R = 2, 3, 5, 9, both bases): D = 18, starts independent of R, dm_max = 17 <= D - 1, S = 5, CNOTs inside windows, template orientation, detector set exact (0 problems)
 PASS  [A] G = max(2D + dm_max - 1, D + S + dm_max) = 52; a weight-11 undetected logical spans <= 10 (G - 1) = 510 layers
@@ -51,10 +51,12 @@ PASS  [A] deletion: every weight-11 undetected logical maps into a circuit with 
 PASS  witness Z basis: weight 12, commutes with HZ, flips logical rows [0, 1, 4]
 PASS  witness X basis: weight 12, commutes with HX, flips logical rows [0, 1, 2]
 PASS  [A] Z basis R=1: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
+PASS  [A] Z basis R=2: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
 PASS  [A] Z basis R=3: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
 PASS  [A] Z basis R=6: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
 PASS  [A] Z basis R=10: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
 PASS  [A] X basis R=1: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
+PASS  [A] X basis R=2: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
 PASS  [A] X basis R=3: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
 PASS  [A] X basis R=6: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
 PASS  [A] X basis R=10: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
@@ -116,8 +118,8 @@ PASS  [fig12_retiming_3] X basis R=6: 1/1 weight-11 fault sets injected: no dete
 PASS  [weight11_p8_colour_symmetric_944.json.gz] 60 circuits: 60/60 weight-11 fault sets injected: no detector, observable flipped, 11 distinct mechanisms, images = the listed logical
 == code/check_certificates.py --max-clauses 45000
 PASS  fig12_retimings/primary_P08_pipelined.cnf.gz: 26402 clauses, 1518 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
-PASS  fig12_retimings/primary_P09_pipelined.cnf.gz: 32577 clauses, 1696 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
-PASS  fig12_retimings/primary_P10_pipelined.cnf.gz: 40665 clauses, 1920 variables, sha256 ok, CaDiCaL UNSAT in 0.2 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  fig12_retimings/primary_P09_pipelined.cnf.gz: 32577 clauses, 1696 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  fig12_retimings/primary_P10_pipelined.cnf.gz: 40665 clauses, 1920 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 skip  fig12_retimings/primary_P11_pipelined.cnf.gz (51221 clauses)
 skip  fig12_retimings/primary_P12_pipelined.cnf.gz (59985 clauses)
 skip  fig12_retimings/primary_P16_common_frame_nosym.cnf.gz (654106 clauses)
@@ -141,8 +143,8 @@ PASS  fig12_retimings/second_P10_sym24.cnf.gz: 38505 clauses, 2597 variables, sh
 skip  fig12_retimings/second_P11_sym24.cnf.gz (45582 clauses)
 skip  fig12_retimings/second_P12_sym24.cnf.gz (51171 clauses)
 PASS  fig12_retimings_len2only/primary_P08_pipelined.cnf.gz: 24979 clauses, 1464 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical301 UNSAT)
-PASS  fig12_retimings_len2only/primary_P09_pipelined.cnf.gz: 30801 clauses, 1634 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical301 UNSAT)
-PASS  fig12_retimings_len2only/primary_P10_pipelined.cnf.gz: 39810 clauses, 1901 variables, sha256 ok, CaDiCaL UNSAT in 0.2 s (recorded: cadical301 UNSAT)
+PASS  fig12_retimings_len2only/primary_P09_pipelined.cnf.gz: 30801 clauses, 1634 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical301 UNSAT)
+PASS  fig12_retimings_len2only/primary_P10_pipelined.cnf.gz: 39810 clauses, 1901 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical301 UNSAT)
 skip  fig12_retimings_len2only/primary_P11_pipelined.cnf.gz (47028 clauses)
 skip  fig12_retimings_len2only/primary_P12_pipelined.cnf.gz (54841 clauses)
 skip  fig12_retimings_len2only/primary_P16_common_frame_nosym.cnf.gz (619781 clauses)
@@ -173,8 +175,8 @@ skip  less_symmetry/P08_subgroup_6_3.cnf.gz (218294 clauses)
 skip  less_symmetry/P09_subgroup_1_2.cnf.gz (65732 clauses)
 skip  less_symmetry/P10_subgroup_1_2.cnf.gz (96996 clauses)
 skip  less_symmetry/P11_subgroup_1_2.cnf.gz (133180 clauses)
-PASS  min_period_primary_encoding/P08_pipelined.cnf.gz: 26948 clauses, 1552 variables, sha256 ok, CaDiCaL UNSAT in 0.2 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
-PASS  min_period_primary_encoding/P09_pipelined.cnf.gz: 36063 clauses, 1826 variables, sha256 ok, CaDiCaL UNSAT in 1.2 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_primary_encoding/P08_pipelined.cnf.gz: 26948 clauses, 1552 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_primary_encoding/P09_pipelined.cnf.gz: 36063 clauses, 1826 variables, sha256 ok, CaDiCaL UNSAT in 0.7 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 skip  min_period_primary_encoding/P10_pipelined.cnf.gz (45936 clauses)
 skip  min_period_primary_encoding/P11_pipelined.cnf.gz (58344 clauses)
 skip  min_period_primary_encoding/P12_pipelined.cnf.gz (69631 clauses)
@@ -183,10 +185,10 @@ skip  min_period_primary_encoding/P14_pipelined.cnf.gz (99087 clauses)
 skip  min_period_primary_encoding/P15_pipelined.cnf.gz (114844 clauses)
 skip  min_period_primary_encoding/P16_pipelined.cnf.gz (131538 clauses)
 skip  min_period_primary_encoding/P17_pipelined.cnf.gz (148627 clauses)
-PASS  min_period_primary_encoding/P20_common_frame.cnf.gz: 42775 clauses, 1937 variables, sha256 ok, CaDiCaL UNSAT in 4.2 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_primary_encoding/P20_common_frame.cnf.gz: 42775 clauses, 1937 variables, sha256 ok, CaDiCaL UNSAT in 2.4 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 PASS  min_period_second_encoding/P08_pipelined.cnf.gz: 31699 clauses, 2335 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 PASS  min_period_second_encoding/P09_pipelined.cnf.gz: 38292 clauses, 2638 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
-PASS  min_period_second_encoding/P10_pipelined.cnf.gz: 44910 clauses, 2905 variables, sha256 ok, CaDiCaL UNSAT in 0.8 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  min_period_second_encoding/P10_pipelined.cnf.gz: 44910 clauses, 2905 variables, sha256 ok, CaDiCaL UNSAT in 0.4 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 skip  min_period_second_encoding/P11_pipelined.cnf.gz (53067 clauses)
 skip  min_period_second_encoding/P12_pipelined.cnf.gz (60717 clauses)
 skip  min_period_second_encoding/P13_pipelined.cnf.gz (68851 clauses)
@@ -202,7 +204,7 @@ PASS  order_class_uniqueness/0_0__1_2_Xerrors.cnf.gz: 23088 clauses, 1638 variab
 PASS  order_class_uniqueness/0_0__1_2_Zerrors.cnf.gz: 22944 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 PASS  order_class_uniqueness/0_0__1_3_Xerrors.cnf.gz: 25026 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 PASS  order_class_uniqueness/0_0__1_3_Zerrors.cnf.gz: 21642 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
-PASS  order_class_uniqueness/0_0__1_4_Xerrors.cnf.gz: 26322 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.1 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
+PASS  order_class_uniqueness/0_0__1_4_Xerrors.cnf.gz: 26322 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 PASS  order_class_uniqueness/0_0__1_4_Zerrors.cnf.gz: 23874 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 PASS  order_class_uniqueness/0_0__1_5_Xerrors.cnf.gz: 25104 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
 PASS  order_class_uniqueness/0_0__1_5_Zerrors.cnf.gz: 24096 clauses, 1638 variables, sha256 ok, CaDiCaL UNSAT in 0.0 s (recorded: cadical153 UNSAT, glucose4 UNSAT, minisat22 UNSAT)
@@ -246,31 +248,31 @@ skip  window_explanation/P24_window14_X0.cnf.gz (142974 clauses)
 skip  window_explanation/P24_window14_Z2.cnf.gz (144788 clauses)
 == code/sat/regenerate.py primary 8
 P=8 common_frame=0 classes=3 logical reps=184 skipped=168 det pairs=27 vars=1344
-{'it': 1, 'lifting': 160, 'nogoods': 160, 'sec': 0.3}
+{'it': 1, 'lifting': 160, 'nogoods': 160, 'sec': 0.2}
 STATUS UNSAT it=2
-status UNSAT; 26948 clauses (22381 family, 4567 nogoods); {'status': 'UNSAT', 'iterations': 2, 'nogoods': 160, 'sec': 0.5}
+status UNSAT; 26948 clauses (22381 family, 4567 nogoods); {'status': 'UNSAT', 'iterations': 2, 'nogoods': 160, 'sec': 0.2}
 PASS  IDENTICAL: clause sequence equals P08_pipelined.cnf.gz byte for byte (after the comment header)
 == code/sat/regenerate.py second 10
 P=10 |H|=24 classes=3 items=36 reps=184 skipped=168 det_pairs=27 clauses=35011 vars=2401
-{'it': 1, 'lifting': 132, 'sec': 0.5}
-{'it': 2, 'lifting': 119, 'sec': 0.6}
-{'it': 3, 'lifting': 88, 'sec': 0.7}
-{'it': 10, 'lifting': 98, 'sec': 1.4}
-{'it': 20, 'lifting': 80, 'sec': 2.8}
+{'it': 1, 'lifting': 132, 'sec': 0.2}
+{'it': 2, 'lifting': 119, 'sec': 0.3}
+{'it': 3, 'lifting': 88, 'sec': 0.3}
+{'it': 10, 'lifting': 98, 'sec': 0.7}
+{'it': 20, 'lifting': 80, 'sec': 1.4}
 STATUS UNSAT it=23
-status UNSAT; 44910 clauses (35012 family, 9898 nogoods); {'status': 'UNSAT', 'iterations': 23, 'sec': 3.1, 'subgroup_order': 24}
+status UNSAT; 44910 clauses (35012 family, 9898 nogoods); {'status': 'UNSAT', 'iterations': 23, 'sec': 1.6, 'subgroup_order': 24}
 PASS  IDENTICAL: clause sequence equals P10_pipelined.cnf.gz byte for byte (after the comment header)
 == code/sat/len2only.py primary_P10_pipelined
-primary_P10_pipelined: status UNSAT; 39810 clauses (33181 family, 6629 nogoods); 30 of 184 logical records kept; {'status': 'UNSAT', 'iterations': 5, 'nogoods': 120, 'sec': 0.5, 'cpu_sec': 0.5, 'records_all': 184, 'records_kept': 30}
+primary_P10_pipelined: status UNSAT; 39810 clauses (33181 family, 6629 nogoods); 30 of 184 logical records kept; {'status': 'UNSAT', 'iterations': 5, 'nogoods': 120, 'sec': 0.2, 'cpu_sec': 0.2, 'records_all': 184, 'records_kept': 30}
 PASS  IDENTICAL: clause sequence vs primary_P10_pipelined.cnf.gz
 == code/compare_lifts.py --circuit A fig12 --R 1 --methods cpsat dp mitm
-PASS  [A] basis Z R=1: cpsat 0/4224 (4.1 s), dp 0/4224 (1.0 s), mitm 0/4224 (1.4 s) -- identical sets of lifting logicals
+PASS  [A] basis Z R=1: cpsat 0/4224 (2.1 s), dp 0/4224 (0.5 s), mitm 0/4224 (0.7 s) -- identical sets of lifting logicals
 PASS  [A] basis Z R=1: 0 lifting logicals (expected 0)
-PASS  [A] basis X R=1: cpsat 0/4224 (2.8 s), dp 0/4224 (1.0 s), mitm 0/4224 (1.4 s) -- identical sets of lifting logicals
+PASS  [A] basis X R=1: cpsat 0/4224 (1.5 s), dp 0/4224 (0.6 s), mitm 0/4224 (0.8 s) -- identical sets of lifting logicals
 PASS  [A] basis X R=1: 0 lifting logicals (expected 0)
-PASS  [fig12] basis Z R=1: cpsat 4224/4224 (4.0 s), dp 4224/4224 (0.9 s), mitm 4224/4224 (1.2 s) -- identical sets of lifting logicals
+PASS  [fig12] basis Z R=1: cpsat 4224/4224 (2.1 s), dp 4224/4224 (0.5 s), mitm 4224/4224 (0.6 s) -- identical sets of lifting logicals
 PASS  [fig12] basis Z R=1: 4224 lifting logicals (expected 4224)
-PASS  [fig12] basis X R=1: cpsat 4224/4224 (4.0 s), dp 4224/4224 (0.9 s), mitm 4224/4224 (1.2 s) -- identical sets of lifting logicals
+PASS  [fig12] basis X R=1: cpsat 4224/4224 (2.1 s), dp 4224/4224 (0.5 s), mitm 4224/4224 (0.7 s) -- identical sets of lifting logicals
 PASS  [fig12] basis X R=1: 4224 lifting logicals (expected 4224)
 == code/check_uniqueness_witnesses.py
 PASS  m2_10_Xerrors: 46/46 witnesses are weight <= 10 extended logicals of their assignment; 0/0 blocked assignments are Fig. 12 translates
@@ -323,7 +325,89 @@ PASS  0_3__3_0_Xerrors: 71/71 witnesses are weight <= 10 extended logicals of th
 PASS  0_3__3_0_Zerrors: 67/67 witnesses are weight <= 10 extended logicals of their assignment; 1/1 blocked assignments are Fig. 12 translates
 3859 witnesses checked, 0 failures
 == code/p8_family.py enumerate
-PASS  P = 8 colour-symmetric family: backtracking enumeration gives 944 circuits (944 distinct up to global time shift), equal to the 944 listed (18 s)
+PASS  P = 8 colour-symmetric family: backtracking enumeration gives 944 circuits (944 distinct up to global time shift), equal to the 944 listed (10 s)
+== code/bb90/check_circuits.py c16 u16 s16
+PASS  [[90,8,10]] code: HX, HZ equal the polynomial definition (l=15, m=3, A = x^9+y+y^2, B = 1+x^2+x^7); k = 8; LX, LZ are logical operators of rank 8
+PASS  [c16] legality: period 16, every check 6 CNOTs on its support inside its window at distinct steps, no data-qubit conflict (0 problems)
+PASS  [c16] determinism: R = 1, 2, 3, 6 both bases: detectors/observables deterministic, noiseless circuit fires nothing (8/8)
+PASS  [c16] frame: reset steps [0], measurement steps [15]; every check reset at 0, measured at 15, all CNOTs strictly inside (non-wrapping: round j occupies layers 16j..16j+15); X-check CNOT steps [1, 3, 5, 6, 8, 10], Z-check CNOT steps [2, 4, 6, 7, 9, 12]; X/Z switches per data qubit per period: {6: 90} (interleaved)
+PASS  [c16] symmetry: 45/45 translations of the 15 x 3 torus map every check order to the order of the image check (translation invariant)
+PASS  [c16] extended code, Z-basis memory: 225 merged columns, equal to data/extended_code/bb90_extended_code_Z_memory.json; 5 column orbits of size 45
+PASS  [c16] extended code, X-basis memory: 225 merged columns, equal to data/extended_code/bb90_extended_code_X_memory.json; 5 column orbits of size 45
+PASS  [u16] legality: period 16, every check 6 CNOTs on its support inside its window at distinct steps, no data-qubit conflict (0 problems)
+PASS  [u16] determinism: R = 1, 2, 3, 6 both bases: detectors/observables deterministic, noiseless circuit fires nothing (8/8)
+PASS  [u16] frame: reset steps [0], measurement steps [15]; every check reset at 0, measured at 15, all CNOTs strictly inside (non-wrapping: round j occupies layers 16j..16j+15); X-check CNOT steps [3, 4, 6, 7, 9, 12], Z-check CNOT steps [1, 5, 7, 8, 10, 11]; X/Z switches per data qubit per period: {4: 90} (interleaved)
+PASS  [u16] symmetry: 45/45 translations of the 15 x 3 torus map every check order to the order of the image check (translation invariant)
+PASS  [u16] extended code, Z-basis memory: 225 merged columns, equal to data/extended_code/bb90_extended_code_Z_memory.json; 5 column orbits of size 45
+PASS  [u16] extended code, X-basis memory: 225 merged columns, equal to data/extended_code/bb90_extended_code_X_memory.json; 5 column orbits of size 45
+PASS  [s16] legality: period 16, every check 6 CNOTs on its support inside its window at distinct steps, no data-qubit conflict (0 problems)
+PASS  [s16] determinism: R = 1, 2, 3, 6 both bases: detectors/observables deterministic, noiseless circuit fires nothing (8/8)
+PASS  [s16] frame: reset steps [0, 7], measurement steps [7, 14]; X-check CNOT steps [1, 2, 3, 4, 5, 6], Z-check CNOT steps [8, 9, 10, 11, 12, 13]; X/Z switches per data qubit per period: {2: 90} (non-interleaved)
+PASS  [s16] symmetry: 45/45 translations of the 15 x 3 torus map every check order to the order of the image check (translation invariant)
+PASS  [s16] extended code, Z-basis memory: 225 merged columns, equal to data/extended_code/bb90_extended_code_Z_memory.json; 5 column orbits of size 45
+PASS  [s16] extended code, X-basis memory: 225 merged columns, equal to data/extended_code/bb90_extended_code_X_memory.json; 5 column orbits of size 45
+== code/bb90/lists.py --wmax 8
+PASS  bb90 Z-basis memory: no extended logical of weight 1 (5 orbit cases, 0.5 s)
+PASS  bb90 Z-basis memory: no extended logical of weight 2 (5 orbit cases, 0.0 s)
+PASS  bb90 Z-basis memory: no extended logical of weight 3 (5 orbit cases, 0.0 s)
+PASS  bb90 Z-basis memory: no extended logical of weight 4 (5 orbit cases, 0.0 s)
+PASS  bb90 Z-basis memory: no extended logical of weight 5 (5 orbit cases, 0.0 s)
+PASS  bb90 Z-basis memory: no extended logical of weight 6 (5 orbit cases, 0.3 s)
+PASS  bb90 Z-basis memory: no extended logical of weight 7 (5 orbit cases, 0.7 s)
+PASS  bb90 Z-basis memory: weight-8 extended logicals: 30 in the orbit cases, 585 after the 45 translations, equal to data/logicals/bb90_weight8_logicals_Z_memory.json (585) (16.2 s)
+PASS  bb90 X-basis memory: no extended logical of weight 1 (5 orbit cases, 0.0 s)
+PASS  bb90 X-basis memory: no extended logical of weight 2 (5 orbit cases, 0.0 s)
+PASS  bb90 X-basis memory: no extended logical of weight 3 (5 orbit cases, 0.0 s)
+PASS  bb90 X-basis memory: no extended logical of weight 4 (5 orbit cases, 0.0 s)
+PASS  bb90 X-basis memory: no extended logical of weight 5 (5 orbit cases, 0.0 s)
+PASS  bb90 X-basis memory: no extended logical of weight 6 (5 orbit cases, 0.3 s)
+PASS  bb90 X-basis memory: no extended logical of weight 7 (5 orbit cases, 0.6 s)
+PASS  bb90 X-basis memory: weight-8 extended logicals: 31 in the orbit cases, 585 after the 45 translations, equal to data/logicals/bb90_weight8_logicals_X_memory.json (585) (16.1 s)
+== code/bb90/lift.py --circuit c16 --basis Z X --R 1-2
+{"circuit": "c16", "basis": "Z", "R": 1, "w8": 0, "w8z": 0, "w9": 0, "first_hits": {"w8": [], "w8z": [], "w9": []}, "mechanisms": 540, "detectors": 90, "zero_image": 45, "zero_image_no_detector": 0, "zero_image_with_detectors": 45, "zero_image_readout_pattern": 45, "bad_obs": 0, "telescoping_bad": 0, "image_not_a_column": 0, "unrealised_columns": 0, "sec": 2.0}
+PASS  lift c16 basis Z R=1: lifting w8 0/585, w8+zero-image 0/585, w9 0/16830 (expected 0); every one of 540 mechanisms has image 0 or one of the 225 columns, all realised, template identity holds; zero-image mechanisms with detectors: 45 (45 of readout-flip pattern) (2.0 s)
+{"circuit": "c16", "basis": "Z", "R": 2, "w8": 0, "w8z": 0, "w9": 0, "first_hits": {"w8": [], "w8z": [], "w9": []}, "mechanisms": 990, "detectors": 135, "zero_image": 90, "zero_image_no_detector": 0, "zero_image_with_detectors": 90, "zero_image_readout_pattern": 90, "bad_obs": 0, "telescoping_bad": 0, "image_not_a_column": 0, "unrealised_columns": 0, "sec": 4.2}
+PASS  lift c16 basis Z R=2: lifting w8 0/585, w8+zero-image 0/585, w9 0/16830 (expected 0); every one of 990 mechanisms has image 0 or one of the 225 columns, all realised, template identity holds; zero-image mechanisms with detectors: 90 (90 of readout-flip pattern) (4.2 s)
+{"circuit": "c16", "basis": "X", "R": 1, "w8": 0, "w8z": 0, "w9": 0, "first_hits": {"w8": [], "w8z": [], "w9": []}, "mechanisms": 540, "detectors": 90, "zero_image": 45, "zero_image_no_detector": 0, "zero_image_with_detectors": 45, "zero_image_readout_pattern": 45, "bad_obs": 0, "telescoping_bad": 0, "image_not_a_column": 0, "unrealised_columns": 0, "sec": 2.1}
+PASS  lift c16 basis X R=1: lifting w8 0/585, w8+zero-image 0/585, w9 0/16830 (expected 0); every one of 540 mechanisms has image 0 or one of the 225 columns, all realised, template identity holds; zero-image mechanisms with detectors: 45 (45 of readout-flip pattern) (2.1 s)
+{"circuit": "c16", "basis": "X", "R": 2, "w8": 0, "w8z": 0, "w9": 0, "first_hits": {"w8": [], "w8z": [], "w9": []}, "mechanisms": 990, "detectors": 135, "zero_image": 90, "zero_image_no_detector": 0, "zero_image_with_detectors": 90, "zero_image_readout_pattern": 90, "bad_obs": 0, "telescoping_bad": 0, "image_not_a_column": 0, "unrealised_columns": 0, "sec": 4.2}
+PASS  lift c16 basis X R=2: lifting w8 0/585, w8+zero-image 0/585, w9 0/16830 (expected 0); every one of 990 mechanisms has image 0 or one of the 225 columns, all realised, template identity holds; zero-image mechanisms with detectors: 90 (90 of readout-flip pattern) (4.2 s)
+== code/bb90/lift.py --circuit u16 --basis Z --R 1
+{"circuit": "u16", "basis": "Z", "R": 1, "w8": 0, "w8z": 0, "w9": 315, "first_hits": {"w8": [], "w8z": [], "w9": [202, 203, 204, 225, 227]}, "mechanisms": 540, "detectors": 90, "zero_image": 45, "zero_image_no_detector": 0, "zero_image_with_detectors": 45, "zero_image_readout_pattern": 45, "bad_obs": 0, "telescoping_bad": 0, "image_not_a_column": 0, "unrealised_columns": 0, "sec": 2.0}
+PASS  lift u16 basis Z R=1: lifting w8 0/585, w8+zero-image 0/585, w9 315/16830 (expected > 0); every one of 540 mechanisms has image 0 or one of the 225 columns, all realised, template identity holds; zero-image mechanisms with detectors: 45 (45 of readout-flip pattern) (2.0 s)
+== code/bb90/lift.py --circuit s16 --basis Z --R 1
+{"circuit": "s16", "basis": "Z", "R": 1, "w8": 585, "w8z": 540, "w9": 16830, "first_hits": {"w8": [0, 1, 2, 3, 4], "w8z": [0, 1, 2, 3, 4], "w9": [0, 1, 2, 3, 4]}, "mechanisms": 540, "detectors": 90, "zero_image": 45, "zero_image_no_detector": 0, "zero_image_with_detectors": 45, "zero_image_readout_pattern": 45, "bad_obs": 0, "telescoping_bad": 0, "image_not_a_column": 0, "unrealised_columns": 0, "sec": 2.1}
+PASS  lift s16 basis Z R=1: lifting w8 585/585, w8+zero-image 540/585, w9 16830/16830 (expected > 0); every one of 540 mechanisms has image 0 or one of the 225 columns, all realised, template identity holds; zero-image mechanisms with detectors: 45 (45 of readout-flip pattern) (2.1 s)
+== code/bb90/premises.py --rmax 8
+PASS  [c16] (S) separation, R = 1..8: round j occupies layers 16j..16j+15 (resets in its first layer, CNOTs strictly inside, measurements in its last layer), data reset in layer 0, readout after the last block (0 violations)
+PASS  [c16] (T) periodicity, Z basis, R = 4..8: circuit(R) = circuit(R-1) with one 16-segment block inserted, valid at every segment position 32..16(R-1) (after block 1, up to the end of the last block), the block inserted at position 32 identical for all R, detectors and observables mapped (1 distinct block(s) at position 32)
+PASS  [c16] (T) periodicity, X basis, R = 4..8: circuit(R) = circuit(R-1) with one 16-segment block inserted, valid at every segment position 32..16(R-1) (after block 1, up to the end of the last block), the block inserted at position 32 identical for all R, detectors and observables mapped (1 distinct block(s) at position 32)
+PASS  [c16] reduction: a minimum-weight undetected logical of weight w <= 9 spans <= w blocks (split lemma with (S)); deleting untouched blocks (T) gives R' <= w + 3 <= 12; lift.py and the direct DEM search cover R = 1..12
+== code/bb90/inject_upper_bound.py c16
+PASS  witness Z basis: weight 10, commutes with HZ, flips logical rows [0, 2, 4, 6]
+PASS  witness X basis: weight 10, commutes with HX, flips logical rows [0, 1]
+PASS  [c16] Z basis R=1: weight-10 injection fires no detector, flips observables [0, 2, 4, 6]; omitting any one flip is detected (10/10)
+PASS  [c16] Z basis R=2: weight-10 injection fires no detector, flips observables [0, 2, 4, 6]; omitting any one flip is detected (10/10)
+PASS  [c16] Z basis R=3: weight-10 injection fires no detector, flips observables [0, 2, 4, 6]; omitting any one flip is detected (10/10)
+PASS  [c16] Z basis R=6: weight-10 injection fires no detector, flips observables [0, 2, 4, 6]; omitting any one flip is detected (10/10)
+PASS  [c16] Z basis R=10: weight-10 injection fires no detector, flips observables [0, 2, 4, 6]; omitting any one flip is detected (10/10)
+PASS  [c16] Z basis R=13: weight-10 injection fires no detector, flips observables [0, 2, 4, 6]; omitting any one flip is detected (10/10)
+PASS  [c16] X basis R=1: weight-10 injection fires no detector, flips observables [0, 1]; omitting any one flip is detected (10/10)
+PASS  [c16] X basis R=2: weight-10 injection fires no detector, flips observables [0, 1]; omitting any one flip is detected (10/10)
+PASS  [c16] X basis R=3: weight-10 injection fires no detector, flips observables [0, 1]; omitting any one flip is detected (10/10)
+PASS  [c16] X basis R=6: weight-10 injection fires no detector, flips observables [0, 1]; omitting any one flip is detected (10/10)
+PASS  [c16] X basis R=10: weight-10 injection fires no detector, flips observables [0, 1]; omitting any one flip is detected (10/10)
+PASS  [c16] X basis R=13: weight-10 injection fires no detector, flips observables [0, 1]; omitting any one flip is detected (10/10)
+== code/dcirc/run.py quick --workers 1 --out dcirc_run_quick
+PASS  ccsearch selftest: 130 random instances (d = 1..5, cyclic symmetry of order <= 4) vs brute force: decide d-1 = NONE, decide d = FOUND, enum d expanded by the group = all weight-d solutions; 0 mismatches (2 s)
+PASS  ccsearch c16 X basis R=1 decide W=9: NONE (expected NONE); root cases 12/12; nodes 99312688, reference 99312688 (equal); cpu 2.4s
+PASS  ccsearch c16 X basis R=1 decide W=10: FOUND (expected FOUND); root cases 1/12; nodes 788968, reference 788968 (equal); cpu 0.0s; witness: solution of weight 10: distinct True, detectors left 0, observables [0, 1]; circuit injection of one fault per mechanism: 0 detectors fire, observables [0, 1]
+PASS  ccsearch c16 Z basis R=1 decide W=9: NONE (expected NONE); root cases 12/12; nodes 171572998, reference 171572998 (equal); cpu 4.2s
+PASS  ccsearch c16 Z basis R=1 decide W=10: FOUND (expected FOUND); root cases 1/12; nodes 635731658, reference 635731658 (equal); cpu 15.1s; witness: solution of weight 10: distinct True, detectors left 0, observables [0, 1, 4, 7]; circuit injection of one fault per mechanism: 0 detectors fire, observables [0, 1, 4, 7]
+PASS  ccsearch u16 X basis R=1 decide W=8: NONE (expected NONE); root cases 12/12; nodes 10892195, reference 10892195 (equal); cpu 0.3s
+PASS  ccsearch u16 X basis R=1 decide W=9: FOUND (expected FOUND); root cases 2/12; nodes 69349534, reference 69349534 (equal); cpu 1.7s; witness: solution of weight 9: distinct True, detectors left 0, observables [2, 3, 7]; circuit injection of one fault per mechanism: 0 detectors fire, observables [2, 3, 7]
+PASS  ccsearch u16 Z basis R=1 decide W=8: NONE (expected NONE); root cases 12/12; nodes 12089234, reference 12089234 (equal); cpu 0.3s
+PASS  ccsearch u16 Z basis R=1 decide W=9: FOUND (expected FOUND); root cases 2/12; nodes 75524161, reference 75524161 (equal); cpu 1.8s; witness: solution of weight 9: distinct True, detectors left 0, observables [0, 2, 4, 6, 7]; circuit injection of one fault per mechanism: 0 detectors fire, observables [0, 2, 4, 6, 7]
 == code/proofs/check_proofs.py --max-bytes 2e6
 PASS  fig12_retimings__primary_P08_pipelined: sha256 ok, drat-trim VERIFIED (152081 bytes, 0.1 s)
 PASS  fig12_retimings__primary_P09_pipelined: sha256 ok, drat-trim VERIFIED (477742 bytes, 0.1 s)
@@ -334,7 +418,7 @@ skip  fig12_retimings__primary_P16_common_frame_nosym: proof not shipped (287324
 skip  fig12_retimings__primary_P38_common_frame: 39823863 bytes > --max-bytes
 PASS  fig12_retimings__second_P08_sym24: sha256 ok, drat-trim VERIFIED (56081 bytes, 0.1 s)
 PASS  fig12_retimings__second_P09_subgroup_0_3__2_1: sha256 ok, drat-trim VERIFIED (214902 bytes, 0.1 s)
-PASS  fig12_retimings__second_P09_subgroup_0_3__3_0: sha256 ok, drat-trim VERIFIED (1027072 bytes, 0.2 s)
+PASS  fig12_retimings__second_P09_subgroup_0_3__3_0: sha256 ok, drat-trim VERIFIED (1027072 bytes, 0.1 s)
 skip  fig12_retimings__second_P09_subgroup_0_3__6_0: 14432538 bytes > --max-bytes
 PASS  fig12_retimings__second_P09_subgroup_1_2: sha256 ok, drat-trim VERIFIED (172662 bytes, 0.1 s)
 PASS  fig12_retimings__second_P09_subgroup_1_5: sha256 ok, drat-trim VERIFIED (168771 bytes, 0.1 s)
@@ -342,14 +426,14 @@ skip  fig12_retimings__second_P09_subgroup_2_1: 3250680 bytes > --max-bytes
 skip  fig12_retimings__second_P09_subgroup_2_4: 3204503 bytes > --max-bytes
 skip  fig12_retimings__second_P09_subgroup_3_3: 14720108 bytes > --max-bytes
 skip  fig12_retimings__second_P09_subgroup_4_2: 57500966 bytes > --max-bytes
-PASS  fig12_retimings__second_P09_subgroup_4_5: sha256 ok, drat-trim VERIFIED (1662559 bytes, 0.3 s)
+PASS  fig12_retimings__second_P09_subgroup_4_5: sha256 ok, drat-trim VERIFIED (1662559 bytes, 0.2 s)
 PASS  fig12_retimings__second_P09_sym24: sha256 ok, drat-trim VERIFIED (68634 bytes, 0.1 s)
 skip  fig12_retimings__second_P10_subgroup_0_3__3_0: 12489867 bytes > --max-bytes
-PASS  fig12_retimings__second_P10_subgroup_1_2: sha256 ok, drat-trim VERIFIED (1807023 bytes, 0.2 s)
+PASS  fig12_retimings__second_P10_subgroup_1_2: sha256 ok, drat-trim VERIFIED (1807023 bytes, 0.1 s)
 skip  fig12_retimings__second_P10_subgroup_2_4: 58390362 bytes > --max-bytes
 PASS  fig12_retimings__second_P10_sym24: sha256 ok, drat-trim VERIFIED (90196 bytes, 0.1 s)
 PASS  fig12_retimings__second_P11_sym24: sha256 ok, drat-trim VERIFIED (439331 bytes, 0.1 s)
-PASS  fig12_retimings__second_P12_sym24: sha256 ok, drat-trim VERIFIED (754165 bytes, 0.2 s)
+PASS  fig12_retimings__second_P12_sym24: sha256 ok, drat-trim VERIFIED (754165 bytes, 0.1 s)
 PASS  fig12_retimings_len2only__primary_P08_pipelined: sha256 ok, drat-trim VERIFIED (189490 bytes, 0.1 s)
 PASS  fig12_retimings_len2only__primary_P09_pipelined: sha256 ok, drat-trim VERIFIED (268413 bytes, 0.1 s)
 skip  fig12_retimings_len2only__primary_P10_pipelined: 2310047 bytes > --max-bytes
@@ -359,7 +443,7 @@ skip  fig12_retimings_len2only__primary_P16_common_frame_nosym: proof not shippe
 skip  fig12_retimings_len2only__primary_P38_common_frame: 34119891 bytes > --max-bytes
 PASS  fig12_retimings_len2only__second_P08_sym24: sha256 ok, drat-trim VERIFIED (34623 bytes, 0.1 s)
 PASS  fig12_retimings_len2only__second_P09_subgroup_0_3__2_1: sha256 ok, drat-trim VERIFIED (148634 bytes, 0.1 s)
-PASS  fig12_retimings_len2only__second_P09_subgroup_0_3__3_0: sha256 ok, drat-trim VERIFIED (855370 bytes, 0.2 s)
+PASS  fig12_retimings_len2only__second_P09_subgroup_0_3__3_0: sha256 ok, drat-trim VERIFIED (855370 bytes, 0.1 s)
 skip  fig12_retimings_len2only__second_P09_subgroup_0_3__6_0: 15496316 bytes > --max-bytes
 PASS  fig12_retimings_len2only__second_P09_subgroup_1_2: sha256 ok, drat-trim VERIFIED (319131 bytes, 0.1 s)
 PASS  fig12_retimings_len2only__second_P09_subgroup_1_5: sha256 ok, drat-trim VERIFIED (377107 bytes, 0.1 s)
@@ -370,11 +454,11 @@ skip  fig12_retimings_len2only__second_P09_subgroup_4_2: 54532600 bytes > --max-
 skip  fig12_retimings_len2only__second_P09_subgroup_4_5: 2332246 bytes > --max-bytes
 PASS  fig12_retimings_len2only__second_P09_sym24: sha256 ok, drat-trim VERIFIED (40291 bytes, 0.1 s)
 skip  fig12_retimings_len2only__second_P10_subgroup_0_3__3_0: 13610164 bytes > --max-bytes
-PASS  fig12_retimings_len2only__second_P10_subgroup_1_2: sha256 ok, drat-trim VERIFIED (1919350 bytes, 0.3 s)
+PASS  fig12_retimings_len2only__second_P10_subgroup_1_2: sha256 ok, drat-trim VERIFIED (1919350 bytes, 0.2 s)
 skip  fig12_retimings_len2only__second_P10_subgroup_2_4: 80379307 bytes > --max-bytes
 PASS  fig12_retimings_len2only__second_P10_sym24: sha256 ok, drat-trim VERIFIED (61076 bytes, 0.1 s)
 PASS  fig12_retimings_len2only__second_P11_sym24: sha256 ok, drat-trim VERIFIED (243005 bytes, 0.1 s)
-PASS  fig12_retimings_len2only__second_P12_sym24: sha256 ok, drat-trim VERIFIED (965758 bytes, 0.2 s)
+PASS  fig12_retimings_len2only__second_P12_sym24: sha256 ok, drat-trim VERIFIED (965758 bytes, 0.1 s)
 skip  less_symmetry__P08_subgroup_0_3: proof not shipped (133467473 bytes, sha256 d3b9720ae76d7d74…)
 skip  less_symmetry__P08_subgroup_1_2: 3597560 bytes > --max-bytes
 skip  less_symmetry__P08_subgroup_4_2: proof not shipped (119217222 bytes, sha256 6ed06cf306d0fa9e…)
@@ -383,7 +467,7 @@ skip  less_symmetry__P08_subgroup_6_3: proof not shipped (394915278 bytes, sha25
 skip  less_symmetry__P09_subgroup_1_2: 27958969 bytes > --max-bytes
 skip  less_symmetry__P10_subgroup_1_2: proof not shipped (252390602 bytes, sha256 93a4a6fdec891299…)
 skip  less_symmetry__P11_subgroup_1_2: proof not shipped (1568787846 bytes, sha256 f941bc7e99e278ce…)
-PASS  min_period_primary_encoding__P08_pipelined: sha256 ok, drat-trim VERIFIED (1632127 bytes, 0.2 s)
+PASS  min_period_primary_encoding__P08_pipelined: sha256 ok, drat-trim VERIFIED (1632127 bytes, 0.1 s)
 skip  min_period_primary_encoding__P09_pipelined: 9319991 bytes > --max-bytes
 skip  min_period_primary_encoding__P10_pipelined: 21481148 bytes > --max-bytes
 skip  min_period_primary_encoding__P11_pipelined: 40273841 bytes > --max-bytes
@@ -395,7 +479,7 @@ skip  min_period_primary_encoding__P16_pipelined: proof not shipped (425805700 b
 skip  min_period_primary_encoding__P17_pipelined: proof not shipped (507936594 bytes, sha256 4201987bf801b786…)
 skip  min_period_primary_encoding__P20_common_frame: 29822065 bytes > --max-bytes
 PASS  min_period_second_encoding__P08_pipelined: sha256 ok, drat-trim VERIFIED (91191 bytes, 0.1 s)
-PASS  min_period_second_encoding__P09_pipelined: sha256 ok, drat-trim VERIFIED (1008316 bytes, 0.2 s)
+PASS  min_period_second_encoding__P09_pipelined: sha256 ok, drat-trim VERIFIED (1008316 bytes, 0.1 s)
 skip  min_period_second_encoding__P10_pipelined: 4590762 bytes > --max-bytes
 skip  min_period_second_encoding__P11_pipelined: 7863301 bytes > --max-bytes
 skip  min_period_second_encoding__P12_pipelined: 15079860 bytes > --max-bytes
@@ -443,7 +527,7 @@ PASS  order_class_uniqueness__m2_01_Zerrors: sha256 ok, drat-trim VERIFIED (2395
 PASS  order_class_uniqueness__m2_10_Xerrors: sha256 ok, drat-trim VERIFIED (2587 bytes, 0.1 s)
 PASS  order_class_uniqueness__m2_10_Zerrors: sha256 ok, drat-trim VERIFIED (3598 bytes, 0.1 s)
 PASS  order_class_uniqueness__m2_11_Xerrors: sha256 ok, drat-trim VERIFIED (1469 bytes, 0.1 s)
-PASS  order_class_uniqueness__m2_11_Zerrors: sha256 ok, drat-trim VERIFIED (2814 bytes, 0.1 s)
+PASS  order_class_uniqueness__m2_11_Zerrors: sha256 ok, drat-trim VERIFIED (2814 bytes, 0.0 s)
 PASS  order_class_uniqueness__m3_01_Xerrors: sha256 ok, drat-trim VERIFIED (4453 bytes, 0.1 s)
 PASS  order_class_uniqueness__m3_01_Zerrors: sha256 ok, drat-trim VERIFIED (3177 bytes, 0.1 s)
 PASS  order_class_uniqueness__m3_10_Xerrors: sha256 ok, drat-trim VERIFIED (1473 bytes, 0.1 s)
