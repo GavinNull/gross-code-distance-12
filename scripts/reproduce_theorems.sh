@@ -18,6 +18,15 @@
 #                           （= E-021 审计脚本只改输出目录）查合法性与扩展码 = Fig. 12；4224 列表复用 --with-gross12 在 OUT 里的重建，
 #                           没有则从头重建；CP-SAT 精确 lift R=1..32 两基底应 0 提升、Fig. 12 R=1 阳性对照 4224/4224；权重 12 注入；
 #                           E-024a 间隙论证的前提（G = 52、逐层插块周期性 ⇒ R' = 32）与板论证前提 (A)（约 0.8 CPU 小时，重建列表另加约 1 CPU 小时）
+#   --with-bb90             已确认结果第 14、15 条：E-028 [[90,8,10]] 交错单辅助比特电路 c16 d_circ = 10（任意 R、两基底）与
+#                           E-029 直接 DEM 搜索。用发布包里的独立脚本（release/zenodo/code/bb90、code/dcirc，从仓库根目录运行，
+#                           输出到 $OUT/bb90）：合法性 / 确定性 / 交错 / 45 平移对称；MITM 重算 d_ext = 8 与权重 8（585）、
+#                           权重 9（16830）完整列表并与发布列表逐个比对；扩展 lift R = 1..12 两基底（情形 a、b）应 0 提升，
+#                           对照 u16（权重 9 提升）、s16（585/540/16830）；任意 R 前提（分离 S、周期性 T）；权重 10 注入；
+#                           auditor 独立编码的“任意每校验顺序 X 侧 d_ext <= 8”CNF 字节一致重生成，CaDiCaL 求解 + drat-trim
+#                           + cake_lpr（约 1 CPU 小时、12 GB 磁盘，NO_PROOFS=1 跳过）；ccsearch 自检、电路 A R = 1 两基底（<= 11 无、12 有）、
+#                           c16 R = 1..3（<= 9 无、10 有）、u16 对照；需要 release/zenodo/data（scripts/zenodo/build_bb90.py 生成）
+#                           （不含证明约 1.5 CPU 小时）
 #   --skip-base             不跑默认的 BB108 / E-015 / IBM [[72]] 部分（只跑所选的可选部分）
 #   环境变量：P = 并行进程数（默认 4，不超过 6）；OUT = 输出目录（默认 results/reproduce_theorems，须为仓库内相对路径）。
 #
@@ -34,7 +43,7 @@ set -u
 cd "$(dirname "$0")/.."
 P=${P:-4}
 OUT=${OUT:-results/reproduce_theorems}
-BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0; GROSS12=0; GP18=0
+BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0; GROSS12=0; GP18=0; BB90=0
 for a in "$@"; do
   case "$a" in
     --with-gross) GROSS=1 ;;
@@ -43,6 +52,7 @@ for a in "$@"; do
     --with-gross-retiming) RETIME=1 ;;
     --with-gross12) GROSS12=1 ;;
     --with-gross12-p18) GP18=1 ;;
+    --with-bb90) BB90=1 ;;
     --skip-base) BASE=0 ;;
     *) echo "unknown option $a"; exit 2 ;;
   esac
@@ -276,6 +286,32 @@ if [ "$GP18" -eq 1 ]; then
   grep -q '^PASS' "$Q18/premises.log" || FAIL=1
   $R24 scripts/repro_gross12_p18.py check 32 || FAIL=1
   unset SPEC TAG
+fi
+
+if [ "$BB90" -eq 1 ]; then
+  echo "== E-028 / E-029  [[90,8,10]] 交错单辅助比特电路 c16 d_circ = 10，任意 R、两基底；直接 DEM 搜索（发布包脚本）"
+  B9=$OUT/bb90; mkdir -p "$B9"
+  Z=release/zenodo; PYR="uv run python"
+  if [ ! -f $Z/data/logicals/bb90_weight9_logicals_X_memory.json ] || [ ! -f $Z/certificates/bb90_dext_free/X_side.cnf.gz ]; then
+    echo "FAIL  bb90: release/zenodo data missing (run scripts/zenodo/build_bb90.py)"; FAIL=1
+  else
+    bb() { log=$1; shift; $PYR "$@" > "$B9/$log.log" 2>&1; grep -E '^(PASS|FAIL)' "$B9/$log.log"
+           grep -q '^FAIL' "$B9/$log.log" && FAIL=1; grep -q '^PASS' "$B9/$log.log" || { echo "FAIL  bb90 $log crashed"; FAIL=1; }; }
+    bb check $Z/code/bb90/check_circuits.py c16 u16 s16
+    bb premises $Z/code/bb90/premises.py --rmax 14
+    bb inject $Z/code/bb90/inject_upper_bound.py c16
+    bb lists $Z/code/bb90/lists.py --wmax 9
+    bb cnf $Z/code/bb90/dext_free.py "$B9/X_side.cnf" --compare $Z/certificates/bb90_dext_free/X_side.cnf.gz
+    # 扩展 lift（每行：电路 基底 R 范围；行尾不能有空格）
+    { for b in Z X; do echo "c16 $b 1-8"; echo "c16 $b 9-12"; echo "u16 $b 1-2"; echo "s16 $b 1-2"; done; } | xargs -P "$P" -L 1 sh -c \
+      'uv run python release/zenodo/code/bb90/lift.py --circuit $1 --basis $2 --R $3 > "$0/lift_$1_$2_$3.log" 2>&1' "$B9"
+    for f in "$B9"/lift_*.log; do grep -E '^(PASS|FAIL)' "$f"; grep -q '^FAIL' "$f" && FAIL=1; grep -q '^PASS' "$f" || FAIL=1; done
+    bb dcirc $Z/code/dcirc/run.py full --workers "$P" --out "$B9/dcirc"
+    if [ "${NO_PROOFS:-0}" != 1 ]; then
+      export CADICAL=$PWD/tools/cadical/build/cadical DRAT_TRIM=$PWD/tools/drat-trim/drat-trim CAKE_LPR=$PWD/tools/cake_lpr/cake_lpr
+      bb proof $Z/code/proofs/check_proofs.py --records certificates/proofs/bb90_dext_free.jsonl --regenerate all --timeout 20000
+    fi
+  fi
 fi
 
 [ "$FAIL" -eq 0 ] && echo "ALL PASS" || { echo "SOME CHECKS FAILED"; exit 1; }
