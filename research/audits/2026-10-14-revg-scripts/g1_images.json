@@ -1,0 +1,242 @@
+{
+ "circuitA_R1_Z": {
+  "mechanisms": 864,
+  "classes": {
+   "suffix_len3": 72,
+   "suffix_len2": 72,
+   "single/suffix_len1": 288,
+   "single": 96,
+   "suffix_len4": 72,
+   "single/suffix_len5": 192,
+   "zero": 72
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "circuitA_R1_X": {
+  "mechanisms": 864,
+  "classes": {
+   "suffix_len3": 72,
+   "suffix_len4": 72,
+   "single/suffix_len5": 288,
+   "single/suffix_len1": 192,
+   "suffix_len2": 72,
+   "single": 96,
+   "zero": 72
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "circuitA_R2_Z": {
+  "mechanisms": 1584,
+  "classes": {
+   "suffix_len3": 144,
+   "suffix_len2": 144,
+   "single/suffix_len1": 504,
+   "single": 168,
+   "suffix_len4": 144,
+   "single/suffix_len5": 336,
+   "zero": 144
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "circuitA_R2_X": {
+  "mechanisms": 1584,
+  "classes": {
+   "suffix_len3": 144,
+   "suffix_len4": 144,
+   "single/suffix_len5": 504,
+   "single/suffix_len1": 336,
+   "suffix_len2": 144,
+   "single": 168,
+   "zero": 144
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "circuitA_R3_Z": {
+  "mechanisms": 2304,
+  "classes": {
+   "suffix_len3": 216,
+   "suffix_len2": 216,
+   "single/suffix_len1": 720,
+   "single": 240,
+   "suffix_len4": 216,
+   "single/suffix_len5": 480,
+   "zero": 216
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "circuitA_R3_X": {
+  "mechanisms": 2304,
+  "classes": {
+   "suffix_len3": 216,
+   "suffix_len4": 216,
+   "single/suffix_len5": 720,
+   "single/suffix_len1": 480,
+   "suffix_len2": 216,
+   "single": 240,
+   "zero": 216
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "fig12_R1_Z": {
+  "mechanisms": 864,
+  "classes": {
+   "single/suffix_len5": 192,
+   "single": 192,
+   "single/suffix_len1": 192,
+   "zero": 72,
+   "suffix_len3": 72,
+   "suffix_len4": 72,
+   "suffix_len2": 72
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "fig12_R1_X": {
+  "mechanisms": 864,
+  "classes": {
+   "suffix_len3": 72,
+   "suffix_len2": 72,
+   "single/suffix_len1": 192,
+   "suffix_len4": 72,
+   "single": 192,
+   "single/suffix_len5": 192,
+   "zero": 72
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "fig12_R2_Z": {
+  "mechanisms": 1584,
+  "classes": {
+   "single/suffix_len5": 336,
+   "single": 336,
+   "single/suffix_len1": 336,
+   "zero": 144,
+   "suffix_len3": 144,
+   "suffix_len4": 144,
+   "suffix_len2": 144
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "fig12_R2_X": {
+  "mechanisms": 1584,
+  "classes": {
+   "suffix_len3": 144,
+   "suffix_len2": 144,
+   "single/suffix_len1": 336,
+   "suffix_len4": 144,
+   "single": 336,
+   "single/suffix_len5": 336,
+   "zero": 144
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "fig12_R3_Z": {
+  "mechanisms": 2304,
+  "classes": {
+   "single/suffix_len5": 480,
+   "single": 480,
+   "single/suffix_len1": 480,
+   "zero": 216,
+   "suffix_len3": 216,
+   "suffix_len4": 216,
+   "suffix_len2": 216
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ },
+ "fig12_R3_X": {
+  "mechanisms": 2304,
+  "classes": {
+   "suffix_len3": 216,
+   "suffix_len2": 216,
+   "single/suffix_len1": 480,
+   "suffix_len4": 216,
+   "single": 480,
+   "single/suffix_len5": 480,
+   "zero": 216
+  },
+  "columns": {
+   "distinct_columns_hit": 360,
+   "allowed_keys": 360
+  },
+  "not_allowed": 0,
+  "examples": [],
+  "telescoping_bad": 0,
+  "logical_bad": 0
+ }
+}

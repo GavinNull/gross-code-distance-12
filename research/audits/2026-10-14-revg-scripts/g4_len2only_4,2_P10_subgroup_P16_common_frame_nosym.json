@@ -1,0 +1,247 @@
+{
+ "primary_P16_common_frame_nosym|all": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 5,
+   "nogoods": 9585,
+   "sec": 110.5
+  },
+  "rec_types": {
+   "1res_|V|=2": 720,
+   "1res_len2": 720,
+   "3res": 2016,
+   "2res": 48,
+   "4res": 336,
+   "5res": 576
+  },
+  "kept": 4416,
+  "nogood_types": {
+   "1res_|V|=2": 2806,
+   "1res_len2": 2849,
+   "2res": 154,
+   "3res": 3461,
+   "5res": 191,
+   "4res": 124
+  },
+  "sec": 110.5
+ },
+ "primary_P16_common_frame_nosym|len2only": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 7,
+   "nogoods": 4276,
+   "sec": 1649.4
+  },
+  "rec_types": {
+   "1res_|V|=2": 720,
+   "1res_len2": 720,
+   "3res": 2016,
+   "2res": 48,
+   "4res": 336,
+   "5res": 576
+  },
+  "kept": 720,
+  "nogood_types": {
+   "1res_len2": 4276
+  },
+  "sec": 1649.6
+ },
+ "second_P09_subgroup_4,2|all": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 2,
+   "sec": 45.5,
+   "subgroup_order": 3
+  },
+  "rec_types": {
+   "1res_|V|=2": 240,
+   "1res_len2": 240,
+   "3res": 672,
+   "4res": 112,
+   "5res": 192,
+   "2res": 16
+  },
+  "kept": 1472,
+  "nogood_types": {
+   "1res_|V|=2": 240,
+   "1res_len2": 240,
+   "3res": 491,
+   "5res": 62,
+   "4res": 43,
+   "2res": 16
+  },
+  "sec": 45.6
+ },
+ "second_P09_subgroup_4,2|len2only": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 3,
+   "sec": 68.3,
+   "subgroup_order": 3
+  },
+  "rec_types": {
+   "1res_|V|=2": 240,
+   "1res_len2": 240,
+   "3res": 672,
+   "4res": 112,
+   "5res": 192,
+   "2res": 16
+  },
+  "kept": 240,
+  "nogood_types": {
+   "1res_len2": 476
+  },
+  "sec": 68.3
+ },
+ "second_P10_subgroup_1,2|all": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 6,
+   "sec": 3.1,
+   "subgroup_order": 12
+  },
+  "rec_types": {
+   "1res_|V|=2": 60,
+   "1res_len2": 60,
+   "3res": 168,
+   "4res": 28,
+   "5res": 48,
+   "2res": 4
+  },
+  "kept": 368,
+  "nogood_types": {
+   "1res_|V|=2": 300,
+   "1res_len2": 300,
+   "3res": 554,
+   "4res": 58,
+   "5res": 97,
+   "2res": 18
+  },
+  "sec": 3.1
+ },
+ "second_P10_subgroup_1,2|len2only": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 9,
+   "sec": 2.0,
+   "subgroup_order": 12
+  },
+  "rec_types": {
+   "1res_|V|=2": 60,
+   "1res_len2": 60,
+   "3res": 168,
+   "4res": 28,
+   "5res": 48,
+   "2res": 4
+  },
+  "kept": 60,
+  "nogood_types": {
+   "1res_len2": 479
+  },
+  "sec": 2.0
+ },
+ "second_P10_subgroup_0,3;3,0|all": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 9,
+   "sec": 7.7,
+   "subgroup_order": 8
+  },
+  "rec_types": {
+   "1res_|V|=2": 90,
+   "1res_len2": 90,
+   "3res": 252,
+   "4res": 42,
+   "5res": 72,
+   "2res": 6
+  },
+  "kept": 552,
+  "nogood_types": {
+   "1res_|V|=2": 714,
+   "1res_len2": 718,
+   "3res": 1108,
+   "4res": 90,
+   "5res": 132,
+   "2res": 42
+  },
+  "sec": 7.8
+ },
+ "second_P10_subgroup_0,3;3,0|len2only": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 20,
+   "sec": 7.7,
+   "subgroup_order": 8
+  },
+  "rec_types": {
+   "1res_|V|=2": 90,
+   "1res_len2": 90,
+   "3res": 252,
+   "4res": 42,
+   "5res": 72,
+   "2res": 6
+  },
+  "kept": 90,
+  "nogood_types": {
+   "1res_len2": 1699
+  },
+  "sec": 7.7
+ },
+ "second_P10_subgroup_2,4|all": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 10,
+   "sec": 21.1,
+   "subgroup_order": 6
+  },
+  "rec_types": {
+   "1res_|V|=2": 120,
+   "1res_len2": 120,
+   "3res": 336,
+   "4res": 56,
+   "5res": 96,
+   "2res": 8
+  },
+  "kept": 736,
+  "nogood_types": {
+   "1res_|V|=2": 1076,
+   "1res_len2": 1080,
+   "3res": 1566,
+   "4res": 85,
+   "5res": 118,
+   "2res": 68
+  },
+  "sec": 21.1
+ },
+ "second_P10_subgroup_2,4|len2only": {
+  "status": "UNSAT",
+  "info": {
+   "status": "UNSAT",
+   "iterations": 18,
+   "sec": 50.4,
+   "subgroup_order": 6
+  },
+  "rec_types": {
+   "1res_|V|=2": 120,
+   "1res_len2": 120,
+   "3res": 336,
+   "4res": 56,
+   "5res": 96,
+   "2res": 8
+  },
+  "kept": 120,
+  "nogood_types": {
+   "1res_len2": 2036
+  },
+  "sec": 50.5
+ }
+}
