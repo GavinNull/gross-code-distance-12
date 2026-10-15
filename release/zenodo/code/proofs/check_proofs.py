@@ -10,6 +10,9 @@ the reference machine).  Proofs up to the size limit are shipped as certificates
                                                           # proof with drat-trim (and cake_lpr), compare its sha256
     python code/proofs/check_proofs.py --regenerate unshipped   # the 14 proofs over 100 MB (about 2.9 CPU hours)
     python code/proofs/check_proofs.py --regenerate all         # every certificate (about 3.2 CPU hours)
+    python code/proofs/check_proofs.py --records certificates/proofs/bb90_dext_free.jsonl --regenerate all
+                                                          # [[90,8,10]] d_ext <= 8 (proof 2.6 GB, not shipped;
+                                                          # about 2.5 CPU hours)
 Tools: $CADICAL, $DRAT_TRIM, $CAKE_LPR (see code/proofs/build_tools.sh).
 """
 import argparse
@@ -36,9 +39,10 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--max-bytes", type=float, default=0)
 ap.add_argument("--regenerate", nargs="*", default=None)
 ap.add_argument("--timeout", type=int, default=7200)
+ap.add_argument("--records", default=None, help="record file (default certificates/proofs/certificates_proofs.jsonl)")
 a = ap.parse_args()
 V = Verdict()
-recs = [json.loads(l) for l in open(PROOFS / "certificates_proofs.jsonl")]
+recs = [json.loads(l) for l in open(ROOT / a.records if a.records else PROOFS / "certificates_proofs.jsonl")]
 tmp = Path(tempfile.mkdtemp(prefix="proofcheck"))
 try:
     for r in recs:

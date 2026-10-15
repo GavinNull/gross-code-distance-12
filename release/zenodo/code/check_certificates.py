@@ -27,7 +27,9 @@ ap.add_argument("--max-clauses", type=int, default=0)
 ap.add_argument("--family", action="store_true")
 a = ap.parse_args()
 V = Verdict()
-dirs = [Path(d) for d in a.dirs] or sorted(p for p in CERTIFICATES.iterdir() if p.is_dir())
+# certificates/bb90_dext_free/ ([[90,8,10]], SM S9) has no re-solve log; it is checked with its DRAT proof record
+# (code/proofs/check_proofs.py --records certificates/proofs/bb90_dext_free.jsonl --regenerate all)
+dirs = [Path(d) for d in a.dirs] or sorted(p for p in CERTIFICATES.iterdir() if p.is_dir() and p.name != "bb90_dext_free")
 for d in dirs:
     for cnf in sorted(d.glob("*.cnf.gz")):
         log = json.load(open(str(cnf).replace(".cnf.gz", ".log.json")))
