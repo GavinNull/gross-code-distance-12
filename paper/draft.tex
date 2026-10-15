@@ -24,7 +24,7 @@
 
 \begin{document}
 
-\title{A single-ancilla syndrome circuit with circuit distance 12 for the gross code}
+\title{Interleaving recovers the full circuit distance of bivariate-bicycle codes}
 
 \author{Guancheng Pan}
 \email{3250101086@zju.edu.cn}
@@ -32,20 +32,21 @@
 \date{\today}
 
 \begin{abstract}
-Strikis, Browne and Beverland proved that no non-interleaved single-ancilla
-syndrome-extraction circuit for the gross code $\code{144,12,12}$ reaches circuit
-distance 12, and asked whether an interleaved one can. We construct a single-ancilla,
-interleaved circuit for the gross code with circuit distance $\dcirc=12$ under
-standard circuit-level depolarizing noise, and prove this in both memory bases for
-every number of rounds. The key idea is to keep the extended code of their
-distance-11 circuit fixed and to choose the CNOT orders and timing so that none of
-its minimum-weight extended-code logicals is realised by an undetected circuit
-error. This turns circuit design into a finite decision problem, which we solve
-exactly and certify with checked DRAT proofs; the method applies to single-ancilla
-circuits beyond the gross code. Our computation of the extended-code distance also
-proves their conjecture that the original circuit has $\dcirc=11$. The new circuit
-has a period of 18 time steps per round instead of 8, which increases its exposure
-to idle noise.
+Strikis, Browne and Beverland showed that every non-interleaved single-ancilla
+syndrome-extraction circuit has circuit distance at most the distance $\dext$ of an
+extended code, which can fall below the code distance: at
+most 11 for the gross code $\code{144,12,12}$ and, as we show, at most 8 for
+$\code{90,8,10}$. We show that interleaving recovers the full code distance. We
+construct single-ancilla, interleaved circuits with circuit distance $\dcirc=12$ for
+the gross code, answering their open question, and $\dcirc=10$ for $\code{90,8,10}$,
+two above every non-interleaved circuit, and prove both under standard circuit-level
+depolarizing noise in both memory bases for every number of rounds. The method keeps
+a fixed extended code and turns circuit design into a finite decision problem over
+its low-weight logicals, which we solve exactly and certify with checked DRAT proofs.
+A direct search on the full detector error model confirms both results independently
+of the extended code, and our computation also confirms their conjecture that their
+original gross circuit has $\dcirc=11$. The new circuits have periods of 18 and 16
+time steps per round, against 8 for the IBM circuits.
 \end{abstract}
 
 \maketitle
@@ -73,20 +74,24 @@ all $X$-type CNOTs precede all overlapping $Z$-type CNOTs or vice versa
 code, non-interleaved circuits are capped at 11 (their Prop.~4); their depth-8
 circuit (their Fig.~12, hereafter ``Fig.~12'') was conjectured to reach it. They
 left open ``whether any interleaved circuit can achieve circuit distance
-12''~\cite{Strikis2026}.
+12''~\cite{Strikis2026}. For the $\code{90,8,10}$ code of the same family the best
+known value is 8: the IBM circuit has $\dcirc\le8$~\cite{Bravyi2024}, proven exact by
+MaxSAT~\cite{Tesseract2025}.
 
-We answer this question in the affirmative. We construct a single-ancilla,
-CNOT-based, interleaved circuit for the gross code (Table~\ref{tab:circuit}) and
-prove that its circuit distance is 12 for every number of rounds
-(Theorem~\ref{thm:main})\cl{41,40}. The idea (Fig.~\ref{fig:concept}) is to use the
-gap between Prop.~3 and Cor.~1: we keep the extended code of Fig.~12, with
-$\dext=11$, fixed and choose CNOT orders and times such that none of its 4224
-minimum-weight logicals can be realised by eleven undetected circuit faults. This
-turns circuit design into a finite decision problem that we solve exactly and
-certify, a tool that applies to single-ancilla circuits beyond the gross code. Our
-computation of $\dext$ also proves SBB's conjecture that Fig.~12 has $\dcirc=11$
-(Corollary~\ref{cor:fig12})\cl{10}. The new circuit runs with a period of 18 time
-steps per round instead of 8\cl{44}; we discuss this cost at the end.
+We answer this question in the affirmative and show that the gap between Prop.~3 and
+Cor.~1 can be wider than one. For the gross code we construct a single-ancilla,
+CNOT-based, interleaved circuit (Table~\ref{tab:circuit}) and prove $\dcirc=12$ for
+every number of rounds (Theorem~\ref{thm:main})\cl{41,40}. For $\code{90,8,10}$ every
+choice of CNOT orders gives $\dext\le8$, so every non-interleaved circuit has
+$\dcirc\le8$; we construct an interleaved circuit (Table~\ref{tab:bb90}) with
+$\dcirc=10=d$ (Theorem~\ref{thm:bb90})\cl{53}. The idea (Fig.~\ref{fig:concept}) is
+to fix an extended code and choose CNOT orders and times such that none of its
+minimum-weight logicals, and none of the slightly heavier ones, can be realised by
+undetected circuit faults. This turns circuit design into a finite decision problem
+that we solve exactly and certify, a tool for single-ancilla circuits in general.
+Our computation of $\dext$ also proves SBB's conjecture that Fig.~12 has $\dcirc=11$
+(Corollary~\ref{cor:fig12})\cl{10}. The new circuits run with periods of 18 and 16
+time steps per round instead of 8\cl{44,53}; we discuss this cost at the end.
 
 Exact circuit distances are known for hypergraph-product codes~\cite{ManesClaes},
 for the smallest BB circuit from exact solvers~\cite{Webster2026}, and as
@@ -101,7 +106,11 @@ have circuit distance 12'', without giving the circuit; the circuit referred to 
 Shaw--Terhal construction. We
 note that this end-cycle code is not equivalent to the gross code under qubit
 permutations and local Cliffords, since its minimum stabiliser weight is 9 rather
-than 6\cl{2}. SBB also show that the distance of an interleaved circuit is
+than 6\cl{2}. For $\code{90,8,10}$, Bi, Chang and Puri report that the upper bound for the
+unchanged IBM circuit returns to 10 when the ancilla noise is infinitely
+$Z$-biased~\cite{BiChangPuri2026}; we keep unbiased depolarizing noise and change the
+circuit instead, and our value is proven rather than a heuristic upper bound\cl{53}.
+SBB also show that the distance of an interleaved circuit is
 lower-bounded by that of its non-interleaved counterpart~\cite{Strikis2026};
 Ref.~\cite{Nguyen2026} proposed using this bound to screen interleaved schedules,
 leaving the search to future work. For the gross code that bound gives at most 11,
@@ -191,7 +200,7 @@ $Z_2$ & 16 & $B_2B_1B_3A_3A_2A_1$ & 17, 5, 6, 12, 13, 14 & 15 & rev\,$s_{56}$\\
 
 % ---------------------------------------------------------------------------
 \paragraph{Key idea.}
-Interleaving decouples $\dcirc$ from $\dext$ in one direction only: $\dcirc\ge\dext$
+We explain the idea on the gross code. Interleaving decouples $\dcirc$ from $\dext$ in one direction only: $\dcirc\ge\dext$
 still holds, but $\dcirc$ can exceed it. To use this, the extended code must stay at
 distance 11, and the timing must prevent every weight-11 extended logical from
 lifting. We say that an extended logical \emph{lifts} if one can choose, for each of
@@ -246,7 +255,28 @@ period boundary) and interleaved (96 data qubits switch between $X$- and $Z$-typ
 CNOTs four times per period, 48 twice); every check's order differs from that of
 Fig.~12\cl{41,42}. A second period-18 circuit and a period-21 circuit in which all
 ancillas are reset and measured together have the same distance
-(SM~\ref{sm:circuits})\cl{31,43}.
+(SM~\ref{sm:circuits})\cl{31,43}. For $\code{90,8,10}$ a search of the same kind over
+fully translation-invariant schedules, blocking the weight-8 and weight-9 extended
+logicals of Lemma~\ref{lem:structure} below, gave the circuit of
+Table~\ref{tab:bb90}: all $X$ checks share one order and timing, all $Z$ checks
+another, every data qubit alternates $X$- and $Z$-type CNOTs six times per period,
+and the circuit is legal and deterministic\cl{53}.
+
+\begin{table}[t]
+\caption{The $\code{90,8,10}$ circuit, period 16. Code: $\ell=15$, $m=3$,
+$A=x^9+y+y^2\mapsto A_1A_2A_3$, $B=1+x^2+x^7\mapsto B_1B_2B_3$~\cite{Bravyi2024}. All
+ancillas are reset at step 0 and measured at step 15; steps 11, 13 and 14 contain no
+CNOT. Every check of a type uses the same order and steps.}
+\label{tab:bb90}
+\begin{ruledtabular}
+\begin{tabular}{lll}
+type & CNOT order & CNOT steps\\
+\hline
+$X$ & $A_2A_1A_3B_2B_3B_1$ & 1, 3, 5, 6, 8, 10\\
+$Z$ & $B_1B_3B_2A_3A_1A_2$ & 2, 4, 6, 7, 9, 12\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
 
 \begin{figure}[t]
 \includegraphics[width=\columnwidth]{figures/fig2_timing.pdf}
@@ -266,7 +296,8 @@ Under SD6 noise, the circuit of Table~\ref{tab:circuit} has $\dcirc=12$ in both
 memory bases for every number of rounds $R\ge1$.
 \end{theorem}
 
-The proof has three steps, two of them pen-and-paper and one computer-assisted.
+The proof rests on two lemmas that hold for every circuit of our template, and on
+one computation.
 
 \begin{lemma}[Reduction]\label{lem:reduction}
 In any circuit of our template, an undetected fault set of size $w$ that flips a
@@ -280,12 +311,29 @@ undetected fault set the $H$ parts of the images therefore sum to zero, while th
 $L$ parts sum to the logical effect. Each image is zero or one column, a property
 noted by SBB (their Table~I) that we prove for our template, interleaved and
 pipelined, in SM~\ref{sm:reduction}; pairs of equal columns cancel. $\square$
-This uses neither Prop.~3 of SBB nor non-interleaving; with $\dext=11$ it excludes
-weight $\le10$ for every $R$\cl{33}.
+This uses neither Prop.~3 of SBB nor non-interleaving; it excludes every weight
+below $\dext$, for every $R$\cl{33}.
+
+\begin{lemma}[Light logicals]\label{lem:structure}
+An undetected logical of weight $\dext$ consists of $\dext$ faults whose images are
+distinct columns forming an extended logical. An undetected logical of weight
+$\dext+1$ consists either of $\dext+1$ faults with distinct nonzero images forming an
+extended logical, or of $\dext$ such faults forming an extended logical of weight
+$\dext$ together with one fault of zero image.
+\end{lemma}
+\emph{Proof.} If $z$ faults have zero image and $c$ pairs of nonzero images cancel,
+the remaining distinct columns form an extended logical of weight $w-z-2c\ge\dext$
+by Lemma~\ref{lem:reduction}. For $w=\dext$ this forces $z=c=0$; for $w=\dext+1$ it
+forces $c=0$ and $z\le1$. $\square$\cl{53}
+Deciding $\dcirc\ge\dext+2$ is therefore a finite problem: for every extended logical of
+weight $\dext$ (with or without one zero-image fault) and of weight $\dext+1$, decide
+whether it lifts.
+
+For the gross circuit, $\dext=11$ and only weight 11 needs to be decided.
 
 \begin{lemma}[Finite rounds]\label{lem:lift}
-For $R=1,\dots,32$ and both bases, none of the 4224 weight-11 extended logicals is
-the image of eleven undetected faults.
+For $R=1,\dots,32$ and both bases, none of the 4224 weight-11 extended logicals of the
+gross circuit is the image of eleven undetected faults.
 \end{lemma}
 We verified this by an exact computation: for each logical, a CP-SAT model chooses
 one DEM mechanism per column subject to every detector sum vanishing; all
@@ -301,7 +349,7 @@ verified with drat-trim, whose LRAT core was verified with cake\_lpr
 (SM~\ref{sm:lift})\cl{51}.
 
 \begin{lemma}[All rounds]\label{lem:gap}
-If a weight-11 undetected logical existed for some $R$, one would exist for some
+For the gross circuit, if a weight-11 undetected logical existed for some $R$, one would exist for some
 $R'\le32$.
 \end{lemma}
 \emph{Proof sketch.} After the last fault of a fault set at layer $a$, the data
@@ -336,7 +384,55 @@ with weight-11 undetected errors, and in the bulk, every legal circuit keeping t
 orders has such an error in each longer-period family of Table~\ref{tab:fig12} (SM~\ref{sm:fig12})\cl{14,15,16,17}.
 
 % ---------------------------------------------------------------------------
-\paragraph{Optimality.}
+\paragraph{Gap of two for $\code{90,8,10}$.}
+For this code no choice of CNOT orders reaches the code distance through the
+extended code: for every assignment of per-check orders, the extended code of the
+$X$-check side contains a logical of weight at most 8. We verified this with a SAT
+encoding over all admissible order types whose unsatisfiability is certified by a
+DRAT proof checked with drat-trim (SM~\ref{sm:bb90}). Hence $\dext\le8=d-2$ for
+every single-ancilla circuit of this code, every non-interleaved circuit has
+$\dcirc\le8$ by SBB's Cor.~1, and a non-interleaved circuit with the same extended code as
+Table~\ref{tab:bb90} attains 8\cl{53}.
+
+\begin{theorem}\label{thm:bb90}
+Under SD6 noise, the circuit of Table~\ref{tab:bb90} has $\dcirc=10$ in both memory
+bases for every number of rounds $R\ge1$.
+\end{theorem}
+\emph{Proof.} The extended code of its orders has $\dext=8$, with exactly 585
+logicals of weight 8 and 16830 of weight 9 in each basis (two independent
+enumerations, a depth-first search and a meet-in-the-middle search). By
+Lemma~\ref{lem:reduction} no undetected logical has weight $\le7$. By
+Lemma~\ref{lem:structure}, one of weight 8 lifts a weight-8 extended logical, and one
+of weight 9 lifts a weight-9 extended logical or a weight-8 one together with one
+zero-image fault; in this circuit the zero-image faults that trigger detectors are
+exactly the ancilla readout flips. For $R=1,\dots,12$ and both bases none of these
+lifts, as found by three independent implementations. All ancillas are reset at
+step 0 and measured at step 15, so rounds are separated in time: a minimal undetected
+logical with a fault-free round inside its span would split into two undetected
+parts, one of them lighter, so a weight-9 logical spans at most 9 rounds, and
+deleting fault-free rounds maps it into a circuit with at most 12 rounds. A weight-10
+data logical injected after data initialisation gives the upper bound. $\square$\cl{53}
+As positive controls, the same lift finds 315 weight-9 lifts for a nearby interleaved
+circuit with $\dcirc=9$, and 585 weight-8 lifts for a non-interleaved circuit with the
+same extended code. To our knowledge, the two circuits of this work
+are the first explicit single-ancilla circuits whose circuit distance exceeds the
+extended-code distance of every choice of CNOT orders\cl{53}.
+
+\paragraph{Direct cross-check.}
+Both lower bounds were also checked without the extended code, by an exact
+branch-and-bound search for the lightest undetected logical on the full detector
+error model, driven by unsatisfied detectors (the same family of methods as the
+search of SM~\ref{sm:dext}, but an independent implementation with different
+pruning; its $R=1$ results were reproduced by a second, independently written
+implementation). For the gross circuit there is no undetected logical of weight
+$\le11$ at $R=1$, 2 and 3 in both bases, and the weight-12 injection gives the
+minimum 12. For the $\code{90,8,10}$ circuit there is none of weight $\le9$ for
+$R=1,\dots,12$ in both bases; with the round-splitting argument above this proves
+Theorem~\ref{thm:bb90} for every $R$ without any extended-code input
+(SM~\ref{sm:direct})\cl{54}.
+
+% ---------------------------------------------------------------------------
+\paragraph{Optimality of the gross period.}
 Within its order class the circuit is as short as a colour-symmetric schedule can
 be in the bulk frame model described below.
 Among schedules symmetric under the 24 colour-preserving translations with orders in
@@ -358,16 +454,17 @@ already excludes $P\le11$, and any non-trivial subgroup excludes $P=8$\cl{47,38}
 
 % ---------------------------------------------------------------------------
 \paragraph{Discussion.}
-The obstruction found by SBB is specific to non-interleaved circuits: the gross code
-admits a single-ancilla circuit that preserves its full distance. The method behind
-this result is general. Fixing the extended code and searching over the orders of
-its class and over timing turns an open-ended circuit search into a lift problem
-against a finite list of minimum-weight extended logicals, which is decided exactly
-and certified; it applies to every single-ancilla circuit whose distance is limited
-by Cor.~1 of SBB.
+The obstruction found by SBB is specific to non-interleaved circuits: both the gross
+code and $\code{90,8,10}$ admit single-ancilla circuits that preserve their full
+distance, and for $\code{90,8,10}$ interleaving gains two units over every
+non-interleaved circuit. The method behind these results is general. Fixing the
+extended code and searching over orders and timing turns an open-ended circuit
+search into a lift problem against finite lists of extended logicals of weight
+$\dext$ and $\dext+1$ (Lemma~\ref{lem:structure}), which is decided exactly; it applies
+to every single-ancilla circuit whose distance is limited by Cor.~1 of SBB.
 
-\emph{Cost and outlook.} The circuit uses the qubits of the IBM and SBB circuits, one
-ancilla per check, but 18 time steps per round instead of 8, with 3168 idle
+\emph{Cost and outlook.} The gross circuit uses the qubits of the IBM and SBB
+circuits, one ancilla per check, but 18 time steps per round instead of 8, with 3168 idle
 locations per round instead of 288 and 2.8 times the total fault probability per
 round\cl{44,50}. We compared it with Fig.~12 and the IBM circuit under the same SD6
 noise (idle depolarization on every idle qubit in every layer), $R=12$, and
@@ -380,15 +477,20 @@ $\lambda=0$ the period-18 circuit has a lower per-round logical error rate than
 Fig.~12 at $p=4\times10^{-3}$ (ratio 0.37 [0.28, 0.49] with BP-OSD; 0.25 [0.11, 0.60]
 with Relay-BP) and is statistically indistinguishable from the IBM circuit at
 $p=3$--$4\times10^{-3}$, whereas already at $\lambda=0.1$ it is worse than Fig.~12
-by a factor 2.3--3 per round (SM~\ref{sm:idle})\cl{52}. A shorter period is therefore
-the natural next goal: the main open question is whether $\dcirc=12$ can be reached
-at period 8, or at any period below 18, by less symmetric schedules. Correlated
+by a factor 2.3--3 per round (SM~\ref{sm:idle})\cl{52}. The $\code{90,8,10}$ circuit
+has period 16, three steps of which contain no CNOT, against 8 time steps per round
+for the depth-7 IBM circuit; its logical error rate has not been evaluated\cl{53}.
+Shorter periods are therefore the natural next goal: the main open questions are
+whether $\dcirc=12$ for the gross code and $\dcirc=10$ for $\code{90,8,10}$ can be
+reached at period 8 by less symmetric schedules. Correlated
 faults, leakage and CZ-native compilations are outside the scope of this work.
 
 \paragraph{Data availability.}
-The circuit specifications, the lists of 4224 weight-11 extended logicals for each
-basis, the witnesses, the certificates (clause sets of the unsatisfiable instances)
-and the reproduction scripts are available at [Zenodo DOI].
+The circuit specifications, the lists of extended logicals used in the lift
+computations (4224 of weight 11 for the gross circuit; 585 of weight 8 and 16830 of
+weight 9 for the $\code{90,8,10}$ circuit, each basis), the witnesses, the
+certificates (clause sets of the unsatisfiable instances) and the reproduction
+scripts are available at [Zenodo DOI].
 
 \begin{acknowledgments}
 \emph{AI use.} This research was carried out with AI agents (Claude, Anthropic).
@@ -410,6 +512,8 @@ modular quantum computer based on bivariate bicycle codes, arXiv:2506.03094 (202
 \bibitem{Strikis2026} A.~Strikis, D.~E.~Browne, and M.~E.~Beverland,
 High-performance syndrome extraction circuits for quantum codes,
 arXiv:2603.05481 (v2, 2026).
+\bibitem{Tesseract2025} L.~Aghababaie Beni, O.~Higgott, and N.~Shutty, Tesseract: A
+search-based decoder for quantum error correction, arXiv:2503.10988 (v2, 2025).
 \bibitem{ManesClaes} A.~G.~Manes and J.~Claes, Distance-preserving stabilizer
 measurements in hypergraph product codes, Quantum \textbf{9}, 1618 (2025),
 arXiv:2308.15520.
@@ -426,6 +530,8 @@ Lett.\ \textbf{134}, 090602 (2025), arXiv:2407.16336.
 \bibitem{Wills2026} A.~Wills, M.~E.~Beverland, L.~S.~Bishop, J.~M.~Gambetta,
 P.~Rall, V.~Siddhu, and A.~W.~Cross, Concatenating algebraic codes over high-rate
 quantum LDPC codes, arXiv:2605.21898 (v2, 2026).
+\bibitem{BiChangPuri2026} R.~Bi, K.~Chang, and S.~Puri, Untangling QLDPC codes with
+biased noise ancilla, arXiv:2606.30592 (2026).
 \bibitem{Nguyen2026} M.~T.~P.~Nguyen, M.~Rimbach-Russ, and S.~Bosco, Disassembling
 qLDPC codes for depth-optimal parity-check circuits, arXiv:2608.19917 (v2, 2026).
 \bibitem{TomitaSvore} Y.~Tomita and K.~M.~Svore, Low-distance surface codes under
@@ -459,10 +565,12 @@ correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
 \renewcommand{\theequation}{S\arabic{equation}}
 \renewcommand{\theHequation}{S\arabic{equation}}
 
-The sections follow the order of the main text. S1--S2 fix notation and the
-circuits; S3--S8 contain the proof of Theorem~\ref{thm:main}; S9 concerns Fig.~12
-of SBB; S10 the search and the optimality statements; S11 the sensitivity of the
-logical error rate to idle noise; S12 the verification and the data.
+The sections follow the order of the main text. S1--S2 fix notation and the gross
+circuits; S3--S8 contain the proof of Theorem~\ref{thm:main} and the general lemmas;
+S9 treats the $\code{90,8,10}$ code and Theorem~\ref{thm:bb90}; S10 the direct search
+on the detector error model; S11 Fig.~12 of SBB; S12 the search and the optimality
+statements; S13 the sensitivity of the logical error rate to idle noise; S14 the
+verification and the data.
 
 % ---------------------------------------------------------------------------
 \section{Notation and noise model}\label{sm:notation}
@@ -761,8 +869,105 @@ circuits with $R=3,8,24$ in both bases; it reduces any $R$ to $R\le23$.
 For each basis we found a weight-12 logical operator of the gross code of the
 corresponding type with CP-SAT and applied it as single-qubit flips immediately
 after data initialisation; each flip is one SD6 mechanism. For $R=1,3,6,10$ and both
-bases no detector fires and the logical observable flips; omitting any one of the
-twelve flips makes the error detectable. Hence $\dcirc\le12$ for circuits A, B and C.
+bases (and, for circuit A, also at $R=2$) no detector fires and the logical
+observable flips; omitting any one of the twelve flips makes the error detectable.
+Hence $\dcirc\le12$ for circuits A, B and C.
+
+% ---------------------------------------------------------------------------
+\section{The $\code{90,8,10}$ code: bound and Theorem~\ref{thm:bb90}}\label{sm:bb90}\cl{53}
+\emph{Code and circuit.} $\ell=15$, $m=3$, $x=S_{15}\otimes I_3$, $y=I_{15}\otimes S_3$,
+$A=x^9+y+y^2$, $B=1+x^2+x^7$, $H_X=[A\,|\,B]$, $H_Z=[B^T\,|\,A^T]$~\cite{Bravyi2024};
+$n=90$, $k=8$, and an exhaustive search finds no logical of weight $\le9$ and 558
+$X$-type logicals of weight 10, so $d=10$. Labels: $A_1=x^9$, $A_2=y$, $A_3=y^2$,
+$B_1=1$, $B_2=x^2$, $B_3=x^7$; qubits and checks are indexed by $i=3a+b$, and the check
+at $(x,y)$ acts as in S1. The 45 translations are code automorphisms that preserve
+the labels, and the circuit of Table~\ref{tab:bb90} is invariant under all of them.
+It is legal (each data qubit takes part in at most one CNOT per step; every check's
+six CNOTs cover its support at distinct steps inside its window) and deterministic
+(each of the 405 overlapping pairs of $X$ and $Z$ checks shares an even number of
+qubits on which the $X$ CNOT precedes the $Z$ CNOT). $X$-type CNOTs occupy steps
+$\{1,3,5,6,8,10\}$ and $Z$-type CNOTs steps $\{2,4,6,7,9,12\}$, so each data qubit's
+cyclic sequence is $XZXZXZ$ and no partition of a round into an $X$ part and a $Z$
+part exists.
+
+\emph{Every choice of orders has $\dext\le8$.} Up to $s_{12}$, $s_{56}$ and reversal,
+a check of this code has 90 order types; for 36 of them the extended code of that
+check alone already has a logical of weight $\le8$. For the remaining 54, consider
+each of the 558 weight-10 $X$-type logicals $l$: any realised residual columns inside
+$l$ whose total size reduction is at least 2 (one triple or quadruple, or two
+disjoint pairs) give, with the rest of $l$, an extended logical of weight $\le8$. We
+encode the choice of one admissible type per check as a SAT instance with one clause
+for each such combination (17910 combinations, each verified explicitly as an
+extended logical of weight $\le8$; 3555 variables and 21690 clauses), in a form that
+only strengthens the statement (types are required ``at least one'' per check, and
+realisation is a one-way implication). CaDiCaL reports unsatisfiability and the DRAT
+proof is verified by drat-trim. Hence for every assignment of orders the $X$-side
+extended code has a logical of weight $\le8$, and every non-interleaved circuit has
+$\dcirc\le8$ by SBB's Cor.~1. A non-interleaved circuit whose extended code equals
+that of Table~\ref{tab:bb90} lifts all 585 weight-8 extended logicals at $R=1$, so 8
+is attained.
+
+\emph{Lists.} The extended code of the orders of Table~\ref{tab:bb90} has 225 merged
+columns in each basis (5 orbits under the 45 translations). There are no extended
+logicals of weight $\le7$, exactly 585 of weight 8 and 16830 of weight 9 in each
+basis; a depth-first search and an independent meet-in-the-middle enumeration give
+identical sets.
+
+\emph{Lift.} Following Lemma~\ref{lem:structure}, we decide for every weight-8 extended
+logical whether it lifts, with or without one additional zero-image DEM mechanism,
+and for every weight-9 extended logical whether it lifts. Zero-image mechanisms with
+detectors are, in every round, exactly the 45 ancilla readout flips (checked for
+$R=1,\dots,12$); all zero-image mechanisms of the DEM are admitted as candidates, so
+this description is not used. For $R=1,\dots,12$ and both bases no instance lifts
+(full counts, no early stopping), with three implementations: a frontier dynamic
+program, a CP-SAT model, and a per-logical SAT model; at $R=1$ an exhaustive
+enumeration of the products agrees. Controls: a nearby interleaved circuit with
+$\dcirc=9$ gives 315 weight-9 lifts at $R=1$ and $R=2$; the non-interleaved circuit above
+gives 585 weight-8 lifts, 540 weight-8 lifts with a zero-image fault, and 16830 weight-9
+lifts at $R=1$. The image property (S5) and the telescoping identity were asserted on
+the DEM for every $R$ used.
+
+\emph{All $R$.} In round $j$ all CNOTs lie in layers $16j+1,\dots,16j+12$ and all
+measurements in layer $16j+15$, and the noisy circuit with $R+1$ rounds equals the
+$R$-round circuit with one 16-layer block inserted (checked for $R=3,\dots,14$, both
+bases). If a minimal undetected logical has a fault-free round strictly inside its
+span, the faults before that round form an undetected set by themselves (from that
+round on every measurement reads the same syndrome, consistent with the final
+readout), so both parts are undetected and one of them is a lighter logical. Hence a
+weight-9 logical spans at most 9 rounds, and deleting fault-free rounds after the
+second and before the last maps it into a circuit with at most $2+9+1=12$ rounds.
+
+\emph{Upper bound.} A weight-10 data logical, applied as flips after data
+initialisation, fires no detector and flips the observable for $R=1,2,3,6,10,13$ in
+both bases.
+
+% ---------------------------------------------------------------------------
+\section{Direct search on the detector error model}\label{sm:direct}\cl{54}
+The search looks for a minimum-weight set of DEM mechanisms with zero detector sum
+and nonzero logical effect. It branches on the mechanisms covering an odd detector,
+excluding earlier siblings so that the branches partition the search space; it prunes
+any partial set whose detector sum and logical effect both vanish (such a set cannot
+be contained in a minimal solution), bounds the remaining weight by a packing of
+detectors with disjoint covering mechanisms, and closes the last level by table
+look-up. Root cases are split by the orbits of the translations that preserve the
+detector set and the logical classes (checked by rank conditions). This is the same
+family of methods as the extended-code search of S4, implemented independently with
+different pruning; its $R=1$ results were reproduced by a second, independently
+written implementation, which also reproduced $\dext=11$ and the list of 4224 logicals
+of S4, and both were tested on 1672 random instances with known answers. The searches
+produce no proof certificates.
+
+Results. Gross circuit A: at $R=1$ there is no undetected logical of weight $\le11$ in
+either basis and one of weight 12 is found; at $R=2$ (66 root cases) and $R=3$ (96 root
+cases) there is none of weight $\le11$, and the injection of S8 gives 12.
+$\code{90,8,10}$ circuit: for $R=1,\dots,12$ there is none of weight $\le9$ in either
+basis, and weight 10 is found for $R=1,2,3$; the interleaved control circuit gives 9.
+For the $\code{90,8,10}$ circuit, take a minimal undetected logical of weight $w\le9$
+at any $R$: by the splitting argument of S9 it spans at most $w$ rounds and maps into
+a circuit with at most $w+3\le12$ rounds, contradicting the search. This proves
+Theorem~\ref{thm:bb90} for every $R$ without extended-code input; it uses the
+separation and periodicity checks of S9. At $R=1$ a SAT formulation of the same
+question on the DEM is also unsatisfiable in both bases.
 
 % ---------------------------------------------------------------------------
 \section{Fig.~12 of SBB: $\dcirc=11$ and retimings}\label{sm:fig12}\cl{10,13,14,15,16,17,18}
