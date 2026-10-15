@@ -1,5 +1,13 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision k (2026-10-15, tone pass).** No number, scope or audited fact changed. Abstract and intro P3 lead with the
+construction and Theorem 1; the method is stated as a general tool. Limitations now stated once each: frame-model scope
+of the minimal periods (C45) in the "Optimality" paragraph; uncertified d_ext / 4224-list inputs (C11, C13) in the
+Lemma 2 paragraph and SM S4/S12; practical cost (C44, C50, C52) in one "Cost and outlook" paragraph (λ* ≈ 0.3,
+per-layer caveat, CX-native variant and the ⌈d/2⌉ / 26× coefficient statements are now in SM S11 only). Retiming
+obstructions (C16) stated as proven for all Table S3 families.
+
+
 **Revision i (2026-10-15).** **New C52 (E-026b, idle sensitivity, audited `research/audits/2026-10-15-E-026b.md`):**
 main-text "Role of idle noise" paragraph = audit §7 wording, lightly adapted (numbers and caveats unchanged; "type-(b)
 weight-12" rendered as "weight-12 families … one type of weight-12 logical is not enumerated"); abstract and
