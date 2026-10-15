@@ -32,27 +32,19 @@
 \date{\today}
 
 \begin{abstract}
-The gross code $\code{144,12,12}$ is the flagship bivariate-bicycle code, but what
-a syndrome-extraction circuit actually protects against is its circuit distance
-$\dcirc$, the minimum number of faults that cause an undetected logical error.
-Strikis, Browne and Beverland proved that no non-interleaved single-ancilla circuit
-for this code reaches $\dcirc=12$ and asked whether any interleaved circuit can.
-We give one: an interleaved single-ancilla circuit with $\dcirc=12$ under standard
-circuit-level depolarizing noise, in both memory bases and for every number of
-rounds.
-The construction keeps the extended code of their distance-11 circuit, and hence its
-distance 11, fixed and changes only the order and timing of CNOTs so that none of
-the minimum-weight extended-code logicals becomes an undetected circuit error; the
-proof combines two short arguments with an exact computation.
-The price is a period of 18 time steps per round instead of 8; in a bulk
-Pauli-frame model of lifting, no colour-symmetric schedule of this kind has a shorter
-period. The answer is structural: with idle noise and practical decoders, the longer
-period makes this circuit's logical error rate higher than that of the existing
-circuits at every noise level we sampled, and the distance gain pays off only when
-idle errors are much weaker than gate errors (without idle noise the circuit beats
-the original one at $p=4\times10^{-3}$; with idle errors at one tenth of the gate
-error rate it already loses). Combining their bounds with an exhaustive
-computation of the extended-code distance also confirms their conjecture that the
+The gross code $\code{144,12,12}$ is the flagship bivariate-bicycle code, but a
+syndrome-extraction circuit protects only up to its circuit distance $\dcirc$, the
+minimum number of faults that cause an undetected logical error. Strikis, Browne
+and Beverland proved that no non-interleaved single-ancilla circuit for this code
+reaches $\dcirc=12$ and asked whether an interleaved one can. We give one and prove
+$\dcirc=12$ under standard circuit-level depolarizing noise, in both memory bases
+and for every number of rounds. The construction keeps the extended code of their
+distance-11 circuit fixed and changes only the order and timing of CNOTs, so that
+no minimum-weight extended-code logical becomes an undetected circuit error; the
+proof combines two short arguments with an exact, certified computation. The price
+is a period of 18 time steps per round instead of 8, so the answer is structural:
+with idle noise and practical decoders the new circuit's logical error rate is
+higher than that of existing circuits. We also confirm their conjecture that their
 original circuit has $\dcirc=11$.
 \end{abstract}
 
@@ -105,7 +97,8 @@ number of qubits, has no dedicated ancillas, and at the end of each cycle acts o
 $\code{144,12,12}$ code that they call ``a second `gross' code''; its circuit distance
 is reported as an upper bound, $\le12$~\cite{ShawTerhal2025}. Ref.~\cite{Wills2026}
 (App.~C) describes a morphing idling circuit for the gross code that is ``believed to
-have circuit distance 12'', without giving the circuit; presumably it is this one. We
+have circuit distance 12'', without giving the circuit; the circuit referred to there may coincide with the
+Shaw--Terhal construction. We
 note that this end-cycle code is not equivalent to the gross code under qubit
 permutations and local Cliffords, since its minimum stabiliser weight is 9 rather
 than 6\cl{2}. SBB also show that the distance of an interleaved circuit is
@@ -320,8 +313,8 @@ window; both parts would be undetected, their observables would add to a nonzero
 value, and one part would have weight $\le10$, contradicting
 Lemma~\ref{lem:reduction}. So a weight-11 logical spans at most $10\times51$ layers.
 The noisy circuit is periodic: inserting an 18-layer block at any layer $x$ with
-$4\le x\le18R$ (layers numbered from 0) turns the $R$-round circuit into the
-$(R+1)$-round one. Deleting fault-free blocks before
+$4\le x\le18(R-1)$ (layers numbered from 0) turns the $(R-1)$-round circuit into the
+$R$-round one. Deleting fault-free blocks before
 and after the logical leaves every detector it touches unchanged, which maps it into
 a circuit with at most 32 rounds (SM~\ref{sm:gap}). $\square$\cl{43}
 
@@ -424,7 +417,7 @@ the main open practical question\cl{52}.
 \paragraph{Data availability.}
 The circuit specifications, the lists of 4224 weight-11 extended logicals for each
 basis, the witnesses, the certificates (clause sets of the unsatisfiable instances)
-and the reproduction scripts are available at [Zenodo DOI --- PI to decide].
+and the reproduction scripts are available at [Zenodo DOI].
 
 \begin{acknowledgments}
 \emph{AI use.} This research was carried out with AI agents (Claude, Anthropic).
@@ -459,8 +452,6 @@ extraction, thresholds and idle robustness, arXiv:2609.39522 (v2, 2026).
 \bibitem{ShawTerhal2025} M.~H.~Shaw and B.~M.~Terhal, Lowering connectivity
 requirements for bivariate bicycle codes using morphing circuits, Phys.\ Rev.\
 Lett.\ \textbf{134}, 090602 (2025), arXiv:2407.16336.
-\bibitem{ShawTerhal2026} M.~H.~Shaw and B.~M.~Terhal, Optimising quantum error
-correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
 \bibitem{Wills2026} A.~Wills, M.~E.~Beverland, L.~S.~Bishop, J.~M.~Gambetta,
 P.~Rall, V.~Siddhu, and A.~W.~Cross, Concatenating algebraic codes over high-rate
 quantum LDPC codes, arXiv:2605.21898 (v2, 2026).
@@ -474,6 +465,8 @@ avoiding hook errors with a single auxiliary per plaquette, arXiv:2603.28852 (20
 A fault-tolerant honeycomb memory, Quantum \textbf{5}, 605 (2021), arXiv:2108.10457.
 \bibitem{Gidney2021stim} C.~Gidney, Stim: a fast stabilizer circuit simulator,
 Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
+\bibitem{ShawTerhal2026} M.~H.~Shaw and B.~M.~Terhal, Optimising quantum error
+correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
 \end{thebibliography}
 
 % ===========================================================================
@@ -1008,7 +1001,7 @@ C and Fig.~12), the lists of 4224 weight-11 extended logicals for each basis, th
 witnesses (the weight-12 upper-bound witnesses and the weight-11 witnesses for
 Fig.~12 and its retimings), the certificates (clause sets of the unsatisfiable
 instances), and the reproduction scripts for the lower-bound computations; it is
-available at [Zenodo DOI --- PI to decide]. Every unsatisfiable clause set in the
+available at [Zenodo DOI]. Every unsatisfiable clause set in the
 data set (129 in total: 104 for the obstruction and optimality instances with all
 logicals, and 25 length-2-only instances for Table~\ref{tab:fig12}), and every batch
 of the lift computation, is accompanied by a DRAT proof produced by CaDiCaL and
