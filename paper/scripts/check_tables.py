@@ -1,4 +1,4 @@
-"""Check Tables I, S1, S2 of paper/draft.tex against the schedule specs.
+"""Check Tables I, II, S1, S2 of paper/draft.tex against the schedule specs.
 
 For every class row: CNOT order, CNOT steps (and, where present, reset/measurement
 steps) and the map from the Fig. 12 order must equal the output of
@@ -53,5 +53,59 @@ def main():
     sys.exit(1 if bad else 0)
 
 
+
+
+def check_bb90():
+    """Table II ([[90,8,10]], one row per check type) against search/experiments/e028/c16_spec.json."""
+    import json
+    tex = open("paper/draft.tex").read()
+    d = json.load(open("search/experiments/e028/c16_spec.json"))
+    L, M = 15, 3
+    A = [("A1", (9, 0)), ("A2", (0, 1)), ("A3", (0, 2))]
+    B = [("B1", (0, 0)), ("B2", (2, 0)), ("B3", (7, 0))]
+
+    def idx(a, b):
+        return M * (a % L) + (b % M)
+
+    def labels(i, t):
+        x, y = divmod(i, M)
+        o = {}
+        first, second = (A, B) if t == "X" else (B, A)
+        sgn = 1 if t == "X" else -1
+        for n, (dx, dy) in first:
+            o[idx(x + sgn * dx, y + sgn * dy)] = n
+        for n, (dx, dy) in second:
+            o[45 + idx(x + sgn * dx, y + sgn * dy)] = n
+        return o
+
+    i = tex.index("\\label{tab:bb90}")
+    j = tex.index("\\end{tabular}", i)
+    rows = {}
+    for r in tex[i:j].split("\\\\"):
+        m = re.search(r"\$([XZ])\$\s*&", r)
+        if m:
+            rows[m.group(1)] = [c.strip() for c in r[m.start():].split("&")]
+    bad = 0
+    for t, key in (("X", "x_checks"), ("Z", "z_checks")):
+        pats = set()
+        for k, c in enumerate(d[key]):
+            lab = labels(k, t)
+            assert {q for q, _ in c["cnots"]} == set(lab), (t, k)
+            pats.add((tuple((lab[q], tt) for q, tt in sorted(c["cnots"], key=lambda e: e[1])), c["prep"], c["meas"]))
+        assert len(pats) == 1, t
+        seq, prep, meas = next(iter(pats))
+        cells = rows[t]
+        ok = (cells[1].replace("$", "").replace("_", "") == "".join(n for n, _ in seq)
+              and cells[2].replace(" ", "").split(",") == [str(tt) for _, tt in seq]
+              and (prep, meas, d["period"]) == (0, 15, 16))
+        print(f"tab:bb90     {t}  {'OK' if ok else 'MISMATCH'}  order {''.join(n for n, _ in seq)}")
+        bad += not ok
+    return bad
+
+
 if __name__ == "__main__":
-    main()
+    bad90 = check_bb90()
+    try:
+        main()
+    except SystemExit as e:
+        sys.exit(1 if (e.code or bad90) else 0)
