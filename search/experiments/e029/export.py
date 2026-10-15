@@ -31,7 +31,7 @@ from evaluators.candidate import build_circuits, parse_schedule  # noqa: E402
 from evaluators.noise import add_noise  # noqa: E402
 from evaluators.tasks import build_code, get_task  # noqa: E402
 
-LM = {"gross-dcirc": (12, 6), "bb72-dcirc": (6, 6)}
+LM = {"gross-dcirc": (12, 6), "bb72-dcirc": (6, 6), "bb90-dcirc": (15, 3)}
 
 
 def gf2_rank(M):
