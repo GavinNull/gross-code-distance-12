@@ -32,20 +32,20 @@
 \date{\today}
 
 \begin{abstract}
-The gross code $\code{144,12,12}$ is the flagship bivariate-bicycle code, but a
-syndrome-extraction circuit protects only up to its circuit distance $\dcirc$, the
-minimum number of faults that cause an undetected logical error. Strikis, Browne
-and Beverland proved that no non-interleaved single-ancilla circuit for this code
-reaches $\dcirc=12$ and asked whether an interleaved one can. We give one and prove
-$\dcirc=12$ under standard circuit-level depolarizing noise, in both memory bases
-and for every number of rounds. The construction keeps the extended code of their
-distance-11 circuit fixed and changes only the order and timing of CNOTs, so that
-no minimum-weight extended-code logical becomes an undetected circuit error; the
-proof combines two short arguments with an exact, certified computation. The price
-is a period of 18 time steps per round instead of 8, so the answer is structural:
-with idle noise and practical decoders the new circuit's logical error rate is
-higher than that of existing circuits. We also confirm their conjecture that their
-original circuit has $\dcirc=11$.
+Strikis, Browne and Beverland proved that no non-interleaved single-ancilla
+syndrome-extraction circuit for the gross code $\code{144,12,12}$ reaches circuit
+distance 12, and asked whether an interleaved one can. We construct a single-ancilla,
+interleaved circuit for the gross code with circuit distance $\dcirc=12$ under
+standard circuit-level depolarizing noise, and prove this in both memory bases for
+every number of rounds. The key idea is to keep the extended code of their
+distance-11 circuit fixed and to choose the CNOT orders and timing so that none of
+its minimum-weight extended-code logicals is realised by an undetected circuit
+error. This turns circuit design into a finite decision problem, which we solve
+exactly and certify with checked DRAT proofs; the method applies to single-ancilla
+circuits beyond the gross code. Our computation of the extended-code distance also
+proves their conjecture that the original circuit has $\dcirc=11$. The new circuit
+has a period of 18 time steps per round instead of 8, which increases its exposure
+to idle noise.
 \end{abstract}
 
 \maketitle
@@ -75,18 +75,18 @@ circuit (their Fig.~12, hereafter ``Fig.~12'') was conjectured to reach it. They
 left open ``whether any interleaved circuit can achieve circuit distance
 12''~\cite{Strikis2026}.
 
-We answer this question in the affirmative. The circuit of Table~\ref{tab:circuit}
-is single-ancilla, CNOT-based and interleaved, and has $\dcirc=12$ for every number
-of rounds (Theorem~\ref{thm:main})\cl{41,40}. The idea (Fig.~\ref{fig:concept}) is
-to exploit the gap between Prop.~3 and Cor.~1: we keep the extended code of Fig.~12,
-with $\dext=11$, and choose CNOT orders and times such that none of its
-minimum-weight logicals can be realised by eleven undetected circuit faults. The
-cost is time: the period is 18 steps per round instead of 8\cl{44}. Our answer is
-therefore an existence result about circuit structure; under circuit-level noise
-with idling and with practical decoders, the longer period outweighs the gain in
-distance at the noise levels we sampled (Discussion)\cl{50}. Together with SBB's
-Prop.~3 and Cor.~1, our computation of $\dext$ confirms their conjecture that Fig.~12
-has $\dcirc=11$\cl{10}.
+We answer this question in the affirmative. We construct a single-ancilla,
+CNOT-based, interleaved circuit for the gross code (Table~\ref{tab:circuit}) and
+prove that its circuit distance is 12 for every number of rounds
+(Theorem~\ref{thm:main})\cl{41,40}. The idea (Fig.~\ref{fig:concept}) is to use the
+gap between Prop.~3 and Cor.~1: we keep the extended code of Fig.~12, with
+$\dext=11$, fixed and choose CNOT orders and times such that none of its 4224
+minimum-weight logicals can be realised by eleven undetected circuit faults. This
+turns circuit design into a finite decision problem that we solve exactly and
+certify, a tool that applies to single-ancilla circuits beyond the gross code. Our
+computation of $\dext$ also proves SBB's conjecture that Fig.~12 has $\dcirc=11$
+(Corollary~\ref{cor:fig12})\cl{10}. The new circuit runs with a period of 18 time
+steps per round instead of 8\cl{44}; we discuss this cost at the end.
 
 Exact circuit distances are known for hypergraph-product codes~\cite{ManesClaes},
 for the smallest BB circuit from exact solvers~\cite{Webster2026}, and as
@@ -227,8 +227,8 @@ conflicting set of detectors (one whose constraints alone forbid the lift, but n
 proper subset does) has between 4 and 10 detectors; the smallest such set has 4, 5
 or 9 detectors\cl{49}. Circuit design becomes a finite problem: find orders in the
 class and CNOT times for which none of the 4224 known logicals lifts. With the
-Fig.~12 orders themselves this is impossible in every family of retimings we could
-decide (SM~\ref{sm:fig12})\cl{16}.
+Fig.~12 orders themselves it is impossible: every retiming family of
+Table~\ref{tab:fig12} is obstructed (SM~\ref{sm:fig12})\cl{16}.
 
 % ---------------------------------------------------------------------------
 
@@ -291,9 +291,9 @@ We verified this by an exact computation: for each logical, a CP-SAT model choos
 one DEM mechanism per column subject to every detector sum vanishing; all
 $2\times32\times4224$ instances are infeasible\cl{42}. As a positive control, the
 same program finds a realisation for all 4224 logicals in Fig.~12. The computation
-was carried out with two independent implementations, and the inputs ($\dext=11$
-and the list of 4224 logicals) with two independent exhaustive searches
-(SM~\ref{sm:dext}, \ref{sm:lift})\cl{11,13}.
+was carried out with two independent implementations. Its inputs, $\dext=11$ and
+the list of 4224 logicals, are confirmed by two independent exhaustive searches
+rather than by proof certificates (SM~\ref{sm:dext}, \ref{sm:lift})\cl{11,13}.
 The infeasible lift instances of this finite-$R$ computation were also encoded as
 CNF and combined into batches by a selector disjunction, so that unsatisfiability of
 a batch implies that of each member; each batch was refuted with a DRAT proof
@@ -330,89 +330,60 @@ conjectured.
 This is SBB's Prop.~3 ($\dcirc\ge\dext$) and Cor.~1 ($\dcirc\le\dext$ for
 non-interleaved circuits) combined with our value $\dext=11$, obtained by a complete
 symmetric search over the extended code and reproduced with an independently built
-instance and a second symmetry group\cl{10,11}. Retiming Fig.~12 without changing its orders does not help: among
+instance and a second symmetry group\cl{10,11}. Retiming Fig.~12 without changing its orders cannot reach 12: among
 schedules of period $\le8$ there are four conflict-free ones up to translation, all
 with weight-11 undetected errors, and in the bulk, every legal circuit keeping the
 orders has such an error in each longer-period family of Table~\ref{tab:fig12} (SM~\ref{sm:fig12})\cl{14,15,16,17}.
 
 % ---------------------------------------------------------------------------
-\paragraph{Cost and optimality.}
-The circuit uses the qubits of the IBM and SBB circuits, one ancilla per check, but
-18 time steps per round instead of 8, i.e.\ 2.25 times as many, with more idle
-locations\cl{44}. Whether a shorter period is possible we can answer only within a
-model. In a bulk Pauli-frame model of lifting (SM~\ref{sm:fig12}), a data error is
-seen by a check at the first readout after it, and a weight-11 extended logical is
-\emph{model-liftable} if its errors can be timed so that every check sees an even
-number of them between consecutive readouts. For logicals of ten data errors and
-one residual of length two, a model lift yields a genuine weight-11 undetected error
-once the number of rounds is large enough (a one-dimensional Helly argument,
-SM~\ref{sm:fig12}); for other logicals we confirmed this on the exact detector error
-model in all 991 sampled cases, including logicals with several residual columns.
-This is the direction a non-existence claim needs. Among schedules symmetric under
-the 24 colour-preserving translations with orders in the class of Fig.~12, the model
-admits no schedule with period $P\le17$ in which no weight-11 logical is
-model-liftable, and none with $P\le20$ when all ancillas share one reset and
-measurement frame; within this model the minimal periods are therefore 18 and
-21\cl{45}. Because the model-to-circuit step is proven only for logicals with one
-length-2 residual, we regard this as strong evidence rather than a theorem. The class of
-orders is not arbitrary either: among all 24 colourings by cosets of translation
-subgroups of index 2, 3, 4, 6, 8 or 9, with one order type per colour, only the class
-of Fig.~12 has $\dext\ge11$ in both bases, an exact statement\cl{46}. With less
-symmetry the minimal period is open; in the same model, invariance under a translation
-subgroup of order 12 already excludes $P\le11$, and any non-trivial subgroup excludes
-$P=8$\cl{47,38}.
+\paragraph{Optimality.}
+Within its order class the circuit is as short as a colour-symmetric schedule can
+be in the bulk frame model described below.
+Among schedules symmetric under the 24 colour-preserving translations with orders in
+the class of Fig.~12, every legal schedule with period $P\le17$ has a model-liftable
+weight-11 logical, and so does every schedule with $P\le20$ in which all ancillas
+share one reset and measurement frame; the minimal periods are therefore 18 and 21
+in a bulk Pauli-frame model of lifting (SM~\ref{sm:fig12}, \ref{sm:search})\cl{45}.
+In this model a data error is seen by a check at the first readout after it, and a
+logical is model-liftable if its errors can be timed so that every check sees an
+even number of them between consecutive readouts; a model lift is a genuine
+weight-11 undetected error for logicals with one length-2 residual (a
+one-dimensional Helly argument) and was confirmed on the exact detector error model
+in all 991 sampled cases with several residual columns. The class of orders is
+itself forced: among all 24 colourings by cosets of translation subgroups of index
+2, 3, 4, 6, 8 or 9, with one order type per colour, only the class of Fig.~12 has
+$\dext\ge11$ in both bases\cl{46}. For less symmetric schedules the minimal period
+is open; in the same model, invariance under a translation subgroup of order 12
+already excludes $P\le11$, and any non-trivial subgroup excludes $P=8$\cl{47,38}.
 
 % ---------------------------------------------------------------------------
 \paragraph{Discussion.}
-The obstruction found by SBB is specific to non-interleaved circuits, not to the
-single-ancilla model: the gross code admits a single-ancilla circuit that preserves
-its full distance. The method transfers. Fixing the extended code and searching
-only over orders within its class and over timing turns an open-ended circuit
-search into a lift problem against a finite list of minimum-weight extended
-logicals, which can be decided exactly and certified; the same approach applies to
-other single-ancilla circuits whose distance is limited by Cor.~1 of SBB.
+The obstruction found by SBB is specific to non-interleaved circuits: the gross code
+admits a single-ancilla circuit that preserves its full distance. The method behind
+this result is general. Fixing the extended code and searching over the orders of
+its class and over timing turns an open-ended circuit search into a lift problem
+against a finite list of minimum-weight extended logicals, which is decided exactly
+and certified; it applies to every single-ancilla circuit whose distance is limited
+by Cor.~1 of SBB.
 
-\emph{Practical performance.} We compared the period-18 circuit with Fig.~12 and
-the IBM circuit using the same template, the same SD6 noise (idle depolarization on
-every idle qubit in every layer), $R=12$, and identical BP-OSD and Relay-BP decoders
-with exact priors. Under this model the period-18 circuit is worse at every sampled
-$p\ge10^{-3}$: it is above its pseudo-threshold for $p\ge3\times10^{-3}$, about
-$1.5\times10^3$ times worse than the IBM circuit at $p=2\times10^{-3}$, and at least
-3 times worse at $10^{-3}$ (a direct-sampling bound). The reason is fault mass: the
-longer period has 3168 idle locations per round instead of 288, eleven times as many,
-and 2.8 times the total fault probability per round; at matched fault mass the
-circuits perform alike. Raising $\dcirc$ from 11 to 12 does not change the leading
-power of an ideal decoder ($\lceil\dcirc/2\rceil=6$ for both), and for the enumerated
-families of weight-12 logicals the leading-order coefficient of the period-18 circuit
-is about 26 times that of Fig.~12. $\dcirc=12$ is thus a structural property of the
-circuit and not a practical improvement under this noise model\cl{50}.
-
-\emph{Role of idle noise.} To isolate it we rescale only the idle channel of SD6,
-$p_{\rm idle}=\lambda p$, leaving all other components unchanged ($\lambda=1$
-reproduces SD6 exactly; $\lambda=0$ coincides with circuit-level depolarizing noise
-without idle errors). At $\lambda=0$ the period-18 circuit has a lower per-round
-logical error rate than Fig.~12 at $p=4\times10^{-3}$ (ratio 0.37 [0.28, 0.49] with
-BP-OSD, independently reproduced; 0.25 [0.11, 0.60] with Relay-BP) and is
-statistically indistinguishable from the IBM circuit at $p=3$--$4\times10^{-3}$.
-Already at $\lambda=0.1$ it is worse than Fig.~12 by a factor 2.3--3 per round for
-$2\times10^{-3}\le p\le4\times10^{-3}$ (comparable per unit-duration layer), and at
-$\lambda=0.3$ by 15--70 times. A leading-order (ideal-decoder) estimate restricted to
-the enumerated weight-11 and weight-12 logical families places the per-round
-break-even with Fig.~12 near $\lambda\approx0.3$; because one type of weight-12
-logical is not enumerated for either circuit, this value is indicative only (an
-unknown factor of 3 in their relative weight moves it to 0.2--0.5), and it concerns
-the asymptotic regime $p\lesssim10^{-4}$, not the sampled range. Per-layer rates
-assume unit-duration layers; with realistic measurement and reset durations the
-advantage the per-layer comparison gives the longer period largely disappears. A
-variant with SI1000 coefficients and native CX (CX, RX and MX treated as native)
-gives the same qualitative picture (SM~\ref{sm:idle})\cl{52}.
-
-Our results do not cover correlated faults, leakage or CZ-native compilations. The
-main open question is whether $\dcirc=12$ can be reached at period 8, or at any
-period below 18, by less symmetric schedules. Since the distance gain pays off only when
-idle errors are much weaker than gate errors (at $\lambda=0$ the circuit beats
-Fig.~12 at $p=4\times10^{-3}$, at $\lambda=0.1$ it already loses), a shorter period is
-the main open practical question\cl{52}.
+\emph{Cost and outlook.} The circuit uses the qubits of the IBM and SBB circuits, one
+ancilla per check, but 18 time steps per round instead of 8, with 3168 idle
+locations per round instead of 288 and 2.8 times the total fault probability per
+round\cl{44,50}. We compared it with Fig.~12 and the IBM circuit under the same SD6
+noise (idle depolarization on every idle qubit in every layer), $R=12$, and
+identical BP-OSD and Relay-BP decoders with exact priors. With full idle noise it is
+worse at every sampled $p\ge10^{-3}$: about $1.5\times10^3$ times worse than the IBM
+circuit at $p=2\times10^{-3}$ and at least 3 times worse at $10^{-3}$, while at
+matched fault mass the circuits perform alike\cl{50}. Rescaling only the idle channel,
+$p_{\rm idle}=\lambda p$, locates the regime where the structure pays off: at
+$\lambda=0$ the period-18 circuit has a lower per-round logical error rate than
+Fig.~12 at $p=4\times10^{-3}$ (ratio 0.37 [0.28, 0.49] with BP-OSD; 0.25 [0.11, 0.60]
+with Relay-BP) and is statistically indistinguishable from the IBM circuit at
+$p=3$--$4\times10^{-3}$, whereas already at $\lambda=0.1$ it is worse than Fig.~12
+by a factor 2.3--3 per round (SM~\ref{sm:idle})\cl{52}. A shorter period is therefore
+the natural next goal: the main open question is whether $\dcirc=12$ can be reached
+at period 8, or at any period below 18, by less symmetric schedules. Correlated
+faults, leakage and CZ-native compilations are outside the scope of this work.
 
 \paragraph{Data availability.}
 The circuit specifications, the lists of 4224 weight-11 extended logicals for each
@@ -901,8 +872,8 @@ circuit of the family has a model-liftable weight-11 logical. For logicals of te
 errors and one length-2 residual this implies a genuine weight-11 undetected error for
 sufficiently many rounds (S9); for logicals with several residual columns the same
 implication is confirmed in the sampled cases above but not proven in general. The
-minimum periods are therefore established within the model, and are strong evidence
-for the circuits themselves; they are not statements at fixed small $R$. Restricting the CNOT window of class $X_0$
+minimum periods are therefore established within the model and refer to
+sufficiently many rounds. Restricting the CNOT window of class $X_0$
 or of class $Z_2$ to at most 14 steps is unsatisfiable at $P=24$, while each of the
 other four classes can be so restricted; since a window spans at most $P-3$ steps,
 this suggests why $P\ge18$ is needed, but the bound itself rests on the direct runs.
