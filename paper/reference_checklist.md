@@ -23,6 +23,6 @@ after checking authors (spelling, initials, order), title, version, and journal 
 | [15] | ShawTerhal2026 | 2604.09797 | https://arxiv.org/abs/2604.09797 | Optimising quantum error correction using morphing circuits | M. H. Shaw and B. M. Terhal | arXiv:2604.09797 (v2, 2026). | ☐ | |
 
 Notes for the checker:
-- [5] Webster et al.: the sentence "exact values for the smallest BB circuit" relies on Sec. 5.5.3 / Table 28 of the paper, which could not be re-read in the last automated reference audit (PDF too large); please check it in a browser.
+- [5] Webster et al.: the sentence "exact values for the smallest BB circuit" relies on Sec. 5.5.3 / Table 28 of the paper, re-read by the lead in a browser on 2026-10-14 (Sec. 5.5.3: "Gurobi … completed within 8 hours only for the first member of the family"); a manual look is still worthwhile.
 - [9] Wills et al.: the main text quotes App. C ("believed to have circuit distance 12").
 - [3] Strikis et al.: the main text quotes the open question of Sec. IV C (PDF numbering) verbatim.
