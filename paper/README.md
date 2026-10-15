@@ -20,6 +20,18 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision j (2026-10-15, second external review)
+
+1. Table maps: the source and the PDF both read $s_{12}$ for Table S1 Z2 (no "s128" in the current PDF text;
+   probably an extraction artefact of an older build). All 18 rows of Tables I, S1, S2 (order, steps, reset/meas,
+   map) now verified by `scripts/check_tables.py` against the specs and Fig. 12 — all OK.
+2. Placeholders: "[Zenodo DOI]" only; no "PI"/"TODO"/"to decide" left in draft.tex or the PDF.
+3. Bibliography order = first-citation order; Shaw–Terhal 2604.09797 (cited only in SM S7) moved to the end as [15].
+4. Wills: "the circuit referred to there may coincide with the Shaw–Terhal construction".
+5. Insertion convention unified on "(R−1)-round circuit + block at 4 ≤ x ≤ 18(R−1) = R-round circuit" (main text and S7).
+6. Abstract shortened to ~150 words (background, gap, result, idea, cost); the λ details stay in the Discussion.
+7. `reference_checklist.md` for the PI's manual check.
+
 ## Revision i (2026-10-15)
 
 E-026b (idle sensitivity) added: main-text paragraph from the audit's §7, one sentence each in abstract and Discussion,
