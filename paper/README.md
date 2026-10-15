@@ -20,6 +20,17 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision L (2026-10-15): one method, two codes
+
+Restructured per `outline_L.md`: working title "Interleaving recovers the full circuit distance of bivariate-bicycle
+codes" (two alternatives in the outline). New: [[90,8,10]] result (Theorem 2, Table II, C53), general Lemma 2 (light
+logicals at weights d_ext and d_ext + 1), direct-DEM cross-check paragraph (C54), SM S9 ([[90]]) and S10 (direct
+search); SM renumbered (S11 Fig. 12, S12 search/optimality, S13 idle noise, S14 data). New references: Tesseract
+2503.10988, Bi–Chang–Puri 2606.30592 (abs pages checked). `scripts/check_tables.py` now also checks Table II.
+Length (advisory): 14 pages (main text and references to page 6); abstract ≈ 180 words; main text ≈ 3,800 words +
+captions ≈ 620 + float areas ≈ 540 ≈ 4,950 word-equivalents. Data package and `reference_checklist.md` need the two new
+references and the [[90]] lists (the lead updates the package separately).
+
 ## Revision k (2026-10-15, tone pass per PI)
 
 Abstract and intro paragraph 3 rewritten to lead with the result; "Cost and optimality" split into "Optimality"
