@@ -1,0 +1,52 @@
+id: E-029-direct-dcirc
+title: Extended-code-free cross-checks of Theorem 1 (second external review, 2026-10-15)
+owner: experimenter
+written: 2026-10-15 (before any run; predictions below are fixed before results)
+hypothesis: >
+  (1) The minimum weight of an undetected logical in the full SD6 DEM of circuit A
+  (search/experiments/e024a/cs_P18_H24.json) at R=1 is 12 in both bases, and this can be decided by an exact
+  search that never uses the extended code or the 4224 list.  (2) An independently written exact search on the
+  extended-code matrices reproduces d_ext = 11 and exactly 4224 weight-11 logicals per basis.  (3) The 4224 list
+  is a union of 176 free orbits of the 24-element translation group, consistent under subgroups.
+method:
+  engine: >
+    search/experiments/e029/ccsearch.c (own C code, written for this experiment, no code shared with the E-014/E-018
+    DFS programs or the lift programs).  Exact branch-and-bound over a parity-check matrix D (rows = detectors or
+    checks, columns = mechanisms or extended columns) and observable matrix L: decide/enumerate x with D x = 0,
+    L x != 0, |x| <= W.  Completeness argument: a minimum-weight solution contains no nonempty proper zero-syndrome
+    subset; branching on the columns of one unsatisfied row with sibling exclusion partitions the search space;
+    symmetry: a solution can be translated to contain the representative of its lowest column orbit (root split).
+    Pruning: packing lower bound (greedy set of unsatisfied rows no column covers two of) and ceil(|s|/wmax);
+    last two levels by syndrome lookup.  Knuth random-probe estimator for projected cost.
+  dem_input: evaluator public entry only (evaluators.candidate.build_circuits + evaluators.noise.add_noise sd6, p=1e-3;
+    stim detector_error_model(decompose_errors=False)); symmetry verified on the DEM itself (column permutation
+    maps detector sets to detector sets; rowspace of [D;L] invariant).
+  wjh_tool: >
+    PI-approved download: Webster-Jacob-Higgott codeDistance (https://github.com/m-webster/codeDistancePYPI, the
+    repository named in arXiv:2603.22532), cloned under tools/wjh/ (commit recorded in tools/VERSIONS.txt).
+    Its m4riCC is a wrapper around QEC-pages/dist-m4ri (third-party, needs libm4ri) and is NOT downloaded
+    (outside the approval: other authors' repository + extra library).  The package's own pure-Python
+    connected-cluster implementation (CCMW) is used where feasible; its published benchmark numbers are used
+    as validation targets.
+validation:
+  - fig12 R=1, both bases: predict 11 (known, E-014/E-018 + injection)
+  - IBM BB72 depth-8 (evaluator bb72-dcirc, baselines.schedule.ibm_depth8) R=1..3: predict 6
+  - WJH data set circuit 05_bivariatebicyclecodes/01 ([[72,12,6]], r=6, si1000): WJH report m4riCC d=6 (11 s),
+    Gurobi d=6; predict 6
+predictions:
+  circuit_A_R1: "12 in both bases (Theorem 1). Feasibility: uncertain; my estimate before running is 1e10-1e13
+    search nodes per basis at W=11, i.e. between minutes and beyond budget; R=2 likely beyond budget."
+  dext: "11 both bases; weight-11 enumeration gives exactly the published 4224 per basis (set-equal)"
+  orbits: "4224 = 176 x 24 all free; order-8 subgroup: 528 free orbits; no logical fixed by any nontrivial
+    translation"
+budget:
+  cpu_hours: 40
+  workers: 4
+  llm_tokens: 0
+commands:
+  build: cc -O3 -march=native -o results/E-029-direct-dcirc/ccsearch search/experiments/e029/ccsearch.c
+  export: PYTHONPATH=.:tests uv run python search/experiments/e029/export.py <case> <basis> <R>
+  run: results/E-029-direct-dcirc/ccsearch <instance> decide|enum|estimate W [orbit-range]
+  orbits: uv run python search/experiments/e029/orbits.py
+results: results/E-029-direct-dcirc/
+journal: research/journal/2026-10-15-E-029-direct-dcirc.md
