@@ -1,20 +1,20 @@
 # DOI, release date and arXiv identifier are placeholders until publication.
 cff-version: 1.2.0
 message: "If you use this data set or code, please cite the paper and this data set."
-title: "Data and verification code for: A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
+title: "Data and verification code for: Interleaving recovers the full circuit distance of bivariate-bicycle codes"
 type: dataset
 authors:
   - family-names: "Pan"
     given-names: "Guancheng"
     affiliation: "Zhejiang University"
     email: "3250101086@zju.edu.cn"
-version: "1.0.0"
+version: "1.1.0"
 doi: "[Zenodo DOI -- assigned on upload]"
 license: ["CC-BY-4.0", "MIT"]
 date-released: "[YYYY-MM-DD]"
 preferred-citation:
   type: article
-  title: "A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
+  title: "Interleaving recovers the full circuit distance of bivariate-bicycle codes"
   authors:
     - family-names: "Pan"
       given-names: "Guancheng"

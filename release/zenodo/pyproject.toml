@@ -1,7 +1,7 @@
 [project]
 name = "gross12-verification"
-version = "1.0.0"
-description = "Verification code and data for: A single-ancilla syndrome circuit with circuit distance 12 for the gross code"
+version = "1.1.0"
+description = "Verification code and data for: Interleaving recovers the full circuit distance of bivariate-bicycle codes"
 requires-python = ">=3.12,<3.13"
 license = { text = "MIT (code); CC-BY-4.0 (data)" }
 dependencies = [
