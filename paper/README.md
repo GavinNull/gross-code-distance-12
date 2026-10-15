@@ -20,6 +20,13 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision k (2026-10-15, tone pass per PI)
+
+Abstract and intro paragraph 3 rewritten to lead with the result; "Cost and optimality" split into "Optimality"
+(one model-scope clause) and a compact "Cost and outlook" paragraph in the Discussion (replacing the separate
+"Practical performance" and "Role of idle noise" paragraphs; the detailed idle-noise caveats live in SM S11). Defensive
+meta-language removed; no numbers changed. 12 pages.
+
 ## Revision j (2026-10-15, second external review)
 
 1. Table maps: the source and the PDF both read $s_{12}$ for Table S1 Z2 (no "s128" in the current PDF text;
