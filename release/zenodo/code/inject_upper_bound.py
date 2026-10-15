@@ -3,7 +3,7 @@
 witnesses/upper_bound_weight12.json holds, for each memory basis b, a weight-12 logical operator of the gross code
 of the type that flips the b-basis observables (X type for the Z basis, Z type for the X basis).  It is applied as
 twelve single-qubit flips immediately after the data initialisation (each flip is the after-reset flip of one data
-qubit, i.e. one SD6 mechanism).  For every circuit, R = 1, 3, 6, 10 and both bases: no detector fires and the
+qubit, i.e. one SD6 mechanism).  For every circuit, R = 1, 2, 3, 6, 10 and both bases: no detector fires and the
 logical observable flips; omitting any one of the twelve flips is detected.
 With --search the witnesses are recomputed (CP-SAT minimum-weight logical flipping logical row 0).
 
@@ -52,7 +52,7 @@ for name in names:
     spec = circuit(name).canonical()
     for basis in "ZX":
         supp = W["witnesses"][basis]["support"]
-        for R in (1, 3, 6, 10):
+        for R in (1, 2, 3, 6, 10):
             c = build_circuits(spec, code, R)[basis]
             noisy = add_sd6(c)
             # the after-reset flips of the data qubits are the second instruction of the SD6 circuit
