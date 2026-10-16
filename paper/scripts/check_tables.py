@@ -1,4 +1,4 @@
-"""Check Tables I, II, S1, S2 of paper/draft.tex against the schedule specs.
+"""Check Table I (both codes), S1, S2 of paper/draft.tex against the schedule specs.
 
 For every class row: CNOT order, CNOT steps (and, where present, reset/measurement
 steps) and the map from the Fig. 12 order must equal the output of
@@ -56,7 +56,7 @@ def main():
 
 
 def check_bb90():
-    """Table II ([[90,8,10]], one row per check type) against search/experiments/e028/c16_spec.json."""
+    """[[90,8,10]] rows of Table I (one row per check type) against search/experiments/e028/c16_spec.json."""
     import json
     tex = open("paper/draft.tex").read()
     d = json.load(open("search/experiments/e028/c16_spec.json"))
@@ -78,7 +78,7 @@ def check_bb90():
             o[45 + idx(x + sgn * dx, y + sgn * dy)] = n
         return o
 
-    i = tex.index("\\label{tab:bb90}")
+    i = tex.index("\\label{tab:circuit}")
     j = tex.index("\\end{tabular}", i)
     rows = {}
     for r in tex[i:j].split("\\\\"):
@@ -95,10 +95,10 @@ def check_bb90():
         assert len(pats) == 1, t
         seq, prep, meas = next(iter(pats))
         cells = rows[t]
-        ok = (cells[1].replace("$", "").replace("_", "") == "".join(n for n, _ in seq)
-              and cells[2].replace(" ", "").split(",") == [str(tt) for _, tt in seq]
-              and (prep, meas, d["period"]) == (0, 15, 16))
-        print(f"tab:bb90     {t}  {'OK' if ok else 'MISMATCH'}  order {''.join(n for n, _ in seq)}")
+        ok = (cells[2].replace("$", "").replace("_", "") == "".join(n for n, _ in seq)
+              and cells[3].replace(" ", "").split(",") == [str(tt) for _, tt in seq]
+              and cells[1] == str(prep) and cells[4] == str(meas) and d["period"] == 16)
+        print(f"tab:circuit  {t}  ([[90]])  {'OK' if ok else 'MISMATCH'}  order {''.join(n for n, _ in seq)}")
         bad += not ok
     return bad
 
