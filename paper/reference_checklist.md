@@ -1,6 +1,6 @@
 # Reference checklist for `paper/draft.tex`
 
-One row per bibliography entry, in the order printed in the PDF (= order of first citation; the last entry is cited only in the SM).
+One row per bibliography entry, in the order printed in the PDF (= order of first citation; [17] is the Supplemental Material reference and is not listed; [18] is cited only in the SM).
 Authors, titles and publication data are copied from the bibliography as printed. Open each abs link and tick the box
 after checking authors (spelling, initials, order), title, version, and journal reference.
 
@@ -22,7 +22,7 @@ after checking authors (spelling, initials, order), title, version, and journal 
 | [14] | KishonyFowler | 2603.28852 | https://arxiv.org/abs/2603.28852 | Color code off-the-hook: avoiding hook errors with a single auxiliary per plaquette | G. Kishony and A. Fowler | arXiv:2603.28852 (2026). | ☐ | |
 | [15] | Gidney2021honeycomb | 2108.10457 | https://arxiv.org/abs/2108.10457 | A fault-tolerant honeycomb memory | C. Gidney, M. Newman, A. Fowler, and M. Broughton | Quantum 5, 605 (2021), arXiv:2108.10457. | ☐ | |
 | [16] | Gidney2021stim | 2103.02202 | https://arxiv.org/abs/2103.02202 | Stim: a fast stabilizer circuit simulator | C. Gidney | Quantum 5, 497 (2021), arXiv:2103.02202. | ☐ | |
-| [17] | ShawTerhal2026 | 2604.09797 | https://arxiv.org/abs/2604.09797 | Optimising quantum error correction using morphing circuits | M. H. Shaw and B. M. Terhal | arXiv:2604.09797 (v2, 2026). | ☐ | |
+| [18] | ShawTerhal2026 | 2604.09797 | https://arxiv.org/abs/2604.09797 | Optimising quantum error correction using morphing circuits | M. H. Shaw and B. M. Terhal | arXiv:2604.09797 (v2, 2026). | ☐ | |
 
 Notes for the checker:
 - Webster et al.: "exact values for the smallest BB circuit" relies on Sec. 5.5.3 / Table 28, not re-read in the last automated reference audit (PDF too large); please check in a browser.
