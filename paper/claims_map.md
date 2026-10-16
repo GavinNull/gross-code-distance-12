@@ -1,5 +1,13 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision M (2026-10-17, PRL submission version).** No number, scope or audited claim changed; tags kept.
+Tables I and II merged into one double-column Table I (`tab:circuit`; [[90]] rows at the bottom); former Fig. 2
+(timing) moved to SM S2 as Fig. S1; Fig. 1 caption cut to 141 words. Moved to End Matter (after the references):
+proof of Lemma 2, proof of Lemma 4 (gap argument), details of Theorem 2 (lists, readout-flip case, controls,
+round splitting, upper bound), Fig. 12 retimings (C14–C18), optimality detail (C45–C47, C38). Abstract no longer
+mentions Corollary 1 (stated in the intro). `paper/scripts/count_words.py` gives the PRL count.
+
+
 **Revision L (2026-10-15): one method, two codes.** Outline in `paper/outline_L.md`.
 New tags:
 
