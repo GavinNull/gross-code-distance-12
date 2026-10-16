@@ -20,6 +20,32 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision M (2026-10-17): PRL submission version
+
+**APS rules relied on** (read-only check of journals.aps.org/prl/authors and /authors/length-guide on 2026-10-17):
+- Letters: length limit 3750 words for the core; waivers of ≥ 1/2 page may be requested (not appealable).
+- Counted: body text, figure and table captions, footnotes; plus displayed math (16 words per row single-column,
+  32 double), figures (single-column 150/aspect + 20; double-column 300/(0.5·aspect) + 40), tables (single-column
+  13 + 6.5 per line; double-column 26 + 13 per line). Not counted: title, authors/affiliations, abstract, references,
+  author footnotes, acknowledgments.
+- Abstract: no numerical limit is given on the author page ("concisely summarize"); we keep ≈ 150 words.
+- End Matter: up to two pages of appendices or other content, not counted against the core limit, appearing after the
+  references.
+- Supplemental Material: for material not essential to the main results; the paper must stand on its own; cited as
+  "See Supplemental Material at [URL] for …"; all references cited in the SM must appear in the main reference list
+  (they do: [17] is cited only in the SM and is listed).
+- Data Availability Statement required (included; DOI placeholder). Substantive AI use must be disclosed in the paper;
+  AI cannot be an author (AI-use statement in the acknowledgments).
+
+**Counts** (`uv run python paper/scripts/count_words.py`): core 3327 word-equivalents (limit 3750): introduction 584,
+Setting 183, Key idea 360, Construction + Theorem 1 + lemmas + Corollary 1 640, [[90]] section + cross-check 287,
+optimality 96, Discussion 301, Data availability 55, Fig. 1 (double column, aspect 1.46) 141 caption + 450 area,
+Table I (double column, 9 lines) 87 caption + 143 area. Abstract 149 words (not counted). End Matter 774 words,
+about 1.1 pages (limit 2 pages). PDF: 15 pages; main text pages 1–4, references pages 4–5, End Matter pages 5–6
+(after the references), SM from page 7.
+Still to do before submission: the "See Supplemental Material at [URL] …" sentence is not yet in the standard APS
+form (the main text cites SM sections directly); the PI should decide whether to add it.
+
 ## Revision L (2026-10-15): one method, two codes
 
 Restructured per `outline_L.md`: working title "Interleaving recovers the full circuit distance of bivariate-bicycle
