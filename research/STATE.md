@@ -253,3 +253,4 @@ PI 决定：允许下载 Webster–Jacob–Higgott 的精确求距离工具；�
 - E-028：[[90,8,10]] 交错电路能否 d_circ = 10（非交错的上界是 9，见 E-005），用同一套流程：固定扩展码、在顺序类内搜时序、对有限 lift 列表做判定。
 - E-029：绕开扩展码的直接交叉验证：电路 A 在 R=1（R=2 尽量做）上直接对完整 DEM 求 d_circ；另做轨道分解的一致性检查（4224 = 176×24，用 order-8 子群反推）。
 - 文字修改：Table S1 中 Z2 的 map “s128”→ s12；去掉 “PI to decide” 等占位措辞；[9] 在正文中补引或调整编号；“presumably it is this one”改为中性表述；插入位置的记法统一；摘要压到约 150 词。参考文献由 PI 本人逐条人工核对（lead 提供核对清单）。
+- （2026-10-17）PI 决定投 PRL。标题暂用 lead 推荐的第 1 个：“Interleaving recovers the full circuit distance of bivariate-bicycle codes”。
