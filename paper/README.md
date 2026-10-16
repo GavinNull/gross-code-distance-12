@@ -20,6 +20,13 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision M2 (2026-10-17)
+
+Added the APS-standard Supplemental Material reference [17] ("See Supplemental Material at [URL will be inserted by
+publisher] for …, which includes Refs. [1, 3, 15, 16, 18]"), cited at the first SM pointer (Setting, "SM S5 [17]");
+section pointers kept. Bibliography stays in first-citation order (Shaw–Terhal 2604.09797 is now [18]). Core count
+3328 word-equivalents (limit 3750); End Matter 774 words; 15 pages; clean build.
+
 ## Revision M (2026-10-17): PRL submission version
 
 **APS rules relied on** (read-only check of journals.aps.org/prl/authors and /authors/length-guide on 2026-10-17):
@@ -43,8 +50,7 @@ optimality 96, Discussion 301, Data availability 55, Fig. 1 (double column, aspe
 Table I (double column, 9 lines) 87 caption + 143 area. Abstract 149 words (not counted). End Matter 774 words,
 about 1.1 pages (limit 2 pages). PDF: 15 pages; main text pages 1–4, references pages 4–5, End Matter pages 5–6
 (after the references), SM from page 7.
-Still to do before submission: the "See Supplemental Material at [URL] …" sentence is not yet in the standard APS
-form (the main text cites SM sections directly); the PI should decide whether to add it.
+(The APS Supplemental Material reference was added in revision M2.)
 
 ## Revision L (2026-10-15): one method, two codes
 
