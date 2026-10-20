@@ -1,4 +1,6 @@
-# A distance-12 single-ancilla syndrome circuit for the gross code
+# Interleaving recovers the full circuit distance of bivariate-bicycle codes
+
+**Release v1.0** (paper PDF, arXiv source, full data/reproduction package): https://github.com/GavinNull/gross-code-distance-12/releases/tag/v1.0
 
 This repository contains the code, data pointers, paper source and the complete research record behind
 
