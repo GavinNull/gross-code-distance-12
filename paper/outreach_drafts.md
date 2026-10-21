@@ -12,6 +12,9 @@ PI 决定（2026-10-21）：三封信都不等 arXiv，直接发。附件是论�
 
 ## 第一封：致 Strikis、Browne、Beverland（arXiv:2603.05481 作者）
 
+**To:** strikis@maths.ox.ac.uk　**Cc:** michael.beverland@gmail.com
+（两个邮箱都取自 arXiv:2603.05481 v2 论文正文。Browne 的邮箱论文中没有印，如需加上，请从 UCL 官网查询。）
+
 **Subject:** Interleaved single-ancilla circuits reaching distance 12 for the gross code and 10 for [[90,8,10]]
 
 Dear Dr. Strikis, Prof. Browne and Dr. Beverland,
@@ -39,6 +42,8 @@ Chu Kochen Honors College, Zhejiang University
 
 ## 第二封：致 IBM（arXiv:2308.07915 / 2506.03094 作者，如 Andrew Cross、Ted Yoder）—— 不等 arXiv，直接发
 
+**To:** 这两篇论文都没有印作者邮箱。可以通过 LinkedIn、IBM Quantum 官网的联系渠道，或者请 Beverland（IBM Quantum，已在第一封信的抄送里）转交。
+
 **Subject:** Distance-preserving single-ancilla syndrome circuits for the gross and [[90,8,10]] codes
 
 Dear Dr. [Name],
@@ -60,7 +65,7 @@ Chu Kochen Honors College, Zhejiang University
 
 ## 第三封：致 Anthropic 研究员（Andi Gu，arXiv:2610.22367 第一作者）——个人介绍与合作意向
 
-收件人邮箱以论文或 arXiv 上的联系方式为准；也可以走 Anthropic 官方的 Fellows 或科研合作渠道。
+**To:** andigu@g.harvard.edu（取自 arXiv:2610.22367 论文正文；作者单位同时列为哈佛和 Anthropic STEM Fellows Program）。也可以同时走 Anthropic 官方的 Fellows 或科研合作渠道。
 
 **Subject:** Two research results obtained with Claude agents, and a wish to work with you
 
