@@ -1,5 +1,17 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision N (2026-10-21, third external review).** Numbers unchanged. C50: new SM Table S5 (λ = 1 per-round rates
+with failure counts, from `research/journal/2026-10-14-E-026-gross-ler.md` lines 47–54 and audit
+`2026-10-14-E-026.md` §2: p18/IBM = 1.52e3 [1.10e3, 2.14e3] at 2e-3); main text now says the "≥ 3 at 1e-3" is a
+direct-sampling lower bound (IBM 0/20000, 95% upper 3.0e-5) and that the comparison is with BP-OSD (with Relay-BP at
+1e-3 no ordering is established). C52: 0.37 [0.28, 0.49] marked as the independent re-sampling (Table S4 has
+0.34 [0.19, 0.59]). C2: new SM S15 with the E-017 audit §4.2 computation (min stabiliser weight exactly 9 vs 6;
+invariance under qubit permutations and local Cliffords), cited in the intro. C45: section renamed "Period lower
+bound in the symmetric family", scope in its first sentence. C51: abstract now says every solver decision is
+DRAT-certified and the extended-code inputs rest on independent exhaustive searches. All hard-coded SM numbers
+replaced by \ref (fixes "in line with S9" → S11).
+
+
 **Revision M (2026-10-17, PRL submission version).** No number, scope or audited claim changed; tags kept.
 Tables I and II merged into one double-column Table I (`tab:circuit`; [[90]] rows at the bottom); former Fig. 2
 (timing) moved to SM S2 as Fig. S1; Fig. 1 caption cut to 141 words. Moved to End Matter (after the references):
