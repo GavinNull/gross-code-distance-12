@@ -103,3 +103,71 @@
 - [经典对照 1：同族随机采样] 同一编码去掉逻辑 nogood、随机相位（`cegar10 --nologic 1 --seed 20261021`）：第 48 个随机合法确定电路通过精确 R ≤ 2 屏选（前 47 个：39 个 R = 1 就有 w10 提升、7 个 w11、1 个 w10 + 零像）。
   它与 u11 不同（X 顺序 B1B2B3A3A1A2、Z 起点相同），属于同一类。所以在这个只有两个单元的完全平移不变族里，**随机采样也能找到**，CEGAR 的优势只是 7 轮 vs 48 次；
   真正起作用的是选对顺序类（d_ext = 10 的均匀类型 + 扩展 lift），而不是时序搜索本身。这一点必须照实写。
+- [经典对照 2：更多随机种子] 种子 2、3、4：分别在第 130、74、28 个随机合法确定电路处得到通过精确 R ≤ 2 屏选的电路（加上种子 20261021 的 48）⇒ 随机命中率约 1/70（只是 R ≤ 2 屏选，不是完整认证）。
+- [u11 是交错的吗] 每个数据比特一个周期内的 CNOT 类型按时刻排列是循环的 XXXZZZ（只有两次切换），但按校验实例看是交错的：
+  L 比特上 Z 实例 k 的 B1 CNOT 在 11k + 11，之后 X 实例 k + 1 的三个 CNOT 在 11k + 12..14，再之后才是 Z 实例 k 的 B2、B3（11k + 15、16）；
+  R 比特上 X 实例 k + 1 的 B3、B2（11k + 15、16）在 Z 实例 k 的三个 CNOT（11k + 17..19）之前，B1（11k + 20）在之后。交错完全来自流水（回绕），不是来自层内穿插。
+  这与 d_circ = 12 > d_ext = 10 一致（不可分段的电路才可能超过 d_ext，SBB Cor. 1）。
+
+## 结论（未审计）
+
+1. **认证（待 auditor）：gross [[144,12,12]] 的单辅助比特电路 `search/experiments/e032/u11_spec.json`，周期 11，SD6，两个基底，任意轮数 d_circ = 12**。
+   电路完全平移不变（所有 X 校验同一顺序和时序，所有 Z 校验同一顺序和时序），回绕流水；每校验顺序属于均匀类型 A1A2A3B3B1B2（X：A2A1A3B3B2B1，Z：B1B2B3A3A1A2），两侧 d_ext = 10。
+   证明链：d_ext = 10（两套独立枚举）；推广的引理 2（权重 10 只能是 w10 列表，权重 11 只能是 w11 列表或 w10 + 一个零像）；完整列表 144 / 7344（两套独立枚举，集合相等）；
+   R = 1..31 两基底精确 lift 全 0（DP 与审计式 CP-SAT 两套实现）；E-024a 间隙论证（前提对本电路机器核验，G = 31，R' = 31），按权重 10、11 两步归纳；权重 12 注入给上界。
+   另有不经扩展码的直接 DEM 检验：R = 1、2 两基底无权重 ≤ 11（R = 1 直接找到 12）。
+   周期从 18（已确认 13）降到 11；比 Fig. 12 / IBM 的 8 多 3 层。
+2. **方法上的关键**：放弃 d_ext = 11 的 Fig. 12 类，改用 d_ext = 10 的均匀类型，用扩展 lift 补回 2。最小列表的均匀类型恰好是 Fig. 12 三个颜色类型之一。
+   在最对称的族（只有两个单元）里帧模型 CEGAR 7 轮就找到候选；P = 10 在同一族、同一类型对下体内 UNSAT（2 轮），P = 8、9 连只阻断权重 10 都 UNSAT。
+3. **障碍（带范围）**：X = Z = A1A2A3B3B1B2 的均匀时序族（回绕允许）：P = 8、9：每个合法确定电路都有帧模型提升的 w10 或 w10 + 读出翻转（体内，d_circ ≤ 11）；P = 10：每个都有提升的 w10/w10z/w11（体内）。
+   单一实现（cegar10 = 审计过的 e028/cegar9 编码 + 推广），没有独立复核。其他 6 个 d_ext = 10 均匀类型、类型对、颜色对称或更低对称族在 P ≤ 10 **没有跑**（按委派要求，认证到 P ≤ 14 即停下）。
+4. **经典对照**：同族随机合法确定电路约 1/70 通过精确 R ≤ 2 屏选（4 个种子：48、130、74、28 次）。所以在这个族里随机搜索也行；预测 6（对照 0 个，95%）**错**。
+   起作用的是“选 d_ext = 10 的均匀类 + 扩展 lift 的认证路线”，不是时序搜索的巧妙。
+   普查（`ctl_enum.py`，SAT 默认顺序逐个枚举该族、每个做精确 R ≤ 2 屏选，2 h 时限）：4003 个合法确定电路（未枚举完），1 个通过（第 3803 个），3968 个 R = 1 Z 基就有 w10 提升、34 个 w11 提升。
+   ⇒ 该族里能通过的电路是少数（随机约 1.4%，按 SAT 顺序约 0.025%），但族本身足够小，随机采样几十到一百多次就能碰到。
+5. **(A) 精确 lift 惰性 SAT**：只做了分析（见上），没有实现：在体内提升上，见证 nogood 被帧模型 nogood 支配，不可能比帧模型 CEGAR 收敛更快；(B) 已在 P = 11 给出认证电路，(A) 要解决的逐校验停滞问题在本实验不再是瓶颈。
+6. **推广的引理 2**：d_ext = 10 时的情形 (z, c) ∈ {(0,0), (1,0)} 已用；d_ext = 9 时权重 11 的四种情形 {(0,0), (1,0), (2,0), (0,1)} 已推导，未使用。
+
+## 预测核对
+
+| 预测 | 结果 |
+|---|---|
+| 1) 两侧都有 d_ext = 10 的均匀类型（85%），每侧 5–40 个（60%） | 对：每侧 7 个 |
+| 2) w10 10²–10⁴、w11 10³–10⁵（60%） | 对：144、7344 |
+| 3) 最小认证周期 ≤ 18（45%）、≤ 14（30%）、≤ 12（20%）、= 8（< 5%） | 11：落在 ≤ 12 档；8 未达到 |
+| 4) P = 8 所有尝试的均匀 d_ext = 10 类体内 UNSAT（85%） | 只试了一个类型对：P = 8、9 UNSAT（连 w10 都阻断不了）；其他类型对未试 |
+| 5) (A) 比帧模型快（15%）/ 逐校验给出结论（10%） | 未实现（分析表明不可能更快） |
+| 6) 经典对照 0 个（95%） | 错：随机约 1/70 通过 R ≤ 2 屏选 |
+
+## 局限 / 审计需要盯的地方
+
+1. 推广的引理 2（d_ext + 1 的零像情形）与 lift10 的零像组：零像机制全部收进候选（每轮 72 个，都是读出翻转）。
+2. 列表完备性：两套枚举（wlist DFS、ccsearch）同属综合征驱动分支，不是证书；d_ext = 10 同理。
+3. 任意 R：用 e024a/anyr.py（审计过的间隙论证，这里按权重 10、11 两步归纳，R' 按权重 11 的跨度 300 计算，权重 10 的 R' 更小）。
+4. 帧模型的 UNSAT（P ≤ 10）只是体内结论，单一实现。
+5. 没有评估逻辑错误率；周期 11 每轮的空闲位置比 IBM 深度 8 多（E-026 的教训：长周期的空闲噪声会吃掉距离收益），不能说电路“更好”，只能说距离达到 12。
+6. 新颖性未查（需 lit-scout）。
+
+## CPU
+
+约 14–16 CPU h（均匀筛 0.2、w10 列表 2.0、w11 列表 2.7、DP lift 2.1、CP-SAT lift 1.2、ccsearch 直接 DEM 1.8、列表复核 0.8、阳性对照 0.2、随机对照 0.15、普查约 2、其余 0.3）；预算 60。
+全程最多 2 个工作进程（E-030 尚无最终汇总）。
+
+## 复现命令
+
+```
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.singles
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.uniform --kind X     # 及 Z
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.wlist --kind X --orders A1A2A3B3B1B2 --w 10          # 及 Z
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.wlist --kind X --orders A1A2A3B3B1B2 --w 11 --dmin 10 # 及 Z
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.cegar10 --xo A1A2A3B3B1B2 --zo A1A2A3B3B1B2 --hs "0,1;1,0" --P 11 --rmax 3   # P = 10: UNSAT
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.cegar10 ... --P 8 --only10 1                          # P = 8, 9: UNSAT
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.lift10 search/experiments/e032/u11_spec.json --R $(seq 1 31) --xo A1A2A3B3B1B2 --zo A1A2A3B3B1B2 --all 1
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.cert search/experiments/e032/u11_spec.json Z A1A2A3B3B1B2 $(seq 1 31)   # 及 X
+PYTHONPATH=.:tests uv run python -m search.experiments.e024a.anyr search/experiments/e032/u11_spec.json
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.inject12 search/experiments/e032/u11_spec.json
+PYTHONPATH=.:tests uv run python search/experiments/e029/export.py dem search/experiments/e032/u11_spec.json gross-dcirc Z 1 OUT.txt; ccsearch OUT.txt decide 11   # R = 1, 2；及 X
+PYTHONPATH=.:tests uv run python search/experiments/e029/export.py ext search/experiments/e032/u11_spec.json Z EXT.txt; ccsearch EXT.txt enum 11; uv run python -m search.experiments.e032.xlist EXT.txt RUN.out X A1A2A3B3B1B2
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.cegar10 ... --P 11 --nologic 1 --seed 20261021 --rmax 2   # 经典对照；种子 2 3 4
+PYTHONPATH=.:tests uv run python -m search.experiments.e032.ctl_enum --xo A1A2A3B3B1B2 --zo A1A2A3B3B1B2 --hs "0,1;1,0" --P 11   # 普查
+```
