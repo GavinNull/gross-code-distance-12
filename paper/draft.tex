@@ -24,7 +24,7 @@
 
 \begin{document}
 
-\title{Interleaving recovers the full circuit distance of bivariate-bicycle codes}
+\title{Interleaving recovers the full circuit distance of the gross and $[[90,8,10]]$ bivariate-bicycle codes}
 
 \author{Guancheng Pan}
 \email{3250101086@zju.edu.cn}
@@ -32,16 +32,18 @@
 \date{\today}
 
 \begin{abstract}
-Every non-interleaved single-ancilla syndrome-extraction circuit has circuit
-distance at most the distance of an extended code, which can fall below the code
-distance: at most 11 for the gross code $\code{144,12,12}$ and, as we show, at most 8
+Strikis, Browne and Beverland (arXiv:2603.05481) showed that every non-interleaved
+single-ancilla syndrome-extraction circuit has circuit distance at most the distance
+of an extended code, which can fall below the code distance: at most 11 for the gross code $\code{144,12,12}$ and, as we show, at most 8
 for $\code{90,8,10}$. We show that interleaving recovers the full code distance. We
 construct single-ancilla, interleaved circuits with circuit distance 12 for the gross
-code, answering an open question of Strikis, Browne and Beverland, and 10 for
+code, answering their open question, and 10 for
 $\code{90,8,10}$, two above every non-interleaved circuit, and prove both under
 circuit-level depolarizing noise for every number of rounds. The method fixes an
 extended code and turns circuit design into a finite decision problem over its
-lightest logicals, solved exactly and certified with DRAT proofs; a direct search on
+lightest logicals, solved exactly with every solver decision certified by a DRAT
+proof (the extended-code inputs rest on independent exhaustive searches); a direct
+search on
 the detector error model confirms both results. The circuits have periods of 18 and
 16 time steps per round, against 8 for the IBM circuits.
 \end{abstract}
@@ -93,7 +95,7 @@ the same qubit count acts on a $\code{144,12,12}$ code that they call ``a second
 `gross' code'', with $\dcirc\le12$~\cite{ShawTerhal2025}; a morphing idling circuit for
 the gross code is ``believed to have circuit distance 12''~\cite{Wills2026}. We note
 that this end-cycle code is not equivalent to the gross code, since its minimum
-stabiliser weight is 9 rather than 6\cl{2}. For $\code{90,8,10}$ the upper bound for
+stabiliser weight is 9 rather than 6 (SM~\ref{sm:morph})\cl{2}. For $\code{90,8,10}$ the upper bound for
 the unchanged IBM circuit returns to 10 under infinitely $Z$-biased ancilla
 noise~\cite{BiChangPuri2026}; we keep depolarizing noise, change the circuit, and
 prove the value\cl{53}. Using SBB's lower bound via non-interleaved counterparts to
@@ -299,12 +301,12 @@ splitting proves Theorem~\ref{thm:bb90} without extended-code input
 (SM~\ref{sm:direct})\cl{54}.
 
 % ---------------------------------------------------------------------------
-\paragraph{Optimality of the gross period.}
-In a bulk Pauli-frame model of lifting, no gross-code schedule symmetric under the 24
-colour-preserving translations with orders in the class of Fig.~12 has period below
-18, or below 21 if all ancillas share one frame; a model lift is a genuine error for
-logicals with one length-2 residual and was confirmed for all 991 sampled others (End
-Matter)\cl{45}. Among all 24 colourings by cosets of translation subgroups of index 2, 3, 4, 6, 8
+\paragraph{Period lower bound in the symmetric family.}
+This bound holds in a bulk Pauli-frame model of lifting, whose lifts are proven to be
+genuine errors for logicals with one length-2 residual and were confirmed for all 991
+sampled others, and for gross-code schedules symmetric under the 24 colour-preserving
+translations with orders in the class of Fig.~12: no such schedule has period below
+18, or below 21 if all ancillas share one frame (End Matter)\cl{45}. Among all 24 colourings by cosets of translation subgroups of index 2, 3, 4, 6, 8
 or 9, with one order type per colour, only the class of Fig.~12 has $\dext\ge11$\cl{46}.
 
 % ---------------------------------------------------------------------------
@@ -320,12 +322,15 @@ distance is limited by SBB's Cor.~1.
 \emph{Cost and outlook.} The gross circuit uses the qubits of the IBM and SBB
 circuits but 18 time steps per round instead of 8, with 3168 idle locations per round
 instead of 288 and 2.8 times the total fault probability\cl{44,50}. Under the same SD6
-noise and identical BP-OSD and Relay-BP decoders, it is worse than the IBM circuit at
-every sampled $p\ge10^{-3}$ (about $1.5\times10^3$ times at $p=2\times10^{-3}$, at least
-3 times at $10^{-3}$), while at matched fault mass the circuits perform alike\cl{50}.
+noise and identical decoders it is worse than the IBM circuit at every sampled
+$p\ge10^{-3}$ with BP-OSD: about $1.5\times10^3$ times at $p=2\times10^{-3}$, and at
+$10^{-3}$ at least 3 times, a direct-sampling lower bound, since the IBM circuit had no
+failure in 20000 shots (Table~\ref{tab:ler1}). At matched fault mass the circuits
+perform alike\cl{50}.
 Rescaling only the idle channel, $p_{\rm idle}=\lambda p$, shows where the structure
 pays off: at $\lambda=0$ the period-18 circuit beats Fig.~12 at $p=4\times10^{-3}$ (ratio
-0.37 [0.28, 0.49] with BP-OSD) and is statistically indistinguishable from the IBM
+0.37 [0.28, 0.49] with BP-OSD in an independent re-sampling,
+SM~\ref{sm:idle}) and is statistically indistinguishable from the IBM
 circuit at $p=3$--$4\times10^{-3}$, whereas at $\lambda=0.1$ it is worse than Fig.~12 by
 2.3--3 times per round (SM~\ref{sm:idle})\cl{52}. The $\code{90,8,10}$ circuit has
 period 16, three steps of which contain no CNOT, against 8 for the IBM circuit; its
@@ -493,7 +498,7 @@ circuits; S3--S8 contain the proof of Theorem~\ref{thm:main} and the general lem
 S9 treats the $\code{90,8,10}$ code and Theorem~\ref{thm:bb90}; S10 the direct search
 on the detector error model; S11 Fig.~12 of SBB; S12 the search and the optimality
 statements; S13 the sensitivity of the logical error rate to idle noise; S14 the
-verification and the data.
+verification and the data; S15 the morphing end-cycle code.
 
 % ---------------------------------------------------------------------------
 \section{Notation and noise model}\label{sm:notation}
@@ -551,7 +556,7 @@ times and 48 twice (cyclically) between $X$- and $Z$-type CNOTs.
 Circuit B (Table~\ref{tab:circB}) also has period 18; 24 of its checks keep the
 Fig.~12 order. Circuit C (Table~\ref{tab:circC}) has period 21 and a common frame:
 all ancillas are reset at step 0 and measured at step 20, so rounds are separated
-in time. Both have $\dcirc=12$ for every $R$ in both bases (S6, S7).
+in time. Both have $\dcirc=12$ for every $R$ in both bases (\ref{sm:lift}, \ref{sm:gap}).
 
 For reference, the Fig.~12 orders in the same labelling are
 $X_0$: $B_1B_2B_3A_3A_2A_1$, \ $X_1$: $B_2B_3B_1A_3A_2A_1$, \ $X_2$: $B_1B_2B_3A_2A_1A_3$,
@@ -702,14 +707,14 @@ listed weight-11 logicals. The template has no $X$-check detectors in a $Z$-basi
 memory; adding them would only remove undetected fault sets, so the bound also holds
 with all detectors.
 
-\emph{Computed check.} For every circuit and every $R$ used in S6 we confirmed both
+\emph{Computed check.} For every circuit and every $R$ used in \ref{sm:lift} we confirmed both
 facts on the DEM in both bases: each mechanism's per-check detector parity equals the
 $H$ part of its image, its logical effect equals the $L$ part, and the set of images
 is exactly the 360 extended columns.
 
 % ---------------------------------------------------------------------------
 \section{Computation for Lemma~\ref{lem:lift}}\label{sm:lift}\cl{34,42}
-By S5, a weight-11 undetected logical selects, for each of the eleven columns of
+By \ref{sm:reduction}, a weight-11 undetected logical selects, for each of the eleven columns of
 one listed extended logical, one DEM mechanism with that image, such that the
 detector sums vanish. For each of the 4224 logicals per basis, a CP-SAT model has a
 Boolean variable per mechanism of the eleven image groups, an exactly-one
@@ -813,7 +818,7 @@ $A=x^9+y+y^2$, $B=1+x^2+x^7$, $H_X=[A\,|\,B]$, $H_Z=[B^T\,|\,A^T]$~\cite{Bravyi2
 $n=90$, $k=8$, and an exhaustive search finds no logical of weight $\le9$ and 558
 $X$-type logicals of weight 10, so $d=10$. Labels: $A_1=x^9$, $A_2=y$, $A_3=y^2$,
 $B_1=1$, $B_2=x^2$, $B_3=x^7$; qubits and checks are indexed by $i=3a+b$, and the check
-at $(x,y)$ acts as in S1. The 45 translations are code automorphisms that preserve
+at $(x,y)$ acts as in \ref{sm:notation}. The 45 translations are code automorphisms that preserve
 the labels, and the circuit of Table~\ref{tab:circuit} is invariant under all of them.
 It is legal (each data qubit takes part in at most one CNOT per step; every check's
 six CNOTs cover its support at distinct steps inside its window) and deterministic
@@ -857,7 +862,7 @@ program, a CP-SAT model, and a per-logical SAT model; at $R=1$ an exhaustive
 enumeration of the products agrees. Controls: a nearby interleaved circuit with
 $\dcirc=9$ gives 315 weight-9 lifts at $R=1$ and $R=2$; the non-interleaved circuit above
 gives 585 weight-8 lifts, 540 weight-8 lifts with a zero-image fault, and 16830 weight-9
-lifts at $R=1$. The image property (S5) and the telescoping identity were asserted on
+lifts at $R=1$. The image property (\ref{sm:reduction}) and the telescoping identity were asserted on
 the DEM for every $R$ used.
 
 \emph{All $R$.} In round $j$ all CNOTs lie in layers $16j+1,\dots,16j+12$ and all
@@ -884,28 +889,28 @@ be contained in a minimal solution), bounds the remaining weight by a packing of
 detectors with disjoint covering mechanisms, and closes the last level by table
 look-up. Root cases are split by the orbits of the translations that preserve the
 detector set and the logical classes (checked by rank conditions). This is the same
-family of methods as the extended-code search of S4, implemented independently with
+family of methods as the extended-code search of \ref{sm:dext}, implemented independently with
 different pruning; its $R=1$ results were reproduced by a second, independently
 written implementation, which also reproduced $\dext=11$ and the list of 4224 logicals
-of S4, and both were tested on 1672 random instances with known answers. The searches
+of \ref{sm:dext}, and both were tested on 1672 random instances with known answers. The searches
 produce no proof certificates.
 
 Results. Gross circuit A: at $R=1$ there is no undetected logical of weight $\le11$ in
 either basis and one of weight 12 is found; at $R=2$ (66 root cases) and $R=3$ (96 root
-cases) there is none of weight $\le11$, and the injection of S8 gives 12.
+cases) there is none of weight $\le11$, and the injection of \ref{sm:upper} gives 12.
 $\code{90,8,10}$ circuit: for $R=1,\dots,12$ there is none of weight $\le9$ in either
 basis, and weight 10 is found for $R=1,2,3$; the interleaved control circuit gives 9.
 For the $\code{90,8,10}$ circuit, take a minimal undetected logical of weight $w\le9$
-at any $R$: by the splitting argument of S9 it spans at most $w$ rounds and maps into
+at any $R$: by the splitting argument of \ref{sm:bb90} it spans at most $w$ rounds and maps into
 a circuit with at most $w+3\le12$ rounds, contradicting the search. This proves
 Theorem~\ref{thm:bb90} for every $R$ without extended-code input; it uses the
-separation and periodicity checks of S9. At $R=1$ a SAT formulation of the same
+separation and periodicity checks of \ref{sm:bb90}. At $R=1$ a SAT formulation of the same
 question on the DEM is also unsatisfiable in both bases.
 
 % ---------------------------------------------------------------------------
 \section{Fig.~12 of SBB: $\dcirc=11$ and retimings}\label{sm:fig12}\cl{10,13,14,15,16,17,18}
 \emph{$\dcirc=11$.} Fig.~12 is non-interleaved, so SBB's Prop.~3 and Cor.~1 give
-$\dcirc=\dext$ for every $R$; $\dext=11$ by S4. The weight-11 extended logicals are
+$\dcirc=\dext$ for every $R$; $\dext=11$ by \ref{sm:dext}. The weight-11 extended logicals are
 realised by eleven circuit faults (checked by injection for $R=1,2,3$ in both bases).
 
 \emph{Lift structure.} All 4224 weight-11 extended logicals per basis lift to
@@ -984,8 +989,8 @@ constraints: legality (six distinct times modulo $P$ per data qubit), determinis
 which the $X$ instance acts before the $Z$ instance is even, for every instance
 offset), and, added lazily, one clause per frame-model-liftable weight-11 extended
 logical forbidding the timing that makes it liftable. Models were then certified
-with S5--S7. With the Fig.~12 orders pinned the model is unsatisfiable, in line
-with S9. As a control, 233 random legal deterministic schedules of the
+with \ref{sm:reduction}--\ref{sm:gap}. With the Fig.~12 orders pinned the model is unsatisfiable, in line
+with \ref{sm:fig12}. As a control, 233 random legal deterministic schedules of the
 common-frame family, sampled without the blocking clauses, all have liftable
 weight-11 logicals.
 
@@ -1008,7 +1013,7 @@ model was confirmed on the exact DEM, and in 99 sampled cases every violated cla
 corresponded to an exact lift. Unsatisfiability means that every legal deterministic
 circuit of the family has a model-liftable weight-11 logical. For logicals of ten data
 errors and one length-2 residual this implies a genuine weight-11 undetected error for
-sufficiently many rounds (S9); for logicals with several residual columns the same
+sufficiently many rounds (\ref{sm:fig12}); for logicals with several residual columns the same
 implication is confirmed in the sampled cases above but not proven in general. The
 minimum periods are therefore established within the model and refer to
 sufficiently many rounds. Restricting the CNOT window of class $X_0$
@@ -1074,6 +1079,35 @@ CX-native & $2\times10^{-3}$ & 23 [13, 39] & 40 [22, 74] & 36 [19, 70] & 44 [23,
 \end{ruledtabular}
 \end{table}
 
+\emph{Full SD6 noise ($\lambda=1$).} Table~\ref{tab:ler1} lists the per-round logical
+error rates (both bases summed, 95\% intervals) with the numbers of failures. At
+$p=2\times10^{-3}$ an independent re-sampling with $4\times10^5$ shots for the IBM circuit
+(22 and 25 failures in the two bases) and 400 per basis for the period-18 circuit (66
+and 67 failures) gives the ratio $1.52\times10^3$ [$1.10\times10^3$,
+$2.14\times10^3$]. At $p=10^{-3}$ neither period-8 circuit failed in 20000 shots, so the ratio of at least 3 is the period-18 rate divided by the 95\% upper limit
+of the IBM rate: a lower bound, not an estimate. The factor of about $1.5\times10^3$ at
+$p=2\times10^{-3}$ and the lower bound of 3 at $p=10^{-3}$ refer to different $p$ and are
+consistent.
+
+\begin{table}[h]
+\caption{Per-round logical error rates under full SD6 noise ($\lambda=1$), $R=12$, both
+bases summed, with failure counts (bases Z+X) where available; ``$<$'': 95\% upper limit
+with no failure.}
+\label{tab:ler1}
+\footnotesize
+\begin{ruledtabular}
+\begin{tabular}{lllll}
+$p$ & decoder & period 18 & Fig.~12 & IBM\\
+\hline
+$10^{-3}$ & BP-OSD & $9.1\times10^{-5}$ [6.2, 13.4]$\times10^{-5}$ (15+10) & 0/20000, $<3.1\times10^{-5}$ & 0/20000, $<3.0\times10^{-5}$\\
+$10^{-3}$ & Relay-BP & $1.1\times10^{-5}$ [0.40, 3.1]$\times10^{-5}$ (0+3) & 0/20000, $<3.1\times10^{-5}$ & 0/20000, $<3.1\times10^{-5}$\\
+$2\times10^{-3}$ & BP-OSD & $3.08\times10^{-2}$ [2.69, 3.54]$\times10^{-2}$ (100+100) & $3.3\times10^{-5}$ [1.4, 8.4]$\times10^{-5}$ (1+3) & $2.1\times10^{-5}$ [0.8, 6.3]$\times10^{-5}$ (1+2)\\
+$2\times10^{-3}$ & Relay-BP & $1.44\times10^{-2}$ [1.26, 1.65]$\times10^{-2}$ & 0/20893, $<3.0\times10^{-5}$ & $7.3\times10^{-6}$ [0.18, 4.1]$\times10^{-5}$ (1+0)\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+
 \emph{Per-layer rates.} Dividing per-round rates by the period treats every layer as
 having unit duration, consistent with SD6 but not with physical time. Each round of
 the period-18 circuit has 12 CX-only layers and 6 layers with measurements or resets;
@@ -1119,9 +1153,24 @@ Here ``accompanied'' means: proofs of up to 100~MB are included in the data set;
 larger ones are identified by their SHA-256 hash and can be regenerated
 byte-identically with the included script. The certificates cover the solver
 decisions only; the circuit template and the reduction of Lemma~\ref{lem:reduction}
-are covered by the pen-and-paper proofs and code-level checks of S5. Limitation:
+are covered by the pen-and-paper proofs and code-level checks of \ref{sm:reduction}. Limitation:
 $\dext=11$ and the completeness of the list of 4224 weight-11 logicals rest on two
 independent exhaustive searches; we did not obtain a checkable proof certificate for
 them (a direct CNF encoding is beyond CDCL solvers already at weight 6).
+
+% ---------------------------------------------------------------------------
+\section{The morphing end-cycle code is not the gross code}\label{sm:morph}\cl{2}
+The end-cycle code of the Shaw--Terhal morphing circuit derived from the
+$\code{288,12,18}$ code with homomorphism $f_x$~\cite{ShawTerhal2025} has parameters
+$\code{144,12,12}$: $k=12$, and an exhaustive search finds no logical of weight
+$\le11$ and one of weight 12 for both error types. Its stabiliser group has minimum
+weight exactly 9: an exhaustive search over the nonzero elements of the row spaces of
+$H_X$ and $H_Z$ finds none of weight $\le8$ and one of weight 9, for both types. The
+gross code has stabiliser generators of weight 6. The minimum weight of a CSS
+stabiliser group is the smaller of the minimum $X$- and $Z$-type weights, and it is
+invariant under qubit permutations and local Clifford operations, which map
+stabilisers to stabilisers of the same weight. The two codes are therefore not
+equivalent under these operations; the argument says nothing about more general
+equivalences.
 
 \end{document}
