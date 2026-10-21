@@ -368,7 +368,7 @@ int main(int argc, char **argv){
   if (enumerate && proof) die("-e is count-only");
   if (proof){
     size_t pl = strlen(proof);
-    if (pl > 3 && !strcmp(proof + pl - 3, ".gz")){ char cmd[4096]; snprintf(cmd, sizeof cmd, "gzip -1 > '%s'", proof); pf = popen(cmd, "w"); gz = 1; }
+    if (pl > 3 && !strcmp(proof + pl - 3, ".gz")){ char cmd[4096]; snprintf(cmd, sizeof cmd, "gzip -1 -n > '%s'", proof); pf = popen(cmd, "w"); gz = 1; }
     else pf = fopen(proof, "w");
     if (!pf) die("open proof"); ocap = 1<<23; obuf = malloc(ocap); }
   nextid = NCONS + 1;
