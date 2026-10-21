@@ -120,6 +120,12 @@ def cmd_tamper(opb, proof, outdir):
     if c:
         i = rng.choice(c); m = re.search(r" (\d+) \* \+$", lines[i]); lam = int(m.group(1))
         muts.append(("lambda_minus_1", i, lines[i][:m.start()] + (f" {lam - 1} * +" if lam > 2 else " +")))
+    # 4b) counting-bound certificate without its weight term (a valid but useless constraint): the RUP using it must fail
+    first_case = min(i for i in idx["rup"])
+    c = [i for i in idx["pol"] if i > first_case and re.fullmatch(r"pol \d+( \d+ \+)+", lines[i])]
+    if c:
+        i = rng.choice(c); l = lines[i]
+        muts.append(("drop_weight_term", i, l[:l.rstrip(" +").rfind(" ")].rstrip()))
     # 5) symmetry step with a wrong witness (swap two images)
     i = idx["red"][0]; l = lines[i].split(" ; "); w = l[1].split(); a_ = [k for k in range(0, len(w), 3)]
     w[2], w[5] = w[5], w[2]
