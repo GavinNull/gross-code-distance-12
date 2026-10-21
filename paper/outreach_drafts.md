@@ -49,30 +49,34 @@ Zhejiang University
 
 ---
 
-## 致 Anthropic 研究员：个人介绍与合作意向（PI 2026-10-21 要求以介绍本人为主）
+## 致 Anthropic 研究员：个人介绍与合作意向（以介绍本人为主）
 
 收件人：Andi Gu（arXiv:2610.22367 第一作者，Anthropic STEM Fellows）。邮箱以论文或 arXiv 上的联系方式为准。也可以走 Anthropic 官方的 Fellows 或科研合作渠道。
-方括号里的内容请 PI 自己填写，lead 没有替你编任何个人信息。
+个人信息取自两个 GitHub 账号的公开仓库（Ephemeral6、GavinNull），请 PI 逐句核对后再发。
 
-**Subject:** An undergraduate who runs research with Claude agents: hoping to work with you
+**Subject:** A second-year undergraduate doing research with Claude agents: hoping to work with you
 
 Dear Dr. Gu,
 
-My name is Guancheng Pan, and I am a [year / major] student at Zhejiang University. I am writing because your paper on discovering quantum circuits with LLMs (arXiv:2610.22367) is very close to what I care about most: how to do real research with AI.
+My name is Guancheng Pan. I am a second-year undergraduate at Chu Kochen Honors College, Zhejiang University. I am writing because your paper on discovering quantum circuits with LLMs (arXiv:2610.22367) is very close to what I care about most: how to do real research with AI.
 
-Over the past weeks I set up and ran an "AI-native" research project. Claude agents proposed hypotheses, wrote and ran the experiments, reasoned out constructions and proofs, and independently audited one another's claims. My role was to choose the problem, set the rules, and make the decisions at each gate. I started with no background in quantum error correction. The project produced certified results on syndrome-extraction circuits for bivariate-bicycle codes, including an answer to an open question of Strikis, Browne and Beverland.
+Over the past months I have built my own AI research system, an orchestration of Claude agents in Claude Code. It runs parallel workstreams, dedicated refutation agents and independent auditors, and the human makes the decisions at defined gates. With it I have worked across several fields:
 
-What I learned matters to me more than the result itself. I learned how to structure a project so that agents do the reasoning rather than just the chores. I learned how to make their claims trustworthy through independent audits, machine-checkable certificates and pre-registered predictions. I also learned where they fail: agents overclaimed, made subtle encoding mistakes, and wrote defensive prose, and the process had to catch each of these. The whole record, including mistakes, corrections and audits, is public: https://github.com/GavinNull/gross-code-distance-12
+- **Nivat's conjecture (convex form).** A proof of Nivat's 1997 conjecture in its convex form, with a complete Lean 4 formalisation: about 216,000 lines, no `sorry`, only Lean's standard axioms, and every quoted literature result also formalised. Formalising the argument exposed a step in a published lemma that does not go through as written; the formalisation replaces it. https://github.com/Ephemeral6/convex-nivat-star-configurations
+- **Harmonic analysis.** A proof of Mockenhaupt's three-term Hardy–Littlewood majorant conjecture for all k (arXiv:2609.09740).
+- **Low-dimensional topology.** A preprint on Kakimizu's contractibility problem for knots (arXiv:2609.09224).
+- **Quantum error correction.** Certified single-ancilla syndrome circuits that reach the full circuit distance of the gross code (answering an open question of Strikis, Browne and Beverland) and of the [[90,8,10]] code. The complete research record is public, including audits, mistakes and corrections. https://github.com/GavinNull/gross-code-distance-12
+- **Tooling.** Agent harnesses for mathematical research and modelling (e.g. math-agent, theoria, modeling-harness) and a Lean 4 formalisation of a superconductivity paper.
 
-[One or two sentences about yourself: background, other interests, what you want to do next.]
+What I care about is the method behind these results. That means making agents do the reasoning and not just the chores, and making their output trustworthy through adversarial audits, machine-checkable proofs and pre-registered predictions. It also means learning where agents fail (overclaiming, subtle encoding mistakes, plausible but wrong steps) and building processes that catch those failures.
 
-I would love to work with you, or with Anthropic more broadly, on using AI for scientific research: as a fellow, an intern, or a collaborator on a concrete project. I would be glad to talk at any time that suits you.
+I would love to work with you, or with Anthropic more broadly, on AI for scientific research, whether as a fellow, an intern, or a collaborator on a concrete project. I would be glad to talk at any time that suits you.
 
 Best regards,
 Guancheng Pan
-Zhejiang University
+Chu Kochen Honors College, Zhejiang University
 3250101086@zju.edu.cn
-GitHub: https://github.com/GavinNull
+GitHub: https://github.com/Ephemeral6 · https://github.com/GavinNull
 
 ---
 
