@@ -54,23 +54,19 @@ Zhejiang University
 收件人：Andi Gu（arXiv:2610.22367 第一作者，Anthropic STEM Fellows）。邮箱以论文或 arXiv 上的联系方式为准。也可以走 Anthropic 官方的 Fellows 或科研合作渠道。
 个人信息取自两个 GitHub 账号的公开仓库（Ephemeral6、GavinNull），请 PI 逐句核对后再发。
 
-**Subject:** A second-year undergraduate doing research with Claude agents: hoping to work with you
+**Subject:** A machine-checked proof of Nivat's conjecture, found with Claude agents: hoping to work with you
 
 Dear Dr. Gu,
 
-My name is Guancheng Pan. I am a second-year undergraduate at Chu Kochen Honors College, Zhejiang University. I am writing because your paper on discovering quantum circuits with LLMs (arXiv:2610.22367) is very close to what I care about most: how to do real research with AI.
+My name is Guancheng Pan. I am a second-year undergraduate at Chu Kochen Honors College, Zhejiang University. Your paper on discovering quantum circuits with LLMs (arXiv:2610.22367) is very close to what I care about most, which is how to do real research with AI, and I wanted to introduce myself.
 
-Over the past months I have built my own AI research system, an orchestration of Claude agents in Claude Code. It runs parallel workstreams, dedicated refutation agents and independent auditors, and the human makes the decisions at defined gates. With it I have worked across several fields:
+The result I am proudest of is a proof of **Nivat's conjecture**, in its convex form, with a complete Lean 4 formalisation. Nivat posed the conjecture in 1997 as the two-dimensional analogue of the Morse–Hedlund theorem: if a configuration of Z² has at most mn distinct m×n patterns for some m, n, it must be periodic. It is one of the best-known open problems in symbolic dynamics and combinatorics on words. Over the past decade it has drawn a series of partial results: Kari–Szabados's algebraic approach, work by Cyr and Kra, and Colle's results on nonexpansive directions. The convex form is the natural general statement, since Khetan's counterexample shows that it fails for non-convex windows, and it contains the original rectangular conjecture. The core of the proof is a complexity lower bound for "star configurations". In it a zonotope, the Newton polytope of a product of annihilating Laurent polynomials, appears twice with opposite signs: once as the exact cost of the affine relations a window carries, and once as the exact capacity of an independent family of quadratic characters. The two cancel.
 
-- **Nivat's conjecture (convex form).** A proof of Nivat's 1997 conjecture in its convex form, with a complete Lean 4 formalisation: about 216,000 lines, no `sorry`, only Lean's standard axioms, and every quoted literature result also formalised. Formalising the argument exposed a step in a published lemma that does not go through as written; the formalisation replaces it. https://github.com/Ephemeral6/convex-nivat-star-configurations
-- **Harmonic analysis.** A proof of Mockenhaupt's three-term Hardy–Littlewood majorant conjecture for all k (arXiv:2609.09740).
-- **Low-dimensional topology.** A preprint on Kakimizu's contractibility problem for knots (arXiv:2609.09224).
-- **Quantum error correction.** Certified single-ancilla syndrome circuits that reach the full circuit distance of the gross code (answering an open question of Strikis, Browne and Beverland) and of the [[90,8,10]] code. The complete research record is public, including audits, mistakes and corrections. https://github.com/GavinNull/gross-code-distance-12
-- **Tooling.** Agent harnesses for mathematical research and modelling (e.g. math-agent, theoria, modeling-harness) and a Lean 4 formalisation of a superconductivity paper.
+The method is what I most want to talk about. The proof and the formalisation were produced by a research system I built: an orchestration of Claude agents in Claude Code, with parallel formalisation lanes, a single integrating agent, dedicated refutation agents that try to break every claim, and independent auditors, while I make the decisions at defined gates. The Lean development has about 216,000 lines and 449 modules, contains no `sorry`, and uses only Lean's standard axioms. It also formalises every result the paper quotes from the literature (Kari–Szabados, Colle, Boyle–Lind, Cyr–Kra), and doing so exposed a step in a published lemma that does not go through as written; the formalisation replaces it with a different construction. The paper's appendix records the timeline, the organisation, and every significant error the agents made and how it was caught. Repository: https://github.com/Ephemeral6/convex-nivat-star-configurations
 
-What I care about is the method behind these results. That means making agents do the reasoning and not just the chores, and making their output trustworthy through adversarial audits, machine-checkable proofs and pre-registered predictions. It also means learning where agents fail (overclaiming, subtle encoding mistakes, plausible but wrong steps) and building processes that catch those failures.
+I have used the same approach in other areas: Mockenhaupt's three-term majorant conjecture (arXiv:2609.09740), Kakimizu's contractibility problem for knots (arXiv:2609.09224), and, most recently, certified distance-preserving syndrome circuits for bivariate-bicycle codes (https://github.com/GavinNull/gross-code-distance-12).
 
-I would love to work with you, or with Anthropic more broadly, on AI for scientific research, whether as a fellow, an intern, or a collaborator on a concrete project. I would be glad to talk at any time that suits you.
+I would love to work with you, or with Anthropic more broadly, on AI for scientific research, as a fellow, an intern, or a collaborator on a concrete project. I would be glad to talk at any time that suits you.
 
 Best regards,
 Guancheng Pan
