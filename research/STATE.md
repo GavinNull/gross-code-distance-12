@@ -255,3 +255,9 @@ PI 决定：允许下载 Webster–Jacob–Higgott 的精确求距离工具；�
 - 文字修改：Table S1 中 Z2 的 map “s128”→ s12；去掉 “PI to decide” 等占位措辞；[9] 在正文中补引或调整编号；“presumably it is this one”改为中性表述；插入位置的记法统一；摘要压到约 150 词。参考文献由 PI 本人逐条人工核对（lead 提供核对清单）。
 - （2026-10-17）PI 决定投 PRL。标题暂用 lead 推荐的第 1 个：“Interleaving recovers the full circuit distance of bivariate-bicycle codes”。
 - （2026-10-21）PI 要求在 GitHub 开源：已发布 GitHub Release v1.0（含论文 PDF、arXiv 源码、298 MB 的数据与复现包）。
+
+## 第三份外部审读与应对（2026-10-21）
+审读结论：数学干净（Lemma 4 的数字和 Table I 都经过重算核对），最大风险在“代价”这一部分的叙事和数据支撑。
+- E-030：[[90]] 删掉 3 个空层后周期 16 → 13（重新认证 d_circ = 10），并补测 [[90]] 的逻辑错误率，与 IBM 的 [[90]] 电路对比。这是审读最推荐的实验：可能把论文从“结构性结果”变成“对一个码有实际收益”。
+- E-031：用 VeriPB 加 XOR 证明日志认证 d_ext = 11 与 4224 列表的完备性（PI 已批准下载）。
+- revision N 文字修改：Table S4 补 λ=1 行；明确“≥3”是直接采样得到的下界；摘要的证书措辞收紧；“Optimality”改名并限定适用范围；SM 补 Shaw–Terhal 不等价的计算；标题加 “two”；交叉引用、排版粘连；注明 0.37 来自独立重采样。
