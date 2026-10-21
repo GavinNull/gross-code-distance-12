@@ -117,7 +117,7 @@ def main():
         for f in a.blocks:
             listed += [tuple(e["columns"]) for e in json.load(open(f))["logicals"]]
         # blocked sets actually in the instance (after --drop-block): read back from the OPB file
-        active = [tuple(int(v[2:]) - 1 for v in l.split()[1::2]) for l in open(str(stem) + ".opb")
+        active = [tuple(int(v[2:]) - 1 for v in l.split() if v.startswith("~x")) for l in open(str(stem) + ".opb")
                   if l.startswith("1 ~x")]
         ok, blk = verify_solution(a.source, a.basis, cols, a.W, active)
         rec["verdict"] = "SAT"
