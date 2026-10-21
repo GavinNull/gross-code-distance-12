@@ -20,6 +20,17 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision N (2026-10-21, third external review)
+
+Title: "Interleaving recovers the full circuit distance of the gross and [[90,8,10]] bivariate-bicycle codes"
+(chosen over "… of two bivariate-bicycle codes": it names the codes and keeps the claim exact). Abstract attributes
+SBB's bound directly (names + arXiv number; APS abstracts avoid reference numbers) and words the certification
+precisely. λ = 1 data added as Table S5 with failure counts; main text calls ≥ 3 at 1e-3 a lower bound. SM S15 added
+(non-equivalence of the morphing end-cycle code). SM cross-references now all via \ref. Glued tokens: the PDF itself
+shows the hyphens and spaces; "modelliftable"-type tokens come from pdftotext joining words hyphenated at line ends
+(15 such words, all standard TeX hyphenation at an explicit hyphen), and "hasdext"/"P≤ 17" from math adjacency in text
+extraction — no typesetting change needed. Core count 3361 word-equivalents; End Matter 774 words; 15 pages; tables OK.
+
 ## Revision M2 (2026-10-17)
 
 Added the APS-standard Supplemental Material reference [17] ("See Supplemental Material at [URL will be inserted by
