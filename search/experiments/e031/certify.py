@@ -54,7 +54,11 @@ def verify_solution(source, basis, cols, W, blocks):
     sys.path.insert(0, str(HERE))
     import numpy as np
     from build import load_ibm, load_release
-    src = load_release(source, basis) if source in ("gross", "bb90") else load_ibm(source.split(":")[1], basis)
+    if source == "u11":
+        from u11 import load_u11
+        src = load_u11(basis)
+    else:
+        src = load_release(source, basis) if source in ("gross", "bb90") else load_ibm(source.split(":")[1], basis)
     H, L, sups = src["H"], src["L"], src["sups"]
     # column indices refer to the merged column list of build.build (identical to the release order for release data)
     from build import build

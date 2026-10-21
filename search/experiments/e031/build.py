@@ -363,6 +363,9 @@ def main():
     a = ap.parse_args()
     if a.source in ("gross", "bb90"):
         src = load_release(a.source, a.basis)
+    elif a.source == "u11":
+        from u11 import load_u11
+        src = load_u11(a.basis)
     else:
         src = load_ibm(a.source.split(":")[1], a.basis)
     blocks = []
