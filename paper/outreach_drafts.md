@@ -49,28 +49,30 @@ Zhejiang University
 
 ---
 
-## 致 Anthropic 研究员（arXiv:2610.22367 的作者 Andi Gu 等）——可与第一封信并行发送
+## 致 Anthropic 研究员：个人介绍与合作意向（PI 2026-10-21 要求以介绍本人为主）
 
-收件人：Andi Gu（Anthropic STEM Fellows，2610.22367 第一作者；邮箱请以论文首页或 arXiv 上的联系方式为准）。可抄送该文的哈佛通讯作者。也可以通过 Anthropic 官方的科研合作或 AI for Science 渠道联系（以官网当前页面为准）。
+收件人：Andi Gu（arXiv:2610.22367 第一作者，Anthropic STEM Fellows）。邮箱以论文或 arXiv 上的联系方式为准。也可以走 Anthropic 官方的 Fellows 或科研合作渠道。
+方括号里的内容请 PI 自己填写，lead 没有替你编任何个人信息。
 
-**Subject:** Certified AI-found syndrome-extraction circuits: the error-correction layer next to your 2610.22367
+**Subject:** An undergraduate who runs research with Claude agents: hoping to work with you
 
 Dear Dr. Gu,
 
-I read your paper "Discovering state-of-the-art quantum circuits with large language models" (arXiv:2610.22367) with great interest. In your outlook you mention co-design across the fault-tolerant stack. I have just completed a result one layer below yours, in quantum error correction, and I think the two fit together naturally.
+My name is Guancheng Pan, and I am a [year / major] student at Zhejiang University. I am writing because your paper on discovering quantum circuits with LLMs (arXiv:2610.22367) is very close to what I care about most: how to do real research with AI.
 
-Working with Claude agents under my direction, I constructed explicit single-ancilla, interleaved syndrome-extraction circuits that reach the full code distance:
-- for the gross code [[144,12,12]], circuit distance 12, answering an open question of Strikis, Browne and Beverland (arXiv:2603.05481);
-- for [[90,8,10]], circuit distance 10, two above every non-interleaved circuit.
+Over the past weeks I set up and ran an "AI-native" research project. Claude agents proposed hypotheses, wrote and ran the experiments, reasoned out constructions and proofs, and independently audited one another's claims. My role was to choose the problem, set the rules, and make the decisions at each gate. I started with no background in quantum error correction. The project produced certified results on syndrome-extraction circuits for bivariate-bicycle codes, including an answer to an open question of Strikis, Browne and Beverland.
 
-The agents did the scientific reasoning: the key structural insight, the searches, the proofs, and an independent audit of every claim with separately written code. Every infeasibility claim decided by a solver comes with a DRAT proof, checked with drat-trim and cake_lpr. Paper, circuits, certificates and reproduction scripts: https://github.com/GavinNull/gross-code-distance-12 (release v1.0).
+What I learned matters to me more than the result itself. I learned how to structure a project so that agents do the reasoning rather than just the chores. I learned how to make their claims trustworthy through independent audits, machine-checkable certificates and pre-registered predictions. I also learned where they fail: agents overclaimed, made subtle encoding mistakes, and wrote defensive prose, and the process had to catch each of these. The whole record, including mistakes, corrections and audits, is public: https://github.com/GavinNull/gross-code-distance-12
 
-Your work uses LLM-guided evolutionary search with an evaluator for arithmetic circuits; ours uses agent reasoning plus certified exact search for syndrome circuits. Together they look like two complementary pieces of AI-driven fault-tolerant design. I would be glad to hear your thoughts, and I would welcome a conversation about whether there is room to collaborate, for instance on shorter-period circuits or on joint co-design of the algorithm and error-correction layers.
+[One or two sentences about yourself: background, other interests, what you want to do next.]
+
+I would love to work with you, or with Anthropic more broadly, on using AI for scientific research: as a fellow, an intern, or a collaborator on a concrete project. I would be glad to talk at any time that suits you.
 
 Best regards,
 Guancheng Pan
 Zhejiang University
 3250101086@zju.edu.cn
+GitHub: https://github.com/GavinNull
 
 ---
 
