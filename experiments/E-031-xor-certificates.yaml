@@ -1,0 +1,49 @@
+id: E-031-xor-certificates
+title: VeriPB certificates with native parity reasoning for d_ext and the completeness of the logical lists
+owner: experimenter
+date: 2026-10-21
+hypothesis: >
+  The last uncertified inputs of Theorem 1 (d_ext = 11 of the Fig. 12 extended code, completeness of the 4224
+  weight-11 lists) and of the [[90]] result (d_ext = 8 of the c16 extended code, completeness of the 585 / 16830
+  lists) can be certified by pseudo-Boolean proofs checked by VeriPB, if the proof works with parity rows natively
+  (row equalities sum x - 2*sum 2^k a_k = 0, parity clauses derived by cutting planes with one division) and with
+  the orbit split justified inside the proof (redundance steps with the translation as witness).
+tools:
+  checker: VeriPB 2 (official repo gitlab.com/MIAOresearch/software/VeriPB, branch version2, b0d55dc), C++ core built
+    by search/experiments/e031/build_tools.sh; VeriPB 3 (main, f41ce91) cloned but not built (needs Rust + crates,
+    not approved).  Companion solver: none downloaded -- RoundingSat / Exact need cmake + Boost (absent) and are CDCL /
+    cutting-planes solvers that E-027 already showed cannot reach weight 6 on this problem; the proof generator is our
+    own search (search/experiments/e031/pbdfs.c), which is NOT trusted: every UNSAT claim rests on the VeriPB check.
+encoding: search/experiments/e031/build.py (exact: model <-> x with Hx=0, Lx!=0, |x|<=W, no blocked subset;
+  logical rows closed under the symmetry group so the formula is invariant, checked syntactically)
+proof:
+  - strengthening_to_core on; symmetry clauses ~x_g v x_rep(o) v OR_{orbits<o} x by `red` (witness = translation)
+  - non-basis logical rows -> clauses ~q_m v OR q_basis by XOR elimination in cutting planes; sum_{basis} q >= 1 by RUP
+  - per orbit representative: search tree; leaves = parity clause / weight RUP / counting bound (pol); internal
+    nodes = RUP with hints; unit ~x_rep; orbit units by RUP; final contradiction
+commands:
+  build_tools: sh search/experiments/e031/build_tools.sh
+  one_run: uv run python search/experiments/e031/certify.py NAME SOURCE BASIS W --out results/E-031-xor-certificates/<group> [--blocks F] [--expect sat|unsat]
+  all: sh search/experiments/e031/run_all.sh
+dev_probes_before_this_file: >
+  Count-only search probes and small VeriPB runs were made while developing the encoding (results/E-031-xor-certificates/dev/).
+  Node counts (final algorithm, count only, no proof): gross Fig.12 Z: W5 9.1e4, W6 5.8e5, W7 4.1e6, W8 3.07e7 (x7.3 per weight);
+  gross X W6 5.9e5; bb90 c16 X: W6 2.8e5, W7 2.36e6; Z: W6 2.3e5, W7 1.94e6.  VeriPB 2 checks about 1-2e3 search nodes per CPU second
+  plus ~15-30 s fixed cost for the symmetry steps.
+predictions: >
+  (written before the production runs)
+  1) Validation, IBM BB72 extended codes (d_ext = 5 known from E-015): W=4 UNSAT verified by VeriPB on both bases (97%);
+     W=5 the search returns a weight-5 logical that re-verifies (97%). Tampered proofs are rejected (99%).
+  2) Planted: blocking all but one orbit of a known complete list makes the search return a logical from the missing orbit (95%).
+  3) [[90]] c16: W=7 UNSAT verified on both bases, i.e. d_ext >= 8 certified (90%), < 2 CPU h each including checking (75%).
+  4) [[90]] completeness of the 585 weight-8 lists (W=8 with the lists blocked): UNSAT verified per basis (75%; ~2e7 nodes,
+     ~3-6 CPU h each); the 16830 weight-9 lists (W=9, ~1.5e8 nodes): infeasible within the 30 CPU h budget (80%).
+  5) gross Fig.12: certificates for W <= 7 on both bases (90%), W=8 on at least one basis (50%);
+     W=10 (d_ext = 11) and W=11 (4224 completeness) infeasible within budget (95%): extrapolated ~1.7e9 / 1.3e10 nodes,
+     >= 200 / >= 1500 CPU h of VeriPB-2 checking.
+budget:
+  cpu_hours: 30
+  workers: 3          # another experiment uses 8 cores
+  llm_tokens: 0
+results: results/E-031-xor-certificates/
+journal: research/journal/2026-10-21-E-031-xor-certificates.md
