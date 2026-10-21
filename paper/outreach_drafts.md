@@ -49,7 +49,33 @@ Zhejiang University
 
 ---
 
+## 致 Anthropic 研究员（arXiv:2610.22367 的作者 Andi Gu 等）——可与第一封信并行发送
+
+收件人：Andi Gu（Anthropic STEM Fellows，2610.22367 第一作者；邮箱请以论文首页或 arXiv 上的联系方式为准）。可抄送该文的哈佛通讯作者。也可以通过 Anthropic 官方的科研合作或 AI for Science 渠道联系（以官网当前页面为准）。
+
+**Subject:** Certified AI-found syndrome-extraction circuits: the error-correction layer next to your 2610.22367
+
+Dear Dr. Gu,
+
+I read your paper "Discovering state-of-the-art quantum circuits with large language models" (arXiv:2610.22367) with great interest. In your outlook you mention co-design across the fault-tolerant stack. I have just completed a result one layer below yours, in quantum error correction, and I think the two fit together naturally.
+
+Working with Claude agents under my direction, I constructed explicit single-ancilla, interleaved syndrome-extraction circuits that reach the full code distance:
+- for the gross code [[144,12,12]], circuit distance 12, answering an open question of Strikis, Browne and Beverland (arXiv:2603.05481);
+- for [[90,8,10]], circuit distance 10, two above every non-interleaved circuit.
+
+The agents did the scientific reasoning: the key structural insight, the searches, the proofs, and an independent audit of every claim with separately written code. Every infeasibility claim decided by a solver comes with a DRAT proof, checked with drat-trim and cake_lpr. Paper, circuits, certificates and reproduction scripts: https://github.com/GavinNull/gross-code-distance-12 (release v1.0).
+
+Your work uses LLM-guided evolutionary search with an evaluator for arithmetic circuits; ours uses agent reasoning plus certified exact search for syndrome circuits. Together they look like two complementary pieces of AI-driven fault-tolerant design. I would be glad to hear your thoughts, and I would welcome a conversation about whether there is room to collaborate, for instance on shorter-period circuits or on joint co-design of the algorithm and error-correction layers.
+
+Best regards,
+Guancheng Pan
+Zhejiang University
+3250101086@zju.edu.cn
+
+---
+
 注意事项：
+- 发给 Anthropic 研究员的信不要拿我们的工作去和他们的比较，只讲互补。语气自信，但不攀附。
 - 第一封在挂 arXiv **之前**发，第二封在挂出**之后**发。
 - 信里只写论文中已有、并且经过复核的内容。
 - AI 参与的情况与论文致谢保持一致，坦白写明。
