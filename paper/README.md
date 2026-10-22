@@ -20,6 +20,19 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision O (2026-10-22): two codes, both gap two, both period 11
+
+Outline `outline_O.md`. Title kept. Headline circuits: period-11 gross circuit (d_ext = 10 → d_circ = 12) and
+period-11 [[90,8,10]] circuit (d_ext = 8 → 10), Table I (one row per check type). Lemma 2 now carries both theorems;
+gap arguments in End Matter (gross R' = 31; [[90]] R' = 25). New paragraphs: certificates (E-031 wording), logical
+error rates (E-030/E-033 audited wording), IBM gross d_circ = 10 for R ≤ 3. The period-18 family moved to SM history
+(S10–S16) with old Fig. 1 and old Table I; main text has no figure for now — a new Fig. 1 for the period-11 mechanism
+needs new data (requested from the lead). SM reordered: S1 notation, S2 Lemma 1, S3 period-11 gross, S4 [[90]],
+S5 direct search, S6 certificates, S7 LER, S8–S9 Fig. 12, S10–S16 period-18 history, S17 data, S18 morphing.
+`scripts/check_tables.py` rewritten for the new tables (Table I both codes, c16, circuits A/B/C): all OK.
+Counts: core 2305 word-equivalents (room ≈ 1450 for a new Fig. 1), abstract ≈ 170 words, End Matter 646 words,
+17 pages.
+
 ## Revision N (2026-10-21, third external review)
 
 Title: "Interleaving recovers the full circuit distance of the gross and [[90,8,10]] bivariate-bicycle codes"
