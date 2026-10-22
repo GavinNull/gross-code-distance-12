@@ -1,0 +1,49 @@
+id: E-034-veripb3-u11
+title: VeriPB 3 (Rust) for the u11 list-completeness certificates; remaining [[90]] lift certificates
+owner: experimenter
+date: 2026-10-22
+hypothesis: >
+  The only uncertified computational inputs of the gross u11 result (E-032) are the completeness of the 144 weight-10
+  and 7344 weight-11 extended-logical lists.  E-031 measured that VeriPB 2 (Python front end, ~0.45 ms per search
+  node) makes them infeasible (>= 35-60 CPU h per side at W=10).  VeriPB 3 (Rust) should check the same proofs
+  (after translation to the 3.0 proof syntax) one to two orders of magnitude faster, bringing W=10 and possibly W=11
+  within a 120 CPU h budget.  Separately, the [[90]] lift certificates of c11 (R=20-25; cake_lpr for the 292
+  drat-trim-only batches), c13 (R<=12) and c12 (R<=12) are routine and cheap.
+approvals: >
+  PI approved (2026-10-22): rustup from rust-lang.org for the current user, no sudo, --no-modify-path, cargo called by
+  full path; VeriPB 3 from the official repository's main branch with its crates.io dependencies.  Nothing else
+  downloaded.  Versions in tools/VERSIONS.txt.
+tools:
+  checker: VeriPB 3 (gitlab.com/MIAOresearch/software/VeriPB, main), cargo build --release; judged ONLY by the line
+    "s VERIFIED UNSATISFIABLE" (exit code alone is not accepted: conclusion NONE also returns 0).
+  proof generator: search/experiments/e031/pbdfs.c, adapted to emit 3.0 syntax (untrusted; copy in e034/).
+  lift: e031/liftcert.py pipeline unchanged (CaDiCaL 3.0.1 -> drat-trim -> cake_lpr).
+plan:
+  - build VeriPB 3; its own test suite; re-check E-031 [[90]] W7 and W8 proofs; E-031/audit tamper set must be rejected
+  - speed benchmark VeriPB 3 vs VeriPB 2 on identical proofs (same search, two syntaxes)
+  - u11 count-only W=10 (blocked 144) and W=11 (blocked 144+7344) per side, before any certificate run
+  - certificates in order W10 X, W10 Z, then W11 if the measured cost fits the remaining budget
+  - lift: c11 R=20-25 (both bases, drat-trim + cake_lpr), c11 R=13-19 drat-trim-only batches with cake_lpr,
+    c13 R=1-12, c12 R=1-12 if cheap
+commands:
+  build: sh search/experiments/e034/build_veripb3.sh
+  u11: sh search/experiments/e034/run_u11.sh <step> <kind>
+  lift: sh search/experiments/e034/run_lift.sh
+predictions: >
+  (written before any VeriPB 3 run or u11 W>=10 count)
+  1) VeriPB 3 builds with rust >= 1.92 and passes its own tests (90%).  The translated E-031 proofs of [[90]] W7/W8
+     verify (85%; risk: semantic differences, e.g. red goals or rup hint semantics, needing generator changes);
+     every tamper that VeriPB 2 rejected is rejected (95%).
+  2) Speed: VeriPB 3 checks these proofs 10-50x faster than VeriPB 2 (median guess 20x, i.e. ~20 us per node) (70%);
+     < 5x faster (10%).
+  3) u11 count-only: W=10 with 144 blocked 4e8-1.5e9 nodes per side (70%); W=11 with 7488 blocked 3e9-1e10 per side
+     (65%); no logical found in either (99%, E-032 + audit MITM lists).
+  4) Certificates: W=10 both sides verified within ~20 CPU h total (65%); W=11 both sides within the remaining budget
+     (35%).  If not, report the measured cost.
+  5) Lift: every c11 R=20-25, c13, c12 batch UNSAT and verified by drat-trim and cake_lpr (97%); total < 20 CPU h (75%).
+budget:
+  cpu_hours: 120
+  workers: 6
+  llm_tokens: 0
+results: results/E-034-veripb3-u11/
+journal: research/journal/2026-10-22-E-034-veripb3-u11.md
