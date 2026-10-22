@@ -20,6 +20,13 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision O2 (2026-10-22)
+
+New two-column Fig. 1 (`figures/fig1_u11.pdf`): (a) non-segmentability, (b) one weight-10 logical that lifts in the
+segmented control but is blocked by a single readout in the period-11 circuit, (c) proof chains for both codes. Caption
+149 words; one mechanism sentence added to "The circuits" (tag C61, audit pending; typicality count omitted).
+Core 2952 word-equivalents (limit 3750); End Matter 646 words; 18 pages; tables OK.
+
 ## Revision O (2026-10-22): two codes, both gap two, both period 11
 
 Outline `outline_O.md`. Title kept. Headline circuits: period-11 gross circuit (d_ext = 10 → d_circ = 12) and
