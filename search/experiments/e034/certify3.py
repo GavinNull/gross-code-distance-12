@@ -47,7 +47,9 @@ def ensure_bin():
     src = HERE / "pbdfs.c"
     if not BIN.exists() or BIN.stat().st_mtime < src.stat().st_mtime:
         BIN.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["cc", "-O2", "-Wall", "-o", str(BIN), str(src)], check=True)
+        tmp = str(BIN) + ".tmp"          # build aside, then rename: a running pbdfs keeps its own (old) file
+        subprocess.run(["cc", "-O2", "-Wall", "-o", tmp, str(src)], check=True)
+        os.replace(tmp, BIN)
 
 
 def verified(text):
@@ -62,6 +64,7 @@ def main():
     ap.add_argument("--stream", action="store_true")
     ap.add_argument("--keep", action="store_true")
     ap.add_argument("--syntax", default="3")
+    ap.add_argument("--cachemax", type=int, default=0, help="pbdfs -F: bounded parity-clause cache (0 = E-031 behaviour)")
     a = ap.parse_args()
     ensure_bin()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
@@ -78,7 +81,8 @@ def main():
         print(p.stdout, p.stderr); raise SystemExit("build failed")
     rec["build"] = {"cpu_s": round(cpu_children() - c0, 1), "meta": json.loads(Path(str(stem) + ".json").read_text())}
     rec["opb_sha256"] = sha(str(stem) + ".opb")
-    extra = ["-2"] if a.syntax == "2" else []
+    extra = (["-2"] if a.syntax == "2" else []) + (["-F", str(a.cachemax)] if a.cachemax else [])
+    rec["cachemax"] = a.cachemax
     vlog = open(str(stem) + ".veripb3.log", "w")
     slog = open(str(stem) + ".search.log", "w")
     t0 = time.time()

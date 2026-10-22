@@ -120,6 +120,29 @@ static void cache_flush(void){
   if (htcap) memset(ht, 0, htcap*sizeof(RKey)); htn = 0;
 }
 
+/* E-034: bounded row-clause cache (-F N).  E-031 kept every parity clause of a case alive until the end of the
+   case; VeriPB keeps every live constraint in memory (about 2-4 KB each), which for u11 W = 11 reached 40-67 GB.
+   With -F N, whenever the cache holds more than N clauses at the entry of a node, every cached clause that is not
+   pinned is deleted from the proof (and from the cache; it is re-derived if needed again).  Pinned = the parity
+   clause `base` of every active branch frame and every certificate a child returned without ownership (owned = 0,
+   e.g. a parity clause returned by a leaf), i.e. exactly the ids that a pending RUP of an ancestor will still cite.
+   The search itself is unchanged (the cache affects only the proof text). */
+static long long cachemax = 0, ntrim = 0;
+static long long *pin; static int npin = 0, pincap = 0;
+static void pin_push(long long id){ if (npin == pincap){ pincap = pincap ? 2*pincap : 1024; pin = realloc(pin, pincap*sizeof(long long)); if (!pin) die("oom"); } pin[npin++] = id; }
+static int is_pinned(long long id){ for (int k=0;k<npin;k++) if (pin[k] == id) return 1; return 0; }
+static void cache_trim(void){
+  if (!pf || !cachemax || (long long)htn <= cachemax) return;
+  RKey *keep = malloc((npin+1)*sizeof(RKey)); int nk = 0, cnt = 0;
+  for (size_t h=0;h<htcap;h++) if (ht[h].id){
+    if (is_pinned(ht[h].id)){ if (nk > npin) die("pin overflow"); keep[nk++] = ht[h]; }
+    else { if (cnt % 1000 == 0) ostr(cnt ? (V3 ? ";\ndel id" : "\ndel id") : "del id"); ostr(" "); oint(ht[h].id); cnt++; } }
+  if (cnt) ostr(EOL);
+  memset(ht, 0, htcap*sizeof(RKey)); htn = 0;
+  for (int k=0;k<nk;k++){ u64 h = rhash(keep[k].row, keep[k].nt, keep[k].t) & (htcap-1); while (ht[h].id) h = (h+1)&(htcap-1); ht[h] = keep[k]; htn++; }
+  free(keep); ntrim++;
+}
+
 static void emit_clause_rup(const long long *hints, int nh){
   ostr("rup");
   for (int k=0;k<nS;k++){ ostr(" 1 ~"); ostr(names[S[k]]); }
@@ -168,6 +191,7 @@ static long long branch_x(int row, long long xcert){
   if (xcert){ for (int j=0;j<NX;j++) if (excl[j]){ excl[j] = 0; xforb[j] = 1; setcol_unavail(j, -1); xl[nxl++] = j; }
     xstack[nxs++] = xcert; }
   long long base = row >= 0 ? row_clause(row) : sid;
+  int pin0 = npin; if (row >= 0) pin_push(base);
   long long *ch = malloc(sizeof(long long) * (nc + 2)); char *own = malloc(nc + 1);
   LC *mylc = malloc(sizeof(LC) * (nc + 1)); int mynlc = 0;
   int f0 = nF;
@@ -178,8 +202,9 @@ static long long branch_x(int row, long long xcert){
     long long id = node();
     if (lcache == mylc) mynlc = nlc;
     unchoose(j);
-    if (id < 0){ free(ch); free(own); free(mylc); return id; }
+    if (id < 0){ free(ch); free(own); free(mylc); npin = pin0; return id; }
     ch[a] = id; own[a] = owned;
+    if (!owned) pin_push(id);
     forb[j] = 1; setcol_unavail(j, -1); Fl[nF++] = j;
   }
   for (int a=f0;a<nF;a++){ forb[Fl[a]] = 0; setcol_unavail(Fl[a], +1); }
@@ -197,6 +222,7 @@ static long long branch_x(int row, long long xcert){
     if (xcert){ if (!any){ ostr("del id"); any = 1; } ostr(" "); oint(xcert); }
     if (any) ostr(EOL); }
   free(ch); free(own); free(mylc); free(h);
+  npin = pin0;
   lcache = NULL; nlc = 0;
   owned = 1;
   return id;
@@ -204,6 +230,7 @@ static long long branch_x(int row, long long xcert){
 
 static long long node(void){
   nodes++;
+  cache_trim();
   if (limit > 0 && nodes > limit) return -3;
   int O[MAXR]; int no = open_rows(O);
   int rem = W - wt;
@@ -330,7 +357,8 @@ int main(int argc, char **argv){
     else if (!strcmp(argv[a], "-n")) limit = atoll(argv[++a]);
     else if (!strcmp(argv[a], "-e")) enumerate = 1;   /* list all solutions (no proof) */
     else if (!strcmp(argv[a], "-P")) leafrup = 0;
-    else if (!strcmp(argv[a], "-2")) V3 = 0;   /* E-034: proof format 2.0 */
+    else if (!strcmp(argv[a], "-2")) V3 = 0;
+    else if (!strcmp(argv[a], "-F")) cachemax = atoll(argv[++a]);   /* E-034: bounded row-clause cache */   /* E-034: proof format 2.0 */
     else if (!strcmp(argv[a], "-T")) tight = 0;    /* no tight-bound exclusions */   /* rem = 0 leaves as pol (R + weight) instead of rup */
   }
   FILE *f = fopen(argv[1], "r"); if (!f) die("open inst");
@@ -453,6 +481,7 @@ int main(int argc, char **argv){
     ostr(V3 ? "output NONE;\nconclusion UNSAT : " : "output NONE\nconclusion UNSAT : "); oint(cid); ostr(V3 ? ";\nend pseudo-Boolean proof;\n" : "\nend pseudo-Boolean proof\n");
   }
   oflush(); if (pf){ if (gz){ if (pclose(pf) != 0) die("gzip failed"); } else fclose(pf); }
+  if (cachemax) printf("cache trims %lld (cachemax %lld)\n", ntrim, cachemax);
   printf("RESULT %s W=%d nodes=%lld prune_cover=%lld prune_pack=%lld leaf_empty=%lld leaf_weight=%lld blocked=%lld qbranch=%lld tight=%lld rowclauses=%lld proof_lines~%lld cpu=%.1fs\n",
          rc==0?(nsol?"ENUMERATED":"UNSAT"):rc==2?"SAT":"LIMIT", W, nodes, nprune1, nprune2, nleaf0, nleafw, nblk, nqbr, ntight, nrowcl, nextid - NCONS - 1,
          (double)(clock()-t0)/CLOCKS_PER_SEC);
