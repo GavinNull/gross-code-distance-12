@@ -1,5 +1,21 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision O (2026-10-22): two codes, both gap two, both period 11.** Outline `paper/outline_O.md`.
+
+| tag | claim in draft (short) | STATE item | audit | data | scope / wording constraint |
+|---|---|---|---|---|---|
+| C55 | IBM's depth-8 gross circuit: exactly 144 (Z) / 288 (X) weight-10 undetected logicals per round, constant for R = 1–3, none lighter for R ≤ 3 (exact enumeration) ⇒ d_circ = 10 for up to three rounds | 18 | `research/audits/2026-10-22-E-033.md` §5a | `results/E-033-*` | Always "for up to three rounds" / "R ≤ 3"; lower bound rests on the audited ccsearch completeness |
+| C56 | Period-11 gross circuit (Table I; `search/experiments/e032/u11_spec.json`): translation invariant, wrapping, legal, deterministic; not segmentable (mixed strongly connected components, 6-cycle witness) although each data qubit does XXX then ZZZ per period; uniform class of A1A2A3B3B1B2, d_ext = 10, lists 144 / 7344 (two enumerations); zero-image = 72 readout flips per round; lift R = 1..31 zero (three implementations); G = 31, R' = 31; weight-12 injection R = 1,2,3,6,10,31; direct DEM R = 1, 2 none ≤ 11; controls (period-10: 432/576; segmented: 144/144/7344); ~1/70 random schedules pass the R ≤ 2 screen | 16 | `research/audits/2026-10-22-E-032.md` §1–7 | `results/E-032-gross-short-period/`, `results/E-032-audit/` | "interleaved" only in the precise non-segmentable sense; no LER / depth claims; list completeness not certified |
+| C57 | Period-11 [[90,8,10]] circuit (Table I; `search/experiments/e030/c11_spec.json`) and period-12 circuit: d_circ = 10 every R, both bases; same extended code as c16 (585 / 16830); c11 lift R ≤ 25 by two independent chains, R'_8 = 22, R'_9 = 25; c12 R' = 12; injection R = 1,2,5,11. Family bound: translation invariant, orders in one of four d_ext = 8 classes, P ≤ 10 bulk UNSAT 48/48 | 17 | `research/audits/2026-10-22-E-030.md` §1–2 | `results/E-030-bb90-period-ler/`, `results/E-030-audit/` | Never "11 is the minimal period"; family bound bulk-only and class-restricted |
+| C58 | Certificates: c16 every infeasibility claim certified (VeriPB d_ext ≥ 8 and lists; DRAT lifts R ≤ 12); u11 d_ext = 10 (VeriPB) and lifts R ≤ 31 (DRAT) certified, lists not (in progress); c11 lifts certified R ≤ 19 only; c12 none; Fig. 12 d_ext ≥ 9 certified; VeriPB verdict "s VERIFIED UNSATISFIABLE" | 19 | `research/audits/2026-10-22-E-031.md` §1–5 | release certificates | Never "every computational input is certified"; use "every infeasibility claim used in the proof" only for c16 |
+| C59 | [[90]] LER: λ = 0 c11 below IBM depth-8 at every sampled p 2–5e-3, both decoders; 3e-3 BP-OSD pooled 0.52 [0.44, 0.62] (independent 0.57 [0.47, 0.70]); λ = 0.1 indistinguishable; λ = 1 worse 6–9× (BP-OSD), 9–17× (Relay); leading order IBM 315/540 weight-8 per round, c11 24507 weight-10; crossing estimate indicative | 17 | `2026-10-22-E-030.md` §3–4 | as C57 | No "beats IBM" without λ = 0; no "monotone"; no 0.37 headline |
+| C60 | Gross LER: λ = 0 u11 below Fig. 12 with BP-OSD at 3–5e-3 (0.31–0.56; 3e-3 independent 0.33 [0.23, 0.49]), Relay only 4–5e-3 (0.35–0.54); vs IBM comparable (0.64–0.96 point estimates; 3e-3 independent 0.73 [0.50, 1.05], pooled 0.64 [0.48, 0.85]); λ = 0.1 no resolved difference (intervals spanning 3–10); λ = 1 worse 7 [4, 12] (BP-OSD 2e-3) to 21–39 (3e-3); λ = 0 failures dominated by BP-OSD decoder failures; u11 weight-12 counts 69756 (R = 1) / 233244 (R = 2, Z), not converged | 18 | `2026-10-22-E-033.md` §1–6 | `results/E-033-*` | Never "beats/outperforms IBM"; never 0.53; never "163488 per round"; no X/Z asymmetry |
+
+Moved to SM (history, S10–S16): the period-18/21 circuits (C31–C37, C41–C46, C49–C52), with the old Fig. 1 as an SM
+figure and Table I of revision N as Table S3 (circuit A). The main text keeps Corollary 1 (C10, C11) and the Fig. 12
+retiming obstruction (C14–C18, End Matter).
+
+
 **Revision N (2026-10-21, third external review).** Numbers unchanged. C50: new SM Table S5 (λ = 1 per-round rates
 with failure counts, from `research/journal/2026-10-14-E-026-gross-ler.md` lines 47–54 and audit
 `2026-10-14-E-026.md` §2: p18/IBM = 1.52e3 [1.10e3, 2.14e3] at 2e-3); main text now says the "≥ 3 at 1e-3" is a
