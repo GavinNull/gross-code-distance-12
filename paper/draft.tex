@@ -143,6 +143,21 @@ $\code{90,8,10}$ & $X$ & 0 & $B_1B_3B_2A_3A_1A_2$ & 1, 2, 3, 4, 5, 9 & 10\\
 \end{ruledtabular}
 \end{table*}
 
+\begin{figure*}[t]
+\includegraphics[width=\textwidth]{figures/fig1_u11.pdf}
+\caption{The period-11 gross circuit. (a) Top: CNOT types on one left and one right
+data qubit over a period: three $X$-check CNOTs, then three $Z$-check CNOTs. Bottom: a
+cycle $X_9\to Z_{17}\to X_{12}\to Z_{20}\to X_{22}\to Z_{24}\to X_9$ of check instances;
+arrows mark shared data qubits on which the first instance acts first. A $Z$
+instance's first CNOT precedes the round's $X$ CNOTs and its other five follow them, so
+the circuit is not segmentable. (b) A weight-10 extended logical (six data and four
+hook columns; $Z$ memory, $R=1$). In a segmented circuit with the same orders, hooks
+of $X_{45}$ and $X_{48}$ both reach qubit 123 before $Z_{69}$ reads it, and the logical
+lifts. In the period-11 circuit $Z_{69}$ reads qubit 123 between the two arrivals, so its
+detector fires. (c) The proofs of Theorems~\ref{thm:main} and~\ref{thm:bb90}.}
+\label{fig:u11}
+\end{figure*}
+
 \paragraph{The circuits.}
 Both circuits are translation invariant: all $X$ checks share one order and timing,
 as do all $Z$ checks (Table~\ref{tab:circuit}). Both are legal and deterministic.
@@ -150,8 +165,12 @@ Within one period every data qubit performs its three $X$-check CNOTs and then i
 three $Z$-check CNOTs, yet neither circuit is non-interleaved: because a $Z$-check
 window wraps across the period boundary, a $Z$-check instance straddles the next
 $X$-check instance on the same data qubits, and no reordering of commuting gates
-separates the $X$ and $Z$ CNOTs of a round (SM~\ref{sm:u11})\cl{56,57}. This is the
-sense in which they are interleaved, and it is what lifts $\dcirc$ above $\dext$. In
+separates the $X$ and $Z$ CNOTs of a round (Fig.~\ref{fig:u11}a,
+SM~\ref{sm:u11})\cl{56,57}. This is the sense in which they are interleaved, and it is
+what lifts $\dcirc$ above $\dext$: a readout can now fall between the arrivals of two
+hook residuals on the same data qubit, so a check sees one of them instead of both,
+and an extended logical that a segmented circuit realises silently triggers a detector
+(Fig.~\ref{fig:u11}b)\cl{61}. In
 the gross circuit both check types use orders of the uniform class of
 $A_1A_2A_3B_3B_1B_2$ (closed under reversal and the swaps of positions 1,2 and 5,6),
 whose extended code has $\dext=10$, with exactly 144 extended logicals of weight 10
