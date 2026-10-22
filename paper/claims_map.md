@@ -1,5 +1,16 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision O2 (2026-10-22): new Fig. 1 (`figures/fig1_u11.pdf`).** New tag C61: the mechanism example of Fig. 1(b)
+and the sentence in "The circuits" (a readout falls between the arrivals of two hook residuals on the same data qubit:
+X45's hook reaches qubit 123 at tick 6, X48's at tick 10, Z69 reads it at tick 8, so its detector fires; in the
+segmented control, same orders, X block steps 1–6, Z block 8–13, period 15, both arrivals precede the read and the
+weight-10 logical lifts, injection-verified). Source: `paper/figures/fig1_u11_data.json` (figure agent, lead's facts).
+**Not yet audited** (audit commissioned); the typicality count (96 of 144 logicals blocked by this single-detector
+pattern) is NOT in the paper. Fig. 1(a) facts (XXX then ZZZ; 6-cycle witness) are C56 (E-032 audit §1). Fig. 1(c)
+shows G = 31 also for the [[90]] circuit; this follows from its constants (D = 11, starts {0, 1}, Δ = 10; E-030
+audit §1), the same as the gross circuit's.
+
+
 **Revision O (2026-10-22): two codes, both gap two, both period 11.** Outline `paper/outline_O.md`.
 
 | tag | claim in draft (short) | STATE item | audit | data | scope / wording constraint |
