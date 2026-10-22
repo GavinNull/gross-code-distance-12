@@ -33,19 +33,19 @@
 
 \begin{abstract}
 Strikis, Browne and Beverland (arXiv:2603.05481) showed that every non-interleaved
-single-ancilla syndrome-extraction circuit has circuit distance at most the distance
-of an extended code, which can fall below the code distance: at most 11 for the gross code $\code{144,12,12}$ and, as we show, at most 8
-for $\code{90,8,10}$. We show that interleaving recovers the full code distance. We
-construct single-ancilla, interleaved circuits with circuit distance 12 for the gross
-code, answering their open question, and 10 for
-$\code{90,8,10}$, two above every non-interleaved circuit, and prove both under
-circuit-level depolarizing noise for every number of rounds. The method fixes an
-extended code and turns circuit design into a finite decision problem over its
-lightest logicals, solved exactly with every solver decision certified by a DRAT
-proof (the extended-code inputs rest on independent exhaustive searches); a direct
-search on
-the detector error model confirms both results. The circuits have periods of 18 and
-16 time steps per round, against 8 for the IBM circuits.
+single-ancilla syndrome-extraction circuit has circuit distance at most that of an
+extended code: at most 11 for the gross code $\code{144,12,12}$ and, as we show, at most
+8 for $\code{90,8,10}$. We construct single-ancilla circuits with a period of 11 time
+steps that reach the full code distance, 12 for the gross code, answering their open
+question, and 10 for $\code{90,8,10}$, two above the extended-code distance of their
+CNOT orders, and prove this under circuit-level depolarizing noise for every number of
+rounds. The method fixes an order class, even one of lower extended-code distance, and
+recovers the code distance by exact lift computations over complete lists of the
+lightest extended logicals, with checked proof certificates for most infeasibility
+claims. Without idle noise the $\code{90,8,10}$ circuit has a lower logical error rate
+than IBM's at $p=3\times10^{-3}$, and the gross circuit one lower than the distance-11
+circuit of Strikis et al.; with standard idle noise both are worse than the IBM
+circuits.
 \end{abstract}
 
 \maketitle
@@ -58,35 +58,39 @@ delivers is its circuit distance $\dcirc$, the minimum number of circuit faults 
 flip a logical observable without triggering any detector; at low physical error
 rates it governs the logical error rate.
 
-No circuit for the gross code had been shown to reach $\dcirc=d=12$; the IBM
-circuit, with 8 time steps per round, has $\dcirc\le10$~\cite{Bravyi2024,TourDeGross}.
+No circuit for the gross code had been shown to reach $\dcirc=d=12$. The IBM
+circuit, with 8 time steps per round, has $\dcirc\le10$~\cite{Bravyi2024,TourDeGross};
+exact enumeration shows that it has exactly 10 for up to three rounds\cl{55}.
 Strikis, Browne and Beverland (SBB)~\cite{Strikis2026} analysed single-ancilla
 circuits, in which each check is measured by one dedicated ancilla coupled by CNOTs.
-They append to the check matrix the ``residual'' errors that an ancilla fault
-spreads onto the data, obtaining an extended code of distance $\dext$, and show that
+They append to the check matrix the ``residual'' errors that an ancilla fault spreads
+onto the data, obtaining an extended code of distance $\dext$, and show that
 $\dcirc\ge\dext$ for every such circuit (their Prop.~3), while $\dcirc\le\dext$ when
 the circuit is \emph{non-interleaved} in their sense, i.e.\ when all $X$-type CNOTs
 precede all overlapping $Z$-type CNOTs or vice versa (their Sec.~II\,A and Cor.~1).
-Since every CNOT order gives $\dext\le11$ for the gross code, non-interleaved circuits
-are capped at 11 (their Prop.~4); their depth-8 circuit (their Fig.~12, hereafter
-``Fig.~12'') was conjectured to reach it. They left open ``whether any interleaved
-circuit can achieve circuit distance 12''~\cite{Strikis2026}. For the $\code{90,8,10}$
-code of the same family the best known value is 8: the IBM circuit has
-$\dcirc\le8$~\cite{Bravyi2024}, proven exact by MaxSAT~\cite{Tesseract2025}.
+Since every CNOT order gives $\dext\le11$ for the gross code, non-interleaved
+circuits are capped at 11 (their Prop.~4); their depth-8 circuit (their Fig.~12,
+hereafter ``Fig.~12'') was conjectured to reach it. They left open ``whether any
+interleaved circuit can achieve circuit distance 12''~\cite{Strikis2026}. For the
+$\code{90,8,10}$ code of the same family the best known value is 8: the IBM circuit
+has $\dcirc\le8$~\cite{Bravyi2024}, proven exact by MaxSAT~\cite{Tesseract2025}.
 
-We answer this question in the affirmative and show that the gap between Prop.~3 and
-Cor.~1 can be wider than one. For the gross code we construct a single-ancilla,
-CNOT-based, interleaved circuit and prove $\dcirc=12$ for every number of rounds
-(Theorem~\ref{thm:main})\cl{41,40}. For $\code{90,8,10}$ every choice of CNOT orders
-gives $\dext\le8$, so every non-interleaved circuit has $\dcirc\le8$; we construct an
-interleaved circuit with $\dcirc=10=d$ (Theorem~\ref{thm:bb90})\cl{53}. The idea
-(Fig.~\ref{fig:concept}) is to fix an extended code and choose CNOT orders and times
-such that none of its lightest logicals can be realised by undetected circuit faults.
-This turns circuit design into a finite decision problem that we solve exactly and
-certify, a tool for single-ancilla circuits in general. Our computation of $\dext$
-also proves SBB's conjecture that Fig.~12 has $\dcirc=11$
-(Corollary~\ref{cor:fig12})\cl{10}. The new circuits run with periods of 18 and 16
-time steps per round instead of 8\cl{44,53}; we discuss this cost at the end.
+We answer this question in the affirmative and show that interleaving can gain two
+units over the extended-code distance. For both codes we construct single-ancilla
+circuits with a period of 11 time steps (Table~\ref{tab:circuit}) and prove that they
+reach the full code distance, $\dcirc=12$ for the gross code
+(Theorem~\ref{thm:main})\cl{56} and $\dcirc=10$ for $\code{90,8,10}$
+(Theorem~\ref{thm:bb90})\cl{57}, for every number of rounds. In both circuits the CNOT
+orders have $\dext=d-2$; for $\code{90,8,10}$ every choice of orders has $\dext\le8$,
+so every non-interleaved circuit is capped at 8\cl{53}. The method is to choose a class
+of CNOT orders, even one of lower $\dext$, and to recover the code distance through
+timing, by deciding exactly, over the complete lists of extended logicals of weight
+$\dext$ and $\dext+1$, that none of them can be realised by undetected circuit
+faults. This turns circuit design into a finite decision problem, a tool for
+single-ancilla circuits in general. Our computation of $\dext$ also proves SBB's
+conjecture that Fig.~12 has $\dcirc=11$ (Corollary~\ref{cor:fig12})\cl{10}. The new
+circuits run with 11 time steps per round instead of 8; we discuss this cost at the
+end.
 
 Exact circuit distances are known for hypergraph-product codes~\cite{ManesClaes}, for
 the smallest BB circuit~\cite{Webster2026}, and as certificates for other qLDPC
@@ -95,12 +99,12 @@ the same qubit count acts on a $\code{144,12,12}$ code that they call ``a second
 `gross' code'', with $\dcirc\le12$~\cite{ShawTerhal2025}; a morphing idling circuit for
 the gross code is ``believed to have circuit distance 12''~\cite{Wills2026}. We note
 that this end-cycle code is not equivalent to the gross code, since its minimum
-stabiliser weight is 9 rather than 6 (SM~\ref{sm:morph})\cl{2}. For $\code{90,8,10}$ the upper bound for
-the unchanged IBM circuit returns to 10 under infinitely $Z$-biased ancilla
-noise~\cite{BiChangPuri2026}; we keep depolarizing noise, change the circuit, and
-prove the value\cl{53}. Using SBB's lower bound via non-interleaved counterparts to
-screen interleaved schedules was proposed in Ref.~\cite{Nguyen2026}; for the gross
-code that bound gives at most 11. Check-dependent CNOT orders are an established
+stabiliser weight is 9 rather than 6 (SM~\ref{sm:morph})\cl{2}. For $\code{90,8,10}$
+the upper bound for the unchanged IBM circuit returns to 10 under infinitely
+$Z$-biased ancilla noise~\cite{BiChangPuri2026}; we keep depolarizing noise, change
+the circuit, and prove the value\cl{53}. Using SBB's lower bound via non-interleaved
+counterparts to screen interleaved schedules was proposed in Ref.~\cite{Nguyen2026};
+that bound cannot exceed $\dext$. Check-dependent CNOT orders are an established
 tool~\cite{TomitaSvore,KishonyFowler,Strikis2026}\cl{40}.
 
 % ---------------------------------------------------------------------------
@@ -109,113 +113,58 @@ We consider memory experiments in the $Z$ or $X$ basis: data initialisation, $R$
 rounds of syndrome extraction and transversal readout. Each check has one ancilla
 that is reset, coupled by six CNOTs and measured once per round; rounds of different
 checks may overlap in time (pipelining). Faults are the single-operation Pauli
-components of standard circuit-level depolarizing noise (SD6~\cite{Gidney2021honeycomb}).
-Faults with identical detector and observable effects are merged into one
-detector-error-model (DEM) mechanism~\cite{Gidney2021stim}, and $\dcirc$ counts
-distinct mechanisms. For a check with CNOT order $(q_1,\dots,q_6)$, an ancilla fault
-after the $k$-th CNOT deposits the residual $\{q_{k+1},\dots,q_6\}$ on the data; the
-extended code appends all residual columns $(Hs,Ls)$ to the data columns ($H$: check
-matrix, $L$: logical operators). Every single fault, propagated to the readout, has a
-data image that is zero or one extended-code column (SBB, Table~I; proved for our
-template in SM~\ref{sm:reduction}~\cite{SM}). For Fig.~12, $\dext=11$ in both bases, with
-exactly 4224 weight-11 extended logicals per basis, all realisable in Fig.~12 by
-eleven undetected faults\cl{11,13}.
-
-% ---------------------------------------------------------------------------
-\begin{figure*}[t]
-\includegraphics[width=\textwidth]{figures/fig1_concept.pdf}
-\caption{The idea, on the gross code. (a) Residuals of length 4, 3 and 2 give the
-same extended-code columns as $\{q_1,q_2\}$, $\{q_1,q_2,q_3\}$ and $\{q_5,q_6\}$, so the
-eight orders generated by reversal and the swaps $s_{12}$, $s_{56}$ share one extended
-code. (b) A weight-11 extended logical (ten data errors and the hook column
-$\{9,25\}$; $Z$ memory, $R=1$). Bars: reads of the $Z$ checks $Z_{15}$, $Z_{18}$,
-$Z_{12}$, $Z_6$; stars: hook arrival. Left, Fig.~12: the hook lands after both reads
-and no detector fires. Right, period-18 circuit: the same column comes from the spread
-$\{8,91,82,85\}$ (equal to $\{9,25\}$ up to the check), seen late by $Z_{15}$ and early by
-$Z_6$; the forced timings (red) leave odd parity at $Z_6$. (c) The proof of
-Theorem~\ref{thm:main}.}
-\label{fig:concept}
-\end{figure*}
+components of standard circuit-level depolarizing noise
+(SD6~\cite{Gidney2021honeycomb}). Faults with identical detector and observable
+effects are merged into one detector-error-model (DEM) mechanism~\cite{Gidney2021stim},
+and $\dcirc$ counts distinct mechanisms. For a check with CNOT order
+$(q_1,\dots,q_6)$, an ancilla fault after the $k$-th CNOT deposits the residual
+$\{q_{k+1},\dots,q_6\}$ on the data; the extended code appends all residual columns
+$(Hs,Ls)$ to the data columns ($H$: check matrix, $L$: logical operators). Every
+single fault, propagated to the readout, has a data image that is zero or one
+extended-code column (SBB, Table~I; proved for our template in
+SM~\ref{sm:reduction}~\cite{SM}).
 
 \begin{table*}[t]
-\caption{The two circuits. Gross code (period 18): checks are grouped by type and
-colour $(x+y)\bmod3$; all 24 checks of a class share the entries; steps are modulo 18,
-and a window passing step 17 continues in the next period; last column: map from the
-Fig.~12 order. $\code{90,8,10}$ (period 16): every check of a type shares the entries;
-steps 11, 13, 14 contain no CNOT. Labels:
-$A=x^3+y+y^2$, $B=y^3+x+x^2$ (gross) and $A=x^9+y+y^2$, $B=1+x^2+x^7$
+\caption{The two period-11 circuits. All checks of a type share the reset step, CNOT
+order, CNOT steps and measurement step (modulo 11); a $Z$-check window passes the
+period boundary and continues in the next period. Labels: $A=x^3+y+y^2$,
+$B=y^3+x+x^2$ (gross) and $A=x^9+y+y^2$, $B=1+x^2+x^7$
 ($\code{90,8,10}$)~\cite{Bravyi2024}, $A\mapsto A_1A_2A_3$, $B\mapsto B_1B_2B_3$.}
 \label{tab:circuit}
 \begin{ruledtabular}
-\begin{tabular}{lcllcl}
-class & reset & CNOT order & CNOT steps & meas. & map\\
+\begin{tabular}{llcllc}
+code & type & reset & CNOT order & CNOT steps & meas.\\
 \hline
-$X_0$ & 17 & $A_1A_2A_3B_3B_1B_2$ & 0, 1, 2, 8, 9, 15 & 16 & rev\,$s_{56}$\\
-$X_1$ & 15 & $A_1A_2A_3B_1B_3B_2$ & 16, 3, 4, 5, 10, 13 & 14 & rev\\
-$X_2$ & 17 & $A_3A_1A_2B_3B_1B_2$ & 0, 1, 5, 6, 7, 15 & 16 & rev\,$s_{56}$\\
-$Z_0$ & 17 & $B_2B_1B_3A_2A_1A_3$ & 0, 7, 8, 9, 13, 14 & 15 & rev\,$s_{56}$\\
-$Z_1$ & 2 & $B_2B_3B_1A_3A_2A_1$ & 3, 4, 9, 10, 11, 17 & 0 & rev\,$s_{12}s_{56}$\\
-$Z_2$ & 16 & $B_2B_1B_3A_3A_2A_1$ & 17, 5, 6, 12, 13, 14 & 15 & rev\,$s_{56}$\\
-\hline
-$X$ & 0 & $A_2A_1A_3B_2B_3B_1$ & 1, 3, 5, 6, 8, 10 & 15 & --\\
-$Z$ & 0 & $B_1B_3B_2A_3A_1A_2$ & 2, 4, 6, 7, 9, 12 & 15 & --\\
+gross $\code{144,12,12}$ & $X$ & 0 & $A_2A_1A_3B_3B_2B_1$ & 1, 2, 3, 4, 5, 9 & 10\\
+ & $Z$ & 10 & $B_1B_2B_3A_3A_1A_2$ & 0, 4, 5, 6, 7, 8 & 9\\
+$\code{90,8,10}$ & $X$ & 0 & $B_1B_3B_2A_3A_1A_2$ & 1, 2, 3, 4, 5, 9 & 10\\
+ & $Z$ & 10 & $A_2A_1A_3B_2B_3B_1$ & 0, 4, 5, 6, 7, 8 & 9\\
 \end{tabular}
 \end{ruledtabular}
 \end{table*}
 
-% ---------------------------------------------------------------------------
-\paragraph{Key idea.}
-Interleaving decouples $\dcirc$ from $\dext$ in one direction only: $\dcirc\ge\dext$
-still holds, but $\dcirc$ can exceed it. We say that an extended logical \emph{lifts}
-if one can choose, for each of its columns, a circuit fault with that image such that
-the chosen faults trigger no detector; a lift is an undetected logical error of the
-same weight. Reaching $\dcirc=d$ requires an extended code of the largest possible
-distance and a timing under which none of its lightest logicals lifts. The first
-requirement is met by an invariance: up to the check itself, residuals of length 5,
-4, 3 and 2 equal $\{q_1\}$, $\{q_1,q_2\}$, the complement of $\{q_1,q_2,q_3\}$ and
-$\{q_5,q_6\}$, so the extended code depends only on these three unordered sets per
-check. Reversal and the swaps $s_{12}$, $s_{56}$ of positions 1,2 and 5,6 preserve
-them; all eight orders they generate share the extended code of Fig.~12, its distance
-11 and its 4224 weight-11 logicals (Fig.~\ref{fig:concept}a)\cl{32,42}.
-
-The second requirement concerns time. Reversing an order keeps the extended code but
-changes which fault realises each residual column and when its spread reaches the
-neighbouring checks (Fig.~\ref{fig:concept}b). In Fig.~12 a hook column $\{q_5,q_6\}$
-is produced after the fourth CNOT and lands after the neighbouring $Z$ checks have
-read those qubits, so every data error can be placed after its reads. After
-reversal, the same column comes only from a fault between the second and third CNOT,
-whose four-qubit spread reaches one neighbour after its readout and another before
-it; along a cycle of checks, each seeing two errors of the logical, the early and
-late constraints leave one check with odd parity, so a detector fires. For all 360
-logicals of this ``ten data plus one hook'' form, the lift fails at $R=1$, and every
-irreducible conflicting set of detectors (one whose constraints alone forbid the
-lift, but no proper subset does) has between 4 and 10 detectors; the smallest such set
-has 4, 5 or 9 detectors\cl{49}. With the Fig.~12 orders themselves blocking is
-impossible: every retiming family of Table~\ref{tab:fig12} is obstructed (End
-Matter)\cl{16}.
-
-\paragraph{Construction.}
-We searched gross-code schedules symmetric under the 24 colour-preserving
-translations, choosing for each of the six (type, colour) classes one of the eight
-orders and its CNOT times with a SAT solver, under legality, determinism and the
-blocking of every weight-11 extended logical in a bulk Pauli-frame model
-(SM~\ref{sm:search}); candidates were then certified exactly. The result
-(Table~\ref{tab:circuit}; timing diagram in SM~\ref{sm:circuits}) measures the gross
-code itself, is legal, deterministic, pipelined and interleaved, and every check's
-order differs from that of Fig.~12\cl{41,42}. A second period-18 circuit and a
-period-21 circuit in which all ancillas share one frame have the same
-distance\cl{31,43}. For $\code{90,8,10}$ the same kind of search over fully
-translation-invariant schedules gave the circuit in the lower part of
-Table~\ref{tab:circuit}, in which every data qubit alternates $X$- and $Z$-type CNOTs
-six times per period\cl{53}.
+\paragraph{The circuits.}
+Both circuits are translation invariant: all $X$ checks share one order and timing,
+as do all $Z$ checks (Table~\ref{tab:circuit}). Both are legal and deterministic.
+Within one period every data qubit performs its three $X$-check CNOTs and then its
+three $Z$-check CNOTs, yet neither circuit is non-interleaved: because a $Z$-check
+window wraps across the period boundary, a $Z$-check instance straddles the next
+$X$-check instance on the same data qubits, and no reordering of commuting gates
+separates the $X$ and $Z$ CNOTs of a round (SM~\ref{sm:u11})\cl{56,57}. This is the
+sense in which they are interleaved, and it is what lifts $\dcirc$ above $\dext$. In
+the gross circuit both check types use orders of the uniform class of
+$A_1A_2A_3B_3B_1B_2$ (closed under reversal and the swaps of positions 1,2 and 5,6),
+whose extended code has $\dext=10$, with exactly 144 extended logicals of weight 10
+and 7344 of weight 11 per basis\cl{56}. In the $\code{90,8,10}$ circuit the orders give
+$\dext=8$, with 585 extended logicals of weight 8 and 16830 of weight 9\cl{53,57}. Both
+lists were obtained by two independent exhaustive enumerations with identical
+results. The circuits were found by SAT searches over translation-invariant schedules
+with constraints that block these logicals in a bulk Pauli-frame model, followed by
+exact certification (SM~\ref{sm:u11}, \ref{sm:bb90}).
 
 % ---------------------------------------------------------------------------
-\begin{theorem}\label{thm:main}
-Under SD6 noise, the gross-code circuit of Table~\ref{tab:circuit} has $\dcirc=12$ in
-both memory bases for every number of rounds $R\ge1$.
-\end{theorem}
-
-The proof rests on two lemmas valid for every circuit of our template.
+\paragraph{Two lemmas.}
+The proofs rest on two lemmas valid for every circuit of our template.
 
 \begin{lemma}[Reduction]\label{lem:reduction}
 An undetected fault set of size $w$ that flips a logical observable yields an
@@ -223,8 +172,8 @@ extended-code logical of weight at most $w$, formed by its nonzero fault images.
 \end{lemma}
 \emph{Proof.} Add one observable per row of $H$ and $L$ on the final data readout. The
 observable of row $H_i$ equals the sum of all detectors of check $i$, which telescope
-from the first measurement to the final readout. For an undetected fault set the
-$H$ parts of the images therefore sum to zero and the $L$ parts to the logical effect;
+from the first measurement to the final readout. For an undetected fault set the $H$
+parts of the images therefore sum to zero and the $L$ parts to the logical effect;
 each image is zero or one column, and equal columns cancel. $\square$\cl{33}
 
 \begin{lemma}[Light logicals]\label{lem:structure}
@@ -233,118 +182,104 @@ distinct columns forming an extended logical. One of weight $\dext+1$ consists e
 of $\dext+1$ such faults, or of $\dext$ such faults forming an extended logical
 together with one fault of zero image.
 \end{lemma}
-The proof is a two-line count (End Matter)\cl{53}. Deciding $\dcirc\ge\dext+2$ is thus
-a finite problem: decide which extended logicals of weight $\dext$, with or without one
-zero-image fault, and of weight $\dext+1$ lift.
-
-For the gross circuit, Lemma~\ref{lem:reduction} with $\dext=11$ excludes weight
-$\le10$, and only weight 11 remains.
-
-\begin{lemma}[Finite rounds]\label{lem:lift}
-For $R=1,\dots,32$ and both bases, none of the 4224 weight-11 extended logicals of the
-gross circuit lifts.
-\end{lemma}
-We verified this by an exact computation, a CP-SAT model per logical that chooses one
-DEM mechanism per column subject to every detector sum vanishing, with two independent
-implementations; the same program finds a lift for all 4224 logicals in Fig.~12
-(positive control)\cl{42}. Each infeasible instance was also encoded as CNF; batches
-combined by a selector disjunction were refuted with DRAT proofs verified with
-drat-trim, whose LRAT cores were verified with cake\_lpr (SM~\ref{sm:lift})\cl{51}. The
-inputs, $\dext=11$ and the list of 4224 logicals, are confirmed by two independent
-exhaustive searches rather than by proof certificates\cl{11,13}.
-
-\begin{lemma}[All rounds]\label{lem:gap}
-For the gross circuit, a weight-11 undetected logical for some $R$ implies one for
-some $R'\le32$.
-\end{lemma}
-A fault-free window of 52 layers would split such a logical into two undetected
-parts, one of weight $\le10$; deleting fault-free periods then bounds the number of
-rounds (End Matter)\cl{43}. A weight-12 data logical, applied as flips after
-initialisation, triggers no detector and flips the observable, which completes the
-proof of Theorem~\ref{thm:main}\cl{42}.
-
-\begin{corollary}\label{cor:fig12}
-The Fig.~12 circuit of SBB has $\dcirc=11$ in both bases for every $R$, as they
-conjectured.
-\end{corollary}
-This is SBB's Prop.~3 and Cor.~1 combined with our value $\dext=11$\cl{10,11}.
+The proof is a two-line count (End Matter)\cl{53}. The lift computations admit every
+zero-image mechanism of the DEM as a candidate; in the gross circuit these are exactly
+the ancilla readout flips\cl{56}. Deciding $\dcirc\ge\dext+2$ is thus a finite
+problem: decide which extended logicals of weight $\dext$, with or without one
+zero-image fault, and of weight $\dext+1$ lift, i.e.\ can be realised by circuit faults
+with the corresponding images that trigger no detector.
 
 % ---------------------------------------------------------------------------
-\paragraph{Gap of two for $\code{90,8,10}$.}
-For every assignment of per-check CNOT orders, the extended code of the $X$-check side
-contains a logical of weight at most 8, as we verified with a SAT encoding whose
-unsatisfiability is certified by a DRAT proof checked with drat-trim
-(SM~\ref{sm:bb90}). Hence $\dext\le8=d-2$ for every single-ancilla circuit of this
-code, and every non-interleaved circuit has $\dcirc\le8$ by SBB's Cor.~1, a value that
-is attained\cl{53}.
+\begin{theorem}\label{thm:main}
+Under SD6 noise, the gross-code circuit of Table~\ref{tab:circuit} has $\dcirc=12$ in
+both memory bases for every number of rounds $R\ge1$.
+\end{theorem}
+\emph{Proof sketch.} By Lemma~\ref{lem:reduction} with $\dext=10$ no undetected logical
+has weight $\le9$. By Lemma~\ref{lem:structure}, one of weight 10 or 11 would lift one
+of the 144 weight-10 extended logicals, possibly with one readout flip, or one of the
+7344 of weight 11. For $R=1,\dots,31$ and both bases none of them lifts, as found by
+independent exact implementations (CP-SAT, a frontier dynamic program and a
+per-logical SAT model). A fault-free window of $G=31$ layers would split an
+undetected logical into two undetected parts, one lighter, so a weight-11 logical
+spans at most 300 layers, and deleting fault-free periods maps it into a circuit with
+at most 31 rounds (End Matter). A weight-12 data logical, applied as flips after
+initialisation, triggers no detector and flips the observable. $\square$\cl{56}
+A direct branch-and-bound search on the full DEM, which uses no extended code, finds
+no undetected logical of weight $\le11$ at $R=1$ and 2 in both bases\cl{56}.
 
 \begin{theorem}\label{thm:bb90}
 Under SD6 noise, the $\code{90,8,10}$ circuit of Table~\ref{tab:circuit} has
 $\dcirc=10$ in both memory bases for every number of rounds $R\ge1$.
 \end{theorem}
-\emph{Proof sketch.} Its orders give $\dext=8$, with exactly 585 extended logicals of
-weight 8 and 16830 of weight 9 per basis. By Lemmas~\ref{lem:reduction}
-and~\ref{lem:structure}, $\dcirc\ge10$ holds if none of these lifts, the weight-8 ones
-also together with one zero-image fault. For $R=1,\dots,12$ and both bases none does,
-as found by three independent implementations. Rounds are separated in time, which
-reduces every $R$ to $R\le12$, and a weight-10 data logical gives the upper bound (End
-Matter)\cl{53}.
+\emph{Proof sketch.} As for Theorem~\ref{thm:main}, with $\dext=8$ and the lists of 585
+and 16830 extended logicals: for $R=1,\dots,25$ and both bases none lifts (two
+independent chains of exact computations), the gap argument reduces every $R$ to
+$R\le25$, and a weight-10 data logical gives the upper bound (End Matter).
+$\square$\cl{57} The same holds for a non-wrapping period-12 circuit and for a
+period-16 circuit (SM~\ref{sm:bb90})\cl{53,57}. For every assignment of per-check orders
+the extended code of this code has a logical of weight at most 8 on the $X$-check
+side, so every non-interleaved circuit has $\dcirc\le8$ by SBB's Cor.~1, a value that
+is attained\cl{53}.
 
-To our knowledge, the two circuits of this work are the first explicit
-single-ancilla circuits whose circuit distance exceeds the extended-code distance of
-every choice of CNOT orders\cl{53}. Both lower bounds were also checked without the
-extended code, by an exact branch-and-bound search on the full DEM (an independent
-implementation of the same family of methods as SM~\ref{sm:dext}): for the gross
-circuit there is no undetected logical of weight $\le11$ at $R=1$, 2, 3; for the
-$\code{90,8,10}$ circuit none of weight $\le9$ for $R\le12$, which with round
-splitting proves Theorem~\ref{thm:bb90} without extended-code input
-(SM~\ref{sm:direct})\cl{54}.
+\emph{Certificates.} Every infeasibility claim of the period-16 $\code{90,8,10}$
+circuit's proof carries a checked certificate: $\dext\ge8$ and the completeness of its
+two lists (VeriPB), and all lift instances for $R\le12$ (DRAT proofs checked with
+drat-trim and, for their LRAT cores, cake\_lpr). For the period-11 gross circuit,
+$\dext=10$ (VeriPB) and all lift instances for $R\le31$ (DRAT) are certified; a
+certificate for the completeness of its two lists is in progress. For the period-11
+$\code{90,8,10}$ circuit the lift instances are certified for $R\le19$. The encodings
+were generated from the circuits by our code and cross-checked against independent
+implementations; the reductions to these finite problems are the mathematical
+arguments above, whose premises were verified computationally (SM~\ref{sm:certs})\cl{58}.
+
+\begin{corollary}\label{cor:fig12}
+The Fig.~12 circuit of SBB has $\dcirc=11$ in both bases for every $R$, as they
+conjectured.
+\end{corollary}
+This is SBB's Prop.~3 and Cor.~1 combined with our value $\dext=11$ for its orders,
+from two independent exhaustive searches\cl{10,11}. Retiming Fig.~12 without changing
+its orders cannot reach 12 (End Matter)\cl{14,15,16,17}. An earlier circuit of ours
+with orders in the class of Fig.~12, which share its extended code, reaches 12 at
+period 18 (SM~\ref{sm:p18})\cl{41}.
 
 % ---------------------------------------------------------------------------
-\paragraph{Period lower bound in the symmetric family.}
-This bound holds in a bulk Pauli-frame model of lifting, whose lifts are proven to be
-genuine errors for logicals with one length-2 residual and were confirmed for all 991
-sampled others, and for gross-code schedules symmetric under the 24 colour-preserving
-translations with orders in the class of Fig.~12: no such schedule has period below
-18, or below 21 if all ancillas share one frame (End Matter)\cl{45}. Among all 24 colourings by cosets of translation subgroups of index 2, 3, 4, 6, 8
-or 9, with one order type per colour, only the class of Fig.~12 has $\dext\ge11$\cl{46}.
+\paragraph{Logical error rates.}
+We sampled both period-11 circuits and the references with identical BP-OSD and
+Relay-BP decoders and exact priors, rescaling only the idle channel of SD6,
+$p_{\rm idle}=\lambda p$ (SM~\ref{sm:ler}). Without idle errors ($\lambda=0$) the
+$\code{90,8,10}$ circuit has a lower per-round logical error rate than IBM's depth-8
+circuit at every sampled $p$ between $2\times10^{-3}$ and $5\times10^{-3}$ with both
+decoders (at $p=3\times10^{-3}$, BP-OSD: 0.52 [0.44, 0.62], pooled from two
+independent sampling pipelines); at $\lambda=0.1$ the two are statistically
+indistinguishable, and under standard SD6 ($\lambda=1$) the new circuit is worse by a
+factor of 6--9 (BP-OSD) and 9--17 (Relay-BP) per round\cl{59}. At $\lambda=0$ the
+gross circuit is below SBB's distance-11 circuit at every sampled $p$ between
+$3\times10^{-3}$ and $5\times10^{-3}$ with BP-OSD (ratios 0.31--0.56) and comparable to
+IBM's circuit (0.64 [0.48, 0.85] at $p=3\times10^{-3}$, pooled over two pipelines); at
+$\lambda=0.1$ we resolve no difference (intervals spanning factors of 3--10), and at
+$\lambda=1$ it is worse than IBM's circuit by 7 [4, 12] (BP-OSD, $p=2\times10^{-3}$) to
+21--39 ($p=3\times10^{-3}$). At $\lambda=0$ its failures are dominated by BP-OSD
+decoding failures rather than by minimum-weight logicals\cl{60}. The full distance
+thus pays off when idling is nearly free.
 
 % ---------------------------------------------------------------------------
 \paragraph{Discussion.}
 SBB's obstruction is specific to non-interleaved circuits: both codes admit
-single-ancilla circuits that preserve their full distance, and for $\code{90,8,10}$
-interleaving gains two units over every non-interleaved circuit. Fixing the extended
-code and searching over orders and timing turns an open-ended circuit search into a
-lift problem against finite lists of extended logicals of weight $\dext$ and
-$\dext+1$, which is decided exactly; it applies to every single-ancilla circuit whose
-distance is limited by SBB's Cor.~1.
-
-\emph{Cost and outlook.} The gross circuit uses the qubits of the IBM and SBB
-circuits but 18 time steps per round instead of 8, with 3168 idle locations per round
-instead of 288 and 2.8 times the total fault probability\cl{44,50}. Under the same SD6
-noise and identical decoders it is worse than the IBM circuit at every sampled
-$p\ge10^{-3}$ with BP-OSD: about $1.5\times10^3$ times at $p=2\times10^{-3}$, and at
-$10^{-3}$ at least 3 times, a direct-sampling lower bound, since the IBM circuit had no
-failure in 20000 shots (Table~\ref{tab:ler1}). At matched fault mass the circuits
-perform alike\cl{50}.
-Rescaling only the idle channel, $p_{\rm idle}=\lambda p$, shows where the structure
-pays off: at $\lambda=0$ the period-18 circuit beats Fig.~12 at $p=4\times10^{-3}$ (ratio
-0.37 [0.28, 0.49] with BP-OSD in an independent re-sampling,
-SM~\ref{sm:idle}) and is statistically indistinguishable from the IBM
-circuit at $p=3$--$4\times10^{-3}$, whereas at $\lambda=0.1$ it is worse than Fig.~12 by
-2.3--3 times per round (SM~\ref{sm:idle})\cl{52}. The $\code{90,8,10}$ circuit has
-period 16, three steps of which contain no CNOT, against 8 for the IBM circuit; its
-logical error rate has not been evaluated\cl{53}. Shorter periods are therefore the
-natural next goal: can $\dcirc=12$ and $\dcirc=10$ be reached at period 8 by less
-symmetric schedules? Correlated faults, leakage and CZ-native compilations are outside
-the scope of this work.
+single-ancilla circuits that preserve their full distance, two units above the
+extended-code distance of their orders. Choosing an order class and deciding the lift
+problem for the complete lists of extended logicals of weight $\dext$ and $\dext+1$
+turns an open-ended circuit search into a finite, exactly decidable problem that
+applies to every single-ancilla circuit limited by SBB's Cor.~1. Within
+translation-invariant $\code{90,8,10}$ schedules whose orders lie in a class with
+$\dext=8$, no period below 11 reaches distance 10 in a bulk Pauli-frame model (End
+Matter)\cl{57}. The natural next goal is a shorter period, approaching the 8 steps of
+the IBM circuits, which would reduce the idle cost. Correlated faults, leakage and
+CZ-native compilations are outside the scope of this work.
 
 \paragraph{Data availability.}
 The circuit specifications, the lists of extended logicals used in the lift
-computations (4224 of weight 11 for the gross circuit; 585 of weight 8 and 16830 of
-weight 9 for the $\code{90,8,10}$ circuit, each basis), the witnesses, the certificates
-(clause sets of the unsatisfiable instances) and the reproduction scripts are
-available at [Zenodo DOI].
+computations, the witnesses, the certificates (clause sets and proofs) and the
+reproduction scripts are available at [Zenodo DOI].
 
 \begin{acknowledgments}
 \emph{AI use.} This research was carried out with AI agents (Claude, Anthropic).
@@ -396,11 +331,11 @@ avoiding hook errors with a single auxiliary per plaquette, arXiv:2603.28852 (20
 A fault-tolerant honeycomb memory, Quantum \textbf{5}, 605 (2021), arXiv:2108.10457.
 \bibitem{Gidney2021stim} C.~Gidney, Stim: a fast stabilizer circuit simulator,
 Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
-\bibitem{SM} See Supplemental Material at [URL will be inserted by publisher] for
-the circuit specifications, the proofs of the lemmas in full, the treatment of the
-$\code{90,8,10}$ code, the direct search on the detector error model, the analysis of
-the Fig.~12 retimings and of the optimality of the period, the sensitivity of the
-logical error rate to idle noise, and the verification and data, which includes
+\bibitem{SM} See Supplemental Material at [URL will be inserted by publisher] for the
+proof of Lemma~1 for our template, the period-11 gross circuit, the $\code{90,8,10}$ code
+and its circuits, the direct search on the detector error model, the certificates, the
+logical error rates, the analysis of Fig.~12 and its retimings, an earlier family of
+period-18 gross circuits, and the verification and data, which includes
 Refs.~\cite{Bravyi2024,Strikis2026,Gidney2021honeycomb,Gidney2021stim,ShawTerhal2026}.
 \bibitem{ShawTerhal2026} M.~H.~Shaw and B.~M.~Terhal, Optimising quantum error
 correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
@@ -415,64 +350,53 @@ Lemma~\ref{lem:reduction} the remaining distinct columns form an extended logica
 weight $w-z-2c\ge\dext$. For $w=\dext$ this forces $z=c=0$; for $w=\dext+1$ it forces
 $c=0$ and $z\le1$. $\square$\cl{53}
 
-\emph{Proof of Lemma~\ref{lem:gap}.} Let $D=18$ be the period. After the last fault of
-a fault set at layer $a$, the data frame is constant from layer $a+D-1$ on, because
-only ancillas still in flight can change it. If an undetected weight-11 logical had no
-fault in a window of $G=2D+\Delta-1=52$ layers, where $\Delta=17$ is the longest
-reset-to-measurement span of a check, no detector could respond to both the faults
-before and after the window; both parts would be undetected, their logical effects
-would add to a nonzero value, and one part would have weight $\le10$, contradicting
-Lemma~\ref{lem:reduction}. So a weight-11 logical spans at most $10\times51$ layers.
-The noisy circuit is periodic: inserting an 18-layer block at any layer $x$ with
-$4\le x\le18(R-1)$ (layers numbered from 0) turns the $(R-1)$-round circuit into the
-$R$-round one. Deleting fault-free blocks before and after the logical leaves every
-detector it touches unchanged, which maps it into a circuit with at most 32 rounds
-(term-by-term count in SM~\ref{sm:gap}). With Lemma~\ref{lem:lift} no weight-11
-undetected logical exists for any $R$. $\square$\cl{35,43}
+\emph{All rounds for Theorem~\ref{thm:main}.} Let $D=11$ be the period. Each check
+instance starts at $s_q+jD$ with $s_q\in\{0,1\}$ ($S=1$), is measured $\Delta=10$
+layers later, and has its last CNOT at offset 9. If all faults of a set $F_<$ lie at
+layers $\le a$, the data frame they produce is constant from layer $a+D-1$ on, since
+only ancillas still in flight can change it. A comparison detector responds to both
+$F_<$ and a set $F_>$ of faults at layers $\ge b$ only if $b-a\le2D+\Delta-2=30$; a
+final detector only if $b-a\le D+S+\Delta-1=21$; a first-round detector only if
+$b-a\le11$. Hence a fault-free window of $G=31$ layers splits an undetected logical
+into two undetected parts whose logical effects add to a nonzero value. With no
+undetected logical of weight $\le9$ (Lemma~\ref{lem:reduction}), a weight-10 logical
+spans at most $9\times30$ layers; with none of weight $\le10$, a weight-11 logical
+spans at most $10\times30=300$. The noisy circuit with $R$ rounds equals the circuit
+with $R-1$ rounds with an 11-layer block inserted at any layer $x$ with
+$1\le x\le11(R-1)$ (layers numbered from 0). Deleting fault-free blocks in front
+leaves the first fault at a layer $\le11$, hence the last at $\le311$; deleting
+blocks behind is possible while $x=f_{\rm last}+2D-2\le11(R-1)$, so it stops with
+$11(R-1)<331$, i.e.\ $R\le31$. The exact lifts for $R\le31$ then exclude every $R$.
+$\square$\cl{56}
 
-\emph{Details for Theorem~\ref{thm:bb90}.} The lists of 585 weight-8 and 16830 weight-9
-extended logicals were obtained by two independent enumerations (a depth-first and a
-meet-in-the-middle search) with identical results. In this circuit the zero-image
-mechanisms that trigger detectors are exactly the ancilla readout flips, 45 per round;
-all zero-image mechanisms are admitted as candidates. The three lift implementations
-(a frontier dynamic program, a CP-SAT model and a per-logical SAT model) find no lift
-for $R=1,\dots,12$ in both bases; as positive controls they find 315 weight-9 lifts for
-a nearby interleaved circuit with $\dcirc=9$, and 585 weight-8 lifts for a
-non-interleaved circuit with the same extended code. All ancillas are reset at step 0
-and measured at step 15, so rounds are separated in time and the circuit is periodic.
-A minimal undetected logical with a fault-free round inside its span would split into
-two undetected parts, one lighter; a weight-9 logical therefore spans at most 9
-rounds, and deleting fault-free rounds after the second and before the last maps it
-into a circuit with at most $2+9+1=12$ rounds. A weight-10 data logical, applied as
-flips after initialisation, fires no detector and flips the observable
-(SM~\ref{sm:bb90})\cl{53}.
+\emph{Details for Theorem~\ref{thm:bb90}.} The extended code of the orders of
+Table~\ref{tab:circuit} equals that of the period-16 circuit, with $\dext=8$ and the
+complete lists of 585 and 16830 logicals. The lifts for $R=1,\dots,25$, both bases,
+were decided by two independent chains (a frontier dynamic program together with a
+direct search of the DEM for $R\le12$, and a separately written SAT lift), all with
+zero lifts; the gap argument of the previous paragraph, with this circuit's
+constants, gives $R'=25$ for weight 9. A weight-10 data logical injected after
+initialisation fires no detector and flips the observable. The non-wrapping period-12
+circuit has separated rounds, $R'=12$ and zero lifts for $R\le12$; the period-16 circuit
+is treated in SM~\ref{sm:bb90}\cl{57,53}.
+
+\emph{Family bound for $\code{90,8,10}$.} Within translation-invariant single-ancilla
+schedules whose $X$- and $Z$-check CNOT orders both lie in one of the four order
+classes with $\dext=8$, no schedule with period $P\le10$ (wrapping allowed) reaches bulk
+circuit distance 10 (48 of 48 SAT instances unsatisfiable, in the bulk Pauli-frame
+model of SM~\ref{sm:fig12}); period 11 is attained\cl{57}.
 
 \emph{Retimings of Fig.~12.} Among periodic schedules of period $\le8$ keeping the
 Fig.~12 orders there are four conflict-free ones up to translation, all with
 injection-verified weight-11 undetected errors for $R=1,\dots,6$. For longer periods,
 in a bulk Pauli-frame model a data error is seen by a check at the first readout after
-it, and a logical is model-liftable if its errors can be timed so that every check
-sees an even number of them between consecutive readouts. A model lift of a logical
-with ten data errors and one length-2 residual is a genuine undetected error once the
-number of rounds is large enough (a one-dimensional Helly argument). Every legal
-circuit keeping the orders has such an error in each family of Table~\ref{tab:fig12},
-as shown by SAT encodings restricted to these logicals, each accompanied by a DRAT
-proof (SM~\ref{sm:fig12})\cl{14,15,16,17,18}.
-
-\emph{Optimality of the period.} In the same model, among gross-code schedules
-symmetric under the 24 colour-preserving translations with orders in the class of
-Fig.~12, every legal schedule with period $P\le17$ has a model-liftable weight-11
-logical, and so does every schedule with $P\le20$ in which all ancillas share one
-reset and measurement frame; the minimal periods are therefore 18 and 21 in this
-model. These encodings use all modelled logicals; the model-to-circuit step is proven
-for logicals with one length-2 residual and was confirmed on the exact detector error
-model in all 991 sampled cases with several residual columns. In the same model,
-invariance under a translation subgroup of order 12 already excludes $P\le11$, and any
-non-trivial subgroup excludes $P=8$; schedules without symmetry are open. The order
-class is exact: among the 24 colourings by cosets of translation subgroups of index 2,
-3, 4, 6, 8 or 9, with one order type per colour, only the class of Fig.~12 has
-$\dext\ge11$ in both bases (SM~\ref{sm:search})\cl{45,46,47,38}.
-
+it, and a logical is liftable in the model if its errors can be timed so that every
+check sees an even number of them between consecutive readouts. A model lift of a
+logical with ten data errors and one length-2 residual is a genuine undetected error
+once the number of rounds is large enough (a one-dimensional Helly argument). Every
+legal circuit keeping the orders has such an error in each family of
+Table~\ref{tab:fig12}, as shown by SAT encodings restricted to these logicals, each
+accompanied by a DRAT proof (SM~\ref{sm:fig12})\cl{14,15,16,17,18}.
 
 % ===========================================================================
 \clearpage
@@ -493,12 +417,14 @@ $\dext\ge11$ in both bases (SM~\ref{sm:search})\cl{45,46,47,38}.
 \renewcommand{\theequation}{S\arabic{equation}}
 \renewcommand{\theHequation}{S\arabic{equation}}
 
-The sections follow the order of the main text. S1--S2 fix notation and the gross
-circuits; S3--S8 contain the proof of Theorem~\ref{thm:main} and the general lemmas;
-S9 treats the $\code{90,8,10}$ code and Theorem~\ref{thm:bb90}; S10 the direct search
-on the detector error model; S11 Fig.~12 of SBB; S12 the search and the optimality
-statements; S13 the sensitivity of the logical error rate to idle noise; S14 the
-verification and the data; S15 the morphing end-cycle code.
+The sections follow the order of the main text. \ref{sm:notation} fixes notation and
+\ref{sm:reduction} proves Lemma~\ref{lem:reduction}; \ref{sm:u11} treats the period-11
+gross circuit and \ref{sm:bb90} the $\code{90,8,10}$ code; \ref{sm:direct} describes the
+direct search on the detector error model, \ref{sm:certs} the certificates and
+\ref{sm:ler} the logical error rates. \ref{sm:fig12} and \ref{sm:dext} concern Fig.~12
+of SBB, and \ref{sm:invariance}--\ref{sm:idle} an earlier family of gross circuits with
+period 18. \ref{sm:data} lists the data, and \ref{sm:morph} concerns the morphing
+end-cycle code.
 
 % ---------------------------------------------------------------------------
 \section{Notation and noise model}\label{sm:notation}
@@ -530,118 +456,6 @@ DEM mechanism, and $\dcirc$ counts mechanisms. For lower bounds we use the CSS
 relaxation: in a $Z$-basis memory only $Z$-check detectors and the $X$ part of
 each fault are kept; this can only lower the minimum. Upper bounds are checked on
 the full circuit. Lower bounds hold for any sub-model of SD6.
-
-% ---------------------------------------------------------------------------
-\section{The circuits}\label{sm:circuits}\cl{31,41,43}
-\begin{figure}[h]
-\includegraphics[width=0.6\textwidth]{figures/fig2_timing.pdf}
-\caption{One period of (a) the gross-code circuit of Table~\ref{tab:circuit} and (b) Fig.~12
-of SBB~\cite{Strikis2026}, on the same time scale. Rows: the six classes; boxes:
-CNOTs labelled by the term they implement; R, M: ancilla reset and measurement.
-Windows crossing the period boundary (dotted) continue into the next period. (b)
-has period 8 and is not interleaved: on every data qubit the $X$- and $Z$-type
-CNOTs of a round form two contiguous blocks.}
-\label{fig:timing}
-\end{figure}
-Table~\ref{tab:circuit} specifies circuit A completely: each of the 144 checks
-takes the reset step, order, CNOT steps and measurement step of its class. Its
-resets occur at steps $\{2,15,16,17\}$ and its measurements at
-$\{0,14,15,16\}$. We verified for circuits A, B and C that every check applies
-exactly six CNOTs to its support at distinct steps inside its window, that no data
-qubit takes part in two CNOTs at the same step, that the noiseless circuit fires
-no detector, and that all detectors are deterministic, for several $R$ in both
-bases. Interleaving: in circuit A, over one period, 96 data qubits switch four
-times and 48 twice (cyclically) between $X$- and $Z$-type CNOTs.
-
-Circuit B (Table~\ref{tab:circB}) also has period 18; 24 of its checks keep the
-Fig.~12 order. Circuit C (Table~\ref{tab:circC}) has period 21 and a common frame:
-all ancillas are reset at step 0 and measured at step 20, so rounds are separated
-in time. Both have $\dcirc=12$ for every $R$ in both bases (\ref{sm:lift}, \ref{sm:gap}).
-
-For reference, the Fig.~12 orders in the same labelling are
-$X_0$: $B_1B_2B_3A_3A_2A_1$, \ $X_1$: $B_2B_3B_1A_3A_2A_1$, \ $X_2$: $B_1B_2B_3A_2A_1A_3$,
-$Z_0$: $A_1A_3A_2B_3B_1B_2$, \ $Z_1$: $A_2A_1A_3B_1B_2B_3$, \ $Z_2$: $A_2A_1A_3B_3B_1B_2$
-(period 8, pipelined, non-interleaved).
-
-\begin{table}[h]
-\caption{Circuit B (period 18). Columns as in Table~\ref{tab:circuit}.}
-\label{tab:circB}
-\begin{ruledtabular}
-\begin{tabular}{lcllcl}
-class & reset & CNOT order & CNOT steps & meas. & map\\
-\hline
-$X_0$ & 0 & $B_2B_1B_3A_3A_2A_1$ & 1, 7, 8, 14, 15, 16 & 17 & $s_{12}$\\
-$X_1$ & 2 & $B_2B_3B_1A_3A_2A_1$ & 3, 6, 11, 12, 13, 0 & 1 & id\\
-$X_2$ & 0 & $B_2B_1B_3A_2A_1A_3$ & 1, 9, 10, 11, 15, 16 & 17 & $s_{12}$\\
-$Z_0$ & 1 & $A_3A_1A_2B_3B_1B_2$ & 2, 3, 7, 8, 9, 17 & 0 & $s_{12}$\\
-$Z_1$ & 17 & $A_1A_2A_3B_1B_3B_2$ & 0, 5, 6, 7, 12, 15 & 16 & $s_{12}s_{56}$\\
-$Z_2$ & 1 & $A_1A_2A_3B_3B_1B_2$ & 2, 3, 4, 10, 11, 17 & 0 & $s_{12}$\\
-\end{tabular}
-\end{ruledtabular}
-\end{table}
-
-\begin{table}[h]
-\caption{Circuit C (period 21, common frame: reset at 0, measurement at 20).}
-\label{tab:circC}
-\begin{ruledtabular}
-\begin{tabular}{llll}
-class & CNOT order & CNOT steps & map\\
-\hline
-$X_0$ & $B_2B_1B_3A_3A_2A_1$ & 2, 7, 9, 15, 16, 17 & $s_{12}$\\
-$X_1$ & $B_2B_3B_1A_3A_2A_1$ & 1, 8, 12, 13, 14, 17 & id\\
-$X_2$ & $B_2B_1B_3A_2A_1A_3$ & 1, 10, 11, 12, 16, 18 & $s_{12}$\\
-$Z_0$ & $A_3A_1A_2B_3B_1B_2$ & 3, 4, 8, 9, 10, 17 & $s_{12}$\\
-$Z_1$ & $A_1A_2A_3B_1B_3B_2$ & 1, 6, 7, 8, 13, 14 & $s_{12}s_{56}$\\
-$Z_2$ & $A_1A_2A_3B_3B_1B_2$ & 2, 4, 5, 11, 12, 19 & $s_{12}$\\
-\end{tabular}
-\end{ruledtabular}
-\end{table}
-
-% ---------------------------------------------------------------------------
-\section{Invariance of the extended code}\label{sm:invariance}\cl{32,42}
-Consider a $Z$-basis memory; only $X$ errors matter. An $X$ error on the ancilla of
-an $X$ check after its $k$-th CNOT propagates to the suffix $\{q_{k+1},\dots,q_6\}$;
-$Z$-check CNOTs (data controls, ancilla target) do not change the $X$ frame on the
-data. Each fault's final data $X$ frame is therefore zero, a single data qubit, or a
-proper suffix of an $X$-check order, and its column is $(H_Zs,L_Zs)$. Multiplying
-by the check itself, which has zero column, a suffix of length 5 is equivalent to
-$\{q_1\}$ (a data column), of length 4 to $\{q_1,q_2\}$, of length 3 to the
-complement of $\{q_1,q_2,q_3\}$, and a suffix of length 2 is $\{q_5,q_6\}$. Hence the
-column set is determined by the three sets $\{q_1,q_2\}$, $\{q_1,q_2,q_3\}$,
-$\{q_5,q_6\}$ of every check. Reversal maps these to $\{q_5,q_6\}$, the last three
-and $\{q_1,q_2\}$, which produce the same columns, and $s_{12}$, $s_{56}$ leave them
-unchanged. The $X$ basis is symmetric. For circuits A, B and C we also computed the
-extended codes directly: both bases have 360 merged columns, and the column sets
-coincide with those of Fig.~12.
-
-% ---------------------------------------------------------------------------
-\section{The extended code: $\dext=11$ and the 4224 weight-11 logicals}\label{sm:dext}\cl{11,13}
-The extended code of Fig.~12 has 360 merged columns per basis (144 of check-weight
-3, 144 of weight 6, 72 of weight 9). The 24 colour-preserving translations map each
-check's order to the order of its image check and preserve the logical classes
-(checked by solving $L\circ T=ML+NH$ with $\mathrm{rank}\,M=k$); the columns form 15
-orbits.
-
-\emph{Search.} To decide whether $Hx=0$, $Lx\neq0$ has a solution with $|x|\le W$ we
-use a complete depth-first search: a minimum-weight solution may be translated so
-that it contains the representative of its lowest orbit; the search branches on the
-columns covering an unsatisfied check row, excluding earlier siblings, so that the
-branches partition the search space; it prunes when the depth plus
-$\lceil|s|/w_{\max}\rceil$ exceeds $W$ ($s$ the current syndrome, $w_{\max}$ the
-largest column weight) and closes the last step by table look-up. The program was
-validated against unpruned meet-in-the-middle enumeration on smaller instances and
-by checking that split runs add up to unsplit runs.
-
-\emph{Results.} At $W=10$ there is no solution in either basis
-($\approx2\times10^{10}$ nodes per basis), on two independently constructed
-instances, and under a second symmetry group of order 8 (45 orbits,
-$\approx5\times10^{10}$ nodes per basis); weight 11 is attained. Hence $\dext=11$.
-At $W=11$, two different search programs enumerate the same 4224 extended logicals
-per basis, all in free orbits of the 24-element group (176 orbits); 360 of them
-consist of ten data columns and one residual of length 2. Both $\dext=11$ and the
-completeness of the list of 4224 weight-11 logicals rest on two independent
-exhaustive searches; we did not obtain a checkable proof certificate for them (a
-direct CNF encoding is beyond CDCL solvers already at weight 6).
 
 % ---------------------------------------------------------------------------
 \section{Proof of Lemma~\ref{lem:reduction}}\label{sm:reduction}\cl{33}
@@ -713,113 +527,93 @@ $H$ part of its image, its logical effect equals the $L$ part, and the set of im
 is exactly the 360 extended columns.
 
 % ---------------------------------------------------------------------------
-\section{Computation for Lemma~\ref{lem:lift}}\label{sm:lift}\cl{34,42}
-By \ref{sm:reduction}, a weight-11 undetected logical selects, for each of the eleven columns of
-one listed extended logical, one DEM mechanism with that image, such that the
-detector sums vanish. For each of the 4224 logicals per basis, a CP-SAT model has a
-Boolean variable per mechanism of the eleven image groups, an exactly-one
-constraint per group, and an XOR constraint per detector. Infeasibility for all 4224
-logicals at a given $R$ means that no weight-11 undetected logical exists at that
-$R$.
+\section{The period-11 gross circuit}\label{sm:u11}\cl{56}
+\emph{Circuit.} Table~\ref{tab:circuit} specifies the circuit: every $X$ check is reset
+at step 0, applies $A_2A_1A_3B_3B_2B_1$ at steps 1, 2, 3, 4, 5, 9 and is measured at
+step 10; every $Z$ check is reset at step 10, applies $B_1B_2B_3A_3A_1A_2$ at steps 0, 4,
+5, 6, 7, 8 of the next period and is measured at step 9. The 72 translations map the
+schedule to itself. The circuit is legal (every check's six CNOTs cover its support at
+distinct offsets inside its window; no data qubit takes part in two CNOTs at one step
+modulo 11) and deterministic (the noiseless circuit fires no detector; all detectors
+are deterministic for $R=1,2,3$ in both bases). Our encoder and the benchmark's give
+identical detector error models for $R=1,2,3$.
 
-Results: circuit A, $R=1,\dots,32$, both bases: all infeasible. A second,
-independently written lift program agrees and extends the range to $R=36$. Circuit
-B: $R=1,\dots,24$; circuit C: $R=1,\dots,14$ and $16$, plus a solver-free
-meet-in-the-middle check (split the eleven groups in two halves, enumerate all
-detector sums of each half, intersect) for $R\le3$; all infeasible. Positive
-control: on Fig.~12 the same programs find a realisation for all 4224 logicals.
+\emph{Non-segmentability.} Within one period the cyclic sequence of CNOT types on a
+left data qubit is $ZXXXZZ$ (steps 0--5) and on a right data qubit $XXZZZX$ (steps
+4--9): three $X$-check CNOTs followed by three $Z$-check CNOTs. Consider the
+precedence graph on check instances, with an edge whenever, on a shared data qubit, a
+CNOT of one instance precedes a CNOT of an instance of the other type. A segmentable
+circuit would admit block numbers that never decrease along edges and increase across
+types. The graph of this circuit has strongly connected components containing both
+types (144 instances each, all instances of one round label), for example the 6-cycle
+$X_9\to Z_{17}\to X_{12}\to Z_{20}\to X_{22}\to Z_{24}\to X_9$, so no such numbering
+exists: a $Z$-check instance, whose CNOTs fall in steps 0 and 4--5 of consecutive
+periods, straddles the next $X$-check instance. A circuit with the same orders but an
+$X$ block at steps 1--6 and a $Z$ block at steps 8--13 (period 15) has no mixed
+component.
 
-\emph{Certificates.} For circuits A ($R\le32$), B ($R\le24$) and C ($R\le14$ and 16),
-both bases and all 4224 logicals, the lift instances were encoded as CNF. Instances
-were combined into batches by a selector disjunction: the batch formula is the
-disjunction of its members, each guarded by its own selector variable, with no
-variables shared between members, so that unsatisfiability of a batch implies that
-of each member. Each batch was refuted by CaDiCaL; each refutation is a DRAT proof
-verified with drat-trim, whose LRAT core was verified with the formally verified
-checker cake\_lpr. As a positive control,
-every one of the 4224 Fig.~12 instances at $R=1$ is satisfiable and decodes to a valid
-lift\cl{51}.
+\emph{Order class and lists.} The $X$ order is $A_1A_2A_3B_3B_1B_2$ after the swaps
+$s_{12}$ and $s_{56}$, and the $Z$ order is the reversal of the $X$ order; both lie in the
+class of $A_1A_2A_3B_3B_1B_2$ generated by reversal, $s_{12}$ and $s_{56}$, so they share
+one extended code (\ref{sm:invariance}). It has 360 merged columns per basis (5 orbits
+under the 72 translations), no logical of weight $\le9$, and exactly 144 logicals of
+weight 10 and 7344 of weight 11 in each basis. Two independent exhaustive
+enumerations (a depth-first search, and a separately written search whose last three
+levels use a meet-in-the-middle table) give identical sets; neither finds a logical of
+weight $\le11$ made of data columns only, which recomputes $d\ge12$.
 
-% ---------------------------------------------------------------------------
-\section{Proof of Lemma~\ref{lem:gap}}\label{sm:gap}\cl{35,43}
-Notation: period $D=18$; check $q$ has start $s_q$, instance $j$ is reset at
-$s_q+jD$ and measured at $s_q+jD+\Delta_q$ with $\Delta_q\le D-1$; $\Delta=\max_q
-\Delta_q=17$; $S=\max_q s_q-\min_q s_q=5$. Faults are attached to layers.
+\emph{Lift.} In every round the zero-image mechanisms with detectors are exactly the
+72 ancilla readout flips, there are no other zero-image mechanisms, and every DEM
+mechanism has a unique image. Following Lemma~\ref{lem:structure}, we decide for every
+weight-10 extended logical whether it lifts, with or without one zero-image mechanism,
+and for every weight-11 extended logical whether it lifts. For $R=1,\dots,31$ and both
+bases no instance lifts; the image property and the telescoping identity were asserted
+on the DEM for every $R$ used. Three implementations agree (a frontier dynamic program,
+a CP-SAT model and a per-logical SAT model). Positive controls: a period-10 control circuit lifts 432 ($Z$) and 576 ($X$) weight-11 logicals at $R=1,2$; the
+segmented circuit above lifts all 144 weight-10 logicals, 144 with a readout flip and all
+7344 of weight 11.
 
-\emph{(1) Settling.} If all faults of a set $F_<$ lie at layers $\le a$, the data
-frame they produce is constant from layer $a+D-1$ on: only an ancilla fault can
-later change the data, through the remaining CNOTs of its own instance, all at
-layers $\le a+D-2$; a freshly reset ancilla never pushes errors onto the data (an
-$X$-check ancilla only picks up $Z$ errors from the data, a $Z$-check ancilla only
-$X$ errors). Every instance reset after $a+D-1$ is fault-free and measures $H_ce$.
-If all faults of $F_>$ lie at layers $\ge b$, measurements before $b$ are unaffected.
+\emph{All $R$ and upper bound.} The premises of the gap argument of the End Matter were
+checked on the noisy circuits: start offsets $s_q\in\{0,1\}$ for every $R$, measurement
+offset 10, last CNOT offset 9, and block insertion at every layer $x\in[1,11(R-1)]$
+(layer by layer, both bases, $R\le16$ with our encoder and $R\le12$ with the benchmark's).
+Weight-12 data logicals (supports
+$\{4,51,52,55,58,60,64,70,125,126,127,142\}$ of $X$ type and
+$\{3,5,19,20,21,22,39,41,55,56,57,58\}$ of $Z$ type), applied as flips after the data
+reset, fire no detector and flip the observable for $R=1,2,3,6,10,31$ in both bases.
 
-\emph{(2) Splitting.} Let $F=F_<\cup F_>$ be a weight-11 undetected logical with no
-fault strictly between $a$ and $b$. A comparison detector $(c,j)$ responds to $F_<$
-only if $s(c,j-1)<a+D-1$ and to $F_>$ only if the measurement of instance $j$, at
-$s(c,j-1)+D+\Delta_c\le a+2D+\Delta-2$, is at a layer $\ge b$. A first-round
-detector $(c,0)$ responds to $F_>$ only if $b\le s_c+\Delta_c\le21$, so with $a\ge0$
-it responds to both parts only if $b-a\le21<G$. A final detector responds to both only if
-$b-a<D+S+\Delta$. Hence for $b-a\ge G=\max(2D+\Delta-1,\,D+S+\Delta)=52$ no detector
-responds to both parts; each part is undetected, their logical effects add to a
-nonzero value, and one part has weight $\le10$, contradicting Lemma~1. Consecutive
-faults of $F$ are therefore less than $G$ layers apart, and $F$ spans at most
-$10(G-1)=510$ layers.
-
-\emph{(3) Deletion.} The noisy SD6 circuit with $R$ rounds equals the circuit with
-$R-1$ rounds with an 18-layer block inserted at layer $x$, for every
-$x\in[4,18(R-1)]$ (checked layer by layer in both bases; the template is exactly
-periodic). Removing a block $[x,x+D)$ that contains no fault of $F$ removes one
-measurement of every ancilla; a detector of the shorter circuit that does not
-straddle the cut equals a detector of the longer one, and one that straddles it
-equals the sum of the two detectors around the removed measurement. $F$ therefore
-stays undetected, with the same logical effect, provided the frame entering layer
-$x+D$ of the longer circuit equals the frame entering layer $x$ of the shorter one;
-this holds if $x+D\le f_1$ (all zero; $f_1$ the first fault layer) or
-$x\ge f_{11}+2D-2$ (data frame settled by (1), all ancillas in flight fault-free).
-\emph{(4) Counting.} Write $f_1\le f_{11}$ for the first and last fault layers of
-$F$; by (2), $f_{11}-f_1\le10(G-1)=510$. \emph{Front:} while $f_1\ge4+D=22$, the block
-$[4,22)$ is fault-free and can be deleted at $x=4$, shifting $F$ by $-18$ layers;
-afterwards $f_1\le21$ and hence $f_{11}\le21+510=531$. \emph{Back:} a block can be
-deleted at $x=f_{11}+2D-2$ as long as this $x$ is an admissible insertion point,
-$x\le18(R-1)$. When no further deletion is possible,
-$18(R-1)<f_{11}+2D-2\le531+34=565$, so $R-1\le31$ and $R\le32$. (Using $2D-1$ in
-place of $2D-2$, as a more conservative variant does, gives the same bound; the
-threshold $2D-3$ would already suffice.) Thus
-every weight-11 undetected logical of a circuit with $R$ rounds yields one of a
-circuit with at most 32 rounds, and with Lemma~\ref{lem:lift} none exists for any $R$.
-
-For circuits that alternate with their time reverse, Shaw and Terhal reduce any
-number of rounds to a single round~\cite{ShawTerhal2026}; the gap argument above
-needs no such symmetry.
-
-\emph{Circuits B and C.} For circuit C, rounds are separated in time; a fault-free
-round inside the span of $F$ splits it as in (2), so $F$ occupies at most 11
-consecutive rounds, and periodicity reduces any $R$ to $R\le13$. For circuit B we use
-a slab version of (2): a fault-free slab from the earliest reset to the latest
-measurement of one round splits $F$, provided that on every data qubit every
-propagating CNOT of round $k$ inside the overlap with round $k+1$ precedes every
-reading CNOT of round $k+1$. We verified this condition for all rounds of the
-circuits with $R=3,8,24$ in both bases; it reduces any $R$ to $R\le23$.
+\emph{Search and control.} The circuit was found by a lazy-clause SAT search over
+translation-invariant schedules with orders in this class, blocking the modelled
+logicals in the bulk Pauli-frame model of \ref{sm:fig12}, and then certified exactly.
+About one in 70 random legal deterministic schedules of the same family passes the exact
+screen for $R\le2$; the result therefore rests on the exact certification, not on the
+efficiency of the search.
 
 % ---------------------------------------------------------------------------
-\section{Upper bound}\label{sm:upper}\cl{36,42}
-For each basis we found a weight-12 logical operator of the gross code of the
-corresponding type with CP-SAT and applied it as single-qubit flips immediately
-after data initialisation; each flip is one SD6 mechanism. For $R=1,3,6,10$ and both
-bases (and, for circuit A, also at $R=2$) no detector fires and the logical
-observable flips; omitting any one of the twelve flips makes the error detectable.
-Hence $\dcirc\le12$ for circuits A, B and C.
+\section{The $\code{90,8,10}$ code: bound, lists and circuits}\label{sm:bb90}\cl{53}
 
-% ---------------------------------------------------------------------------
-\section{The $\code{90,8,10}$ code: bound and Theorem~\ref{thm:bb90}}\label{sm:bb90}\cl{53}
+\begin{table}[h]
+\caption{The period-16 $\code{90,8,10}$ circuit. All ancillas are reset at step 0 and
+measured at step 15; steps 11, 13 and 14 contain no CNOT; every check of a type uses the
+same order and steps.}
+\label{tab:c16}
+\begin{ruledtabular}
+\begin{tabular}{lll}
+type & CNOT order & CNOT steps\\
+\hline
+$X$ & $A_2A_1A_3B_2B_3B_1$ & 1, 3, 5, 6, 8, 10\\
+$Z$ & $B_1B_3B_2A_3A_1A_2$ & 2, 4, 6, 7, 9, 12\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
 \emph{Code and circuit.} $\ell=15$, $m=3$, $x=S_{15}\otimes I_3$, $y=I_{15}\otimes S_3$,
 $A=x^9+y+y^2$, $B=1+x^2+x^7$, $H_X=[A\,|\,B]$, $H_Z=[B^T\,|\,A^T]$~\cite{Bravyi2024};
 $n=90$, $k=8$, and an exhaustive search finds no logical of weight $\le9$ and 558
 $X$-type logicals of weight 10, so $d=10$. Labels: $A_1=x^9$, $A_2=y$, $A_3=y^2$,
 $B_1=1$, $B_2=x^2$, $B_3=x^7$; qubits and checks are indexed by $i=3a+b$, and the check
 at $(x,y)$ acts as in \ref{sm:notation}. The 45 translations are code automorphisms that preserve
-the labels, and the circuit of Table~\ref{tab:circuit} is invariant under all of them.
+the labels, and the period-16 circuit of Table~\ref{tab:c16} is invariant under all of them.
 It is legal (each data qubit takes part in at most one CNOT per step; every check's
 six CNOTs cover its support at distinct steps inside its window) and deterministic
 (each of the 405 overlapping pairs of $X$ and $Z$ checks shares an even number of
@@ -842,10 +636,10 @@ realisation is a one-way implication). CaDiCaL reports unsatisfiability and the 
 proof is verified by drat-trim. Hence for every assignment of orders the $X$-side
 extended code has a logical of weight $\le8$, and every non-interleaved circuit has
 $\dcirc\le8$ by SBB's Cor.~1. A non-interleaved circuit whose extended code equals
-that of Table~\ref{tab:circuit} lifts all 585 weight-8 extended logicals at $R=1$, so 8
+that of Table~\ref{tab:c16} lifts all 585 weight-8 extended logicals at $R=1$, so 8
 is attained.
 
-\emph{Lists.} The extended code of the orders of Table~\ref{tab:circuit} has 225 merged
+\emph{Lists.} The extended code of the orders of Table~\ref{tab:c16} has 225 merged
 columns in each basis (5 orbits under the 45 translations). There are no extended
 logicals of weight $\le7$, exactly 585 of weight 8 and 16830 of weight 9 in each
 basis; a depth-first search and an independent meet-in-the-middle enumeration give
@@ -879,6 +673,28 @@ second and before the last maps it into a circuit with at most $2+9+1=12$ rounds
 initialisation, fires no detector and flips the observable for $R=1,2,3,6,10,13$ in
 both bases.
 
+\emph{Period-11 and period-12 circuits.} The period-11 circuit of Table~\ref{tab:circuit}
+wraps (every $Z$-check window crosses the period boundary; start offsets $\{0,1\}$,
+measurement offset 10), and the period-12 circuit does not wrap. Both are legal,
+deterministic and translation invariant, and the column set of their extended code equals
+that of the period-16 circuit, so the lists of 585 and 16830 logicals apply. For the
+period-11 circuit the lifts for $R=1,\dots,25$ are zero in both bases, decided by a frontier
+dynamic program together with the direct search of \ref{sm:direct} for $R\le12$, and
+independently by a separately written SAT lift; the image property and the telescoping
+identity were asserted for every $R$. Block insertion holds at every layer
+$x\in[1,11(R-1)]$ (checked layer by layer for $R\le15$, both bases), and the gap argument
+gives $R'=22$ for weight 8 and $R'=25$ for weight 9. For the period-12 circuit rounds are
+separated and $R'=12$; its lifts are zero for $R\le12$. A weight-10 data logical injected
+after the data reset fires no detector and flips the observable for $R=1,2,5,11$ in both
+bases.
+
+\emph{Family bound.} Within translation-invariant schedules whose $X$- and $Z$-check
+orders both lie in one of the four order classes with $\dext=8$, every legal
+deterministic schedule with period $P\le10$, wrapping allowed, has a liftable weight-$\le9$
+logical in the bulk Pauli-frame model (48 of 48 SAT instances unsatisfiable, re-run
+spot checks agree). The statement concerns many rounds and this family only: order
+classes with $\dext\le7$, smaller symmetry and per-check-free schedules are not covered.
+
 % ---------------------------------------------------------------------------
 \section{Direct search on the detector error model}\label{sm:direct}\cl{54}
 The search looks for a minimum-weight set of DEM mechanisms with zero detector sum
@@ -902,11 +718,90 @@ $\code{90,8,10}$ circuit: for $R=1,\dots,12$ there is none of weight $\le9$ in e
 basis, and weight 10 is found for $R=1,2,3$; the interleaved control circuit gives 9.
 For the $\code{90,8,10}$ circuit, take a minimal undetected logical of weight $w\le9$
 at any $R$: by the splitting argument of \ref{sm:bb90} it spans at most $w$ rounds and maps into
-a circuit with at most $w+3\le12$ rounds, contradicting the search. This proves
-Theorem~\ref{thm:bb90} for every $R$ without extended-code input; it uses the
+a circuit with at most $w+3\le12$ rounds, contradicting the search. This proves $\dcirc=10$ for the period-16 circuit for every $R$ without extended-code
+input; it uses the
 separation and periodicity checks of \ref{sm:bb90}. At $R=1$ a SAT formulation of the same
 question on the DEM is also unsatisfiable in both bases.
 
+\emph{Period-11 circuits.} For the period-11 gross circuit, the search (in the second,
+independently written implementation, whose last levels use a meet-in-the-middle
+table) finds no undetected logical of weight $\le11$ at $R=1$ and $R=2$ in both bases; a
+period-10 control circuit gives 11. For the period-11 $\code{90,8,10}$ circuit there is no
+undetected logical of weight $\le9$ for $R\le12$.
+
+% ---------------------------------------------------------------------------
+\section{Certificates}\label{sm:certs}\cl{58,51}
+A VeriPB proof is accepted only with the verdict ``s VERIFIED UNSATISFIABLE''; DRAT
+proofs are checked with drat-trim and their LRAT cores with the formally verified
+checker cake\_lpr; lift instances are combined into batches by a selector disjunction,
+so that unsatisfiability of a batch implies that of each member.
+
+\emph{Period-16 $\code{90,8,10}$ circuit.} Every infeasibility claim used in the proof
+is accompanied by a checked certificate: $\dext\ge8$ and the completeness of the
+weight-8 and weight-9 extended-logical lists by VeriPB (including the reduction to orbit
+representatives, which is part of the checked proof), and all lift instances for
+$R\le12$, both bases, by DRAT proofs. $\dext\le8$ is witnessed by the listed logicals.
+
+\emph{Period-11 gross circuit.} $\dext\ge10$ (VeriPB; the listed logicals witness
+$\dext\le10$) and all lift instances for $R\le31$, both bases (DRAT), are certified. The
+completeness of the lists of 144 and 7344 logicals is not certified; a VeriPB run is in
+progress.
+
+\emph{Period-11 $\code{90,8,10}$ circuit.} The lift instances are certified for $R\le19$;
+the argument for every $R$ needs $R\le25$, so this circuit's result is not certified as
+a whole. The period-12 circuit has no lift certificates.
+
+\emph{Fig.~12 and the period-18 circuits.} $\dext\ge9$ for the Fig.~12 order class is
+certified; $\dext=11$ and the list of 4224 weight-11 logicals rest on two independent
+exhaustive searches. The certificates for the period-18 circuits and for
+Table~\ref{tab:fig12} are listed in \ref{sm:data}.
+
+The encodings were generated from the circuits by our code and cross-checked against
+independent implementations; the reductions to these finite problems (Lemma~1, the
+structure of light logicals, and the bounds on $R$) are mathematical arguments whose
+premises were verified computationally.
+
+% ---------------------------------------------------------------------------
+\section{Logical error rates of the period-11 circuits}\label{sm:ler}\cl{59,60,55}
+\emph{Setup.} The circuits and the references (IBM's depth-8 circuits and Fig.~12) are
+built from the same template and noised by the same SD6 implementation, with the idle
+channel multiplied by $\lambda$; both bases are sampled separately and added. BP-OSD
+(min-sum, 10000 iterations, OSD-CS order 7) and Relay-BP use identical parameters and
+exact priors for all circuits.
+
+\emph{$\code{90,8,10}$.} At $\lambda=0$ the period-11 circuit has a lower per-round logical
+error rate than IBM's depth-8 circuit at every sampled $p$ between $2\times10^{-3}$ and
+$5\times10^{-3}$ with both decoders. At $p=3\times10^{-3}$ with BP-OSD an independent
+sampling pipeline gives 0.57 [0.47, 0.70] and the pooled value is 0.52 [0.44, 0.62]; the
+data do not show a clear dependence of the ratio on $p$. At $\lambda=0.1$ the two circuits
+are statistically indistinguishable, and at $\lambda=1$ the period-11 circuit is worse by a
+factor of 6--9 with BP-OSD and 9--17 with Relay-BP per round. At $\lambda=0$ the period
+costs nothing, so this comparison isolates the structural gain from $\dcirc=8$ to 10.
+Leading order: IBM's circuit has 315 ($Z$) and 540 ($X$) undetected logicals of weight 8
+per round, the period-11 circuit 24507 of weight 10 per round in each basis; an
+ideal-decoder estimate places the break-even near $p\approx2\times10^{-3}$ for $\lambda=0$ and
+$3\times10^{-5}$ for $\lambda=1$, which is indicative only.
+
+\emph{Gross code.} At $\lambda=0$ the period-11 circuit is below Fig.~12 at every sampled $p$
+between $3\times10^{-3}$ and $5\times10^{-3}$ with BP-OSD (ratios 0.31--0.56; at
+$3\times10^{-3}$, 0.33 [0.23, 0.49] in an independent pipeline) and at $4$--$5\times10^{-3}$
+with Relay-BP (0.35--0.54). Against IBM's depth-8 circuit it is comparable: BP-OSD point
+estimates are 0.64--0.96 between $3\times10^{-3}$ and $5\times10^{-3}$, none individually
+conclusive (at $3\times10^{-3}$: 0.73 [0.50, 1.05] from an independent pipeline with a
+pre-set sample size; 0.64 [0.48, 0.85] pooled over both pipelines). At $\lambda=0.1$ we
+resolve no difference from either reference (95\% intervals spanning factors of 3--10),
+and at $\lambda=1$ it is worse than IBM's circuit per round by 7 [4, 12] (BP-OSD,
+$p=2\times10^{-3}$) to 21--39 ($p=3\times10^{-3}$, BP-OSD and Relay-BP). At $\lambda=0$ and
+$p=4\times10^{-3}$, all failures in a sample of 8000 shots per basis occurred in shots where
+belief propagation did not converge, and in all but one the OSD output had a higher cost
+than the actual error: logical error rates in this regime are dominated by decoder
+failures rather than by minimum-weight logicals.
+
+\emph{IBM's gross circuit.} Exact enumeration on the detector error model finds exactly
+144 ($Z$ basis) and 288 ($X$ basis) undetected logicals of weight 10 per round, constant
+for $R=1$--3, and none of lower weight for $R\le3$: its circuit distance is 10 for up to
+three rounds. For the period-11 circuit we find 69756 logicals of weight 12 at $R=1$ in
+each basis and 233244 at $R=2$ ($Z$ basis); the per-round count has not converged.
 % ---------------------------------------------------------------------------
 \section{Fig.~12 of SBB: $\dcirc=11$ and retimings}\label{sm:fig12}\cl{10,13,14,15,16,17,18}
 \emph{$\dcirc=11$.} Fig.~12 is non-interleaved, so SBB's Prop.~3 and Cor.~1 give
@@ -978,6 +873,262 @@ other pipelined families with $P\ge9$; symmetric pipelined $P\ge13$ & open\\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
+
+% ---------------------------------------------------------------------------
+\section{The extended code: $\dext=11$ and the 4224 weight-11 logicals}\label{sm:dext}\cl{11,13}
+The extended code of Fig.~12 has 360 merged columns per basis (144 of check-weight
+3, 144 of weight 6, 72 of weight 9). The 24 colour-preserving translations map each
+check's order to the order of its image check and preserve the logical classes
+(checked by solving $L\circ T=ML+NH$ with $\mathrm{rank}\,M=k$); the columns form 15
+orbits.
+
+\emph{Search.} To decide whether $Hx=0$, $Lx\neq0$ has a solution with $|x|\le W$ we
+use a complete depth-first search: a minimum-weight solution may be translated so
+that it contains the representative of its lowest orbit; the search branches on the
+columns covering an unsatisfied check row, excluding earlier siblings, so that the
+branches partition the search space; it prunes when the depth plus
+$\lceil|s|/w_{\max}\rceil$ exceeds $W$ ($s$ the current syndrome, $w_{\max}$ the
+largest column weight) and closes the last step by table look-up. The program was
+validated against unpruned meet-in-the-middle enumeration on smaller instances and
+by checking that split runs add up to unsplit runs.
+
+\emph{Results.} At $W=10$ there is no solution in either basis
+($\approx2\times10^{10}$ nodes per basis), on two independently constructed
+instances, and under a second symmetry group of order 8 (45 orbits,
+$\approx5\times10^{10}$ nodes per basis); weight 11 is attained. Hence $\dext=11$.
+At $W=11$, two different search programs enumerate the same 4224 extended logicals
+per basis, all in free orbits of the 24-element group (176 orbits); 360 of them
+consist of ten data columns and one residual of length 2. Both $\dext=11$ and the
+completeness of the list of 4224 weight-11 logicals rest on two independent
+exhaustive searches; we did not obtain a checkable proof certificate for them (a
+direct CNF encoding is beyond CDCL solvers already at weight 6).
+
+% ---------------------------------------------------------------------------
+\section{Invariance of the extended code}\label{sm:invariance}\cl{32,42}
+Consider a $Z$-basis memory; only $X$ errors matter. An $X$ error on the ancilla of
+an $X$ check after its $k$-th CNOT propagates to the suffix $\{q_{k+1},\dots,q_6\}$;
+$Z$-check CNOTs (data controls, ancilla target) do not change the $X$ frame on the
+data. Each fault's final data $X$ frame is therefore zero, a single data qubit, or a
+proper suffix of an $X$-check order, and its column is $(H_Zs,L_Zs)$. Multiplying
+by the check itself, which has zero column, a suffix of length 5 is equivalent to
+$\{q_1\}$ (a data column), of length 4 to $\{q_1,q_2\}$, of length 3 to the
+complement of $\{q_1,q_2,q_3\}$, and a suffix of length 2 is $\{q_5,q_6\}$. Hence the
+column set is determined by the three sets $\{q_1,q_2\}$, $\{q_1,q_2,q_3\}$,
+$\{q_5,q_6\}$ of every check. Reversal maps these to $\{q_5,q_6\}$, the last three
+and $\{q_1,q_2\}$, which produce the same columns, and $s_{12}$, $s_{56}$ leave them
+unchanged. The $X$ basis is symmetric. For circuits A, B and C we also computed the
+extended codes directly: both bases have 360 merged columns, and the column sets
+coincide with those of Fig.~12.
+
+% ---------------------------------------------------------------------------
+\section{Earlier gross circuits with orders in the class of Fig.~12}\label{sm:circuits}\label{sm:p18}\cl{31,41,43}
+Before the period-11 circuit we found three circuits whose orders lie in the class
+of Fig.~12, so that their extended code is that of Fig.~12 ($\dext=11$, 4224
+logicals of weight 11 per basis): circuit A (period 18, pipelined;
+Table~\ref{tab:circA}), circuit B (period 18) and circuit C (period 21, all ancillas
+sharing one frame). Each has $\dcirc=12$ in both bases for every $R$: by
+Lemmas~\ref{lem:reduction} and~\ref{lem:structure} only the 4224 weight-11 logicals
+need to be excluded, which the lift computation of \ref{sm:lift} does for $R\le32$
+(A), $R\le24$ (B) and $R\le14$, 16 (C); the round reductions of \ref{sm:gap} cover every
+$R$, and \ref{sm:upper} gives the upper bound. Fig.~\ref{fig:concept} shows how
+reversing orders within the class blocks the lifts.
+
+\begin{table}[h]
+\caption{Circuit A (period 18). Checks are grouped by type and colour $(x+y)\bmod3$;
+all 24 checks of a class share the entries; steps are modulo 18, and a window passing
+step 17 continues in the next period; last column: map from the Fig.~12 order of the
+class (rev: reversal; $s_{12}$, $s_{56}$: swap positions 1,2 or 5,6).}
+\label{tab:circA}
+\begin{ruledtabular}
+\begin{tabular}{lcllcl}
+class & reset & CNOT order & CNOT steps & meas. & map\\
+\hline
+$X_0$ & 17 & $A_1A_2A_3B_3B_1B_2$ & 0, 1, 2, 8, 9, 15 & 16 & rev\,$s_{56}$\\
+$X_1$ & 15 & $A_1A_2A_3B_1B_3B_2$ & 16, 3, 4, 5, 10, 13 & 14 & rev\\
+$X_2$ & 17 & $A_3A_1A_2B_3B_1B_2$ & 0, 1, 5, 6, 7, 15 & 16 & rev\,$s_{56}$\\
+$Z_0$ & 17 & $B_2B_1B_3A_2A_1A_3$ & 0, 7, 8, 9, 13, 14 & 15 & rev\,$s_{56}$\\
+$Z_1$ & 2 & $B_2B_3B_1A_3A_2A_1$ & 3, 4, 9, 10, 11, 17 & 0 & rev\,$s_{12}s_{56}$\\
+$Z_2$ & 16 & $B_2B_1B_3A_3A_2A_1$ & 17, 5, 6, 12, 13, 14 & 15 & rev\,$s_{56}$\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\begin{figure*}[h]
+\includegraphics[width=\textwidth]{figures/fig1_concept.pdf}
+\caption{The idea, on the gross code. (a) Residuals of length 4, 3 and 2 give the
+same extended-code columns as $\{q_1,q_2\}$, $\{q_1,q_2,q_3\}$ and $\{q_5,q_6\}$, so the
+eight orders generated by reversal and the swaps $s_{12}$, $s_{56}$ share one extended
+code. (b) A weight-11 extended logical (ten data errors and the hook column
+$\{9,25\}$; $Z$ memory, $R=1$). Bars: reads of the $Z$ checks $Z_{15}$, $Z_{18}$,
+$Z_{12}$, $Z_6$; stars: hook arrival. Left, Fig.~12: the hook lands after both reads
+and no detector fires. Right, circuit A: the same column comes from the spread
+$\{8,91,82,85\}$ (equal to $\{9,25\}$ up to the check), seen late by $Z_{15}$ and early by
+$Z_6$; the forced timings (red) leave odd parity at $Z_6$. (c) The proof for circuit A.}
+\label{fig:concept}
+\end{figure*}
+
+\begin{figure}[h]
+\includegraphics[width=0.6\textwidth]{figures/fig2_timing.pdf}
+\caption{One period of (a) circuit A of Table~\ref{tab:circA} and (b) Fig.~12
+of SBB~\cite{Strikis2026}, on the same time scale. Rows: the six classes; boxes:
+CNOTs labelled by the term they implement; R, M: ancilla reset and measurement.
+Windows crossing the period boundary (dotted) continue into the next period. (b)
+has period 8 and is not interleaved: on every data qubit the $X$- and $Z$-type
+CNOTs of a round form two contiguous blocks.}
+\label{fig:timing}
+\end{figure}
+Table~\ref{tab:circA} specifies circuit A completely: each of the 144 checks
+takes the reset step, order, CNOT steps and measurement step of its class. Its
+resets occur at steps $\{2,15,16,17\}$ and its measurements at
+$\{0,14,15,16\}$. We verified for circuits A, B and C that every check applies
+exactly six CNOTs to its support at distinct steps inside its window, that no data
+qubit takes part in two CNOTs at the same step, that the noiseless circuit fires
+no detector, and that all detectors are deterministic, for several $R$ in both
+bases. Interleaving: in circuit A, over one period, 96 data qubits switch four
+times and 48 twice (cyclically) between $X$- and $Z$-type CNOTs.
+
+Circuit B (Table~\ref{tab:circB}) also has period 18; 24 of its checks keep the
+Fig.~12 order. Circuit C (Table~\ref{tab:circC}) has period 21 and a common frame:
+all ancillas are reset at step 0 and measured at step 20, so rounds are separated
+in time. Both have $\dcirc=12$ for every $R$ in both bases (\ref{sm:lift}, \ref{sm:gap}).
+
+For reference, the Fig.~12 orders in the same labelling are
+$X_0$: $B_1B_2B_3A_3A_2A_1$, \ $X_1$: $B_2B_3B_1A_3A_2A_1$, \ $X_2$: $B_1B_2B_3A_2A_1A_3$,
+$Z_0$: $A_1A_3A_2B_3B_1B_2$, \ $Z_1$: $A_2A_1A_3B_1B_2B_3$, \ $Z_2$: $A_2A_1A_3B_3B_1B_2$
+(period 8, pipelined, non-interleaved).
+
+\begin{table}[h]
+\caption{Circuit B (period 18). Columns as in Table~\ref{tab:circA}.}
+\label{tab:circB}
+\begin{ruledtabular}
+\begin{tabular}{lcllcl}
+class & reset & CNOT order & CNOT steps & meas. & map\\
+\hline
+$X_0$ & 0 & $B_2B_1B_3A_3A_2A_1$ & 1, 7, 8, 14, 15, 16 & 17 & $s_{12}$\\
+$X_1$ & 2 & $B_2B_3B_1A_3A_2A_1$ & 3, 6, 11, 12, 13, 0 & 1 & id\\
+$X_2$ & 0 & $B_2B_1B_3A_2A_1A_3$ & 1, 9, 10, 11, 15, 16 & 17 & $s_{12}$\\
+$Z_0$ & 1 & $A_3A_1A_2B_3B_1B_2$ & 2, 3, 7, 8, 9, 17 & 0 & $s_{12}$\\
+$Z_1$ & 17 & $A_1A_2A_3B_1B_3B_2$ & 0, 5, 6, 7, 12, 15 & 16 & $s_{12}s_{56}$\\
+$Z_2$ & 1 & $A_1A_2A_3B_3B_1B_2$ & 2, 3, 4, 10, 11, 17 & 0 & $s_{12}$\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\begin{table}[h]
+\caption{Circuit C (period 21, common frame: reset at 0, measurement at 20).}
+\label{tab:circC}
+\begin{ruledtabular}
+\begin{tabular}{llll}
+class & CNOT order & CNOT steps & map\\
+\hline
+$X_0$ & $B_2B_1B_3A_3A_2A_1$ & 2, 7, 9, 15, 16, 17 & $s_{12}$\\
+$X_1$ & $B_2B_3B_1A_3A_2A_1$ & 1, 8, 12, 13, 14, 17 & id\\
+$X_2$ & $B_2B_1B_3A_2A_1A_3$ & 1, 10, 11, 12, 16, 18 & $s_{12}$\\
+$Z_0$ & $A_3A_1A_2B_3B_1B_2$ & 3, 4, 8, 9, 10, 17 & $s_{12}$\\
+$Z_1$ & $A_1A_2A_3B_1B_3B_2$ & 1, 6, 7, 8, 13, 14 & $s_{12}s_{56}$\\
+$Z_2$ & $A_1A_2A_3B_3B_1B_2$ & 2, 4, 5, 11, 12, 19 & $s_{12}$\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+% ---------------------------------------------------------------------------
+\section{Lift computation for circuits A, B and C}\label{sm:lift}\cl{34,42}
+By \ref{sm:reduction}, a weight-11 undetected logical selects, for each of the eleven columns of
+one listed extended logical, one DEM mechanism with that image, such that the
+detector sums vanish. For each of the 4224 logicals per basis, a CP-SAT model has a
+Boolean variable per mechanism of the eleven image groups, an exactly-one
+constraint per group, and an XOR constraint per detector. Infeasibility for all 4224
+logicals at a given $R$ means that no weight-11 undetected logical exists at that
+$R$.
+
+Results: circuit A, $R=1,\dots,32$, both bases: all infeasible. A second,
+independently written lift program agrees and extends the range to $R=36$. Circuit
+B: $R=1,\dots,24$; circuit C: $R=1,\dots,14$ and $16$, plus a solver-free
+meet-in-the-middle check (split the eleven groups in two halves, enumerate all
+detector sums of each half, intersect) for $R\le3$; all infeasible. Positive
+control: on Fig.~12 the same programs find a realisation for all 4224 logicals.
+
+\emph{Certificates.} For circuits A ($R\le32$), B ($R\le24$) and C ($R\le14$ and 16),
+both bases and all 4224 logicals, the lift instances were encoded as CNF. Instances
+were combined into batches by a selector disjunction: the batch formula is the
+disjunction of its members, each guarded by its own selector variable, with no
+variables shared between members, so that unsatisfiability of a batch implies that
+of each member. Each batch was refuted by CaDiCaL; each refutation is a DRAT proof
+verified with drat-trim, whose LRAT core was verified with the formally verified
+checker cake\_lpr. As a positive control,
+every one of the 4224 Fig.~12 instances at $R=1$ is satisfiable and decodes to a valid
+lift\cl{51}.
+
+% ---------------------------------------------------------------------------
+\section{Round reduction for circuits A, B and C}\label{sm:gap}\cl{35,43}
+Notation: period $D=18$; check $q$ has start $s_q$, instance $j$ is reset at
+$s_q+jD$ and measured at $s_q+jD+\Delta_q$ with $\Delta_q\le D-1$; $\Delta=\max_q
+\Delta_q=17$; $S=\max_q s_q-\min_q s_q=5$. Faults are attached to layers.
+
+\emph{(1) Settling.} If all faults of a set $F_<$ lie at layers $\le a$, the data
+frame they produce is constant from layer $a+D-1$ on: only an ancilla fault can
+later change the data, through the remaining CNOTs of its own instance, all at
+layers $\le a+D-2$; a freshly reset ancilla never pushes errors onto the data (an
+$X$-check ancilla only picks up $Z$ errors from the data, a $Z$-check ancilla only
+$X$ errors). Every instance reset after $a+D-1$ is fault-free and measures $H_ce$.
+If all faults of $F_>$ lie at layers $\ge b$, measurements before $b$ are unaffected.
+
+\emph{(2) Splitting.} Let $F=F_<\cup F_>$ be a weight-11 undetected logical with no
+fault strictly between $a$ and $b$. A comparison detector $(c,j)$ responds to $F_<$
+only if $s(c,j-1)<a+D-1$ and to $F_>$ only if the measurement of instance $j$, at
+$s(c,j-1)+D+\Delta_c\le a+2D+\Delta-2$, is at a layer $\ge b$. A first-round
+detector $(c,0)$ responds to $F_>$ only if $b\le s_c+\Delta_c\le21$, so with $a\ge0$
+it responds to both parts only if $b-a\le21<G$. A final detector responds to both only if
+$b-a<D+S+\Delta$. Hence for $b-a\ge G=\max(2D+\Delta-1,\,D+S+\Delta)=52$ no detector
+responds to both parts; each part is undetected, their logical effects add to a
+nonzero value, and one part has weight $\le10$, contradicting Lemma~1. Consecutive
+faults of $F$ are therefore less than $G$ layers apart, and $F$ spans at most
+$10(G-1)=510$ layers.
+
+\emph{(3) Deletion.} The noisy SD6 circuit with $R$ rounds equals the circuit with
+$R-1$ rounds with an 18-layer block inserted at layer $x$, for every
+$x\in[4,18(R-1)]$ (checked layer by layer in both bases; the template is exactly
+periodic). Removing a block $[x,x+D)$ that contains no fault of $F$ removes one
+measurement of every ancilla; a detector of the shorter circuit that does not
+straddle the cut equals a detector of the longer one, and one that straddles it
+equals the sum of the two detectors around the removed measurement. $F$ therefore
+stays undetected, with the same logical effect, provided the frame entering layer
+$x+D$ of the longer circuit equals the frame entering layer $x$ of the shorter one;
+this holds if $x+D\le f_1$ (all zero; $f_1$ the first fault layer) or
+$x\ge f_{11}+2D-2$ (data frame settled by (1), all ancillas in flight fault-free).
+\emph{(4) Counting.} Write $f_1\le f_{11}$ for the first and last fault layers of
+$F$; by (2), $f_{11}-f_1\le10(G-1)=510$. \emph{Front:} while $f_1\ge4+D=22$, the block
+$[4,22)$ is fault-free and can be deleted at $x=4$, shifting $F$ by $-18$ layers;
+afterwards $f_1\le21$ and hence $f_{11}\le21+510=531$. \emph{Back:} a block can be
+deleted at $x=f_{11}+2D-2$ as long as this $x$ is an admissible insertion point,
+$x\le18(R-1)$. When no further deletion is possible,
+$18(R-1)<f_{11}+2D-2\le531+34=565$, so $R-1\le31$ and $R\le32$. (Using $2D-1$ in
+place of $2D-2$, as a more conservative variant does, gives the same bound; the
+threshold $2D-3$ would already suffice.) Thus
+every weight-11 undetected logical of a circuit with $R$ rounds yields one of a
+circuit with at most 32 rounds, and with the lift computation of \ref{sm:lift} none exists for any $R$.
+
+For circuits that alternate with their time reverse, Shaw and Terhal reduce any
+number of rounds to a single round~\cite{ShawTerhal2026}; the gap argument above
+needs no such symmetry.
+
+\emph{Circuits B and C.} For circuit C, rounds are separated in time; a fault-free
+round inside the span of $F$ splits it as in (2), so $F$ occupies at most 11
+consecutive rounds, and periodicity reduces any $R$ to $R\le13$. For circuit B we use
+a slab version of (2): a fault-free slab from the earliest reset to the latest
+measurement of one round splits $F$, provided that on every data qubit every
+propagating CNOT of round $k$ inside the overlap with round $k+1$ precedes every
+reading CNOT of round $k+1$. We verified this condition for all rounds of the
+circuits with $R=3,8,24$ in both bases; it reduces any $R$ to $R\le23$.
+
+% ---------------------------------------------------------------------------
+\section{Upper bound}\label{sm:upper}\cl{36,42}
+For each basis we found a weight-12 logical operator of the gross code of the
+corresponding type with CP-SAT and applied it as single-qubit flips immediately
+after data initialisation; each flip is one SD6 mechanism. For $R=1,3,6,10$ and both
+bases (and, for circuit A, also at $R=2$) no detector fires and the logical
+observable flips; omitting any one of the twelve flips makes the error detectable.
+Hence $\dcirc\le12$ for circuits A, B and C.
 
 % ---------------------------------------------------------------------------
 \section{Search and optimality}\label{sm:search}\cl{38,39,45,46,47}
@@ -1135,8 +1286,8 @@ feasibility questions were decided with CP-SAT and with CDCL SAT solvers, and th
 extended-code searches use a dedicated depth-first search. The following were
 obtained with two independent implementations that agree: the construction of the
 extended code and $\dext=11$; the list of 4224 weight-11 logicals; the lift
-computation of Lemma~\ref{lem:lift}; the enumeration of period-8 schedules; and the
-minimum-period runs. The arguments of Lemmas~\ref{lem:reduction} and \ref{lem:gap}
+computations; the enumeration of period-8 schedules; and the
+minimum-period runs. The arguments of Lemma~\ref{lem:reduction} and of the round reductions
 were checked independently, and their structural premises (template identity,
 image set, periodicity, detector structure) were verified by computer for every
 circuit. The data set (Data availability) contains the circuit specifications (circuits A, B,
