@@ -28,11 +28,21 @@ def esym(q, k):
 
 def read_sols(circ, basis, R, W):
     f = OUT / "runs" / f"{circ}_{basis}_R{R}_enum{W}.txt"
-    txt = f.read_text()
-    done = [ln for ln in txt.splitlines() if ln.startswith("DONE")]
-    assert done and "ENUMERATED" in done[0], (f, done)
-    sols = [tuple(int(x) for x in ln.split(":")[1].split()) for ln in txt.splitlines() if ln.startswith("SOL")]
-    return sols, done[0]
+    files = [f] if f.exists() else sorted((OUT / "runs").glob(f"{circ}_{basis}_R{R}_enum{W}_o*.txt"))  # orbit-range parts
+    assert files, f
+    sols, done = [], []
+    covered = set()
+    for g in files:
+        txt = g.read_text()
+        d = [ln for ln in txt.splitlines() if ln.startswith("DONE")]
+        assert d and ("ENUMERATED" in d[0] or "NONE" in d[0]), (g, d)
+        rng = [ln for ln in txt.splitlines() if ln.startswith("INST")][0].split("orbits=[")[1].rstrip(")").split(",")
+        covered |= set(range(int(rng[0]), int(rng[1])))
+        norb = int([ln for ln in txt.splitlines() if ln.startswith("INST")][0].split("norb=")[1].split()[0])
+        done.append(d[0])
+        sols += [tuple(int(x) for x in ln.split(":")[1].split()) for ln in txt.splitlines() if ln.startswith("SOL")]
+    assert covered == set(range(norb)), ("orbit ranges incomplete", files)
+    return sols, " | ".join(done)
 
 
 def main():
