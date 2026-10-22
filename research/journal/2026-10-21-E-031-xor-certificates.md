@@ -167,4 +167,41 @@ VeriPB 2 的检查速度在本问题上稳定在每个节点约 0.45 ms（gross 
 组由审计过的 E-028 / E-032 `lift.build_groups`（增广 stim DEM）构造；CNF 与 E-027 的 `lift_cnf.py` 相同（每组恰一、零组至多一、每个探测器一条 Tseitin XOR 链），同一 (电路, 基底, R) 的实例用选择子拼成批（每批约 ≤ 3 M 子句）；CaDiCaL 3.0.1 → drat-trim → cake_lpr，判定规则同 E-027。
 阳性对照（必须可解）：[[90]] u16（d_circ = 9）R = 1 两基底 24/24 批 SAT；gross 同类对照 ctl_p10（E-032 的 w11 提升）R = 1 两基底全部 SAT。
 
-LIFT_TABLE
+结果（全部 UNSAT；drat-trim 全部 `s VERIFIED`；“cake”列为 cake_lpr 检查过 LRAT 核心的批数）：
+
+| 电路 | 任意 R 所需 R' | 覆盖的 R | 基底 | 实例数（= 列表个数 × R 数 × 2） | 批 | cake_lpr | 求解+检查 CPU | DRAT 合计 |
+|---|---|---|---|---|---|---|---|---|
+| gross **u11**（d_ext = 10，列表 144 + 7344） | 31（E-032） | **1–31，完整** | Z、X | 464 256 = 7 488 × 31 × 2 | 632 | 632/632 | 4.9 h | 49 GB |
+| [[90]] **c16**（d_ext = 8，列表 585 + 16830） | ≤ 12（E-028） | **1–12，完整** | Z、X | 417 960 = 17 415 × 12 × 2 | 310 | 310/310 | 1.4 h | 11 GB |
+| [[90]] **c11** | 25（E-030，回绕间隙论证） | **1–19**（20–25 未做，预算） | Z、X | 661 770 = 17 415 × 19 × 2 | 618 | 326/618（R ≤ 12 全部、R = 13 部分；其余只用 drat-trim） | 2.7 h | 30 GB |
+| [[90]] c13 | ≤ 12 | 未做（预算） | – | – | – | – | – | – |
+
+每批 ≤ 3.5 M 子句。DRAT/LRAT 检查后删除，记录 CNF/DRAT/LRAT 的 sha256（`lift/<电路>/results.jsonl`），CNF 由确定性编码器重生成。
+c13 没做的理由：E-030 已核对 R = 1..12 两基底 c13 与 c16 的 SD6 DEM 签名集合完全相同，所以 c16 的证书覆盖的是同一组 lift 实例——但这一“相同”本身是计算核对，不是证书；需要严格时补跑 c13（约 2.5 CPU h）。
+c11 的 R = 20–25 每个 R 约 0.6 CPU h，合计约 3.5 CPU h。
+
+## 续篇结论
+
+- **u11（gross，周期 11）**：两侧 d_ext = 10 有 VeriPB 证书；扩展 lift（权重 10、10 + 零像、11 三种情形）在 R = 1..31（即 E-032 任意 R 论证所需的全部 R'）两基底全部有 DRAT 证书（drat-trim + cake_lpr）。
+  **仍未认证的输入**：144 和 7344 两张列表的完备性（W = 10、W = 11 的穷举）。按实测，每侧至少约 35–60 CPU h（W = 10）且 W = 11 更多，用 VeriPB 2 在本预算内做不到。所以 u11 的 headline 还不是“全部认证”：缺的正是列表完备性，与 Fig. 12 的情况相同，只是轻一些（d_ext 这一层已认证）。
+- **[[90]] c16**：d_ext = 8、两张列表完备性（VeriPB，上一部分）和 lift R ≤ 12（DRAT）现在都有证书 ⇒ c16 定理的全部计算输入都有可检查的证书（任意 R 的约化与 anyR 前提仍是经审计的论证 + 计算核对，不是证书）。
+- **[[90]] c11**：lift 认证到 R = 19 / 25；c13 未做。
+
+## 续篇建议论文措辞
+
+- u11：“For the period-11 circuit, $d_{\rm ext}=10$ in both bases is certified by VeriPB proofs, and every lift instance (the 144 weight-10 extended logicals, with and without one zero-image fault, and the 7344 weight-11 ones) for $R=1,\dots,31$ and both bases is refuted by CaDiCaL with DRAT proofs checked by drat-trim and the LRAT cores by cake\_lpr. The completeness of the two lists rests on exhaustive searches (Sec. …) and is not certified.”
+- c16：可以写 “every computational input of the [[90,8,10]] result is accompanied by a checked proof certificate (VeriPB for $d_{\rm ext}$ and list completeness, DRAT/LRAT for the lift instances up to $R=12$)”。c11 只能写到 R ≤ 19。
+
+## 续篇 CPU 用量（追加预算 30 h）
+
+| 项 | CPU h |
+|---|---|
+| u11 W = 9 证书两侧（生成 + VeriPB） | 9.2 |
+| 只计数（W = 9；W = 10 停在 48 min）、种植、模型核对、列表转换 | 1.2 |
+| lift：CaDiCaL + drat-trim + cake_lpr | 9.0 |
+| lift：Python 端（DEM 构造与 CNF 生成；u11 进程约 5.7 h 为按进度估计） | 约 9.3 |
+| 合计 | 约 28.7（≤ 30） |
+
+过程中的问题：一次把正在运行的 `run_lift.sh` 原地改写来跳过后续行没有生效（sh 已把整个小文件读进缓冲），u11 完成后它开始重跑 c16（只建 DEM 后即跳过，约 1 min）即被我按 PID 停掉；
+`liftcert.py` 在判断“已完成”之前就建 DEM，是可改进的浪费。u11 lift 一开始用固定每批 1500 个实例，R 大时批过大，停掉后改为每批约 13000/R 个（已完成的批按名字跳过，结果不受影响）。
+

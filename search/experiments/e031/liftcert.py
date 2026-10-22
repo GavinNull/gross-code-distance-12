@@ -13,7 +13,7 @@ at-most-one for the zero group, Tseitin XOR chains per detector), instances of o
 selectors: (t_1 v ... v t_m), every clause of instance i guarded by -t_i.  Batch UNSAT <=> no instance lifts.
 
     PYTHONPATH=.:tests uv run python search/experiments/e031/liftcert.py FAMILY SPEC XO ZO RANGE OUTDIR
-        [--bases Z X] [--batch N] [--expect sat]
+        [--bases Z X] [--batch N] [--expect sat] [--no-cake]
 FAMILY e028 (D = 8) or e032 (D = 10).  Records: OUTDIR/results.jsonl (finished batches are skipped on restart).
 """
 import importlib
@@ -116,6 +116,8 @@ def main(argv):
             bases.append(argv[i]); i += 1
     bsize = int(argv[argv.index("--batch") + 1]) if "--batch" in argv else 1500
     expect = "sat" if "--expect" in argv else "unsat"
+    if "--no-cake" in argv:          # drat-trim only (budget); the record then says cake_lpr "not run"
+        CE.CAKE_LPR = "/nonexistent"
     Rs = []
     for part in rng.split(","):
         a, _, c = part.partition("-"); Rs += list(range(int(a), int(c or a) + 1))
@@ -126,7 +128,8 @@ def main(argv):
     for R in Rs:
         for basis in bases:
             insts, meta = setup(family, spec, xo, zo, R, basis)
-            K = max(1, math.ceil(len(insts) / bsize))
+            # about <= 3 M clauses per batch (~225 R clauses per instance): at most 13000 / R instances
+            K = max(1, math.ceil(len(insts) / min(bsize, max(50, 13000 // R))))
             for s in range(K):
                 name = f"{circ}_{basis}_R{R}_s{s}of{K}"
                 if name in done:

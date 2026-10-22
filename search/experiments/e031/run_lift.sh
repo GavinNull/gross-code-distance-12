@@ -10,5 +10,7 @@ $L e032 search/experiments/e032/ctl_p10_spec.json A1A2A3B3B1B2 A1A2A3B3B1B2 1 $O
 # u11: any-R bound R' = 31 (E-032);  [[90]]: c16, c13 R' <= 12 (E-028/E-030), c11 R' = 25 (E-030)
 $L e032 search/experiments/e032/u11_spec.json A1A2A3B3B1B2 A1A2A3B3B1B2 1-31 $O/u11
 $L e028 search/experiments/e028/c16_spec.json A1A2A3B2B1B3 A1A2A3B2B1B3 1-12 $O/c16
-$L e028 search/experiments/e030/c13_spec.json A1A2A3B2B1B3 A1A2A3B2B1B3 1-12 $O/c13
-$L e028 search/experiments/e030/c11_spec.json A1A2A3B2B1B3 A1A2A3B2B1B3 1-25 $O/c11
+# not run (budget): $L e028 search/experiments/e030/c13_spec.json A1A2A3B2B1B3 A1A2A3B2B1B3 1-12 $O/c13
+# run: R 1-13 with cake_lpr, R 13-19 with --no-cake (drat-trim only), R 20-25 not run (budget)
+$L e028 search/experiments/e030/c11_spec.json A1A2A3B2B1B3 A1A2A3B2B1B3 1-12 $O/c11
+$L e028 search/experiments/e030/c11_spec.json A1A2A3B2B1B3 A1A2A3B2B1B3 13-19 $O/c11 --no-cake
