@@ -45,7 +45,9 @@ lightest extended logicals, with every solver decision in the proofs backed by a
 checked proof certificate. Without idle noise the $\code{90,8,10}$ circuit has a lower logical error rate
 than IBM's at $p=3\times10^{-3}$, and the gross circuit one lower than the distance-11
 circuit of Strikis et al.; with standard idle noise both are worse than the IBM
-circuits.
+circuits. In a neutral-atom noise model with literature parameters the $\code{90,8,10}$
+circuit again has the lower rate, provided the ancilla arrays move sequentially and atoms
+left unpaired during entangling pulses do not err.
 \end{abstract}
 
 \maketitle
@@ -300,6 +302,24 @@ decoding failures rather than by minimum-weight logicals\cl{60}. The full distan
 thus pays off when idling is nearly free; otherwise its gain is paid for in idle
 locations, the trade-off anticipated in SBB's App.~F~\cite{Strikis2026}.
 
+\emph{Neutral atoms.} We also use a neutral-atom circuit-level model with literature
+parameters: CZ error $5\times10^{-3}$~\cite{Evered2023,Bluvstein2024}, or a projected
+$3\times10^{-3}$~\cite{Muniz2024,Radnaev2025,Tsai2025}, and dephasing of every atom
+during each array move and mid-circuit readout with $T_2=1$~s~\cite{Bluvstein2024} or an
+assumed 10~s~\cite{Xu2023,Viszlai2026}. Our period-11 circuits need the same number of
+rigid array moves per round as IBM's depth-8 circuits (12, fixed by the code) and the
+same two readouts (SM~\ref{sm:na}). We assume that the $X$- and $Z$-ancilla arrays move
+one after the other~\cite{Viszlai2026}, that each move takes a fixed time, and that
+atoms left unpaired during a Rydberg pulse suffer no error, which experiments report
+only for atoms parked in a separate storage zone~\cite{Bluvstein2024,Bluvstein2025}.
+Under these assumptions the $\code{90,8,10}$ circuit has a lower per-round logical error
+rate than IBM's at every sampled setting with both decoders (ratios 0.40--0.82, all
+95\% intervals below 1), and the gross circuit is comparable to IBM's (0.46--0.99). If
+instead unpaired atoms suffer half the CZ error and the two arrays move simultaneously,
+the ordering reverses, by factors of 2.4 ($\code{90,8,10}$) and 3.3 (gross) at current
+parameters with BP-OSD, because the period-11 circuits spread their CNOTs over more
+pulses and leave more atoms unpaired\cl{62}.
+
 % ---------------------------------------------------------------------------
 \paragraph{Discussion.}
 SBB's obstruction is specific to non-interleaved circuits: both codes admit
@@ -379,9 +399,29 @@ Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
 \bibitem{SM} See Supplemental Material at [URL will be inserted by publisher] for the
 proof of Lemma~1 for our template, the period-11 gross circuit, the $\code{90,8,10}$ code
 and its circuits, the direct search on the detector error model, the certificates, the
-logical error rates, the analysis of Fig.~12 and its retimings, an earlier family of
+logical error rates, the neutral-atom noise model, the analysis of Fig.~12 and its retimings, an earlier family of
 period-18 gross circuits, and the verification and data, which includes
 Refs.~\cite{Bravyi2024,Strikis2026,Gidney2021honeycomb,Gidney2021stim,ShawTerhal2026}.
+\bibitem{Evered2023} S.~J.~Evered, D.~Bluvstein, M.~Kalinowski, S.~Ebadi, T.~Manovitz,
+H.~Zhou, S.~H.~Li, A.~A.~Geim, T.~T.~Wang, N.~Maskara, H.~Levine, G.~Semeghini,
+M.~Greiner, V.~Vuleti\'c, and M.~D.~Lukin, High-fidelity parallel entangling gates on a
+neutral atom quantum computer, Nature \textbf{622}, 268 (2023), arXiv:2304.05420.
+\bibitem{Bluvstein2024} D.~Bluvstein \emph{et al.}, Logical quantum processor based on
+reconfigurable atom arrays, Nature (2023), doi:10.1038/s41586-023-06927-3,
+arXiv:2312.03982.
+\bibitem{Muniz2024} J.~A.~Muniz \emph{et al.}, High-fidelity universal gates in the
+$^{171}$Yb ground state nuclear spin qubit, arXiv:2411.11708 (v2, 2024).
+\bibitem{Radnaev2025} A.~G.~Radnaev \emph{et al.}, A universal neutral-atom quantum
+computer with individual optical addressing and non-destructive readout, PRX Quantum
+\textbf{6}, 030334 (2025), arXiv:2408.08288.
+\bibitem{Tsai2025} R.~B.-S.~Tsai, X.~Sun, A.~L.~Shaw, R.~Finkelstein, and M.~Endres,
+Benchmarking and fidelity response theory of high-fidelity Rydberg entangling gates,
+PRX Quantum \textbf{6}, 010331 (2025), arXiv:2407.20184.
+\bibitem{Viszlai2026} J.~Viszlai, W.~Yang, S.~F.~Lin, J.~Liu, N.~Nottingham,
+J.~M.~Baker, and F.~T.~Chong, qSIEVE: Efficient qLDPC memory via systolic movement in
+atom arrays, ACM Trans.\ Quantum Comput.\ \textbf{7}, 9 (2026), arXiv:2311.16980.
+\bibitem{Bluvstein2025} D.~Bluvstein \emph{et al.}, Architectural mechanisms of a
+universal fault-tolerant quantum computer, arXiv:2506.20661 (2025).
 \bibitem{ShawTerhal2026} M.~H.~Shaw and B.~M.~Terhal, Optimising quantum error
 correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
 \end{thebibliography}
@@ -466,7 +506,8 @@ The sections follow the order of the main text. \ref{sm:notation} fixes notation
 \ref{sm:reduction} proves Lemma~\ref{lem:reduction}; \ref{sm:u11} treats the period-11
 gross circuit and \ref{sm:bb90} the $\code{90,8,10}$ code; \ref{sm:direct} describes the
 direct search on the detector error model, \ref{sm:certs} the certificates and
-\ref{sm:ler} the logical error rates. \ref{sm:fig12} and \ref{sm:dext} concern Fig.~12
+\ref{sm:ler} the logical error rates; \ref{sm:na} treats the neutral-atom noise model.
+\ref{sm:fig12} and \ref{sm:dext} concern Fig.~12
 of SBB, and \ref{sm:invariance}--\ref{sm:idle} an earlier family of gross circuits with
 period 18. \ref{sm:data} lists the data, and \ref{sm:morph} concerns the morphing
 end-cycle code.
@@ -855,6 +896,131 @@ failures rather than by minimum-weight logicals.
 for $R=1$--3, and none of lower weight for $R\le3$: its circuit distance is 10 for up to
 three rounds. For the period-11 circuit we find 69756 logicals of weight 12 at $R=1$ in
 each basis and 233244 at $R=2$ ($Z$ basis); the per-round count has not converged.
+% ---------------------------------------------------------------------------
+\section{Logical error rates in a neutral-atom noise model}\label{sm:na}\cl{62}
+\emph{Architecture and timing.} Data atoms stay in the entangling zone; the $X$- and
+$Z$-ancilla arrays are held in movable tweezers and translated rigidly, and each
+translation is followed by a global Rydberg CZ pulse and local single-qubit gates
+(CX $=$ H$\cdot$CZ$\cdot$H on the target). One move serves one pair (check type,
+polynomial term). Both codes have three terms in each of $A$ and $B$, so every
+translation-invariant schedule, of any period, needs exactly 12 moves per round; this
+holds for the period-11 circuits and for IBM's depth-8 circuits, which also have two
+mid-circuit readout layers per round. The period only determines how the 12 moves are
+distributed over layers. In the main model the two ancilla arrays move one after the
+other, as in qSIEVE~\cite{Viszlai2026}, and each move takes a fixed time, so the
+modelled round times agree. Equal move counts do not imply equal durations: with a
+move time growing as the square root of the distance, the summed path is 6\% longer
+for the period-11 gross circuit and 21\% longer for the period-11 $\code{90,8,10}$
+circuit (an indicator that depends on the layout); at current parameters this changes
+the fault mass by less than 2\%. Wrapping around the torus needs two steps per term in
+qSIEVE~\cite{Viszlai2026}, so 12 is a lower bound; this applies to both circuits
+equally.
+
+\emph{Noise.} Before each layer every atom receives a $Z$ error with probability
+$(1-e^{-\tau/T_2})/2$, with $\tau$ the move time plus the readout wait; during a
+mid-circuit readout the unmeasured atoms receive the scattering error of
+Table~\ref{tab:na}; preparation, gates, measurement and the two ancilla transfers per
+round carry the errors of Table~\ref{tab:na}. The per-round fault mass of each
+period-11 circuit agrees with IBM's within 0.1\% (gross, $X$ basis, current parameters:
+5.855 vs.\ 5.853). The set ``cur$\times$0.5'' halves every error probability of
+``cur''; it is a uniform scaling, not a literature value.
+
+\begin{table}[h]
+\caption{Parameters of the neutral-atom model (error probabilities unless stated).
+``cur'': current hardware; ``proj'': projected.}
+\label{tab:na}
+\begin{ruledtabular}
+\begin{tabular}{lllp{0.58\linewidth}}
+quantity & cur & proj & sources and remarks\\
+\hline
+CZ & $5.0\times10^{-3}$ & $3.0\times10^{-3}$ & cur: 99.5\%~\cite{Evered2023}, \cite{Bluvstein2024,Bluvstein2025}; proj: 99.72\%, 99.73\% with loss
+excluded~\cite{Muniz2024,Radnaev2025}, and 99.71\%~\cite{Tsai2025} (leakage-corrected, from a different architecture)\\
+single-qubit gate & $9\times10^{-4}$ & $3\times10^{-4}$ & cur: local gates, 99.912\%~\cite{Bluvstein2024}, 99.902\%~\cite{Radnaev2025}; proj: global Raman estimate 99.97\%~\cite{Evered2023}, applied here to local gates\\
+preparation & $6.8\times10^{-3}$ & $4\times10^{-3}$ & 99.32\%~\cite{Bluvstein2024}; 99.6\%~\cite{Evered2023}\\
+measurement & $5.8\times10^{-3}$ & $2\times10^{-3}$ & 0.46\% flips plus half of 0.24\% loss~\cite{Bluvstein2025}; imaging $\approx$99.8\%~\cite{Bluvstein2024}\\
+transfer & $1\times10^{-3}$ & $1\times10^{-3}$ & $\lesssim$0.1\% per transfer~\cite{Bluvstein2024}\\
+$T_2$ & 1 s & 10 s & cur~\cite{Bluvstein2024,Bluvstein2025}; proj is an assumption, as in~\cite{Xu2023,Viszlai2026}\\
+time per move & 200 $\mu$s & 200 $\mu$s & \cite{Bluvstein2024}\\
+readout wait & 1 ms & 0 & cur~\cite{Bluvstein2024}; proj: pipelined with the next moves~\cite{Xu2023}, assumes a second ancilla set\\
+readout scattering & $6.8\times10^{-4}$ & $3.4\times10^{-4}$ & 0.034\% per 500 $\mu$s image~\cite{Bluvstein2024}, applied for 1 ms\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\emph{Sampling.} The gross circuits are sampled for $R=12$ and the $\code{90,8,10}$
+circuits for $R=10$, both bases separately, with BP-OSD and Relay-BP as in
+\ref{sm:ler}. Shot numbers were fixed in advance for each block of circuits; no block was
+extended after its failures were seen. Intervals are Jeffreys intervals per basis,
+combined by sampling. An independent implementation of the model gives identical
+detector error models for all circuits and parameter sets, and independent sampling
+reproduces the ratios (e.g.\ $\code{90,8,10}$, proj, BP-OSD: 0.575 [0.465, 0.710]).
+
+\begin{table}[h]
+\caption{Per-round logical error rate ratio, period-11 circuit over IBM's depth-8
+circuit, with 95\% intervals; failures summed over both bases (period-11 / IBM) and
+shots per basis. Main model (sequential moves, no error on unpaired atoms).}
+\label{tab:naratio}
+\begin{ruledtabular}
+\begin{tabular}{llllllll}
+ & & \multicolumn{3}{l}{gross} & \multicolumn{3}{l}{$\code{90,8,10}$}\\
+set & decoder & ratio & failures & shots & ratio & failures & shots\\
+\hline
+cur & BP-OSD & 0.99 [0.81, 1.21] & 177 / 179 & 440 & 0.82 [0.69, 0.97] & 232 / 275 & 640\\
+cur & Relay-BP & 0.80 [0.57, 1.12] & 59 / 74 & 300 & 0.72 [0.55, 0.95] & 87 / 119 & 530\\
+cur$\times$0.5 & BP-OSD & 0.46 [0.27, 0.80] & 18 / 39 & 18000 & 0.54 [0.42, 0.69] & 93 / 173 & 21000\\
+cur$\times$0.5 & Relay-BP & 0.71 [0.24, 2.2] & 5 / 7 & 25000 & 0.40 [0.28, 0.56] & 44 / 111 & 48000\\
+proj & BP-OSD & 0.70 [0.43, 1.16] & 26 / 37 & 20000 & 0.57 [0.46, 0.71] & 125 / 219 & 25000\\
+proj & Relay-BP & 0.56 [0.20, 1.6] & 5 / 9 & 29000 & 0.48 [0.35, 0.66] & 53 / 111 & 41000\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+For the $\code{90,8,10}$ code all six intervals lie below 1. For the gross code all six
+point estimates lie below 1 but only one interval does (cur$\times$0.5, BP-OSD), so we
+call the two circuits comparable.
+
+\begin{table}[h]
+\caption{Sensitivity variants, BP-OSD; ratio period-11 / IBM with failures (period-11
+/ IBM).}
+\label{tab:nasens}
+\begin{ruledtabular}
+\begin{tabular}{lllll}
+variant & gross & failures & $\code{90,8,10}$ & failures\\
+\hline
+cur, CZ error $6.5\times10^{-3}$ & 0.95 [0.81, 1.11] & 288 / 305 & 0.85 [0.71, 1.00] & 236 / 260\\
+cur, simultaneous moves (cur\_par) & 0.98 [0.82, 1.15] & 260 / 267 & 0.89 [0.76, 1.04] & 288 / 325\\
+cur, measured round of~\cite{Bluvstein2025} (cur\_slow) & 0.92 [0.79, 1.08] & 323 / 296 & 0.92 [0.80, 1.06] & 361 / 387\\
+proj, no readout wait, $T_2=1$ s, simultaneous moves & 0.77 [0.54, 1.08] & 56 / 73 & 0.61 [0.49, 0.76] & 133 / 218\\
+cur\_par, unpaired atoms with error $p_{\rm CZ}/2$ & 3.31 [2.85, 3.84] & 603 / 246 & 2.41 [2.09, 2.77] & 561 / 284\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\emph{Sensitivity.} The CZ value $6.5\times10^{-3}$ corresponds to the fidelities
+before loss is excluded~\cite{Muniz2024,Radnaev2025}. In cur\_slow each gate layer takes
+470~$\mu$s and each readout layer 2.57~ms, the split of the 4.45~ms round
+of~\cite{Bluvstein2025}, where 2.57~ms is the time to move the ancillas to the storage
+zone and bring in the next group. At current parameters the $\code{90,8,10}$ advantage
+is not significant under simultaneous moves (cur\_par) or with the measured round
+(cur\_slow); with projected gate errors it persists under simultaneous moves.
+The last variant is the decisive one. With simultaneous moves IBM's circuits pair almost
+every atom in every pulse, while the period-11 circuits spread their CNOTs over 10
+pulses instead of 7. Counting, for each Rydberg pulse, the atoms that stay in the
+entangling zone, are neither prepared nor measured in that layer and have no partner,
+gives 1008 vs.\ 144 exposures per round for the gross code and 630 vs.\ 90 for
+$\code{90,8,10}$. If such atoms suffer half the CZ error, the ordering reverses. With
+sequential moves the counts are equal (1584 and 990 for both circuits). We know of no
+measurement of this error: experiments report no error on atoms in a separate storage
+zone~\cite{Bluvstein2024,Bluvstein2025}, which is isolated from the Rydberg beams.
+
+\emph{Omitted effects and caveats.} Atom loss is folded into Pauli errors and the
+decoders receive no erasure information; $T_1$ decay and heating are not modelled; the
+time per move is fixed rather than distance-dependent. At current parameters the
+gross circuits fail in about 31\% of $X$-basis experiments of 12 rounds (74\% for the
+period-11 circuit in the last variant); in this near-threshold regime the conversion to
+a per-round rate compresses ratios towards 1, so the current-parameter ratios, including
+the reversal factors, are conservative. The comparisons hold for these two decoders.
+
 % ---------------------------------------------------------------------------
 \section{Fig.~12 of SBB: $\dcirc=11$ and retimings}\label{sm:fig12}\cl{10,13,14,15,16,17,18}
 \emph{$\dcirc=11$.} Fig.~12 is non-interleaved, so SBB's Prop.~3 and Cor.~1 give
