@@ -41,8 +41,8 @@ question, and 10 for $\code{90,8,10}$, two above the extended-code distance of t
 CNOT orders, and prove this under circuit-level depolarizing noise for every number of
 rounds. The method fixes an order class, even one of lower extended-code distance, and
 recovers the code distance by exact lift computations over complete lists of the
-lightest extended logicals, with checked proof certificates for most infeasibility
-claims. Without idle noise the $\code{90,8,10}$ circuit has a lower logical error rate
+lightest extended logicals, with every solver decision in the proofs backed by a
+checked proof certificate. Without idle noise the $\code{90,8,10}$ circuit has a lower logical error rate
 than IBM's at $p=3\times10^{-3}$, and the gross circuit one lower than the distance-11
 circuit of Strikis et al.; with standard idle noise both are worse than the IBM
 circuits.
@@ -256,14 +256,14 @@ the extended code of this code has a logical of weight at most 8 on the $X$-chec
 side, so every non-interleaved circuit has $\dcirc\le8$ by SBB's Cor.~1, a value that
 is attained\cl{53}.
 
-\emph{Certificates.} Every infeasibility claim of the period-16 $\code{90,8,10}$
-circuit's proof carries a checked certificate: $\dext\ge8$ and the completeness of its
-two lists (VeriPB), and all lift instances for $R\le12$ (DRAT proofs checked with
-drat-trim and, for their LRAT cores, cake\_lpr). For the period-11 gross circuit,
-$\dext=10$ (VeriPB) and all lift instances for $R\le31$ (DRAT) are certified; a
-certificate for the completeness of its two lists has been produced and is pending
-audit. For the period-11 $\code{90,8,10}$ circuit the lift instances are certified for
-$R\le19$; certificates up to $R\le25$ are pending audit. The encodings
+\emph{Certificates.} Every infeasibility claim used in the proofs of both theorems is
+accompanied by a checked certificate. For the period-11 gross circuit, $\dext=10$ and the
+completeness of the lists of 144 weight-10 and 7344 weight-11 extended logicals (both
+bases) are certified by pseudo-Boolean proofs checked with VeriPB, and every lift
+instance for $R\le31$ by a DRAT proof checked with drat-trim and, for its LRAT core,
+cake\_lpr. For the period-11 $\code{90,8,10}$ circuit the same holds with $\dext=8$, the
+lists of 585 and 16830 logicals, and lift instances for $R\le25$, the bound the argument
+for every $R$ needs; likewise for the period-16 circuit ($R\le12$). The encodings
 were generated from the circuits by our code and cross-checked against independent
 implementations; the reductions to these finite problems are the mathematical
 arguments above, whose premises were verified computationally (SM~\ref{sm:certs})\cl{58}.
@@ -790,14 +790,19 @@ weight-8 and weight-9 extended-logical lists by VeriPB (including the reduction 
 representatives, which is part of the checked proof), and all lift instances for
 $R\le12$, both bases, by DRAT proofs. $\dext\le8$ is witnessed by the listed logicals.
 
-\emph{Period-11 gross circuit.} $\dext\ge10$ (VeriPB; the listed logicals witness
-$\dext\le10$) and all lift instances for $R\le31$, both bases (DRAT), are certified. The
-completeness of the lists of 144 and 7344 logicals has been certified with VeriPB in
-both bases; this certificate is pending audit.
+\emph{Period-11 gross circuit.} $\dext\ge10$ and the completeness of the lists of 144
+weight-10 and 7344 weight-11 extended logicals, both bases, are certified by VeriPB~3
+proofs (the listed logicals witness $\dext\le10$); all lift instances for $R\le31$,
+both bases, are certified by DRAT proofs. The largest proofs ($4.6\times10^{11}$ bytes)
+are generated deterministically and checked as streams; we record the SHA-256 hash of
+each stream so that it can be regenerated and compared. Checking the weight-11 proofs
+requires about 18~GB of memory.
 
-\emph{Period-11 $\code{90,8,10}$ circuit.} The lift instances are certified for $R\le19$
-(audited); certificates for $R\le25$, which the argument for every $R$ needs, and for the
-period-12 circuit up to $R\le12$ have been produced and are pending audit.
+\emph{Period-11 and period-12 $\code{90,8,10}$ circuits.} The period-11 circuit uses the
+extended code of the period-16 circuit, so $\dext\ge8$ and the completeness of the
+weight-8 and weight-9 lists are certified as above; all lift instances for $R\le25$, both
+bases, the bound the argument for every $R$ needs, are certified by DRAT proofs. For the
+period-12 circuit all lift instances for $R\le12$ are certified.
 
 \emph{Fig.~12 and the period-18 circuits.} $\dext\ge9$ for the Fig.~12 order class is
 certified; $\dext=11$ and the list of 4224 weight-11 logicals rest on two independent
