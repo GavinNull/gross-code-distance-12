@@ -20,6 +20,15 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision O3 (2026-10-23)
+
+Prop. 5 framing for the gross circuit (+2 over uniformly tiled non-interleaved circuits, +1 over all non-interleaved);
+IBM gross exact-10 wording; new references 2308.08648 and 2603.01628 (abs pages checked) plus SBB App. F / G.2 and
+SI1000; Fig. 1 audit fixes ("straddle" replaced, both detectors fire, audited typicality sentence); SM step range fixed
+(0 and 4–8 of one period); E-034 certificates marked pending audit. Core 3204 word-equivalents (Fig. 1 caption 150
+words with math counted as one token); End Matter 646 words; 18 pages; tables OK; reference_checklist regenerated
+(20 references).
+
 ## Revision O2 (2026-10-22)
 
 New two-column Fig. 1 (`figures/fig1_u11.pdf`): (a) non-segmentability, (b) one weight-10 logical that lifts in the
