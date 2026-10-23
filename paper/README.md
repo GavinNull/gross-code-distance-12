@@ -20,6 +20,13 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision O4 (2026-10-24)
+
+E-034 audited: certificate wording upgraded in the abstract ("every solver decision in the proofs backed by a checked
+proof certificate"), the main-text Certificates paragraph and SM S6 (u11 VeriPB 144/7344 lists and lifts R ≤ 31; [[90]]
+period 11 lists 585/16830 and lifts R ≤ 25; period 12 R ≤ 12); qualifiers kept; SM notes ~18 GB for the W11 VeriPB
+check. Core 3217 word-equivalents; End Matter 646; 18 pages; tables OK.
+
 ## Revision O3 (2026-10-23)
 
 Prop. 5 framing for the gross circuit (+2 over uniformly tiled non-interleaved circuits, +1 over all non-interleaved);
