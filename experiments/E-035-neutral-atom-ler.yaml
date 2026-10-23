@@ -133,6 +133,17 @@ amendments:
       With floor 300 the N table (shots.json) costs 38.1 CPU h.  Near threshold the failure probability per shot is
       large, so a few hundred shots still give tens of failures.  Surface-code sanity (no BB data) was already run:
       d5 0.39%/round (cur_slow), Lambda(3->5) 1.86.
+  - date: 2026-10-24
+    before_sampling: "partially: main stage complete; sensitivity stage stopped mid-way (only shots/seconds inspected, no sensitivity failure counts looked at)"
+    change: "sensitivity blocks capped at their pre-registered CPU allowance (stop rule on CPU seconds only); global cap 48 h"
+    reason: >
+      The timing step (22 shots/task, process_time at lower load) underestimated sinter seconds by 3-4x for the
+      low-noise blocks (gross proj_t2par: measured 0.14-0.28 s/shot vs 0.012-0.17 estimated), so the fixed N table would
+      have cost ~55-60 h > 50 h budget.  main.csv used 29.5 h (the cur blocks overran their allowance for the same reason).
+      New rule (search/experiments/e035/sens_capped.py): each sensitivity block runs in shot levels of max(50, N/8),
+      and stops after the level at which its cumulative seconds reach the allowance, or at N.  Shots per task may then be
+      unequal between circuits (scheduling order is outcome independent, max_errors stays 1e9).  Stopped by PID
+      84225/84227 and workers 57814-57819, 86577.
 budget: {cpu_hours: 50, llm_tokens: 0, num_workers: 6}
 seed: "sinter default per-batch seeds (recorded in csv strong_id); timing seed 35; analysis MC seed 1"
 command: >
