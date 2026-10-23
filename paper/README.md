@@ -26,7 +26,7 @@ Neutral-atom LER (E-035, audited): main-text paragraph in the LER section, abstr
 ancilla moves and error-free unpaired atoms), new SM section `sm:na` with three tables (parameters, ratios with failure
 counts, sensitivity). Seven new references (2304.05420, 2312.03982, 2411.11708, 2408.08288, 2407.20184, 2311.16980,
 2506.20661), abs pages checked; reference_checklist regenerated (26 references). Core 3436 word-equivalents; End Matter
-646 (pages 5–6); abstract 210 words; 20 pages; tables OK; no overfull boxes.
+646 (pages 5–6); abstract 210 words, trimmed to 176 in O5b (SBB attribution shortened, method and certificate clauses merged, neutral-atom sentence kept); 20 pages; tables OK; no overfull boxes.
 
 ## Revision O4 (2026-10-24)
 
