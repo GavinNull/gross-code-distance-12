@@ -59,8 +59,9 @@ flip a logical observable without triggering any detector; at low physical error
 rates it governs the logical error rate.
 
 No circuit for the gross code had been shown to reach $\dcirc=d=12$. The IBM
-circuit, with 8 time steps per round, has $\dcirc\le10$~\cite{Bravyi2024,TourDeGross};
-exact enumeration shows that it has exactly 10 for up to three rounds\cl{55}.
+circuit, with 8 time steps per round, has circuit distance exactly 10 under SD6 for
+$R\le3$, by exact enumeration (SM~\ref{sm:ler}); previously only $\dcirc\le10$ was
+known~\cite{Bravyi2024,TourDeGross,Tesseract2025}\cl{55}.
 Strikis, Browne and Beverland (SBB)~\cite{Strikis2026} analysed single-ancilla
 circuits, in which each check is measured by one dedicated ancilla coupled by CNOTs.
 They append to the check matrix the ``residual'' errors that an ancilla fault spreads
@@ -75,14 +76,18 @@ interleaved circuit can achieve circuit distance 12''~\cite{Strikis2026}. For th
 $\code{90,8,10}$ code of the same family the best known value is 8: the IBM circuit
 has $\dcirc\le8$~\cite{Bravyi2024}, proven exact by MaxSAT~\cite{Tesseract2025}.
 
-We answer this question in the affirmative and show that interleaving can gain two
-units over the extended-code distance. For both codes we construct single-ancilla
-circuits with a period of 11 time steps (Table~\ref{tab:circuit}) and prove that they
-reach the full code distance, $\dcirc=12$ for the gross code
-(Theorem~\ref{thm:main})\cl{56} and $\dcirc=10$ for $\code{90,8,10}$
-(Theorem~\ref{thm:bb90})\cl{57}, for every number of rounds. In both circuits the CNOT
-orders have $\dext=d-2$; for $\code{90,8,10}$ every choice of orders has $\dext\le8$,
-so every non-interleaved circuit is capped at 8\cl{53}. The method is to choose a class
+We answer this question in the affirmative. For the gross code we construct a
+single-ancilla circuit with a period of 11 time steps that is uniformly tiled, all $X$
+checks acting identically up to translation and likewise all $Z$ checks, and
+interleaved, and prove $\dcirc=12$ for every number of rounds
+(Theorem~\ref{thm:main})\cl{56}. SBB's Prop.~5 bounds every uniformly tiled
+non-interleaved circuit for the gross code by $\dcirc\le10$~\cite{Strikis2026}, so
+interleaving gains two units within this class, and one unit over the best
+non-interleaved circuit overall. For $\code{90,8,10}$, where every choice of CNOT
+orders gives $\dext\le8$ and hence every non-interleaved circuit has
+$\dcirc\le8$\cl{53}, we construct a period-11 circuit with $\dcirc=10$
+(Theorem~\ref{thm:bb90})\cl{57}; a period-16 circuit reaches the same distance, and the
+new circuit shortens the period (Table~\ref{tab:circuit}). The method is to choose a class
 of CNOT orders, even one of lower $\dext$, and to recover the code distance through
 timing, by deciding exactly, over the complete lists of extended logicals of weight
 $\dext$ and $\dext+1$, that none of them can be realised by undetected circuit
@@ -104,7 +109,12 @@ the upper bound for the unchanged IBM circuit returns to 10 under infinitely
 $Z$-biased ancilla noise~\cite{BiChangPuri2026}; we keep depolarizing noise, change
 the circuit, and prove the value\cl{53}. Using SBB's lower bound via non-interleaved
 counterparts to screen interleaved schedules was proposed in Ref.~\cite{Nguyen2026};
-that bound cannot exceed $\dext$. Check-dependent CNOT orders are an established
+that bound cannot exceed $\dext$. Staggering consecutive rounds is permitted in SBB's
+model and generalizes the pipelined product-coloration circuits of
+Ref.~\cite{Xu2023}; the new ingredient here is interleaving $X$- and $Z$-check CNOTs on
+each data qubit within a uniform, wrapped-around schedule. For the surface code,
+interleaving $X$ and $Z$ checks recovers the full distance at minimum
+depth~\cite{Hirai2026}. Check-dependent CNOT orders are an established
 tool~\cite{TomitaSvore,KishonyFowler,Strikis2026}\cl{40}.
 
 % ---------------------------------------------------------------------------
@@ -145,16 +155,17 @@ $\code{90,8,10}$ & $X$ & 0 & $B_1B_3B_2A_3A_1A_2$ & 1, 2, 3, 4, 5, 9 & 10\\
 
 \begin{figure*}[t]
 \includegraphics[width=\textwidth]{figures/fig1_u11.pdf}
-\caption{The period-11 gross circuit. (a) Top: CNOT types on one left and one right
-data qubit over a period: three $X$-check CNOTs, then three $Z$-check CNOTs. Bottom: a
-cycle $X_9\to Z_{17}\to X_{12}\to Z_{20}\to X_{22}\to Z_{24}\to X_9$ of check instances;
-arrows mark shared data qubits on which the first instance acts first. A $Z$
-instance's first CNOT precedes the round's $X$ CNOTs and its other five follow them, so
-the circuit is not segmentable. (b) A weight-10 extended logical (six data and four
-hook columns; $Z$ memory, $R=1$). In a segmented circuit with the same orders, hooks
-of $X_{45}$ and $X_{48}$ both reach qubit 123 before $Z_{69}$ reads it, and the logical
-lifts. In the period-11 circuit $Z_{69}$ reads qubit 123 between the two arrivals, so its
-detector fires. (c) The proofs of Theorems~\ref{thm:main} and~\ref{thm:bb90}.}
+\caption{The period-11 gross circuit. (a) Top: CNOT types on a left and a right data
+qubit over one period. Bottom: a cycle $X_9\to Z_{17}\to X_{12}\to Z_{20}\to X_{22}\to
+Z_{24}\to X_9$ of check instances; each arrow is a shared data qubit on which the first
+instance acts first. On left data qubits a $Z$ instance's first CNOT precedes the
+round's $X$ CNOTs; on right data qubits an $X$ instance's last CNOT follows the round's
+$Z$ CNOTs; so $X$ and $Z$ instances of one round precede one another around cycles, and
+the circuit is not segmentable. (b) A weight-10 extended logical ($Z$ memory, $R=1$). In
+a segmented circuit with the same orders, hooks of $X_{45}$ and $X_{48}$ reach qubit 123
+before $Z_{69}$ reads it, and the logical lifts. In the period-11 circuit $Z_{69}$ reads
+it between the two arrivals, so both of its detectors fire and the logical cannot lift.
+(c) The proofs of Theorems~\ref{thm:main} and~\ref{thm:bb90}.}
 \label{fig:u11}
 \end{figure*}
 
@@ -162,15 +173,20 @@ detector fires. (c) The proofs of Theorems~\ref{thm:main} and~\ref{thm:bb90}.}
 Both circuits are translation invariant: all $X$ checks share one order and timing,
 as do all $Z$ checks (Table~\ref{tab:circuit}). Both are legal and deterministic.
 Within one period every data qubit performs its three $X$-check CNOTs and then its
-three $Z$-check CNOTs, yet neither circuit is non-interleaved: because a $Z$-check
-window wraps across the period boundary, a $Z$-check instance straddles the next
-$X$-check instance on the same data qubits, and no reordering of commuting gates
-separates the $X$ and $Z$ CNOTs of a round (Fig.~\ref{fig:u11}a,
+three $Z$-check CNOTs, yet neither circuit is non-interleaved: because the $Z$-check
+window wraps across the period boundary, a $Z$-check instance follows some $X$-check
+instances of its round and precedes others, closing cycles of precedence through both
+types, and no reordering of commuting gates separates the $X$ and $Z$ CNOTs of a
+round (Fig.~\ref{fig:u11}a,
 SM~\ref{sm:u11})\cl{56,57}. This is the sense in which they are interleaved, and it is
 what lifts $\dcirc$ above $\dext$: a readout can now fall between the arrivals of two
 hook residuals on the same data qubit, so a check sees one of them instead of both,
 and an extended logical that a segmented circuit realises silently triggers a detector
-(Fig.~\ref{fig:u11}b)\cl{61}. In
+(Fig.~\ref{fig:u11}b)\cl{61}. All 144 weight-10 extended logicals lift in the
+segmented circuit and none in the period-11 circuit at $R=1$; for each, three or four
+$Z$ checks see exactly two of its hook residuals, deposited on opposite sides of the
+check's read (on one data qubit, as in Fig.~\ref{fig:u11}b, or on two), so a single
+detector already forbids the lift\cl{61}. In
 the gross circuit both check types use orders of the uniform class of
 $A_1A_2A_3B_3B_1B_2$ (closed under reversal and the swaps of positions 1,2 and 5,6),
 whose extended code has $\dext=10$, with exactly 144 extended logicals of weight 10
@@ -245,8 +261,9 @@ circuit's proof carries a checked certificate: $\dext\ge8$ and the completeness 
 two lists (VeriPB), and all lift instances for $R\le12$ (DRAT proofs checked with
 drat-trim and, for their LRAT cores, cake\_lpr). For the period-11 gross circuit,
 $\dext=10$ (VeriPB) and all lift instances for $R\le31$ (DRAT) are certified; a
-certificate for the completeness of its two lists is in progress. For the period-11
-$\code{90,8,10}$ circuit the lift instances are certified for $R\le19$. The encodings
+certificate for the completeness of its two lists has been produced and is pending
+audit. For the period-11 $\code{90,8,10}$ circuit the lift instances are certified for
+$R\le19$; certificates up to $R\le25$ are pending audit. The encodings
 were generated from the circuits by our code and cross-checked against independent
 implementations; the reductions to these finite problems are the mathematical
 arguments above, whose premises were verified computationally (SM~\ref{sm:certs})\cl{58}.
@@ -265,12 +282,13 @@ period 18 (SM~\ref{sm:p18})\cl{41}.
 \paragraph{Logical error rates.}
 We sampled both period-11 circuits and the references with identical BP-OSD and
 Relay-BP decoders and exact priors, rescaling only the idle channel of SD6,
-$p_{\rm idle}=\lambda p$ (SM~\ref{sm:ler}). Without idle errors ($\lambda=0$) the
+$p_{\rm idle}=\lambda p$ (SM~\ref{sm:ler}); setting idle noise to zero to isolate the
+effect of CNOT ordering follows SBB's App.~G.2~\cite{Strikis2026}. Without idle errors ($\lambda=0$) the
 $\code{90,8,10}$ circuit has a lower per-round logical error rate than IBM's depth-8
 circuit at every sampled $p$ between $2\times10^{-3}$ and $5\times10^{-3}$ with both
 decoders (at $p=3\times10^{-3}$, BP-OSD: 0.52 [0.44, 0.62], pooled from two
-independent sampling pipelines); at $\lambda=0.1$ the two are statistically
-indistinguishable, and under standard SD6 ($\lambda=1$) the new circuit is worse by a
+independent sampling pipelines); at $\lambda=0.1$, an idle strength comparable to the
+SI1000 model~\cite{Gidney2021honeycomb}, the two are statistically indistinguishable, and under standard SD6 ($\lambda=1$) the new circuit is worse by a
 factor of 6--9 (BP-OSD) and 9--17 (Relay-BP) per round\cl{59}. At $\lambda=0$ the
 gross circuit is below SBB's distance-11 circuit at every sampled $p$ between
 $3\times10^{-3}$ and $5\times10^{-3}$ with BP-OSD (ratios 0.31--0.56) and comparable to
@@ -279,7 +297,8 @@ $\lambda=0.1$ we resolve no difference (intervals spanning factors of 3--10), an
 $\lambda=1$ it is worse than IBM's circuit by 7 [4, 12] (BP-OSD, $p=2\times10^{-3}$) to
 21--39 ($p=3\times10^{-3}$). At $\lambda=0$ its failures are dominated by BP-OSD
 decoding failures rather than by minimum-weight logicals\cl{60}. The full distance
-thus pays off when idling is nearly free.
+thus pays off when idling is nearly free; otherwise its gain is paid for in idle
+locations, the trade-off anticipated in SBB's App.~F~\cite{Strikis2026}.
 
 % ---------------------------------------------------------------------------
 \paragraph{Discussion.}
@@ -317,11 +336,11 @@ Nature \textbf{627}, 778 (2024), arXiv:2308.07915.
 \bibitem{TourDeGross} T.~J.~Yoder, E.~Schoute, P.~Rall, E.~Pritchett,
 J.~M.~Gambetta, A.~W.~Cross, M.~Carroll, and M.~E.~Beverland, Tour de gross: A
 modular quantum computer based on bivariate bicycle codes, arXiv:2506.03094 (2025).
+\bibitem{Tesseract2025} L.~Aghababaie Beni, O.~Higgott, and N.~Shutty, Tesseract: A
+search-based decoder for quantum error correction, arXiv:2503.10988 (v2, 2025).
 \bibitem{Strikis2026} A.~Strikis, D.~E.~Browne, and M.~E.~Beverland,
 High-performance syndrome extraction circuits for quantum codes,
 arXiv:2603.05481 (v2, 2026).
-\bibitem{Tesseract2025} L.~Aghababaie Beni, O.~Higgott, and N.~Shutty, Tesseract: A
-search-based decoder for quantum error correction, arXiv:2503.10988 (v2, 2025).
 \bibitem{ManesClaes} A.~G.~Manes and J.~Claes, Distance-preserving stabilizer
 measurements in hypergraph product codes, Quantum \textbf{9}, 1618 (2025),
 arXiv:2308.15520.
@@ -342,6 +361,13 @@ quantum LDPC codes, arXiv:2605.21898 (v2, 2026).
 biased noise ancilla, arXiv:2606.30592 (2026).
 \bibitem{Nguyen2026} M.~T.~P.~Nguyen, M.~Rimbach-Russ, and S.~Bosco, Disassembling
 qLDPC codes for depth-optimal parity-check circuits, arXiv:2608.19917 (v2, 2026).
+\bibitem{Xu2023} Q.~Xu, J.~P.~Bonilla Ataides, C.~A.~Pattison, N.~Raveendran,
+D.~Bluvstein, J.~Wurtz, B.~Vasic, M.~D.~Lukin, L.~Jiang, and H.~Zhou, Constant-overhead
+fault-tolerant quantum computation with reconfigurable atom arrays, arXiv:2308.08648
+(2023).
+\bibitem{Hirai2026} Y.~Hirai, S.~Ikari, Y.~Ueno, and Y.~Suzuki, No more hooks in the
+surface code: Distance-preserving syndrome extraction for arbitrary layouts at minimum
+depth, arXiv:2603.01628 (v2, 2026).
 \bibitem{TomitaSvore} Y.~Tomita and K.~M.~Svore, Low-distance surface codes under
 realistic quantum noise, Phys.\ Rev.\ A \textbf{90}, 062320 (2014), arXiv:1404.3747.
 \bibitem{KishonyFowler} G.~Kishony and A.~Fowler, Color code off-the-hook:
@@ -566,8 +592,11 @@ circuit would admit block numbers that never decrease along edges and increase a
 types. The graph of this circuit has strongly connected components containing both
 types (144 instances each, all instances of one round label), for example the 6-cycle
 $X_9\to Z_{17}\to X_{12}\to Z_{20}\to X_{22}\to Z_{24}\to X_9$, so no such numbering
-exists: a $Z$-check instance, whose CNOTs fall in steps 0 and 4--5 of consecutive
-periods, straddles the next $X$-check instance. A circuit with the same orders but an
+exists. A $Z$-check instance's CNOTs fall in steps 0 and 4--8 of one period: on left
+data qubits a $Z$ instance's first CNOT precedes the round's $X$ CNOTs, and on right
+data qubits an $X$ instance's last CNOT follows the round's $Z$ CNOTs, so $X$ and $Z$
+instances of one round precede one another around cycles. No pair of instances
+precedes each other on two shared qubits; the crossing closes only around cycles. A circuit with the same orders but an
 $X$ block at steps 1--6 and a $Z$ block at steps 8--13 (period 15) has no mixed
 component.
 
@@ -763,12 +792,12 @@ $R\le12$, both bases, by DRAT proofs. $\dext\le8$ is witnessed by the listed log
 
 \emph{Period-11 gross circuit.} $\dext\ge10$ (VeriPB; the listed logicals witness
 $\dext\le10$) and all lift instances for $R\le31$, both bases (DRAT), are certified. The
-completeness of the lists of 144 and 7344 logicals is not certified; a VeriPB run is in
-progress.
+completeness of the lists of 144 and 7344 logicals has been certified with VeriPB in
+both bases; this certificate is pending audit.
 
-\emph{Period-11 $\code{90,8,10}$ circuit.} The lift instances are certified for $R\le19$;
-the argument for every $R$ needs $R\le25$, so this circuit's result is not certified as
-a whole. The period-12 circuit has no lift certificates.
+\emph{Period-11 $\code{90,8,10}$ circuit.} The lift instances are certified for $R\le19$
+(audited); certificates for $R\le25$, which the argument for every $R$ needs, and for the
+period-12 circuit up to $R\le12$ have been produced and are pending audit.
 
 \emph{Fig.~12 and the period-18 circuits.} $\dext\ge9$ for the Fig.~12 order class is
 certified; $\dext=11$ and the list of 4224 weight-11 logicals rest on two independent
