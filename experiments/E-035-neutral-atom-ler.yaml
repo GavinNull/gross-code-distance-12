@@ -90,7 +90,7 @@ plan:
   3_shot_rule: >
     For each block (code family, model, decoder) the same shots-per-basis N for every circuit of the family:
     N = A_block / sum_{circ, basis} t_shot(circ, basis), rounded DOWN to 2 significant digits, capped at 300000,
-    floored at 2000.  Allowances A_block in CPU seconds:
+    floored at 300 (amended, see amendments).  Allowances A_block in CPU seconds:
       gross main  cur: bposd 6000, relay5 3000 | proj: bposd 18000, relay5 8000 | curx0.5: bposd 18000, relay5 8000
       bb90  main  cur: bposd 2000, relay5 1000 | proj: bposd 8000, relay5 4000  | curx0.5: bposd 8000, relay5 4000
       gross sens (bposd only, u11 + ibm): cur_cz 4000, cur_par 6000, cur_slow 6000, proj_t2par 14000, cur_par_unp 6000
@@ -123,6 +123,16 @@ prediction: >
      each.  cur_par_unp: u11/ibm larger than cur_par by > 1.5x: 60%; c11/ibm90 under cur_par_unp significantly > 1: 30%.
   P6 time per round: seq timing u11 = ibm (4.4 ms cur, 2.4 ms proj), par u11/ibm = 10/7 move-time (4.0 vs 3.4 ms cur)
      -- deterministic from the model (probe), stated for completeness.
+amendments:
+  - date: 2026-10-23
+    before_sampling: true
+    change: "shot-rule floor 2000 -> 300"
+    reason: >
+      After timing (timing.json; decode seconds only, no failure counts computed or seen) the cur-level blocks are near
+      threshold and BP-OSD needs 1.5-3.7 s/shot on gross; with the 2000 floor the plan would cost 75 CPU h (> 50 budget).
+      With floor 300 the N table (shots.json) costs 38.1 CPU h.  Near threshold the failure probability per shot is
+      large, so a few hundred shots still give tens of failures.  Surface-code sanity (no BB data) was already run:
+      d5 0.39%/round (cur_slow), Lambda(3->5) 1.86.
 budget: {cpu_hours: 50, llm_tokens: 0, num_workers: 6}
 seed: "sinter default per-batch seeds (recorded in csv strong_id); timing seed 35; analysis MC seed 1"
 command: >
