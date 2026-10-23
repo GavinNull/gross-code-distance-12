@@ -27,7 +27,7 @@ IBM gross exact-10 wording; new references 2308.08648 and 2603.01628 (abs pages 
 SI1000; Fig. 1 audit fixes ("straddle" replaced, both detectors fire, audited typicality sentence); SM step range fixed
 (0 and 4–8 of one period); E-034 certificates marked pending audit. Core 3204 word-equivalents (Fig. 1 caption 150
 words with math counted as one token); End Matter 646 words; 18 pages; tables OK; reference_checklist regenerated
-(20 references).
+(19 references; SM item excluded).
 
 ## Revision O2 (2026-10-22)
 
