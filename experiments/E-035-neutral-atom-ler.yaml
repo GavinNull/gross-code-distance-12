@@ -1,0 +1,134 @@
+id: E-035-neutral-atom-ler
+hypothesis: >
+  H-004 / PI request 2026-10-23: tie the "idle errors cheap" (lambda ~ 0) regime of STATE 17/18 to a real platform.
+  On a neutral-atom processor the time per round is dominated by atom transport and readout, and dephasing hits every
+  atom (gated or not) per unit time, so the SD6 "one idle slot = one DEPOLARIZE1(p)" penalty for period 11 vs 8 may
+  not apply.  Question: with literature neutral-atom parameters, do u11 (gross, period 11, d_circ 12) and c11
+  ([[90]], period 11, d_circ 10) have lower per-round LER than IBM's depth-8 circuits (and SBB Fig. 12)?
+reasoning: >
+  STATE 17/18 (audited): lambda = 0 c11 beats IBM [[90]] at every sampled p (both decoders); u11 is comparable to IBM
+  (0.64-0.96, nothing individually conclusive) and beats Fig. 12 (BP-OSD 0.31-0.56); lambda = 1 both lose 6-39x.
+  Structure probe of THIS model (results/E-035-neutral-atom-ler/probe.json, run before this yaml, no LER):
+  translation-invariant circuits (u11, ibm, c11, ibm90) have at most one (type, term) group per type per layer,
+  12 rigid ancilla translations per round and 2 mid-circuit readout layers per round, so under sequential moves
+  ("seq") u11 and IBM have IDENTICAL round time (4.4 ms cur) and per-round DEM mass equal to 0.1% (cur X basis
+  5.855 vs 5.853; [[90]] 3.660 vs 3.658).  Under parallel X/Z moves ("par") u11 has 10 move layers vs 7 (4.0 vs
+  3.4 ms cur, X mass +1.5%).  Fig. 12 is not translation invariant: up to 6 groups per layer, 26 moves and 4 readout
+  layers per round (9.2 ms cur, X mass 6.70 vs 5.85).  Effective strength: cur per-round mass 5.4-5.9 (gross), about
+  SD6-lambda0 at p ~ 7e-3; proj 2.9 (~3.6e-3); cur x0.5 2.7 (~3.4e-3).  Time noise is ~9% of the cur X-basis mass and
+  ~1% of proj.  Hence the neutral-atom model is close to the lambda = 0 regime for u11 vs IBM, unless atoms that are
+  not paired in a Rydberg pulse suffer gate-like errors (unpaired exposures per round, par timing: u11 1152 vs IBM 288;
+  seq: 1728 both) -- there is no literature value for that, so it is a labelled stress variant only.
+  Lessons (E-023/E-026/E-030/E-033 audits): evaluator template with LOCAL explicit detectors; identical decoders and
+  parameters; Jeffreys 95% intervals with failure counts; FIXED pre-registered shot counts (no stopping on failures,
+  no post-hoc extension); never "per unit time" as a headline; lambda=0 style advantages are decoder-dependent.
+
+noise_model:
+  implementation: >
+    search/experiments/e035/na_noise.py post-processes the NOISELESS evaluator template circuit
+    (evaluators.candidate.memory_circuit, read-only).  evaluators/ is not modified.  Validated by an exact reduction
+    test: with p_1q = p_tr = p_ro = 0, T2 = inf and p_cz = p_prep = p_meas = p, the DEM equals e026b lam0 (SD6 without
+    idle) for all five circuits and both bases (probe.json reduction_test: all True).
+  channels: >
+    CX = H(t) CZ H(t): DEPOLARIZE1(p_1q) on target before, DEPOLARIZE2(p_cz) after, DEPOLARIZE1(p_1q) on target after
+    (exact for depolarizing channels; no H cancellation between consecutive CX on the same qubit = conservative, same
+    rule for every circuit).  Prep: X_ERROR/Z_ERROR(p_prep) after R/RX; ancillas also DEPOLARIZE1(p_tr) after prep
+    (AOD pick-up).  Measurement: ancillas DEPOLARIZE1(p_tr) (transfer to readout zone) then flip p_meas; final data
+    readout flip p_meas.  Time noise: every atom gets Z_ERROR((1 - exp(-tau/T2))/2) per layer, tau = layer duration.
+    Readout layers: other atoms wait t_meas (critical path) and get imaging scatter DEPOLARIZE1(p_ro).
+    Atom loss is folded into Pauli/flip errors (optimistic: assumes loss is detected and replaced).
+  timing: >
+    one step = rigid AOD translation of one ancilla sub-array realising one BB term + global CZ pulse (270 ns) + local
+    1q gates; t_step per step.  "seq": a template layer with g distinct (type, term) groups takes g * t_step (qSIEVE
+    2311.16980 routes X and Z checks separately); "par": t_step if the layer has any CX.  Layers without CX and without
+    readout take 0 time.  Wrap-around of the torus and any 2-step moves are absorbed into t_step.
+  parameter_sets:
+    cur:        # current hardware (Harvard/QuEra transport architecture, the one that realises BB connectivity)
+      p_cz: 5.0e-3      # 99.5%: 2304.05420 abstract (Bell 99.52(4)%, RB 99.54/99.48%); 2312.03982 (99.5%, 99.3-99.5% large array); 2506.20661 "roughly 0.5%" (99.6% best)
+      p_1q: 9.0e-4      # local 1q 99.912(7)%: 2312.03982 Methods; 2408.08288 local RZ 99.902(8)%
+      p_prep: 6.8e-3    # physical |0> initialization 99.32(4)%: 2312.03982
+      p_meas: 5.8e-3    # non-destructive readout 0.46(4)% bit flip + 0.24(2)% loss (counted as random outcome, +0.12%): 2506.20661
+      p_tr: 1.0e-3      # "infidelity of each transfer, encompassing both dephasing and loss, ≲0.1%": 2312.03982
+      T2_s: 1.0         # "T2 > 1 s", effective 1-2 s with DD and movement: 2312.03982 (lower end = conservative)
+      t_step_us: 200    # "characteristic free-space movement time between gates is roughly 200 us": 2312.03982
+      t_meas_us: 1000   # 500 us imaging, "full mid-circuit readout and feedforward cycle ... slightly less than 1 ms": 2312.03982
+      p_ro: 6.8e-4      # data error 0.034(5)% per 500 us mid-circuit readout (2312.03982 ED Fig. 3), x2 for the 1 ms window
+    proj:       # near-term projected
+      p_cz: 3.0e-3      # 99.71% (2407.20184); 99.72% / 99.73% with loss post-selection (2411.11708 / 2408.08288); 2506.20661 projects 3-5x lower physical error
+      p_1q: 3.0e-4      # 99.97% Haar-averaged estimate (2304.05420)
+      p_prep: 4.0e-3    # 99.6(1)% preparation into |0> (2304.05420)
+      p_meas: 2.0e-3    # local imaging fidelity ~99.8% (2312.03982)
+      p_tr: 1.0e-3      # kept at the 2312.03982 bound (conservative)
+      T2_s: 10.0        # T_c = 10 s assumed by 2308.08648 and 2311.16980; "10-100 s with well-established techniques" 2312.03982
+      t_step_us: 200    # unchanged (conservative)
+      t_meas_us: 0      # readout pipelined off the critical path (2308.08648: ancilla measurements pipelined with the next rearrangement); requires a second ancilla bank (ASSUMPTION)
+      p_ro: 3.4e-4      # imaging scatter still hits data: 0.034% per 500 us readout (2312.03982)
+    sensitivity:
+      cur_cz:      "cur with p_cz = 6.5e-3: literature disagreement on un-post-selected CZ: 99.35(4)% (2408.08288), 99.40(3)% (2411.11708), 99.3% large array (2312.03982)"
+      cur_slow:    "cur with t_step = 470 us, t_meas = 2570 us: the demonstrated surface-code QEC round of 2506.20661 (4.45 ms = 0.47 ms between gates, 2.57 ms ancilla moves to storage/readout)"
+      cur_par:     "cur with par timing (simultaneous X/Z moves): makes time scale with the number of CX layers = depth-sensitive (adverse to period 11)"
+      proj_t2par:  "proj with T2 = 1 s and par timing: readout off the critical path, coherence not improved, depth-sensitive timing (most adverse plausible case for period 11)"
+      cur_par_unp: "cur_par + DEPOLARIZE1(2.5e-3 = p_cz/2) on every atom that is not prepared/measured in the layer and not paired in its Rydberg pulse. ASSUMPTION, NO LITERATURE VALUE (unpaired-atom error not reported in 2304.05420 / 2312.03982); a stress test"
+      cur_unp:     "same with seq timing: fault mass only (exposures identical for u11 and IBM), not sampled"
+  assumptions_list:
+    - data atoms static in the entangling zone, ancilla sub-arrays in AODs (2506.20661 surface-code layout); BB long-range terms realised by rigid translations (2311.16980, 2308.08648)
+    - one rigid translation per (check type, BB term) group; translation-invariant schedules need exactly one per group; Fig. 12's colour-class groups each need their own translation (seq)
+    - the template's prep/meas/CX layering is kept; ancilla measurement layers stall all atoms for t_meas in cur (no ancilla bank swap)
+    - dephasing (Z) is the only time-dependent channel; T1 and heating ignored; loss folded into Pauli errors
+    - unpaired-atom Rydberg error = 0 in all main sets (e.g. shielding/local addressing, 2506.20661 uses a shielding beam for storage); stress variant only
+    - no erasure information is given to the decoder
+
+plan:
+  0_probe: "done before this yaml: reduction test, per-round DEM mass per channel, round times, unpaired exposures (probe.json)"
+  1_sanity: >
+    rotated surface code d = 3, 5, R = d, stim generated noiseless + na_noise (cur_slow timing = 4.45 ms round, and cur),
+    pymatching, 200000 shots per basis.  Compare with 2506.20661: d = 5 error per round 0.62(3)% (with loss; "toward
+    0.1% per round on shots with no qubit loss"), 2.14(13)x suppression d 3 -> 5.  Our model has no loss.
+  2_timing: >
+    search/experiments/e035/timing.py: per task, sample a fixed number of shots (BP-OSD 24, Relay 48; seed 35), time
+    decoding single-threaded; does NOT compute or record failures.  Output timing.json (sec/shot per task).
+  3_shot_rule: >
+    For each block (code family, model, decoder) the same shots-per-basis N for every circuit of the family:
+    N = A_block / sum_{circ, basis} t_shot(circ, basis), rounded DOWN to 2 significant digits, capped at 300000,
+    floored at 2000.  Allowances A_block in CPU seconds:
+      gross main  cur: bposd 6000, relay5 3000 | proj: bposd 18000, relay5 8000 | curx0.5: bposd 18000, relay5 8000
+      bb90  main  cur: bposd 2000, relay5 1000 | proj: bposd 8000, relay5 4000  | curx0.5: bposd 8000, relay5 4000
+      gross sens (bposd only, u11 + ibm): cur_cz 4000, cur_par 6000, cur_slow 6000, proj_t2par 14000, cur_par_unp 6000
+      bb90  sens (bposd only, c11 + ibm90): cur_cz 1500, cur_par 2500, cur_slow 2500, proj_t2par 6000, cur_par_unp 2500
+    Total 139000 s = 38.6 CPU h.  The resulting N table is written to shots.json and committed BEFORE sampling.
+    sinter max_errors = 1e9 (never stops on failures); no extension after looking at data, whatever the outcome.
+    If wall time forces stopping early, that is reported as an incomplete task, not re-allocated.
+  4_sampling: >
+    circuits gross: u11 (search/experiments/e032/u11_spec.json), ibm (IBM depth 8, 2308.07915), fig12 (SBB 2603.05481
+    Fig. 12); [[90]]: c11 (search/experiments/e030/c11_spec.json), ibm90.  R = 12 (gross) / 10 ([[90]]); Z and X
+    sampled separately; eps = eps_Z + eps_X per round, eps_b = 1 - (1 - P_b)^(1/R); BP-OSD (IBM: min_sum, 10000 iter,
+    ms_scaling 0, OSD-CS 7) and Relay-BP (relay5), e026.decoders, identical for every circuit.
+    Scalings: cur x1 and x0.5, proj x1.  NOT run: cur x2 (per-round mass ~11, about SD6 p ~ 1.4e-2, above threshold)
+    and proj x0.5 (~SD6 1.8e-3: per-round LER ~1e-6, unresolvable in budget) -- decided from the probe, before sampling.
+  5_analysis: >
+    Jeffreys 95% (beta-posterior MC, seed 1), ratios u11/ibm, u11/fig12, c11/ibm90 from the same draws; failure counts
+    reported.  Time per round from the model layer durations (reported separately, with caveats); no "per unit time"
+    headline.  Significant = 95% interval excludes 1.
+
+prediction: >
+  (written after the structure probe, before any LER sampling or timing)
+  P1 sanity: d = 5 per-round error under cur_slow in [0.1%, 0.62%]: 65%; d3 -> d5 suppression factor in [1.5, 4]: 70%.
+  P2 cur (per-round mass equal): u11/ibm in [0.6, 1.4] with BP-OSD: 70%; significantly < 1 (either decoder): 25%;
+     significantly > 1: 15%.  c11/ibm90 < 1 point estimate both decoders: 70%; significant < 1 (BP-OSD): 45%.
+  P3 proj and cur x0.5 (~SD6 lambda0 3.5e-3): u11/ibm point estimate < 1 for BP-OSD: 70%; significant < 1 at >= 1 of
+     the 4 (model, decoder) points: 40%.  c11/ibm90 significant < 1 at >= 3 of the 4 points: 60%.
+  P4 u11/fig12 significantly < 1 at cur and proj with BP-OSD: 75% (fig12 has 26 moves and 4 readouts per round under
+     seq timing and d_circ 11).
+  P5 sensitivity: cur_cz, cur_par, cur_slow, proj_t2par ratios inside the main-set CI of the corresponding set: 75%
+     each.  cur_par_unp: u11/ibm larger than cur_par by > 1.5x: 60%; c11/ibm90 under cur_par_unp significantly > 1: 30%.
+  P6 time per round: seq timing u11 = ibm (4.4 ms cur, 2.4 ms proj), par u11/ibm = 10/7 move-time (4.0 vs 3.4 ms cur)
+     -- deterministic from the model (probe), stated for completeness.
+budget: {cpu_hours: 50, llm_tokens: 0, num_workers: 6}
+seed: "sinter default per-batch seeds (recorded in csv strong_id); timing seed 35; analysis MC seed 1"
+command: >
+  PYTHONPATH=.:tests uv run python -m search.experiments.e035.probe ;
+  uv run python -m search.experiments.e035.surface_sanity --shots 200000 --workers 2 ;
+  PYTHONPATH=.:tests uv run python -m search.experiments.e035.timing ;
+  PYTHONPATH=.:tests uv run python -m search.experiments.e035.shots ;
+  PYTHONPATH=.:tests uv run python -m search.experiments.e035.run_all --workers 6 ;
+  PYTHONPATH=.:tests uv run python -m search.experiments.e035.analyze
