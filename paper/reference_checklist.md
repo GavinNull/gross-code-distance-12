@@ -24,7 +24,14 @@ after checking authors (spelling, initials, order), title, version, and journal 
 | [16] | KishonyFowler | 2603.28852 | https://arxiv.org/abs/2603.28852 | Color code off-the-hook: avoiding hook errors with a single auxiliary per plaquette | G. Kishony and A. Fowler | arXiv:2603.28852 (2026). | ☐ | |
 | [17] | Gidney2021honeycomb | 2108.10457 | https://arxiv.org/abs/2108.10457 | A fault-tolerant honeycomb memory | C. Gidney, M. Newman, A. Fowler, and M. Broughton | Quantum 5, 605 (2021), arXiv:2108.10457. | ☐ | |
 | [18] | Gidney2021stim | 2103.02202 | https://arxiv.org/abs/2103.02202 | Stim: a fast stabilizer circuit simulator | C. Gidney | Quantum 5, 497 (2021), arXiv:2103.02202. | ☐ | |
-| [20] | ShawTerhal2026 | 2604.09797 | https://arxiv.org/abs/2604.09797 | Optimising quantum error correction using morphing circuits | M. H. Shaw and B. M. Terhal | arXiv:2604.09797 (v2, 2026). | ☐ | |
+| [20] | Evered2023 | 2304.05420 | https://arxiv.org/abs/2304.05420 | High-fidelity parallel entangling gates on a neutral atom quantum computer | S. J. Evered, D. Bluvstein, M. Kalinowski, S. Ebadi, T. Manovitz, H. Zhou, S. H. Li, A. A. Geim, T. T. Wang, N. Maskara, H. Levine, G. Semeghini, M. Greiner, V. Vuletić, and M. D. Lukin | Nature 622, 268 (2023), arXiv:2304.05420. | ☐ | |
+| [21] | Bluvstein2024 | 2312.03982 | https://arxiv.org/abs/2312.03982 | Logical quantum processor based on reconfigurable atom arrays | D. Bluvstein et al. | Nature (2023), doi:10.1038/s41586-023-06927-3, arXiv:2312.03982. | ☐ | |
+| [22] | Muniz2024 | 2411.11708 | https://arxiv.org/abs/2411.11708 | High-fidelity universal gates in the 171Yb ground state nuclear spin qubit | J. A. Muniz et al. | arXiv:2411.11708 (v2, 2024). | ☐ | |
+| [23] | Radnaev2025 | 2408.08288 | https://arxiv.org/abs/2408.08288 | A universal neutral-atom quantum computer with individual optical addressing and non-destructive readout | A. G. Radnaev et al. | PRX Quantum 6, 030334 (2025), arXiv:2408.08288. | ☐ | |
+| [24] | Tsai2025 | 2407.20184 | https://arxiv.org/abs/2407.20184 | Benchmarking and fidelity response theory of high-fidelity Rydberg entangling gates | R. B.-S. Tsai, X. Sun, A. L. Shaw, R. Finkelstein, and M. Endres | PRX Quantum 6, 010331 (2025), arXiv:2407.20184. | ☐ | |
+| [25] | Viszlai2026 | 2311.16980 | https://arxiv.org/abs/2311.16980 | qSIEVE: Efficient qLDPC memory via systolic movement in atom arrays | J. Viszlai, W. Yang, S. F. Lin, J. Liu, N. Nottingham, J. M. Baker, and F. T. Chong | ACM Trans. Quantum Comput. 7, 9 (2026), arXiv:2311.16980. | ☐ | |
+| [26] | Bluvstein2025 | 2506.20661 | https://arxiv.org/abs/2506.20661 | Architectural mechanisms of a universal fault-tolerant quantum computer | D. Bluvstein et al. | arXiv:2506.20661 (2025). | ☐ | |
+| [27] | ShawTerhal2026 | 2604.09797 | https://arxiv.org/abs/2604.09797 | Optimising quantum error correction using morphing circuits | M. H. Shaw and B. M. Terhal | arXiv:2604.09797 (v2, 2026). | ☐ | |
 
 Notes for the checker:
 - Strikis et al.: the main text quotes the open question of Sec. IV C verbatim and uses Prop. 5 (App. H), App. F and App. G.2.
@@ -35,3 +42,10 @@ Notes for the checker:
 - Xu et al. (2308.08648): cited for pipelined product-coloration circuits; the abs page lists no journal reference (the novelty note mentions Nature Phys. 20, 1084 (2024), not verified here).
 - Hirai et al. (2603.01628): surface-code interleaving at minimum depth.
 - Gidney et al. (honeycomb): SD6 and SI1000 (idle strength p/10).
+- Evered et al. (2304.05420): CZ 99.5% (cur); single-qubit 99.97% is the global-Raman estimate (proj, applied to local gates); preparation 99.6%. Abs page: v1, Nature 622, 268–272 (2023).
+- Bluvstein et al. 2024 (2312.03982): 21 authors; abs page journal ref reads only "Nature (2023)" with DOI 10.1038/s41586-023-06927-3 (volume/page not on the abs page, so not printed). Local gate 99.912%, init 99.32%, transfer ≲0.1%, T2 > 1 s, 200 µs per move, readout < 1 ms, 0.034% scattering per 500 µs image, no error on storage-zone atoms.
+- Muniz et al. (2411.11708): 53 authors; v2 (2 Dec 2024); no journal ref on abs page. 99.40% CZ, 99.72% after post-selection.
+- Radnaev et al. (2408.08288): 58 authors; v3; PRX Quantum 6, 030334 (2025). 99.35% CZ, 99.73% loss excluded; local RZ 99.902%.
+- Tsai et al. (2407.20184): v2; PRX Quantum 6, 010331 (2025). 99.71% is averaged over symmetric inputs and leakage-corrected; different (non-transport) architecture.
+- Viszlai et al. (qSIEVE, 2311.16980): v3 (28 May 2026); ACM Trans. Quantum Comput. 7(2), Art. 9 (2026). X and Z checks routed separately; 2 steps per term with wrap-around; T2 = 10 s assumed.
+- Bluvstein et al. 2025 (2506.20661): 23 authors; no journal ref on abs page (a Nature DOI 10.1038/s41586-025-09848-5 is linked; not printed). CZ ≈ 0.5%, readout 0.46% flips + 0.24% loss, T2 1–2 s, 4.45 ms round split (0.47 ms per gate layer, 2.57 ms ancilla swap to storage).
