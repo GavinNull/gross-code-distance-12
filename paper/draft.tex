@@ -32,22 +32,21 @@
 \date{\today}
 
 \begin{abstract}
-Strikis, Browne and Beverland (arXiv:2603.05481) showed that every non-interleaved
-single-ancilla syndrome-extraction circuit has circuit distance at most that of an
-extended code: at most 11 for the gross code $\code{144,12,12}$ and, as we show, at most
-8 for $\code{90,8,10}$. We construct single-ancilla circuits with a period of 11 time
-steps that reach the full code distance, 12 for the gross code, answering their open
-question, and 10 for $\code{90,8,10}$, two above the extended-code distance of their
-CNOT orders, and prove this under circuit-level depolarizing noise for every number of
-rounds. The method fixes an order class, even one of lower extended-code distance, and
-recovers the code distance by exact lift computations over complete lists of the
-lightest extended logicals, with every solver decision in the proofs backed by a
-checked proof certificate. Without idle noise the $\code{90,8,10}$ circuit has a lower logical error rate
-than IBM's at $p=3\times10^{-3}$, and the gross circuit one lower than the distance-11
-circuit of Strikis et al.; with standard idle noise both are worse than the IBM
-circuits. In a neutral-atom noise model with literature parameters the $\code{90,8,10}$
-circuit again has the lower rate, provided the ancilla arrays move sequentially and atoms
-left unpaired during entangling pulses do not err.
+Every non-interleaved single-ancilla syndrome-extraction circuit has circuit distance
+at most that of an extended code (Strikis et al., arXiv:2603.05481): 11
+for the gross code $\code{144,12,12}$ and, as we show, 8 for $\code{90,8,10}$. We
+construct single-ancilla circuits with an 11-step period that reach the full
+code distance, 12 for the gross code, answering their open question, and 10 for
+$\code{90,8,10}$, two above the extended-code distance of their CNOT orders. We prove
+this under circuit-level depolarizing noise for every number of rounds by exact lift
+computations over complete lists of the lightest extended logicals, with every solver
+decision backed by a checked proof certificate. Without idle noise the $\code{90,8,10}$
+circuit has a lower logical error rate than IBM's at $p=3\times10^{-3}$, and the gross
+circuit one lower than their distance-11 circuit; with standard idle
+noise both are worse than the IBM circuits. In a neutral-atom noise model with
+literature parameters the $\code{90,8,10}$ circuit again has the lower rate, provided
+the ancilla arrays move sequentially and atoms left unpaired during entangling pulses
+do not err.
 \end{abstract}
 
 \maketitle
