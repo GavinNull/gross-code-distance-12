@@ -1,12 +1,24 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision O3 (2026-10-23).** C56 framing: SBB 2603.05481 v2 App. H Prop. 5 (verbatim check by the lead: every
+uniformly tiled non-interleaved gross SEC has d_circ ≤ 10); the period-11 circuit is uniformly tiled and interleaved
+⇒ +2 within that class, +1 over the best non-interleaved circuit (11). [[90]] +2 already at period 16; new: period 11.
+C55 wording: "exactly 10 under SD6 for R ≤ 3 (exact enumeration); previously only ≤ 10" (2308.07915, 2506.03094,
+2503.10988). New citations from `research/literature/2026-10-22-period11-novelty.md`: 2308.08648 (pipelined
+product-coloration circuits; abs page checked), 2603.01628 (surface-code interleaving; abs page checked), SBB App. F and
+App. G.2, SI1000 (2108.10457) for λ = 0.1. C58: u11 list-completeness certificate and c11 lifts to R ≤ 25 (E-034)
+written as "produced, pending audit".
+
+
 **Revision O2 (2026-10-22): new Fig. 1 (`figures/fig1_u11.pdf`).** New tag C61: the mechanism example of Fig. 1(b)
 and the sentence in "The circuits" (a readout falls between the arrivals of two hook residuals on the same data qubit:
 X45's hook reaches qubit 123 at tick 6, X48's at tick 10, Z69 reads it at tick 8, so its detector fires; in the
 segmented control, same orders, X block steps 1–6, Z block 8–13, period 15, both arrivals precede the read and the
 weight-10 logical lifts, injection-verified). Source: `paper/figures/fig1_u11_data.json` (figure agent, lead's facts).
-**Not yet audited** (audit commissioned); the typicality count (96 of 144 logicals blocked by this single-detector
-pattern) is NOT in the paper. Fig. 1(a) facts (XXX then ZZZ; 6-cycle witness) are C56 (E-032 audit §1). Fig. 1(c)
+**Audited** (`research/audits/2026-10-22-fig1-u11.md`): example CONFIRMED (both Z69 detectors are forced; wording
+fixed); the "straddle" wording REFUTED and replaced; typicality used only in the audited form (all 144 lift in the
+segmented circuit, none in the period-11 circuit at R = 1; three or four Z checks see two hook residuals on opposite
+sides of their read; a single detector forbids each lift). Never 96/30/66/6/33/9. Fig. 1(a) facts (XXX then ZZZ; 6-cycle witness) are C56 (E-032 audit §1). Fig. 1(c)
 shows G = 31 also for the [[90]] circuit; this follows from its constants (D = 11, starts {0, 1}, Δ = 10; E-030
 audit §1), the same as the gross circuit's.
 
