@@ -1,0 +1,228 @@
+{
+ "gross|cur|bposd": {
+  "N": 440,
+  "circuits": [
+   "u11",
+   "ibm",
+   "fig12"
+  ],
+  "allowance_s": 6000,
+  "sum_t_shot": 13.44443081818182,
+  "expected_cpu_s": 5915.54956
+ },
+ "gross|cur|relay5": {
+  "N": 300,
+  "circuits": [
+   "u11",
+   "ibm",
+   "fig12"
+  ],
+  "allowance_s": 3000,
+  "sum_t_shot": 11.801476913043482,
+  "expected_cpu_s": 3540.4430739130444
+ },
+ "gross|proj|bposd": {
+  "N": 20000,
+  "circuits": [
+   "u11",
+   "ibm",
+   "fig12"
+  ],
+  "allowance_s": 18000,
+  "sum_t_shot": 0.8695203636363629,
+  "expected_cpu_s": 17390.407272727258
+ },
+ "gross|proj|relay5": {
+  "N": 29000,
+  "circuits": [
+   "u11",
+   "ibm",
+   "fig12"
+  ],
+  "allowance_s": 8000,
+  "sum_t_shot": 0.27019345652173976,
+  "expected_cpu_s": 7835.610239130453
+ },
+ "gross|curx0.5|bposd": {
+  "N": 18000,
+  "circuits": [
+   "u11",
+   "ibm",
+   "fig12"
+  ],
+  "allowance_s": 18000,
+  "sum_t_shot": 0.954478454545459,
+  "expected_cpu_s": 17180.612181818262
+ },
+ "gross|curx0.5|relay5": {
+  "N": 25000,
+  "circuits": [
+   "u11",
+   "ibm",
+   "fig12"
+  ],
+  "allowance_s": 8000,
+  "sum_t_shot": 0.3179097608695663,
+  "expected_cpu_s": 7947.744021739158
+ },
+ "bb90|cur|bposd": {
+  "N": 640,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 2000,
+  "sum_t_shot": 3.1208491818181807,
+  "expected_cpu_s": 1997.3434763636355
+ },
+ "bb90|cur|relay5": {
+  "N": 530,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 1000,
+  "sum_t_shot": 1.8640700652173916,
+  "expected_cpu_s": 987.9571345652175
+ },
+ "bb90|proj|bposd": {
+  "N": 25000,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 8000,
+  "sum_t_shot": 0.3113813181818182,
+  "expected_cpu_s": 7784.532954545455
+ },
+ "bb90|proj|relay5": {
+  "N": 41000,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 4000,
+  "sum_t_shot": 0.09679521739130506,
+  "expected_cpu_s": 3968.6039130435074
+ },
+ "bb90|curx0.5|bposd": {
+  "N": 21000,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 8000,
+  "sum_t_shot": 0.370243090909096,
+  "expected_cpu_s": 7775.104909091016
+ },
+ "bb90|curx0.5|relay5": {
+  "N": 48000,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 4000,
+  "sum_t_shot": 0.08332858695652219,
+  "expected_cpu_s": 3999.772173913065
+ },
+ "gross|cur_cz|bposd": {
+  "N": 300,
+  "circuits": [
+   "u11",
+   "ibm"
+  ],
+  "allowance_s": 4000,
+  "sum_t_shot": 14.06362590909091,
+  "expected_cpu_s": 4219.087772727273
+ },
+ "gross|cur_par|bposd": {
+  "N": 730,
+  "circuits": [
+   "u11",
+   "ibm"
+  ],
+  "allowance_s": 6000,
+  "sum_t_shot": 8.213806818181821,
+  "expected_cpu_s": 5996.078977272729
+ },
+ "gross|cur_slow|bposd": {
+  "N": 650,
+  "circuits": [
+   "u11",
+   "ibm"
+  ],
+  "allowance_s": 6000,
+  "sum_t_shot": 9.108521363636362,
+  "expected_cpu_s": 5920.538886363635
+ },
+ "gross|proj_t2par|bposd": {
+  "N": 62000,
+  "circuits": [
+   "u11",
+   "ibm"
+  ],
+  "allowance_s": 14000,
+  "sum_t_shot": 0.22421113636363801,
+  "expected_cpu_s": 13901.090454545556
+ },
+ "gross|cur_par_unp|bposd": {
+  "N": 520,
+  "circuits": [
+   "u11",
+   "ibm"
+  ],
+  "allowance_s": 6000,
+  "sum_t_shot": 11.365163636363635,
+  "expected_cpu_s": 5909.88509090909
+ },
+ "bb90|cur_cz|bposd": {
+  "N": 320,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 1500,
+  "sum_t_shot": 4.630799454545454,
+  "expected_cpu_s": 1481.8558254545453
+ },
+ "bb90|cur_par|bposd": {
+  "N": 880,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 2500,
+  "sum_t_shot": 2.824891590909095,
+  "expected_cpu_s": 2485.9046000000035
+ },
+ "bb90|cur_slow|bposd": {
+  "N": 740,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 2500,
+  "sum_t_shot": 3.3612020454545473,
+  "expected_cpu_s": 2487.289513636365
+ },
+ "bb90|proj_t2par|bposd": {
+  "N": 41000,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 6000,
+  "sum_t_shot": 0.14631954545454207,
+  "expected_cpu_s": 5999.101363636225
+ },
+ "bb90|cur_par_unp|bposd": {
+  "N": 580,
+  "circuits": [
+   "c11",
+   "ibm90"
+  ],
+  "allowance_s": 2500,
+  "sum_t_shot": 4.300209409090909,
+  "expected_cpu_s": 2494.121457272727
+ }
+}
