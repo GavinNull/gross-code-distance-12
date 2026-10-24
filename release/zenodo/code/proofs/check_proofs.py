@@ -1,4 +1,4 @@
-"""Check the DRAT proofs of the unsatisfiable SAT instances in certificates/ (SM S10) with drat-trim.
+"""Check the DRAT proofs of the unsatisfiable SAT instances in certificates/ (SM S9, S16) with drat-trim.
 
 certificates/proofs/certificates_proofs.jsonl has one record per CNF of certificates/ (sha256 of the uncompressed CNF,
 of the binary DRAT proof written by CaDiCaL and of the LRAT core written by drat-trim, sizes, verdicts and times on
