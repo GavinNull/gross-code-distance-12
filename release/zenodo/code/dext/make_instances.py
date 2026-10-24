@@ -1,4 +1,4 @@
-"""Write the extended-code instances for the two exhaustive searches (SM S4), for both memory bases.
+"""Write the extended-code instances for the two exhaustive searches (SM S10), for both memory bases.
 
 The extended code is recomputed from the Fig. 12 CNOT orders and checked against data/extended_code/; the 24
 colour-preserving translations that preserve the orders are recomputed and must give 15 column orbits.
