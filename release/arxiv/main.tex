@@ -90,8 +90,8 @@ circuits run with 11 time steps per round instead of 8; we discuss this cost at 
 end.
 
 Exact circuit distances are known for hypergraph-product codes~\cite{ManesClaes}, for
-the smallest BB circuit~\cite{Webster2026}, and as certificates for other qLDPC
-constructions~\cite{Liang2026,SunCai2026}. Shaw and Terhal's morphing circuit with
+the smallest BB circuit~\cite{Webster2026}, and as certified bounds, exact in small
+cases, for other qLDPC constructions~\cite{Liang2026,SunCai2026}. Shaw and Terhal's morphing circuit with
 the same qubit count acts on a $\code{144,12,12}$ code that they call ``a second
 `gross' code'', with $\dcirc\le12$~\cite{ShawTerhal2025}; a morphing idling circuit for
 the gross code is ``believed to have circuit distance 12''~\cite{Wills2026}. We note
@@ -286,7 +286,8 @@ $\lambda=1$ it is worse than IBM's circuit by 7 [4, 12] (BP-OSD, $p=2\times10^{-
 21--39 ($p=3\times10^{-3}$). At $\lambda=0$ its failures are dominated by BP-OSD
 decoding failures rather than by minimum-weight logicals. The full distance
 thus pays off when idling is nearly free; otherwise its gain is paid for in idle
-locations, the trade-off anticipated in SBB's App.~F~\cite{Strikis2026}.
+locations, in line with the depth--distance trade-off noted in SBB's
+App.~F~\cite{Strikis2026}.
 
 \emph{Neutral atoms.} We also use a neutral-atom circuit-level model with literature
 parameters: CZ error $5\times10^{-3}$~\cite{Evered2023,Bluvstein2024}, or a projected
@@ -366,9 +367,9 @@ biased noise ancilla, arXiv:2606.30592 (2026).
 \bibitem{Nguyen2026} M.~T.~P.~Nguyen, M.~Rimbach-Russ, and S.~Bosco, Disassembling
 qLDPC codes for depth-optimal parity-check circuits, arXiv:2608.19917 (v2, 2026).
 \bibitem{Xu2023} Q.~Xu, J.~P.~Bonilla Ataides, C.~A.~Pattison, N.~Raveendran,
-D.~Bluvstein, J.~Wurtz, B.~Vasic, M.~D.~Lukin, L.~Jiang, and H.~Zhou, Constant-overhead
-fault-tolerant quantum computation with reconfigurable atom arrays, arXiv:2308.08648
-(2023).
+D.~Bluvstein, J.~Wurtz, B.~Vasi\'c, M.~D.~Lukin, L.~Jiang, and H.~Zhou, Constant-overhead
+fault-tolerant quantum computation with reconfigurable atom arrays, Nat.\ Phys.\
+\textbf{20}, 1084 (2024), doi:10.1038/s41567-024-02479-z, arXiv:2308.08648.
 \bibitem{Hirai2026} Y.~Hirai, S.~Ikari, Y.~Ueno, and Y.~Suzuki, No more hooks in the
 surface code: Distance-preserving syndrome extraction for arbitrary layouts at minimum
 depth, arXiv:2603.01628 (v2, 2026).
@@ -391,12 +392,12 @@ H.~Zhou, S.~H.~Li, A.~A.~Geim, T.~T.~Wang, N.~Maskara, H.~Levine, G.~Semeghini,
 M.~Greiner, V.~Vuleti\'c, and M.~D.~Lukin, High-fidelity parallel entangling gates on a
 neutral atom quantum computer, Nature \textbf{622}, 268 (2023), arXiv:2304.05420.
 \bibitem{Bluvstein2024} D.~Bluvstein \emph{et al.}, Logical quantum processor based on
-reconfigurable atom arrays, Nature (2023), doi:10.1038/s41586-023-06927-3,
-arXiv:2312.03982.
+reconfigurable atom arrays, Nature \textbf{626}, 58 (2024),
+doi:10.1038/s41586-023-06927-3, arXiv:2312.03982.
 \bibitem{Muniz2024} J.~A.~Muniz \emph{et al.}, High-fidelity universal gates in the
 $^{171}$Yb ground state nuclear spin qubit, arXiv:2411.11708 (v2, 2024).
-\bibitem{Radnaev2025} A.~G.~Radnaev \emph{et al.}, A universal neutral-atom quantum
-computer with individual optical addressing and non-destructive readout, PRX Quantum
+\bibitem{Radnaev2025} A.~G.~Radnaev \emph{et al.}, Universal neutral-atom quantum
+computer with individual optical addressing and nondestructive readout, PRX Quantum
 \textbf{6}, 030334 (2025), arXiv:2408.08288.
 \bibitem{Tsai2025} R.~B.-S.~Tsai, X.~Sun, A.~L.~Shaw, R.~Finkelstein, and M.~Endres,
 Benchmarking and fidelity response theory of high-fidelity Rydberg entangling gates,
@@ -404,8 +405,9 @@ PRX Quantum \textbf{6}, 010331 (2025), arXiv:2407.20184.
 \bibitem{Viszlai2026} J.~Viszlai, W.~Yang, S.~F.~Lin, J.~Liu, N.~Nottingham,
 J.~M.~Baker, and F.~T.~Chong, qSIEVE: Efficient qLDPC memory via systolic movement in
 atom arrays, ACM Trans.\ Quantum Comput.\ \textbf{7}, 9 (2026), arXiv:2311.16980.
-\bibitem{Bluvstein2025} D.~Bluvstein \emph{et al.}, Architectural mechanisms of a
-universal fault-tolerant quantum computer, arXiv:2506.20661 (2025).
+\bibitem{Bluvstein2025} D.~Bluvstein \emph{et al.}, A fault-tolerant neutral-atom
+architecture for universal quantum computation, Nature \textbf{649}, 39 (2026),
+arXiv:2506.20661.
 \bibitem{ShawTerhal2026} M.~H.~Shaw and B.~M.~Terhal, Optimising quantum error
 correction using morphing circuits, arXiv:2604.09797 (v2, 2026).
 \end{thebibliography}
@@ -970,8 +972,9 @@ cur\_par, unpaired atoms with error $p_{\rm CZ}/2$ & 3.31 [2.85, 3.84] & 603 / 2
 \end{ruledtabular}
 \end{table}
 
-\emph{Sensitivity.} The CZ value $6.5\times10^{-3}$ corresponds to the fidelities
-before loss is excluded~\cite{Muniz2024,Radnaev2025}. In cur\_slow each gate layer takes
+\emph{Sensitivity.} The CZ value $6.5\times10^{-3}$ corresponds to the fidelity of
+99.35\% before loss is excluded~\cite{Radnaev2025}; the corresponding value
+of~\cite{Muniz2024} is 99.40\% ($6.0\times10^{-3}$). In cur\_slow each gate layer takes
 470~$\mu$s and each readout layer 2.57~ms, the split of the 4.45~ms round
 of~\cite{Bluvstein2025}, where 2.57~ms is the time to move the ancillas to the storage
 zone and bring in the next group. At current parameters the $\code{90,8,10}$ advantage
