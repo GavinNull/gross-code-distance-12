@@ -1,20 +1,20 @@
 # DOI, release date and arXiv identifier are placeholders until publication.
 cff-version: 1.2.0
 message: "If you use this data set or code, please cite the paper and this data set."
-title: "Data and verification code for: Interleaving recovers the full circuit distance of bivariate-bicycle codes"
+title: "Data and verification code for: Interleaving recovers the full circuit distance of the gross and [[90,8,10]] bivariate-bicycle codes"
 type: dataset
 authors:
   - family-names: "Pan"
     given-names: "Guancheng"
     affiliation: "Zhejiang University"
     email: "3250101086@zju.edu.cn"
-version: "1.1.0"
+version: "2.0.0"
 doi: "[Zenodo DOI -- assigned on upload]"
 license: ["CC-BY-4.0", "MIT"]
 date-released: "[YYYY-MM-DD]"
 preferred-citation:
   type: article
-  title: "Interleaving recovers the full circuit distance of bivariate-bicycle codes"
+  title: "Interleaving recovers the full circuit distance of the gross and [[90,8,10]] bivariate-bicycle codes"
   authors:
     - family-names: "Pan"
       given-names: "Guancheng"
