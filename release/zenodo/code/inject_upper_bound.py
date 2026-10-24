@@ -1,4 +1,4 @@
-"""SM S8 (upper bound d_circ <= 12): inject the weight-12 witnesses.
+"""SM S15 (upper bound d_circ <= 12 for circuits A, B, C): inject the weight-12 witnesses.
 
 witnesses/upper_bound_weight12.json holds, for each memory basis b, a weight-12 logical operator of the gross code
 of the type that flips the b-basis observables (X type for the Z basis, Z type for the X basis).  It is applied as
