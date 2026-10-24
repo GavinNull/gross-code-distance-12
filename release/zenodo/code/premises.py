@@ -1,4 +1,4 @@
-"""Lemma 3 (all rounds): machine check of the premises of the gap argument (SM S7) for circuit A.
+"""SM S14 (round reduction for circuits A, B, C): machine check of the premises of the gap argument for circuit A.
 
 From the noiseless memory circuits (R = 2, 3, 5, 9, both bases), parsed layer by layer:
   * every ancilla: instance j reset at s_q + D j with s_q independent of R, measured at s_q + D j + dm_q with
@@ -9,7 +9,7 @@ From the noiseless memory circuits (R = 2, 3, 5, 9, both bases), parsed layer by
 then, on the noisy SD6 circuits (R = 6, 12, both bases), the layer-by-layer insertion property: circuit(R + 1) equals
 circuit(R) with one D-layer block inserted at layer x, for every x in a contiguous range [lo, D R + c]; every block
 holds one measurement of each of the 144 ancillas.  Finally R' = (lo + D - 1 + 10 (G - 1) + 2 D - 2 - c) // D
-(the deletion step; paper: 32), which must not exceed the largest R covered by Lemma 2 (--rmax, default 32).
+(the deletion step; paper: 32), which must not exceed the largest R covered by the lift of SM S13 (--rmax, default 32).
 
 With --separated (for circuit C, common frame): the rounds are separated in time (the last measurement of round j
 precedes the first reset of round j+1, R = 3, 8, 14), so a weight-11 undetected logical occupies at most 11
@@ -162,7 +162,7 @@ if not a.slab:
         V.exit()
     Rp = (lo + D - 1 + span + 2 * D - 2 - c_hi) // D
     V(Rp <= a.rmax, f"[{a.circuit}] deletion: every weight-11 undetected logical maps into a circuit with R' <= {Rp} "
-                    f"rounds; Lemma 2 covers R <= {a.rmax}" + (" (paper: G = 52, R' = 32)" if a.circuit == "A" else ""))
+                    f"rounds; the lift (SM S13) covers R <= {a.rmax}" + (" (paper: G = 52, R' = 32)" if a.circuit == "A" else ""))
 else:
     for R in (3, 8, 24):
         U = unroll(spec, code, R)
