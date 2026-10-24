@@ -11,7 +11,8 @@
 Every run is checked: its final status (NONE / FOUND) equals the expected one, every root case was completed
 (NONE), every reported solution is re-verified on a freshly built DEM and by circuit-level injection
 (code/dcirc/verify.py); the node count is compared with code/dcirc/reference_runs.tsv (reference machine; equal
-for identical instances, reported, not required).  CIRCUIT: A, B, C, fig12 (gross code) or c16, u16, s16.
+for identical instances, reported, not required).  CIRCUIT: A, B, C, fig12, u11, u11_control_p10 (gross code) or c11, c12, c13, c16, u16, s16
+([[90,8,10]]); e.g. "c11 Z 12 9" (the period-11 circuit, SM S5).
 """
 import argparse
 import subprocess
