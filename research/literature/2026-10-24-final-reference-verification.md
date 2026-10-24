@@ -110,3 +110,7 @@
 - Muniz 的期刊卷号和文章号没有核实：DOAJ 返回 403，Crossref 也没检索到。
 - 所有 HTML 和 PDF 都是定向检索加读上下文，不是逐页通读。Wills 的 HTML 在 Sec. 3.3 处截断，App. C 改读 PDF 文字。
 - 2308.07915 的 Table 6 和 “936 variants”、SBB Sec. VII 都不在当前 draft.tex 里，这次没有复查。
+
+## lead 浏览器亲自抽查两处逐字引文（2026-10-24，PI 委托）
+- SBB arXiv:2603.05481v2（HTML，Sec. IV C 末段）："…our proof does not apply to interleaved circuits. It therefore remains an open question whether any interleaved circuit can achieve circuit distance 12." 草稿引文 “whether any interleaved circuit can achieve circuit distance 12” **逐字一致**。
+- Wills arXiv:2605.21898v2（HTML，Appendix C “Improved Footprint Estimates via Morphing Idling Circuit”）："…this circuit is believed to have circuit distance 12, matching that of the code, and is constructed using Shaw-Terhal morphing [68]." 草稿引文 “believed to have circuit distance 12” **逐字一致**；归属（App. C、morphing、用于 idling gross code）也一致。
