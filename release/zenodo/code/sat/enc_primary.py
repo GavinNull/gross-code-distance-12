@@ -1,4 +1,4 @@
-"""Primary encoding (SM S10, "SAT models"): schedules symmetric under a translation subgroup, CNOT orders in the
+"""Primary encoding (SM S16, "Search"): schedules symmetric under a translation subgroup, CNOT orders in the
 8-element class <rev, s12, s56> of given per-colour orders, period P; lazy frame-model nogoods (CEGAR).
 
 Family: unit u = (type, class).  Start s_u in [0, P) (0 for the common frame), the six CNOTs at absolute times
