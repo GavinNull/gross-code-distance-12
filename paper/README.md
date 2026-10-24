@@ -20,6 +20,12 @@ there and in the referenced audits. Item 11 (exact morphing criterion, E-022) go
 one sentence saying it "will be reported separately". E-025 (mixed/per-check families) is unaudited and not cited.
 Nothing from "待复核的结论" is claimed.
 
+## Revision O6 (2026-10-24)
+
+Final reference verification applied: four bibliography fixes (Bluvstein2024, Xu2023, Bluvstein2025, Radnaev2025) and
+three statement fixes (Liang/Sun–Cai wording, SBB App. F wording, CZ 6.5e-3 attribution). Core 3445 word-equivalents;
+abstract 176; End Matter 646; 20 pages; tables OK; no overfull boxes.
+
 ## Revision O5 (2026-10-24)
 
 Neutral-atom LER (E-035, audited): main-text paragraph in the LER section, abstract clause (conditional on sequential
