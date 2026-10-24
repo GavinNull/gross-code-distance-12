@@ -1,4 +1,4 @@
-"""Lemma 2 certificates: for each (circuit, basis, R) write the batch CNFs of lift_cnf.py, refute each with CaDiCaL
+"""Lift certificates of circuits A, B, C (SM S13): for each (circuit, basis, R) write the batch CNFs of lift_cnf.py, refute each with CaDiCaL
 (DRAT), check with drat-trim (and the LRAT core with cake_lpr unless --no-cake), record, delete the files.
 
     python run_lift_certs.py CIRCUIT RANGE OUTDIR [--basis Z X] [--workers N] [--no-cake] [--expect sat]
