@@ -1,4 +1,4 @@
-"""Run the three lift implementations side by side and compare them logical by logical (SM S6, S11).
+"""Run the three lift implementations side by side and compare them logical by logical (SM S13, S18).
 
   CP-SAT  code/gross12/ext.py (lift.py)
   DP      code/lift_independent.py (frontier dynamic programming)
