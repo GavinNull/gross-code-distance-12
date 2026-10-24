@@ -1,5 +1,5 @@
 #!/bin/sh
-# Exhaustive searches of SM S4 on the extended code of Fig. 12 (= that of circuits A, B, C), both memory bases.
+# Exhaustive searches of SM S10 on the extended code of Fig. 12 (= that of circuits A, B, C), both memory bases.
 #   sh code/dext/run_dext.sh w10    d_ext >= 11: no extended logical of weight <= 10   (about 4 CPU hours)
 #   sh code/dext/run_dext.sh w11    the complete list of weight-11 extended logicals  (about 1 CPU hour)
 #   sh code/dext/run_dext.sh both
