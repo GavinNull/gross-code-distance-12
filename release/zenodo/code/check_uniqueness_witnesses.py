@@ -1,4 +1,4 @@
-"""SM S10, "Uniqueness of the order class": verify the witnesses behind certificates/order_class_uniqueness/.
+"""SM S16, "Uniqueness of the order class": verify the witnesses behind certificates/order_class_uniqueness/.
 
 For every instance (colouring, residual type) and every witness: the assignment gives each check the CNOT order of
 its colour; every listed column support is a column of that assignment's extended code (a single data qubit, or a
