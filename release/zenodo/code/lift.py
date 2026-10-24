@@ -1,4 +1,4 @@
-"""Lemma 2 (finite rounds): exact lift test of the weight-11 extended logicals.
+"""SM S13 (lift computation for circuits A, B, C): exact lift test of the weight-11 extended logicals.
 
 For a circuit, a memory basis and a number of rounds R, build the SD6 detector error model augmented with one
 observable per row of H and of L (so every mechanism carries its image = extended-code column), check the template
@@ -7,7 +7,7 @@ images equals the 360 columns of the extended code; then, for each of the 4224 w
 mechanism per column such that every detector sum vanishes.  'lifting = 0' at R means no weight-11 undetected
 logical exists at R (with d_ext = 11, Lemma 1 excludes weight <= 10).
 
-    python code/lift.py --circuit A --basis Z X --R 1-32            # Lemma 2 (expect lifting 0 at every R)
+    python code/lift.py --circuit A --basis Z X --R 1-32            # SM S13 (expect lifting 0 at every R)
     python code/lift.py --circuit fig12 --basis Z X --R 1 --expect all   # positive control (expect 4224)
 Writes one JSON line per (basis, R) to stdout (and to --out if given); exit code 1 on any unexpected result.
 """
