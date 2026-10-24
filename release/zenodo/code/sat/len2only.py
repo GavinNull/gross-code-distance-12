@@ -1,4 +1,4 @@
-"""Table S3 (retimings that keep the Fig. 12 orders) with the frame model restricted to the 360 weight-11 logicals per
+"""Table S5 (retimings that keep the Fig. 12 orders) with the frame model restricted to the 360 weight-11 logicals per
 basis of the form "ten data columns + one residual of length 2" (the residual of the last two CNOTs of the check).
 For these logicals the direction "frame-model lift => weight-11 undetected error of the circuit" is the one proven in
 SM S9, so UNSAT of the restricted CEGAR is a theorem-level obstruction for the family.
