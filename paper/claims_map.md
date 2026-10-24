@@ -1,5 +1,12 @@
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
+**Revision O6 (2026-10-24).** Final reference verification (`research/literature/2026-10-24-final-reference-verification.md`):
+bibliography fixes (Bluvstein2024 Nature 626, 58; Xu2023 Nat. Phys. 20, 1084 with DOI, B. Vasić; Bluvstein2025 journal
+title, Nature 649, 39; Radnaev2025 journal title). Statement fixes: intro Liang/Sun–Cai → "certified bounds, exact in
+small cases"; LER C59/C60 closing sentence → "depth–distance trade-off noted in SBB's App. F" (App. F does not mention
+idling); C62 SM sensitivity: 6.5e-3 = Radnaev 99.35%, Muniz 99.40% = 6.0e-3 given separately.
+
+
 **Revision O5 (2026-10-24).** E-035 audited (`research/audits/2026-10-24-E-035.md`, STATE item 21): new tag C62.
 Main text: "Neutral atoms" paragraph in the LER section (4 sentences, written from audit §5, not the experimenter's
 sentence); abstract clause with both decisive assumptions; new SM section `sm:na` (parameters with the audit's source
