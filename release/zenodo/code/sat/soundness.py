@@ -1,4 +1,4 @@
-"""SM S10, "Soundness of the clauses": sampled checks of the frame model and of the nogood clauses against the exact
+"""SM S16, "Soundness of the clauses": sampled checks of the frame model and of the nogood clauses against the exact
 detector error model (finite samples, not a proof; the UNSAT statements rest on the frame-model argument).
 
   A (model): on circuits B of the colour-symmetric family at period P (CEGAR models of the primary encoding, and
