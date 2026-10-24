@@ -1,4 +1,4 @@
-"""SM S10, "Completeness of the family encoding": circuits drawn independently of the SAT encoding are models of it.
+"""SM S16, "Completeness of the family encoding": circuits drawn independently of the SAT encoding are models of it.
 
 sample  Draw legal deterministic colour-symmetric circuits (orders in the class of Fig. 12) at P = 17 and P = 12
         (pipelined) and P = 20 (common frame) with an own CP-SAT model (own list of the 8 order variants, own
