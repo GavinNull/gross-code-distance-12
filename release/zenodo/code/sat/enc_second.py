@@ -1,4 +1,4 @@
-"""Second, independent encoding (SM S10, "absolute times, one-sided difference literals"): pipelined schedules of
+"""Second, independent encoding (SM S16, "absolute times, one-sided difference literals"): pipelined schedules of
 period P invariant under a translation subgroup H of the 24 colour-preserving translations, orders in the class of
 Fig. 12; lazy frame-model nogoods (CEGAR).
 
