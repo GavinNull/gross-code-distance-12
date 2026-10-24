@@ -1,4 +1,4 @@
-"""Shared definitions for the SAT encoders and the bulk Pauli-frame model (SM S9, S10).
+"""Shared definitions for the SAT encoders and the bulk Pauli-frame model (SM S9, S16).
 
 Labels.  Each check has six CNOTs, one per term of A and B.  Label k = 0..5 stands for A1, A2, A3, B1, B2, B3
 (A = x^3 + y + y^2, B = y^3 + x + x^2).  X check i = (a, b) (i = 6a + b) acts with label p < 3 on left qubit
