@@ -1,0 +1,25 @@
+# Optional: logical-error-rate scripts of code/ler/ (sampling and decoders; SM S7, S8).  Install in addition to
+# requirements.txt:  uv pip install --python .venv/bin/python -r requirements.txt -r requirements-ler.txt
+# Direct dependencies: sinter (sampling), stimbposd + ldpc (BP-OSD), relay-bp (Relay-BP), scipy.
+sinter==1.16.0
+stimbposd==0.2.0
+ldpc==2.4.1
+relay-bp==0.2.2
+scipy==1.18.1
+# transitive (pinned for reproducibility)
+beliefmatching==0.2.0
+pymatching==2.4.0
+networkx==3.7
+matplotlib==3.11.2
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.66.1
+kiwisolver==1.5.1
+packaging==26.3
+pillow==12.3.0
+pyparsing==3.3.3
+tqdm==4.70.1
+pytest==9.1.1
+iniconfig==2.3.0
+pluggy==1.6.0
+pygments==2.21.0
