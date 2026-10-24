@@ -1,7 +1,7 @@
 [project]
-name = "gross12-verification"
-version = "1.1.0"
-description = "Verification code and data for: Interleaving recovers the full circuit distance of bivariate-bicycle codes"
+name = "bb-interleaving-verification"
+version = "2.0.0"
+description = "Verification code and data for: Interleaving recovers the full circuit distance of the gross and [[90,8,10]] bivariate-bicycle codes"
 requires-python = ">=3.12,<3.13"
 license = { text = "MIT (code); CC-BY-4.0 (data)" }
 dependencies = [
@@ -10,6 +10,11 @@ dependencies = [
     "ortools==9.15.6755",
     "python-sat==1.9.dev15",
 ]
+
+[project.optional-dependencies]
+# logical-error-rate scripts (code/ler/); pinned versions in requirements-ler.txt
+ler = ["sinter==1.16.0", "stimbposd==0.2.0", "ldpc==2.4.1", "relay-bp==0.2.2", "scipy==1.18.1",
+       "beliefmatching==0.2.0"]
 # Not an installable package: run the scripts in code/ from the package root (see README.md).
 [tool.uv]
 package = false
