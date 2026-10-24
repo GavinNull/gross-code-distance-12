@@ -66,7 +66,7 @@ for bad in ("claims_map", "STATE", "audit", "E-0", "results/", "search/", "resea
 def build(srcdir: Path, name: str) -> str:
     with tempfile.TemporaryDirectory() as d:
         shutil.copytree(srcdir, d, dirs_exist_ok=True)
-        r = subprocess.run(["tectonic", "--keep-logs", name], cwd=d, capture_output=True, text=True)
+        r = subprocess.run(["tectonic", "--only-cached", "--keep-logs", name], cwd=d, capture_output=True, text=True)
         if r.returncode:
             print(r.stdout[-3000:], r.stderr[-3000:])
             sys.exit("tectonic failed")
