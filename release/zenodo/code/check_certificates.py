@@ -1,4 +1,4 @@
-"""Re-solve the clause sets in certificates/ (SM S10) and compare with the recorded results.
+"""Re-solve the clause sets in certificates/ (SM S9, S16) and compare with the recorded results.
 
 Each certificate is a DIMACS CNF (gzip) with a log (*.log.json: what it encodes, sha256 of the uncompressed CNF,
 clause counts, results of three solvers at generation time).  This script checks the hash and solves every CNF from
@@ -27,7 +27,7 @@ ap.add_argument("--max-clauses", type=int, default=0)
 ap.add_argument("--family", action="store_true")
 a = ap.parse_args()
 V = Verdict()
-# certificates/bb90_dext_free/ ([[90,8,10]], SM S9) has no re-solve log; it is checked with its DRAT proof record
+# certificates/bb90_dext_free/ ([[90,8,10]], SM S4) has no re-solve log; it is checked with its DRAT proof record
 # (code/proofs/check_proofs.py --records certificates/proofs/bb90_dext_free.jsonl --regenerate all)
 dirs = [Path(d) for d in a.dirs] or sorted(p for p in CERTIFICATES.iterdir() if p.is_dir() and p.name != "bb90_dext_free")
 for d in dirs:
