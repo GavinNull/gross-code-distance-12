@@ -1,4 +1,4 @@
-"""SM S10, "Completeness of the family encoding" and "At P = 8 all 944 legal deterministic circuits of the family were
+"""SM S16, "Completeness of the family encoding" and "At P = 8 all 944 legal deterministic circuits of the family were
 also checked directly".
 
 Family (colour-symmetric, period 8, orders in the class of Fig. 12): each (type, colour) class picks one of the 8
