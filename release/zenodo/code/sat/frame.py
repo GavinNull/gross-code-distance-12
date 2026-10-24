@@ -1,4 +1,4 @@
-"""Bulk Pauli-frame model of weight-11 logicals (SM S9-S10).
+"""Bulk Pauli-frame model of weight-11 logicals (SM S9, S16).
 
 A weight-11 extended logical S is modelled by realising each column: a data column as a free data error, a residual
 column with support U of check a as errors on the qubits V = U (if |U| <= 3) or V = a \\ U, pinned at a's CNOT
