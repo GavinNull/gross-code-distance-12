@@ -1,6 +1,7 @@
 """Write ccsearch instances: the full SD6 detector error model of a memory circuit, with its translation symmetry.
 
-    python code/dcirc/export.py dem CIRCUIT BASIS R OUT     CIRCUIT: A, B, C, fig12 (gross code) or c16, u16, s16
+    python code/dcirc/export.py dem CIRCUIT BASIS R OUT     CIRCUIT: A, B, C, fig12, u11, u11_control_p10 (gross code) or
+                                                            c11, c12, c13, c16, u16, s16
                                                             ([[90,8,10]]); the circuit of data/circuits/, the
                                                             template of code/gross12/schedule.py, SD6 noise
     python code/dcirc/export.py stim STIM_FILE OUT          any stim circuit (no symmetry; identical DEM terms merged)
@@ -32,6 +33,10 @@ BB90 = ("c16", "u16", "s16")
 
 
 def load(name):
+    from p11 import common as P
+    if name in P.CIRCUITS_P11 and name not in BB90:     # u11 and its controls, c11, c12, c13
+        fam = P.family_of(name)
+        return P.load_code(fam), P.circuit(name), (P.FAMILY[fam]["l"], P.FAMILY[fam]["m"])
     if name in BB90:
         from bb90 import bbcode, ext
         return bbcode.load_code(), ext.circuit(name), (15, 3)
