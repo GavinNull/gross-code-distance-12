@@ -1,9 +1,9 @@
-"""CNF encoding of the Lemma 2 lift instances and their DRAT-checked refutation.
+"""CNF encoding of the lift instances of circuits A, B, C (SM S13) and their DRAT-checked refutation.
 
 Instance (circuit, basis, R, logical S): S is one of the 4224 weight-11 extended logicals (11 columns).  Group g
 (g = 1..11) holds the DEM mechanisms whose image is column S_g.  Question: is there a choice of exactly one
 mechanism per group such that every detector is flipped an even number of times?  (Same model as the CP-SAT lift
-of SM S6.)  CNF: one variable per mechanism of the 11 groups (in group order, mechanisms in DEM order);
+of SM S13.)  CNF: one variable per mechanism of the 11 groups (in group order, mechanisms in DEM order);
   * exactly one per group: one at-least-one clause, at-most-one pairwise (group size <= 6) or by a Sinz ladder;
   * for every detector touched by some mechanism of the groups: XOR of the mechanisms that flip it = 0
     (Tseitin-cut into pieces of <= 5 literals).
