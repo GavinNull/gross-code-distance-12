@@ -1,4 +1,4 @@
-"""Second and third implementations of the lift test of Lemma 2 (independent of code/gross12/ext.py and CP-SAT).
+"""Second and third implementations of the lift test of SM S13 (independent of code/gross12/ext.py and CP-SAT).
 
 dp_lift   frontier dynamic programming: the 11 column groups are processed in a greedy order; a state is the XOR of
           the chosen mechanisms' detector bitmasks; a detector that no later group can flip is "closed" and states
