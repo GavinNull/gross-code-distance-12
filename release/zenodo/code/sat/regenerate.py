@@ -5,7 +5,7 @@
     python code/sat/regenerate.py second 10                        # second encoding, 24-translation symmetric
     python code/sat/regenerate.py second 11 --sub 1,2              # subgroup <(1,2)>
     python code/sat/regenerate.py second 24 --maxwin 14 --winunits X0
-    python code/sat/regenerate.py primary 38 --common-frame --pin-fig12     # Table S3 family (see README)
+    python code/sat/regenerate.py primary 38 --common-frame --pin-fig12     # Table S5 family (see README)
 Options: --out FILE.cnf.gz (write the clause set), --compare CERT.cnf.gz (default: the matching file in
 certificates/ when there is one).  The comparison is on the DIMACS body ('p cnf' line and every clause in order,
 i.e. byte-identical after the comment header) and, if that differs, on the clause multiset.
