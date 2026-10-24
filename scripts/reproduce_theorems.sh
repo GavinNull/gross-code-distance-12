@@ -27,6 +27,19 @@
 #                           + cake_lpr（约 1 CPU 小时、12 GB 磁盘，NO_PROOFS=1 跳过）；ccsearch 自检、电路 A R = 1 两基底（<= 11 无、12 有）、
 #                           c16 R = 1..3（<= 9 无、10 有）、u16 对照；需要 release/zenodo/data（scripts/zenodo/build_bb90.py 生成）
 #                           （不含证明约 1.5 CPU 小时）
+#   --with-period11         已确认结果第 16、17、19、20 条：周期 11 的两个头条电路（gross u11 d_circ = 12、[[90]] c11 d_circ = 10，
+#                           任意 R、两基底）及 c12、c13。用发布包脚本（release/zenodo/code/p11、veripb、proofs、ler，从仓库根目录运行，
+#                           输出到 $OUT/period11）：合法性 / 确定性 / Table I 时序 / 72 或 45 平移对称 / 不可分段（混合强连通分量）；
+#                           扩展 lift（推广的引理 2）u11 R = 1..31、c11 R = 1..25、c12、c13 R = 1..12 两基底应 0 提升，
+#                           对照 u11_control_p10（432/576）、分段对照；任意 R 前提（G = 31、R' = 31 / 25、c12 分离）；
+#                           权重 12 / 10 注入；第二套直接 DEM 搜索（mitm.c）自检与 u11 R = 1 两基底 W = 11 无解、对照找到；
+#                           VeriPB：OPB 语义核对（check_opb）与从数据文件逐字节重建（opb all）；证书（NO_PROOFS=1 跳过）：
+#                           发布的 lift DRAT 证明重检、u11 / c11 R = 1, 2 的 lift 批次重新生成（CNF sha256 = 记录）、求解并经
+#                           drat-trim + cake_lpr 检查、VeriPB 结点数 <= 1e8 的证书重新生成并检查（判据：输出行
+#                           "s VERIFIED UNSATISFIABLE" 且返回码 0），PERIOD11_ALL_PROOFS=1 时跑全部 lift 批次（约 15 CPU 小时）
+#                           与全部 VeriPB 证书（另约 30 CPU 小时，W11 需 18–40 GB 内存）；逻辑错误率表由发布统计重算、
+#                           抽查 6 个采样任务的 sinter strong_id。需要 release/zenodo/data（scripts/zenodo/build_p11.py 等生成）
+#                           （不含证书约 4 CPU 小时）
 #   --skip-base             不跑默认的 BB108 / E-015 / IBM [[72]] 部分（只跑所选的可选部分）
 #   环境变量：P = 并行进程数（默认 4，不超过 6）；OUT = 输出目录（默认 results/reproduce_theorems，须为仓库内相对路径）。
 #
@@ -43,7 +56,7 @@ set -u
 cd "$(dirname "$0")/.."
 P=${P:-4}
 OUT=${OUT:-results/reproduce_theorems}
-BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0; GROSS12=0; GP18=0; BB90=0
+BASE=1; GROSS=0; MORPH=0; MORPH_ALL=0; RETIME=0; GROSS12=0; GP18=0; BB90=0; P11=0
 for a in "$@"; do
   case "$a" in
     --with-gross) GROSS=1 ;;
@@ -53,6 +66,7 @@ for a in "$@"; do
     --with-gross12) GROSS12=1 ;;
     --with-gross12-p18) GP18=1 ;;
     --with-bb90) BB90=1 ;;
+    --with-period11) P11=1 ;;
     --skip-base) BASE=0 ;;
     *) echo "unknown option $a"; exit 2 ;;
   esac
@@ -310,6 +324,52 @@ if [ "$BB90" -eq 1 ]; then
     if [ "${NO_PROOFS:-0}" != 1 ]; then
       export CADICAL=$PWD/tools/cadical/build/cadical DRAT_TRIM=$PWD/tools/drat-trim/drat-trim CAKE_LPR=$PWD/tools/cake_lpr/cake_lpr
       bb proof $Z/code/proofs/check_proofs.py --records certificates/proofs/bb90_dext_free.jsonl --regenerate all --timeout 20000
+    fi
+  fi
+fi
+
+if [ "$P11" -eq 1 ]; then
+  echo "== E-030 / E-031 / E-032 / E-034  周期 11 电路 u11（gross，d_circ = 12）与 c11（[[90]]，d_circ = 10），任意 R、两基底（发布包脚本）"
+  Q=$OUT/period11; mkdir -p "$Q"
+  Z=release/zenodo; PYR="uv run python"
+  if [ ! -f $Z/data/logicals/u11_weight11_logicals_X_memory.json ] || [ ! -f $Z/certificates/veripb/records.jsonl ]; then
+    echo "FAIL  period11: release/zenodo data missing (run scripts/zenodo/build_p11.py, build_veripb.py, build_lift_records.py)"; FAIL=1
+  else
+    pp() { log=$1; shift; $PYR "$@" > "$Q/$log.log" 2>&1; grep -E '^(PASS|FAIL|SKIP)' "$Q/$log.log"
+           grep -q '^FAIL' "$Q/$log.log" && FAIL=1; grep -q '^PASS' "$Q/$log.log" || { echo "FAIL  period11 $log crashed"; FAIL=1; }; }
+    pp check $Z/code/p11/check_circuits.py u11 u11_control_p10 u11_control_segmented c11 c12 c13
+    # 扩展 lift（每行：电路 基底 R 范围；行尾不能有空格）
+    { for b in Z X; do echo "u11 $b 1-16"; echo "u11 $b 17-24"; echo "u11 $b 25-28"; echo "u11 $b 29-31"
+                       echo "c11 $b 1-14"; echo "c11 $b 15-20"; echo "c11 $b 21-25"; echo "c12 $b 1-12"; echo "c13 $b 1-12"
+                       echo "u11_control_p10 $b 1-2"; echo "u11_control_segmented $b 1"; done; } | xargs -P "$P" -L 1 sh -c \
+      'uv run python release/zenodo/code/p11/lift.py --circuit $1 --basis $2 --R $3 > "$0/lift_$1_$2_$3.log" 2>&1' "$Q"
+    for f in "$Q"/lift_*.log; do grep -E '^(PASS|FAIL)' "$f"; grep -q '^FAIL' "$f" && FAIL=1; grep -q '^PASS' "$f" || FAIL=1; done
+    pp premises_u11 $Z/code/p11/premises.py --circuit u11 --rmax 31 --rins 2-16
+    pp premises_c11 $Z/code/p11/premises.py --circuit c11 --rmax 25 --rins 2-15
+    pp premises_c12 $Z/code/p11/premises.py --circuit c12 --separated --rmax 12
+    pp premises_c13 $Z/code/p11/premises.py --circuit c13 --separated --rmax 12
+    pp inject $Z/code/p11/inject_upper_bound.py u11 c11 c12 c13
+    pp direct_selftest $Z/code/p11/direct.py selftest --out "$Q/direct"
+    pp direct_u11_Z $Z/code/p11/direct.py run u11 Z 1 11 --workers "$P" --out "$Q/direct"
+    pp direct_u11_X $Z/code/p11/direct.py run u11 X 1 11 --workers "$P" --out "$Q/direct"
+    pp direct_control $Z/code/p11/direct.py run u11_control_p10 Z 1 11 --workers "$P" --out "$Q/direct"
+    pp check_opb $Z/code/veripb/check_opb.py
+    pp opb $Z/code/veripb/certify.py opb all --out "$Q/veripb"
+    pp ler $Z/code/ler/tables.py --verify-circuits 2
+    if [ "${NO_PROOFS:-0}" != 1 ]; then
+      export CADICAL=$PWD/tools/cadical/build/cadical DRAT_TRIM=$PWD/tools/drat-trim/drat-trim CAKE_LPR=$PWD/tools/cake_lpr/cake_lpr
+      export VERIPB=$PWD/tools/veripb/target/release/veripb
+      pp lift_shipped $Z/code/proofs/ext_lift_certs.py shipped "$Q/ext_lift"
+      if [ "${PERIOD11_ALL_PROOFS:-0}" = 1 ]; then
+        for c in "u11 1-31" "c11 1-25" "c12 1-12" "c13 1-12" "c16 1-12"; do
+          set -- $c; pp "lift_certs_$1" $Z/code/proofs/ext_lift_certs.py $1 $2 "$Q/ext_lift_$1" --workers "$P"
+        done
+        pp veripb $Z/code/veripb/certify.py check all --out "$Q/veripb"
+      else
+        pp lift_certs_u11 $Z/code/proofs/ext_lift_certs.py u11 1-2 "$Q/ext_lift_u11"
+        pp lift_certs_c11 $Z/code/proofs/ext_lift_certs.py c11 1-2 "$Q/ext_lift_c11"
+        pp veripb $Z/code/veripb/certify.py check --max-nodes 1e8 --out "$Q/veripb"
+      fi
     fi
   fi
 fi
