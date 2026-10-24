@@ -1,4 +1,4 @@
-"""SM S2-S3: legality, determinism, pipelining, interleaving, and invariance of the extended code.
+"""SM S11-S12 (circuits A, B, C and Fig. 12): legality, determinism, pipelining, interleaving, and invariance of the extended code.
 
 For each circuit: (i) every check applies exactly six CNOTs to its row support at distinct steps inside its window
 and no data qubit takes part in two CNOTs in one step; (ii) the noiseless memory circuits (R = 1, 2, 3, 6, both bases)
