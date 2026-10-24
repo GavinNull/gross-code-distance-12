@@ -1,6 +1,6 @@
-# Interleaving recovers the full circuit distance of bivariate-bicycle codes
+# Interleaving recovers the full circuit distance of the gross and [[90,8,10]] bivariate-bicycle codes
 
-**Release v1.0** (paper PDF, arXiv source, full data/reproduction package): https://github.com/GavinNull/gross-code-distance-12/releases/tag/v1.0
+**Release v2.0** (paper PDF, arXiv source, full data/reproduction package): https://github.com/GavinNull/gross-code-distance-12/releases/tag/v2.0 — period-11 circuits; v1.0 (period 18) is superseded.
 
 This repository contains the code, data pointers, paper source and the complete research record behind
 

@@ -3,7 +3,7 @@
 PI 决定（2026-10-21）：三封信都不等 arXiv，直接发。附件是论文 PDF（`paper/draft.pdf`），链接用 GitHub。收件人邮箱请从对方论文或主页上核对后再填。
 公开链接：
 - 论文 PDF：https://github.com/GavinNull/gross-code-distance-12/blob/main/paper/draft.pdf
-- 数据与复现：GitHub Release v2.0（即将发布，链接届时更新；v1.0 是旧的周期 18 版本，不要用）
+- 数据与复现（Release v2.0）：https://github.com/GavinNull/gross-code-distance-12/releases/tag/v2.0
 - 仓库：https://github.com/GavinNull/gross-code-distance-12
 
 注（2026-10-24 更新）：信中所有结论都已经独立复核：两个码都在周期 11 下达到满距离，并补充了中性原子噪声模型下的结果。

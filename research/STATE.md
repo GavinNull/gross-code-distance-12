@@ -297,3 +297,4 @@ PI 决定：允许下载 Webster–Jacob–Higgott 的精确求距离工具；�
 - **（2026-10-23）新颖性（`research/literature/2026-10-22-period11-novelty.md`）**：结果是新的，证据中高。lead 用浏览器逐字核对了 SBB 2603.05481 v2 App. H 的 Prop. 5：任何“uniformly-tiled non-interleaved SEC（每个 X 校验的局部限制相同）”都有 d_circ ≤ 10。u11 是 uniformly tiled 的交错电路，d_circ = 12，所以正好比该定理的上界高 2；但相对全部非交错电路的最优值 11 只高 1，两种提升都要写清楚。IBM gross 的精确值 10 是首个精确值（限定 SD6、R ≤ 3）。[[90]] 的“高 2”在 c16 时已公开，c11 新的部分是周期。
 - **Fig. 1（u11）复核（`research/audits/2026-10-22-fig1-u11.md`）**：例子 CONFIRMED。6-环数据成立，但“straddle”的说法要改：同一轮的 X、Z 实例沿环互相先后，不是成对跨越。96/144 典型性被推翻（依赖删除顺序）；精确结果：全部 144 个的最小冲突集大小都是 1，最大不可约冲突集大小都是 4。
 - （2026-10-23）PI 要求用中性原子真实噪声参数测逻辑错误率 → E-035（参数全部附 arXiv 出处；样本量预注册，不做事后扩样）。
+- （2026-10-24）GitHub Release v2.0 已发布（周期 11 电路、证书、LER 数据，Zenodo 包 2.0，304 MB）；v1.0 已标为 superseded。
