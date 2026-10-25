@@ -7,4 +7,7 @@ P=${1:-3}
 {
   for R in 11 10 9 8 7 6 5 4 3 2 1; do for s in ibm:gross:X ibm:gross:Z sd6:gross:Z sd6:gross:X; do echo "$s:$R 9"; done; done
   for R in 9 8 7 6 5 4 3 2 1; do for s in ibm:bb108:X ibm:bb108:Z sd6:bb108:Z sd6:bb108:X; do echo "$s:$R 7"; done; done
-} | xargs -P $P -L 1 sh -c 'uv run python search/experiments/e037/certify.py $0 $1 --out '$O' >> '$O'/driver.log 2>&1'
+} | while read src w; do
+  n=$(echo $src | tr ':' '_')_W$w
+  grep -q "\"name\": \"$n\".*\"ok\": true" $O/runs.jsonl 2>/dev/null || echo "$src $w"   # skip finished
+done | xargs -P $P -L 1 sh -c 'uv run python search/experiments/e037/certify.py $0 $1 --out '$O' >> '$O'/driver.log 2>&1'

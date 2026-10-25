@@ -14,3 +14,15 @@ cross)
     uv run python search/experiments/e037/crosscheck.py $s $O/crosscheck.jsonl
   done ;;
 esac
+# (appended) post checks: implementation equality at the certified R; tamper tests of the in-proof symmetry variant
+case $1 in
+post)
+  uv run python search/experiments/e037/structure.py --R 10 12 > $O/structure_R10_12.log 2>&1
+  cp $O/structure.json $O/structure_R10_12.json
+  uv run python search/experiments/e037/certify.py ibm:gross:X:1 9 --out $O/dev --name insym_keep --keep --sym proof
+  uv run python search/experiments/e037/tamper.py $O/dev/insym_keep $O/tamper.jsonl ;;
+esac
+case $1 in
+cnfmin)
+  for W in 5 9; do uv run python search/experiments/e037/cnf_dem.py ibm:gross:X:1 $W $O/cnf --minimal --timeout 1200; done ;;
+esac

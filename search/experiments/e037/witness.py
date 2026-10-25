@@ -31,7 +31,7 @@ def find(source, W, out):
     stem = str(Path(out) / (source.replace(":", "_") + f"_W{W}_wit"))
     subprocess.run([sys.executable, str(HERE / "dem_inst.py"), source, str(W), stem, "--no-symcheck"],
                    check=True, capture_output=True)
-    p = subprocess.run([str(BIN), stem + ".inst", "-Q"], capture_output=True, text=True)
+    p = subprocess.run([str(BIN), stem + ".inst", "-R", stem + ".triv"], capture_output=True, text=True)
     sol = [l for l in p.stdout.splitlines() if l.startswith("SAT columns:")]
     for ext in (".opb", ".inst"):
         Path(stem + ext).unlink()
