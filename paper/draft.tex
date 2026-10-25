@@ -61,8 +61,10 @@ rates it governs the logical error rate.
 
 No circuit for the gross code had been shown to reach $\dcirc=d=12$. The IBM
 circuit, with 8 time steps per round, has circuit distance exactly 10 under SD6 for
-$R\le3$, by exact enumeration (SM~\ref{sm:ler}); previously only $\dcirc\le10$ was
-known~\cite{Bravyi2024,TourDeGross,Tesseract2025}\cl{55}.
+$R\le3$, by our exact enumeration (SM~\ref{sm:ler}); the upper bound is from
+Refs.~\cite{Bravyi2024,TourDeGross,Tesseract2025}, and an independent exhaustive search on a
+reconstruction of that circuit and its fault list gives 10 in both bases for 12 noisy
+rounds~\cite{Crocker2026}\cl{55}.
 Strikis, Browne and Beverland (SBB)~\cite{Strikis2026} analysed single-ancilla
 circuits, in which each check is measured by one dedicated ancilla coupled by CNOTs.
 They append to the check matrix the ``residual'' errors that an ancilla fault spreads
@@ -358,6 +360,8 @@ J.~M.~Gambetta, A.~W.~Cross, M.~Carroll, and M.~E.~Beverland, Tour de gross: A
 modular quantum computer based on bivariate bicycle codes, arXiv:2506.03094 (2025).
 \bibitem{Tesseract2025} L.~Aghababaie Beni, O.~Higgott, and N.~Shutty, Tesseract: A
 search-based decoder for quantum error correction, arXiv:2503.10988 (v2, 2025).
+\bibitem{Crocker2026} C.~Crocker, The gross code's syndrome circuit has circuit-level
+distance 10: an exhaustive lower bound, Zenodo (2026), doi:10.5281/zenodo.23452754.
 \bibitem{Strikis2026} A.~Strikis, D.~E.~Browne, and M.~E.~Beverland,
 High-performance syndrome extraction circuits for quantum codes,
 arXiv:2603.05481 (v2, 2026).
@@ -895,7 +899,8 @@ failures rather than by minimum-weight logicals.
 \emph{IBM's gross circuit.} Exact enumeration on the detector error model finds exactly
 144 ($Z$ basis) and 288 ($X$ basis) undetected logicals of weight 10 per round, constant
 for $R=1$--3, and none of lower weight for $R\le3$: its circuit distance is 10 for up to
-three rounds. For the period-11 circuit we find 69756 logicals of weight 12 at $R=1$ in
+three rounds, in agreement with the exhaustive search of Ref.~\cite{Crocker2026} for 12 noisy
+and 2 noiseless cycles. For the period-11 circuit we find 69756 logicals of weight 12 at $R=1$ in
 each basis and 233244 at $R=2$ ($Z$ basis); the per-round count has not converged.
 % ---------------------------------------------------------------------------
 \section{Logical error rates in a neutral-atom noise model}\label{sm:na}\cl{62}

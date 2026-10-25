@@ -24,7 +24,7 @@ the ~18 GB memory for the W11 VeriPB check. E-035 not mentioned.
 **Revision O3 (2026-10-23).** C56 framing: SBB 2603.05481 v2 App. H Prop. 5 (verbatim check by the lead: every
 uniformly tiled non-interleaved gross SEC has d_circ ≤ 10); the period-11 circuit is uniformly tiled and interleaved
 ⇒ +2 within that class, +1 over the best non-interleaved circuit (11). [[90]] +2 already at period 16; new: period 11.
-C55 wording: "exactly 10 under SD6 for R ≤ 3 (exact enumeration); previously only ≤ 10" (2308.07915, 2506.03094,
+C55 wording: "exactly 10 under SD6 for R ≤ 3 (exact enumeration); upper bound from Refs.; Crocker (Zenodo 10.5281/zenodo.23452754, 2026-10-18) independently finds 10 in both bases for 12 noisy + 2 noiseless rounds by exhaustive search on a reconstruction, cited" (2308.07915, 2506.03094,
 2503.10988). New citations from `research/literature/2026-10-22-period11-novelty.md`: 2308.08648 (pipelined
 product-coloration circuits; abs page checked), 2603.01628 (surface-code interleaving; abs page checked), SBB App. F and
 App. G.2, SI1000 (2108.10457) for λ = 0.1. C58: u11 list-completeness certificate and c11 lifts to R ≤ 25 (E-034)
