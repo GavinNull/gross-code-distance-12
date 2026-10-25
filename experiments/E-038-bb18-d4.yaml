@@ -1,0 +1,51 @@
+id: E-038-bb18-d4
+title: Can a single-ancilla circuit on the Kunlun chip reach circuit distance 4 for [[18,4,4]]? (7+ layers, wraparound / pipelined)
+owner: experimenter
+date: 2026-10-26
+hypothesis: >
+  E-036 (audited, STATE item 22): for [[18,4,4]] with the 14 measured checks of the Kunlun chip (84 Tanner couplers,
+  one ancilla per check, no flags) every non-interleaved circuit has d_circ <= 3 (each check pair lies in a weight-4
+  logical), and the non-wrapping 6-CNOT-layer family is UNSAT for d_circ = 4 (two independent CEGARs).  Open: 7
+  layers non-wrapping (the experiment's depth), deeper non-wrapping, and pipelined (wraparound) schedules with
+  per-check prep / measurement times, which is what lifted the gross code above its non-interleaved cap (E-024, E-032).
+reasoning: >
+  For the noise model SD6 the circuit distance of a single-ancilla schedule depends only on the relative order of
+  events (per-check CNOT order; per-data-qubit order of the CNOTs of different checks, with round offsets when the
+  schedule wraps).  So I model a schedule by absolute event times tau_e of the round-0 instance (instance j at
+  tau_e + jP) and work in the bulk (infinite memory): a bulk undetectable logical of weight w (faults whose detector
+  effects cancel and whose residual data error is a non-trivial logical) embeds into the finite-R memory circuit for
+  every R large enough, so "every schedule of the class has a bulk witness of weight <= 3" means d_circ <= 3 for all
+  large R.  Single-fault effects (data cut, ancilla hook = suffix spread, measurement flip) are closed-form functions
+  of order literals LT(f, g, k) := tau_f < tau_g + kP.
+  Stronger nogoods than E-036 / its audit: a witness is abstracted to its PATTERN (fault types, checks, hook suffix
+  sets, data qubits, relative rounds); the data-cut position is left free (the attacker may choose any cut) and
+  detector cancellation is encoded as parity constraints over Tseitin variables, so one pattern excludes every
+  schedule in which that combination of faults cancels, not only schedules with the same literal values.  Number of
+  patterns is finite and small, so the CEGAR loop should converge.  Each pattern clause is sound by construction if
+  the closed-form effects are right; that is validated against stim (own circuit + the evaluator template) on random
+  schedules (wrapping and not) and by checking each nogood on an independent schedule that satisfies it.
+  Symmetry: only code automorphisms that preserve the measured-check set (computed, not assumed) are used; none of the
+  9 translations preserves {X2, X8} as a set, so translations are NOT used.
+  Final UNSAT: CNF (legality + all pattern clauses) dumped as DIMACS, CaDiCaL 3.0.1 + DRAT, checked by drat-trim.
+plan:
+  1: e038/model.py periodic bulk symbolic model; validation vs stim (own periodic circuit and evaluator memory_circuit)
+  2: e038/cegar.py pattern-CEGAR; classes N(S) non-wrapping S CNOT layers (S = 6 sanity = known UNSAT, S = 7, 8, ...),
+     N(inf) (any depth, order-only), W(P) wrapping with per-check prep / meas (P = 8, 9, 10, ...)
+  3: for UNSAT: DIMACS + DRAT + drat-trim; nogood validation in stim
+  4: if a d_circ = 4 schedule is found: evaluator validate, exact finite-R DEM (R = 1..Rmax, both bases), any-R argument,
+     weight-4 injection upper bound, cross-check with e036_audit-style independent code, LER vs Kunlun (E-036 Tab. S1
+     mapping, same BP-OSD, 200,000 shots per point fixed in advance, R = 6, Jeffreys CIs)
+  5: the same for the full 18-check variant (unconstrained chip)
+prediction: >
+  (written before any computation; I have read E-036, its audit, E-030/E-032 journals)
+  1) non-wrapping 7 CNOT layers (P = 9, the experiment's depth) UNSAT for d_circ = 4: 75%.
+  2) non-wrapping any depth (order-only class) UNSAT: 55%.
+  3) wrapping P = 8 has a d_circ = 4 schedule: 15%; some wrapping P <= 12 has one: 40%.
+  4) if one exists, its LER under Tab. S1 noise (scale 1) is within 10% of the Kunlun circuit (distance gains are
+     invisible at p ~ 1e-2 with 4% measurement error): 75%; at scale 0.1 it is better by >= 20%: 50%.
+  5) the full 18-check version reaches d_circ = 4 in some class where the 14-check version cannot: 30%.
+  6) pattern-CEGAR settles non-wrapping S = 7 in < 2 CPU h: 60%.
+sample_sizes: "LER (only if a d_circ = 4 circuit is found): 200,000 shots per (circuit, basis, scale), R = 6, scale 1 and 0.1, no post-hoc extension"
+budget: {cpu_hours: 40, llm_tokens: 0, num_workers: 5}
+seed: 20261026
+command: "uv run python -m search.experiments.e038.<script> (each command in the journal's reproduction section)"
