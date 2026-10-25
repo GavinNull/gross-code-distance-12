@@ -26,7 +26,7 @@ from search.experiments.e036.common import OUT, code, load_spec, noiseless
 from search.experiments.e036.dcirc import get_spec
 
 KL = dict(p_cz=9.8e-3, p_I=3.5e-3, p_H=8.0e-4, p_M=4.03e-2, p_DX=1.09e-2, p_DZ=1.59e-2, p_F=3.29e-2)
-IBM_BPOSD = dict(max_bp_iters=10000, bp_method="min_sum", ms_scaling_factor=0, osd_method="osd_cs", osd_order=7)
+IBM_BPOSD = dict(max_bp_iters=100, bp_method="min_sum", ms_scaling_factor=0, osd_method="osd_cs", osd_order=7)
 
 
 def kl_noise(c: stim.Circuit, s: float = 1.0) -> stim.Circuit:
@@ -47,7 +47,7 @@ def kl_noise(c: stim.Circuit, s: float = 1.0) -> stim.Circuit:
             for t in op.targets_copy():
                 if t.is_qubit_target:
                     used.add(t.value)
-        for op in ops:
+        for op in layer:  # keep the original instruction order (detectors use relative record offsets)
             if op.name in ("M", "MX"):
                 qs = [t.value for t in op.targets_copy()]
                 pf = P["p_F"] if final else P["p_M"]
@@ -67,8 +67,6 @@ def kl_noise(c: stim.Circuit, s: float = 1.0) -> stim.Circuit:
                 out.append("PAULI_CHANNEL_1", others, [P["p_DX"], 0, P["p_DZ"]])
         elif not final:  # prep-only layer
             out.append("DEPOLARIZE1", allq, P["p_H"])
-        for a in anns:
-            out.append(a)
 
     ops = list(c.flattened())
     # split at TICK; the last segment (final data readout + detectors) is "final"
