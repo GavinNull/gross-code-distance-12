@@ -2,6 +2,7 @@
 
 Classes:
   N(S)   non-wrapping, S CNOT layers: P = S + 2, pi = 0, mu = S + 1 (constants), tau in 1..S.
+  V(P, delta)  W(P) restricted to prep time 0 for every X check and delta for every Z check (meas free).
   W(P)   wrapping, per-check prep/meas: pi in 0..P-1 (pi of the first check fixed to 0: a global time shift followed
          by relabelling the instances of the checks pushed past P is a symmetry of the bulk model and of legality),
          mu in 7..2P-2, tau in 1..2P-3, pi < tau < mu, mu - pi <= P - 1.
@@ -56,7 +57,7 @@ class IntVar:
 
 
 class Enc:
-    def __init__(self, variant, cls, S_or_P):
+    def __init__(self, variant, cls, S_or_P, delta=None):
         self.variant, self.cls = variant, cls
         self.nv = 0
         self.cl = []
@@ -72,7 +73,11 @@ class Enc:
             self.P = P = S_or_P
             self.pi = {}
             for i, k in enumerate(self.ks):
-                self.pi[k] = IntVar(self, 0, 0) if i == 0 else IntVar(self, 0, P - 1)
+                if cls == "V":   # type-uniform prep times: X checks at 0, Z checks at delta (IBM-style wrap)
+                    v = 0 if k[0] == "X" else delta
+                    self.pi[k] = IntVar(self, v, v)
+                else:
+                    self.pi[k] = IntVar(self, 0, 0) if i == 0 else IntVar(self, 0, P - 1)
             self.mu = {k: IntVar(self, 7, 2 * P - 2) for k in self.ks}
             self.tau = {e: IntVar(self, 1, 2 * P - 3) for e in self.ev}
         self.ltc = {}

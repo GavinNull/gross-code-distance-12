@@ -274,8 +274,8 @@ class ExtSolver:
 
 
 def run(variant, cls, arg, d, W, limit, max_iter, dump, tag, solver_name="cd15", external=False, resume=None,
-        do_expand=False):
-    E = Enc(variant, cls, arg)
+        do_expand=False, delta=None):
+    E = Enc(variant, cls, arg, delta)
     PE = PatternEncoder(E)
     PE.direct = DIRECT
     pats = {}
@@ -384,8 +384,9 @@ if __name__ == "__main__":
     ap.add_argument("--resume")
     ap.add_argument("--tag", default="")
     ap.add_argument("--direct", action="store_true")
+    ap.add_argument("--delta", type=int)
     a = ap.parse_args()
     DIRECT = a.direct
-    tag = f"{a.variant}_{a.cls}{a.arg}_d{a.d}{a.tag}"
+    tag = f"{a.variant}_{a.cls}{a.arg}_d{a.d}{a.tag}" + (f"_delta{a.delta}" if a.delta is not None else "")
     run(a.variant, a.cls, a.arg, a.d, a.W, a.limit, a.max_iter, a.dump, tag, a.solver, a.external, a.resume,
-        a.expand)
+        a.expand, a.delta)
