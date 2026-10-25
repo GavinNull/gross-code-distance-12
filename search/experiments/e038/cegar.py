@@ -29,6 +29,7 @@ from search.experiments.e038.enc import Enc, neg
 from search.experiments.e038.model import Sched, bulk_min, legal
 
 OUT = "results/E-038-bb18-d4"
+DIRECT = False
 
 
 def pattern_of(basis, tags):
@@ -74,10 +75,92 @@ class PatternEncoder:
         choices = [rev[s[1]] for s in slots if s[0] == "D"]
         out = []
         for ch in itertools.product(*choices):
+            if getattr(self, "direct", False):
+                out += self.direct_clauses_for_choice(pat, ch)
+                continue
             cl = self.clauses_for_choice(pat, ch)
             if cl is not None:
                 out.append(cl)
         return out
+
+    def direct_clauses_for_choice(self, pat, ch, nmax=14):
+        """same exclusion as clauses_for_choice, without XOR auxiliaries: one clause per assignment of the indicator
+        literals under which every detector parity is 0 (falls back to the XOR clause if > nmax literals)."""
+        dets, cond = self._dets(pat, ch)
+        if dets is None:
+            return []
+        neg_cond = [neg(c) for c in cond if c is not True]
+        lists = []
+        for key in sorted(dets, key=repr):
+            const = 0
+            ls = []
+            for l in dets[key]:
+                if l is True:
+                    const ^= 1
+                elif l is False:
+                    continue
+                else:
+                    ls.append(l)
+            if not ls:
+                if const:
+                    return []
+                continue
+            lists.append((const, ls))
+        base = sorted({abs(l) for _, ls in lists for l in ls})
+        if len(base) > nmax:
+            cl = self.clauses_for_choice(pat, ch)
+            return [] if cl is None else [cl]
+        pos = {v: i for i, v in enumerate(base)}
+        out = []
+        for m in range(1 << len(base)):
+            ok = True
+            for const, ls in lists:
+                par = const
+                for l in ls:
+                    val = (m >> pos[abs(l)]) & 1
+                    par ^= val if l > 0 else 1 - val
+                if par:
+                    ok = False
+                    break
+            if ok:
+                out.append(neg_cond + [(-v if (m >> pos[v]) & 1 else v) for v in base])
+        return out
+
+    def _dets(self, pat, ch):
+        E = self.E
+        basis, slots = pat
+        rev = self.rev[basis]
+        cond = []
+        dets = {}
+        di = 0
+        for s in slots:
+            if s[0] == "H":
+                _, k, U, r = s
+                for x in range(6):
+                    if x in U:
+                        continue
+                    for u in U:
+                        cond.append(E.LT((k, x), (k, u), 0))
+                for a in U:
+                    g = (k, a)
+                    for f in rev[support(k)[a]]:
+                        self.contrib(dets, g, f, r)
+            elif s[0] == "D":
+                _, q, r = s
+                fs = ch[di]
+                di += 1
+                for f in rev[q]:
+                    if f == fs:
+                        dets.setdefault((f[0], r), []).append(True)
+                    else:
+                        self.contrib(dets, fs, f, r)
+            else:
+                _, c, r = s
+                dets.setdefault((c, r), []).append(True)
+                dets.setdefault((c, r + 1), []).append(True)
+        if any(c is False for c in cond):
+            return None, None
+        return dets, cond
 
     def clauses_for_choice(self, pat, ch):
         """the clause for one choice of f* (one reader event per data slot), or None if trivially satisfied."""
@@ -194,6 +277,7 @@ def run(variant, cls, arg, d, W, limit, max_iter, dump, tag, solver_name="cd15",
         do_expand=False):
     E = Enc(variant, cls, arg)
     PE = PatternEncoder(E)
+    PE.direct = DIRECT
     pats = {}
     if resume:
         for pat in load_patterns(resume):
@@ -299,7 +383,9 @@ if __name__ == "__main__":
     ap.add_argument("--expand", action="store_true")
     ap.add_argument("--resume")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--direct", action="store_true")
     a = ap.parse_args()
+    DIRECT = a.direct
     tag = f"{a.variant}_{a.cls}{a.arg}_d{a.d}{a.tag}"
     run(a.variant, a.cls, a.arg, a.d, a.W, a.limit, a.max_iter, a.dump, tag, a.solver, a.external, a.resume,
         a.expand)
