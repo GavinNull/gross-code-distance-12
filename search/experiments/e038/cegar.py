@@ -279,8 +279,10 @@ def run(variant, cls, arg, d, W, limit, max_iter, dump, tag, solver_name="cd15",
     PE = PatternEncoder(E)
     PE.direct = DIRECT
     pats = {}
-    if resume:
-        for pat in load_patterns(resume):
+    for path in (resume.split(",") if resume else []):
+        for pat in load_patterns(path):
+            if pat in pats:
+                continue
             cls_ = PE.clauses(pat)
             pats[pat] = len(cls_)
             for c in cls_:
