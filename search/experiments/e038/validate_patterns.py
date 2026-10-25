@@ -117,6 +117,9 @@ def main(cls, arg, path, n, seed, variant):
             one = PE.clauses_for_choice(p, ch)
             if one is not None:
                 cls_all.append((ch, one))
+        if not cls_all:
+            stats["trivial"] = stats.get("trivial", 0) + 1
+            continue
         ch, cl = rng.choice(cls_all)
         if any(l is True for l in cl):
             continue
