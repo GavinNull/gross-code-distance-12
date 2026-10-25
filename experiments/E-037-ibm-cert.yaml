@@ -1,0 +1,55 @@
+id: E-037-ibm-cert
+title: Certified circuit-distance lower bounds for IBM's depth-8 BB syndrome circuit (gross and [[108,8,10]]), cross-check of Crocker (Zenodo 10.5281/zenodo.23452754)
+owner: experimenter
+date: 2026-10-25
+hypothesis: >
+  Crocker reports (exhaustive branch and bound, no certificate) that IBM's depth-8 circuit has d_circ = 10 for the
+  gross code (12 noisy + 2 noiseless cycles, IBM decoder_setup.py fault model) and 8 for [[108,8,10]] (10 + 2), both
+  bases.  E-033 found d_circ = 10 for gross under our SD6 DEM for R <= 3 (ccsearch, uncertified lower bound).  The
+  claim "no undetectable logical of weight <= d-1" is a parity-feasibility question on the DEM column matrix
+  (detectors = 0, some logical = 1, |x| <= d-1), the same shape as the extended-code questions certified in
+  E-031/E-034, so the E-031 proof-logging DFS (VeriPB, translation symmetry inside the proof) should certify it
+  directly on the DEM; plain CDCL (CaDiCaL + DRAT) is expected to fail at full weight (E-027, E-033 audit) and is
+  tried as the requested route and as a scaling reference.
+noise_models:
+  sd6: evaluator public entry (evaluators.candidate.memory_circuit of baselines ibm_depth8 + evaluators.noise sd6,
+    as in E-026/E-033); R noisy rounds, transversal final data readout; stim DEM, decompose_errors=False.
+  ibm: reconstruction of github.com/sbravyi/BivariateBicycleCodes decoder_setup.py (read-only WebFetch): own gate
+    list (rounds 0..7, IBM gate order inside rounds), single faults X-type (PrepZ after, MeasZ before, data IDLE in
+    rounds 0, 6, 7 after, CNOT X on control / X on target / XX after) and the Z-type mirror; R noisy cycles + 2
+    noiseless; detectors = raw first syndrome then consecutive differences of the same check; logical = lz (lx) on
+    the final data frame; columns merged by (detectors, logicals).  Two independent implementations (numpy frame
+    simulator mirroring decoder_setup.py, including its non-reset of X on X-check ancillas at PrepX; and a stim
+    circuit) must give identical column sets.
+plan:
+  - build both codes from IBM's definitions, verify [[144,12,12]] and [[108,8,10]] (k by rank; d by an independent
+    certified or published route - k exact, d upper bound by a logical of weight d, lower bound cited)
+  - gate list vs baselines ibm_depth8 (E-033 SD6 circuit): layer by layer identity of CNOTs, prep, meas
+  - DEMs for both models, both bases, R = 1.., translation group of the DEM checked
+  - count-only DFS probes R = 1, 2, 3 to measure scaling, then VeriPB-certified W = d-1 for the largest R in budget
+  - CaDiCaL + DRAT on the direct CNF (Tseitin XOR + cardinality) for small R, as the requested route
+  - witnesses of weight d_circ found and verified in stim (detectors silent, observable flipped) for every model
+  - cross-check: min weight / counts vs ccsearch (E-029 binary) on small R
+predictions: >
+  (written before any DEM was built or any search run)
+  1) Our reconstruction of IBM's gate order equals baselines ibm_depth8 layer by layer (90%).  The two IBM-model
+     implementations agree column for column (90%; the missing PrepX reset in decoder_setup.py's X simulator changes
+     no column, because the persisting ancilla error is a stabilizer frame in a valid circuit) (80%).
+  2) gross: d_circ = 10 in both models and both bases for every R checked (90%); [[108]]: 8 (85%).  No disagreement
+     with Crocker (85%).  SD6 and IBM model give the same minimum weight (80%).
+  3) Direct CNF + CaDiCaL: R = 1 gross W = 9 does not finish within 1 CPU h (75%).
+  4) Proof-logging DFS on the DEM with the 72 (54) translations: R = 1 gross W = 9 certified in < 1 CPU h (60%);
+     cost per R grows roughly linearly in R once R exceeds the time extent of weight-9 fault sets (70%).  R = 12 for
+     gross in both bases and both models within the 40 CPU h budget (35%); R = 10 for [[108]] W = 7 in both (55%).
+  5) ccsearch and the certified DFS agree on every small-R minimum weight (98%).
+budget:
+  cpu_hours: 40
+  workers: 3
+  llm_tokens: 0
+tools: >
+  Already built in tools/ (no downloads): VeriPB 3.0.2 (E-034), CaDiCaL 3.0.1, drat-trim, cake_lpr (E-027).
+  VeriPB judged only by the output line "s VERIFIED UNSATISFIABLE"; drat-trim by "s VERIFIED"; cake_lpr by
+  "s VERIFIED UNSAT".
+commands: see research/journal/2026-10-25-E-037-ibm-cert.md (filled in as the scripts are written)
+results: results/E-037-ibm-cert/
+journal: research/journal/2026-10-25-E-037-ibm-cert.md
