@@ -30,3 +30,8 @@ sample_sizes: "LER：每个 (电路, 基底, R) 预设 200,000 shots（R = 6，�
 budget: {cpu_hours: 30, llm_tokens: 0, num_workers: 6}
 seed: 20261025
 command: "PYTHONPATH=.:tests uv run python -m search.experiments.e036.<script>（逐条见日志复现一节）"
+amendment_2026-10-25_before_LER: >
+  （在采集任何对比 LER 数据之前写入）IBM 参数的 BP-OSD（10^4 次 BP 迭代）在这个噪声下约 67 ms/shot（BP 几乎从不收敛），20 万 shots 不可行。
+  改为 max_bp_iters = 100、其余不变（min-sum、OSD-CS 7）；在 Kunlun [[18,4,4]] Z 基 R = 6 的同 1000 个样本上，100 / 1000 次迭代的块失败率 0.773 / 0.774。
+  所有电路用同一设置。样本量仍为每 (电路, 基底, 噪声档) 200,000，R = 6。另加一档 scale = 0.1（Tab. S1 所有概率 × 0.1，代表好 10 倍的器件），因为 scale = 1 时 R = 6 的块失败率约 0.8，接近饱和。
+  对比对象：[[18,6,3]] Kunlun 电路 vs 我们的周期 8 电路（6 层 CNOT）；[[18,4,4]] Kunlun 电路 vs 我们最好的电路（若有 d_circ = 4 的电路则用它，否则用周期 8、d_circ = 3 的电路）。
