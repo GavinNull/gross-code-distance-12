@@ -30,7 +30,7 @@ static u64 *cmask;                        /* NC x NW */
 #define CM(j) (cmask + (size_t)(j) * NW)
 static int NBAS, *bas, NEXP, *exm, *excn, **exc, *exdn, **exd; static char *isbas;
 static int NB; static long long bid0; static int *bsz, **bcol;
-static int KC, KL, NG; static int **gx, **gq, **gr;
+static int KC, KL, NG; static int SBF; static long long h1id, e2id, sbid; static int **gx, **gq, **gr;
 static int NCASE; static int *case_col, *case_nred; static int **red_col, **red_g;
 
 static char *chosen, *forb, *gfalse;
@@ -437,8 +437,11 @@ int main(int argc, char **argv){
     case_col[c] = rd(f); case_nred[c] = rd(f);
     red_col[c] = xm(sizeof(int)*(case_nred[c]+1)); red_g[c] = xm(sizeof(int)*(case_nred[c]+1));
     for (int r=0;r<case_nred[c];r++){ red_col[c][r] = rd(f); red_g[c][r] = rd(f);
-      if (gx[red_g[c][r]][case_col[c]] != red_col[c][r]) die("group element does not map rep to member"); }
+      if (NG > 0 && gx[red_g[c][r]][case_col[c]] != red_col[c][r]) die("group element does not map rep to member"); }
   }
+  /* E-037: symmetry breaking in the formula (dem_inst.py sb_note): ids of H1 (per column), E2 (orbits >= 1), SB */
+  SBF = rd(f); h1id = rdl(f); e2id = rdl(f); sbid = rdl(f);
+  if (SBF && NG) die("SBF with group");
   fclose(f);
   chosen = xm(NC); forb = xm(NC); gfalse = xm(NC); unit_id = xm(sizeof(long long)*NC); wl = xm(sizeof(int)*NC);
   syn = xm(sizeof(u64)*NW); Fl = xm(sizeof(int)*(NC+1)); stampc = xm(sizeof(int)*NC); cnt = xm(sizeof(int)*NC);
@@ -456,7 +459,7 @@ int main(int argc, char **argv){
   ostr("pseudo-Boolean proof version 3.0\n");
   ostr("f "); oint(NCONS); ostr(EOL);
   int *earlier = xm(sizeof(int)*(NX+1)); int ne = 0;
-  if (pf){
+  if (pf && !SBF){
     int any = 0; for (int c=0;c<NCASE;c++) if (case_nred[c]) any = 1;
     if (any) ostr("strengthening_to_core on;\n");
     for (int c=0;c<NCASE;c++){
@@ -486,7 +489,7 @@ int main(int argc, char **argv){
     sid = nextid++;
   }
   clock_t t0 = clock();
-  int rc = 0;
+  int rc = 0; long long ne_prev = 0;
   for (int c=0;c<NCASE;c++){
     int col = case_col[c];
     if (gfalse[col]) continue;
@@ -504,6 +507,23 @@ int main(int argc, char **argv){
     if (id == -2){ rc = 2; printf("case %d (column %d): SAT\n", c, col); break; }
     if (id == -3){ rc = 3; printf("case %d: node limit\n", c); break; }
     gfalse[col] = 1; unit_id[col] = id;
+    if (SBF){
+      /* ~h_c from SB_c, ~e_c (c >= 1) and ~x_rep; then ~x_g for every orbit member from H1_g; then ~e_{c+1} */
+      char b[64];
+      snprintf(b, sizeof b, "rup 1 ~h%d >= 1 : ~ ", c+1); ostr(b); oint(sbid + c);
+      if (c > 0){ ostr(" "); oint(ne_prev); } ostr(" "); oint(id); ostr(EOL);
+      long long hid = nextid++;
+      for (int r=0;r<case_nred[c];r++){
+        int g = red_col[c][r];
+        ostr("rup 1 ~"); ostr(names[g]); ostr(" >= 1 : ~ "); oint(h1id + g); ostr(" "); oint(hid); ostr(EOL);
+        unit_id[g] = nextid++; gfalse[g] = 1;
+      }
+      if (c + 1 < NCASE){
+        snprintf(b, sizeof b, "rup 1 ~e%d >= 1 : ~ ", c+2); ostr(b); oint(e2id + c);
+        if (c > 0){ ostr(" "); oint(ne_prev); } ostr(" "); oint(hid); ostr(EOL);
+        ne_prev = nextid++;
+      }
+    } else
     for (int r=0;r<case_nred[c];r++){
       int g = red_col[c][r];
       ostr("rup 1 ~"); ostr(names[g]); ostr(" >= 1;\n"); unit_id[g] = nextid++;

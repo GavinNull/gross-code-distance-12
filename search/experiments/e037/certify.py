@@ -125,18 +125,19 @@ def main():
     ap.add_argument("--stream", action="store_true")
     ap.add_argument("--keep", action="store_true")
     ap.add_argument("--cachemax", type=int, default=0)
+    ap.add_argument("--sym", choices=["proof", "formula"], default="formula")
     ap.add_argument("--gz", action="store_true", help="write the proof gzip-compressed (extra gzip process)")
     a = ap.parse_args()
     ensure_bin()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     name = a.name or a.source.replace(":", "_") + f"_W{a.W}"
     stem = out / name
-    rec = {"name": name, "source": a.source, "W": a.W, "start": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    rec = {"name": name, "source": a.source, "W": a.W, "sym": a.sym, "start": time.strftime("%Y-%m-%dT%H:%M:%S"),
            "veripb_binary_sha256": sha(VERIPB), "pbdfs_src_sha256": sha(HERE / "pbdfs.c"),
            "dem_inst_sha256": sha(HERE / "dem_inst.py"), "ibm_model_sha256": sha(HERE / "ibm_model.py")}
     blog = open(str(stem) + ".build.log", "w")
     c0 = cpu_children(); t0 = time.time()
-    run_build([a.source, str(a.W), str(stem) + "_p1", "--no-symcheck"], blog)
+    run_build([a.source, str(a.W), str(stem) + "_p1", "--no-symcheck", "--sym", a.sym], blog)
     p = subprocess.run([str(BIN), str(stem) + "_p1.inst", "-R", str(stem) + ".triv"], capture_output=True, text=True)
     Path(str(stem) + ".pass1.log").write_text(p.stdout + p.stderr)
     res1 = [l for l in p.stdout.splitlines() if l.startswith("RESULT")]
@@ -150,7 +151,7 @@ def main():
     for ext in (".opb", ".inst"):
         os.remove(str(stem) + "_p1" + ext)
     c1 = cpu_children()
-    run_build([a.source, str(a.W), str(stem), "--blocks", str(stem) + ".triv"], blog)
+    run_build([a.source, str(a.W), str(stem), "--blocks", str(stem) + ".triv", "--sym", a.sym], blog)
     blog.close()
     meta = json.loads(Path(str(stem) + ".json").read_text())
     rec["build"] = {"cpu_s": round(cpu_children() - c1, 1), "meta": meta}

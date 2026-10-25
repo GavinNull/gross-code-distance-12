@@ -155,7 +155,7 @@ def logical_basis_int(Hrows, Lrows):
 # sets T (closed under the group).  They are NOT implied by the parity/weight/logical constraints; they preserve
 # satisfiability for the question asked (see check_trivial).  UNSAT of the blocked formula therefore proves that
 # no undetectable logical of weight <= W exists.
-def build(src, W, use_sym=True, blocks=(), cards=(), small_logical=True):
+def build(src, W, use_sym=True, blocks=(), cards=(), small_logical=True, sym_mode="proof"):
     D, L, ndet, nobs = src["D"], src["L"], src["ndet"], src["nobs"]
     n = len(D)
     index = {}
@@ -248,7 +248,25 @@ def build(src, W, use_sym=True, blocks=(), cards=(), small_logical=True):
                 choice = (sub, u)
         if choice is not None:
             break
-    if choice is None or not small_logical:
+    if sym_mode == "formula":
+        # symmetry breaking in the formula (see sb_note): the logical rows are just the observables; the group needs
+        # to preserve the SOLUTION SET only, checked semantically below (rank conditions)
+        choice = (tuple(range(nobs)), [vec_int(orows[i]) for i in range(nobs)])
+        base = rank_mod_h(choice[1])
+        assert base == nobs, "observables not independent modulo detectors"
+        for P in perms:
+            LP = []
+            for i in range(nobs):
+                w, vv = 0, choice[1][i]
+                while vv:
+                    b = vv & -vv
+                    w ^= 1 << int(P[b.bit_length() - 1]); vv ^= b
+                LP.append(w)
+            # P maps ker D onto itself (it permutes detector-labelled columns: D P = rp D) and
+            # rank[D;L] = rank[D;L o P] = rank[D;L;L o P]  =>  ker[D;L] is P-invariant  =>  P preserves
+            # {x : D x = 0, L x != 0}
+            assert rank_mod_h(LP) == nobs and rank_mod_h(choice[1] + LP) == nobs, "translation does not preserve logicals"
+    elif choice is None or not small_logical:
         u, ss = [], set()
         for i in range(nobs):
             for v in orb_of[i]:
@@ -257,11 +275,13 @@ def build(src, W, use_sym=True, blocks=(), cards=(), small_logical=True):
         choice = (tuple(range(nobs)), u)
     lvecs = choice[1]
     lkey = {v: i for i, v in enumerate(lvecs)}
+    lperms = []
+    if sym_mode == "formula":
+        lperms = [np.arange(len(lvecs)) for _ in perms]     # unused (no in-proof symmetry)
     for i in range(nobs):          # every observable row in span(chosen rows, detectors)
         assert rank_mod_h(lvecs + [vec_int(orows[i])]) == rank_mod_h(lvecs) == nobs
     NL = len(lvecs)
-    lperms = []
-    for P in perms:
+    for P in (perms if sym_mode != "formula" else []):
         lp = np.full(NL, -1)
         for i, v in enumerate(lvecs):
             w = 0
@@ -274,6 +294,8 @@ def build(src, W, use_sym=True, blocks=(), cards=(), small_logical=True):
             lp[i] = lkey[w]
         assert sorted(lp.tolist()) == list(range(NL))
         lperms.append(lp)
+    if sym_mode != "formula":
+        lperms = lperms[-len(perms):]
     basis, expand = logical_basis_int(Hint, lvecs)
     assert len(basis) == nobs, (len(basis), nobs)
     lrows = []
@@ -313,7 +335,8 @@ def build(src, W, use_sym=True, blocks=(), cards=(), small_logical=True):
     assert 2 * (2 ** KC - 1) >= max(len(r) for r in rows[:R])
     assert 2 * (2 ** KL - 1) >= max(len(r) for r in rows[R:]) + 1
     return dict(n=n, R=R, NL=NL, W=W, rows=rows, KC=KC, KL=KL, perms=perms, rperms=rperms, lperms=lperms,
-                orbits=orbits, blocks=bl, cards=cards, logical_generators=list(choice[0]), basis=basis, expand=expand, group=used)
+                orbits=orbits, blocks=bl, cards=cards, logical_generators=list(choice[0]), basis=basis, expand=expand, group=used,
+                sym_mode=sym_mode)
 
 
 def write(I, out, check_sym=True):
@@ -324,12 +347,39 @@ def write(I, out, check_sym=True):
     clines = [" ".join(f"-1 x{j + 1}" for j in t) + f" >= -{bd} ;" for bd, t in cards]
     # syntactic invariance of every non-block line under every group element (e031 check); the block lines are a
     # group-closed family of clauses by construction (closure above), re-asserted here
-    nsym = check_automorphisms(I, lines[:len(lines) - nb]) if (check_sym and len(I["perms"]) > 1) else len(I["perms"])
+    formula_sym = I.get("sym_mode") == "formula"
+    if formula_sym:
+        nsym = len(I["perms"])        # invariance checked semantically in build()
+    else:
+        nsym = check_automorphisms(I, lines[:len(lines) - nb]) if (check_sym and len(I["perms"]) > 1) else len(I["perms"])
+    # sb_note: symmetry breaking in the formula (sym_mode "formula").  Orbits O_0, O_1, ... (in case order) with
+    # representatives r_o; fresh variables h_o ("x meets O_o") and e_o ("x meets some O_o', o' < o", o >= 1):
+    #   H1_j : ~x_j v h_orb(j)           E2_o : ~e_o v e_{o-1} v h_{o-1}  (o >= 1; e_0 absent)
+    #   SB_o : ~h_o v e_o v x_{r_o}      (o = 0: ~h_0 v x_{r_0})
+    # Satisfiability-preserving (argument, outside the proof): the solution set S of the other constraints is
+    # invariant under the group (checked in build()), orbits are group-invariant; for x in S let o* be the first
+    # orbit it meets and sigma a translation with sigma(g) = r_{o*} for some g in x cap O_{o*}; sigma(x) is in S,
+    # meets no orbit before o* and contains r_{o*}; with h, e set to their true values all of H1, E2, SB hold.
+    sbl = []
+    if formula_sym:
+        orb_of_col = {}
+        for oi, o in enumerate(I["orbits"]):
+            for j in o:
+                orb_of_col[j] = oi
+        h1 = [f"1 ~x{j + 1} 1 h{orb_of_col[j] + 1} >= 1 ;" for j in range(I["n"])]
+        e2 = []
+        for oi in range(1, len(I["orbits"])):
+            e2.append(f"1 ~e{oi + 1} 1 h{oi} >= 1 ;" if oi == 1 else f"1 ~e{oi + 1} 1 e{oi} 1 h{oi} >= 1 ;")
+        sb = []
+        for oi, o in enumerate(I["orbits"]):
+            sb.append(f"1 ~h1 1 x{o[0] + 1} >= 1 ;" if oi == 0 else f"1 ~h{oi + 1} 1 e{oi + 1} 1 x{o[0] + 1} >= 1 ;")
+        sbl = h1 + e2 + sb
+        clines = clines + sbl
     bset = set(I["blocks"])
     for P in I["perms"]:
         for b in I["blocks"]:
             assert tuple(sorted(int(P[j]) for j in b)) in bset
-    nvars = I["n"] + I["NL"] + I["R"] * I["KC"] + I["NL"] * I["KL"]
+    nvars = I["n"] + I["NL"] + I["R"] * I["KC"] + I["NL"] * I["KL"] + (2 * len(I["orbits"]) - 1 if formula_sym else 0)
     with open(out + ".opb", "w") as f:
         f.write(f"* #variable= {nvars} #constraint= {len(lines) + len(clines)}\n")
         f.write("\n".join(lines + clines) + "\n")
@@ -339,7 +389,10 @@ def write(I, out, check_sym=True):
     wid, sid = cid, cid + 1
     bid = cid + 2
     kid = bid + nb
-    ncons = cid + 1 + nb + len(cards)
+    h1id = kid + len(cards)
+    e2id = h1id + I["n"]
+    sbid = e2id + max(0, len(I["orbits"]) - 1)
+    ncons = cid + 1 + nb + len(cards) + len(sbl)
     n, R, NL = I["n"], I["R"], I["NL"]
     with open(out + ".inst", "w") as f:
         f.write(f"{n} {NL} {R} {I['W']} {ncons}\n")
@@ -365,8 +418,8 @@ def write(I, out, check_sym=True):
         for bd, t in cards:
             f.write(f"{bd} {len(t)} " + " ".join(map(str, t)) + "\n")
         # group: KC KL NG, then per element x-perm, q-perm, row-perm
-        f.write(f"{I['KC']} {I['KL']} {len(I['perms'])}\n")
-        for P, rp, lp in zip(I["perms"], I["rperms"], I["lperms"]):
+        f.write(f"{I['KC']} {I['KL']} {0 if formula_sym else len(I['perms'])}\n")
+        for P, rp, lp in ([] if formula_sym else zip(I["perms"], I["rperms"], I["lperms"])):
             f.write(" ".join(map(str, P.tolist())) + "\n")
             f.write(" ".join(map(str, lp.tolist())) + "\n")
             f.write(" ".join(map(str, rp.tolist())) + "\n")
@@ -376,9 +429,11 @@ def write(I, out, check_sym=True):
             rep = o[0]
             f.write(f"{rep} {len(o) - 1}\n")
             for g in o[1:]:
-                gi = next(k for k, P in enumerate(I["perms"]) if P[rep] == g)
+                gi = -1 if formula_sym else next(k for k, P in enumerate(I["perms"]) if P[rep] == g)
                 f.write(f"{g} {gi}\n")
-    meta = dict(logical_generators=I.get("logical_generators"), nblocks=nb, ncards=len(cards), ncard3=sum(len(t) == 3 for _, t in cards),
+        # symmetry breaking in the formula: first ids of H1 (per column), E2 (orbits 1..), SB (per orbit); 0 = none
+        f.write(f"{1 if formula_sym else 0} {h1id} {e2id} {sbid}\n")
+    meta = dict(sym_mode=I.get("sym_mode"), logical_generators=I.get("logical_generators"), nblocks=nb, ncards=len(cards), ncard3=sum(len(t) == 3 for _, t in cards),
                 ncard4=sum(len(t) == 4 for _, t in cards), n=n, R=R, NL=NL, basis=len(I["basis"]), W=I["W"], KC=I["KC"], KL=I["KL"], nsym=nsym,
                 group=[list(g) for g in I["group"]], norbits=len(I["orbits"]), ncons=ncons, nvars=nvars,
                 max_row=max(len(r) for r in I["rows"][:R]), max_lrow=max(len(r) for r in I["rows"][R:]))
@@ -475,6 +530,9 @@ def main():
     ap.add_argument("--no-sym", action="store_true")
     ap.add_argument("--no-symcheck", action="store_true")
     ap.add_argument("--blocks", default=None, help="trivial sets recorded by pbdfs -R (one per line: k c1 .. ck)")
+    ap.add_argument("--sym", choices=["proof", "formula"], default="formula",
+                    help="symmetry: red steps inside the proof (E-031 style; quadratic in the number of columns) or "
+                         "symmetry-breaking constraints in the formula (sb_note)")
     ap.add_argument("--cards", type=int, default=4, help="cardinality constraints for trivial sets up to this size "
                                                           "(0 = none, 3, 4)")
     a = ap.parse_args()
@@ -490,7 +548,7 @@ def main():
     if a.cards >= 3:
         T3, T4 = small_trivial(src["D"], src["L"], a.cards)
         cards = [(1, t) for t in T3] + [(2, t) for t in T4]
-    I = build(src, a.W, use_sym=not a.no_sym, blocks=blocks, cards=cards)
+    I = build(src, a.W, use_sym=not a.no_sym, blocks=blocks, cards=cards, sym_mode=a.sym)
     meta = write(I, a.out, check_sym=not a.no_symcheck)
     Path(a.out + ".cols.json").write_text(json.dumps(dict(source=a.source, D=src["D"], L=src["L"],
                                                           ndet=src["ndet"], nobs=src["nobs"])))
