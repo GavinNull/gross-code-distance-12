@@ -196,6 +196,12 @@ class Fam:
         return out
 
 
+def dump_nogoods(variant, S, d, nogoods):
+    path = OUT / f"nogoods_{variant}_S{S}_d{d}.json"
+    path.write_text(json.dumps([[[list(e1[0]), e1[1], list(e2[0]), e2[1]] for e1, e2 in ng] for ng in nogoods]))
+    return path
+
+
 def run(variant, S, d, seed, max_iter, timeout):
     F = Fam(variant, S)
     nogoods = []
@@ -204,6 +210,7 @@ def run(variant, S, d, seed, max_iter, timeout):
     for it in range(max_iter):
         T = F.solve(nogoods, seed + it, timeout)
         if T in ("UNSAT", "TIMEOUT"):
+            dump_nogoods(variant, S, d, nogoods)
             return {"variant": variant, "S": S, "period": S + 2, "result": T, "iters": it, "nogoods": len(nogoods),
                     "sec": round(time.time() - t0, 1), "log": log[-5:]}
         cex = F.check(T, (1, 2, 3), d)
@@ -211,7 +218,7 @@ def run(variant, S, d, seed, max_iter, timeout):
             cex = F.check(T, (4, 5, 6), d)
         if not cex:
             spec = F.spec(T)
-            path = OUT / f"cegar_{variant}_S{S}.json"
+            path = OUT / f"cegar_{variant}_S{S}_d{d}.json"
             path.write_text(json.dumps(spec.to_dict()))
             return {"variant": variant, "S": S, "period": S + 2, "result": "FOUND", "iters": it,
                     "nogoods": len(nogoods), "spec": str(path), "sec": round(time.time() - t0, 1)}
