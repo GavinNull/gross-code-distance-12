@@ -12,6 +12,7 @@ import time
 ap = argparse.ArgumentParser()
 ap.add_argument("prefix")
 ap.add_argument("--shard", default="0/1")
+ap.add_argument("--depth", type=int, default=6, help="use only the first DEPTH unit literals of each cube (coarser cubes, deduplicated; still exhaustive)")
 a = ap.parse_args()
 sh, n = map(int, a.shard.split("/"))
 base = open(a.prefix + ".cnf").read().split("\n", 1)
@@ -19,8 +20,14 @@ hdr = base[0].split()
 nv, nc = int(hdr[2]), int(hdr[3])
 body = base[1]
 cubes = json.load(open(a.prefix + "_cubes.json"))
-tmp = f"{a.prefix}_tmp{sh}"
-out = open(f"{a.prefix}_cube_drat_{sh}of{n}.jsonl", "a")
+if a.depth < 6:
+    seen = []
+    for c in cubes:
+        if c[:a.depth] not in seen:
+            seen.append(c[:a.depth])
+    cubes = seen
+tmp = f"{a.prefix}_tmp{sh}d{a.depth}"
+out = open(f"{a.prefix}_cube_drat_d{a.depth}_{sh}of{n}.jsonl", "a")
 for i, cb in enumerate(cubes):
     if i % n != sh:
         continue
