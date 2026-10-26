@@ -1,0 +1,52 @@
+id: E-039-bb18-pipe
+title: Pipelined single-ancilla circuits for [[18,4,4]] on the Kunlun chip at period 8 / 9 (d_circ = 4?), N7 at R = 1, 2, merged meas+reset
+owner: experimenter
+date: 2026-10-26
+hypothesis: >
+  E-038 (audited, STATE item 24) left open: (a) the general pipelined class with per-check preparation and measurement
+  times at period P = 8, 9; (b) whether the N7 impossibility (proven for R >= 3) also holds for R = 1, 2;
+  (c) the class where measurement and the next reset share one layer.
+classes: >
+  Convention (as E-038): a round has P layers; every qubit takes part in at most one operation per layer; the ancilla of
+  check k is reset in layer pi_k, does its 6 CNOTs in distinct layers strictly after pi_k, is measured in layer mu_k,
+  and the next instance is reset in layer pi_k + P; same schedule every round (instance j = instance 0 shifted by jP).
+  Data qubit: its CNOTs (from all 14 checks) in distinct layers mod P.  Determinism parity as E-038.
+  W(P): reset and measurement are separate layers: mu_k - pi_k <= P - 1, so the 6 CNOT times of a check have span
+        <= P - 3 (P = 8: exactly 6 consecutive layers; P = 9: 6 of 7 consecutive layers).  pi_k free per check.
+  Mg(P): merged measure+reset layer (measurement of instance j and reset of instance j+1 in the same layer of that
+        ancilla): mu_k - pi_k <= P, span <= P - 2.  Separate class, reported separately.
+  Under SD6 the bulk fault model depends only on the CNOT times (ancilla errors before the first CNOT are trivial,
+  after the last one equal a measurement flip; a reset flip equals a measurement flip of the previous instance),
+  so a class is fully described by the span bound and P.  Merged MR noise = SD6 measurement flip + reset flip.
+  N7(R): E-038's non-wrapping 7-CNOT-layer class, memory experiment with exactly R rounds (R = 1, 2), both bases.
+reasoning: >
+  E-038's W8/W9 CEGAR stalled with weight-2 (HH) witnesses still being found after 9,000 patterns, 1-3 new patterns
+  per 400-900 s SAT call.  Static count (this session, before any solving): the witness multisets whose residual is a
+  non-trivial logical are, per basis, HH 556, HHM 556 x 7, DDH 420, DHH 8,376, HHH 70,596 (slot types only).  A minimal
+  witness is connected in the detector-intersection graph (otherwise a component is a smaller witness), and every
+  slot's detectors lie in rounds r-1..r+2 for W(P), so relative rounds are bounded.  Plan: add every HH, HHM, DDH, DHH
+  pattern up front (complete for those types), keep CEGAR only for the rare HHH, harvest witnesses from a local-search
+  neighbourhood of each SAT model (many patterns per SAT call; the same local search is a heuristic search for d = 4
+  schedules), and split the class into cubes by the preparation offsets of a few checks (P choices each) modulo the
+  symmetries that preserve the measured-check set (computed: 2 type-preserving, 2 type-swapping data permutations;
+  none of the 8 non-trivial translations), plus the global time shift.
+  Any found schedule: evaluator validate_schedule, exact finite-R d_circ in three fault models (evaluator template,
+  own stim, e036_audit / e038_audit independent code), any-R argument for wrapping schedules (fault-free-round
+  deletion in the bulk + finite boundary rounds), weight-4 upper bound.  Any UNSAT: DIMACS + CaDiCaL DRAT + drat-trim,
+  and the pattern-clause semantics checked against e038_audit.gpat (independent) and stim injection on samples.
+plan:
+  1: e039 static pattern enumerator + soundness / completeness argument; validate clauses on random schedules vs gpat
+  2: W9, W8 (and Mg8, Mg7 if cheap) with static patterns + lazy HHH + cubes; parallel local search for d = 4
+  3: N7 at R = 1, 2: finite-R fault model (validated vs stim), finite-R CEGAR, DRAT or found + certify
+  4: certify / DRAT, journal
+prediction: >
+  (written before any solving; only the static multiset count above was computed)
+  1) W9 has a d_circ = 4 schedule: 30%.
+  2) W8 has one: 10%.
+  3) W9 settled (found, or UNSAT with verified DRAT) within budget: 50%; W8 settled: 55%.
+  4) N7 at R = 1 can reach d_circ = 4: 70%; at R = 2: 40%.
+  5) merged Mg8 has a d_circ = 4 schedule: 25%; Mg7: 10%.
+  6) static HH/HHM/DDH/DHH patterns cut the number of CEGAR iterations for W8 by >= 10x vs E-038's run: 60%.
+budget: {cpu_hours: 80, llm_tokens: 0, num_workers: 8}
+seed: 20261027
+command: "uv run python -m search.experiments.e039.<script> (each command in the journal's reproduction section)"
