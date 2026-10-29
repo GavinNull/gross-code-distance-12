@@ -73,6 +73,13 @@ def enumerate_P(P):
     return nlegal, sigs
 
 
+def norm_row(tx, tz, P):
+    """unique normal form of a time vector: min tX = 0 (as enumerated) and Z instances relabelled so that
+    floor((tX[A1] - tZ[B1]) / P) = 0; then the raw G (not only G up to a constant) is a function of the order type."""
+    k = (tx[0] - tz[3]) // P
+    return list(tx), [v + k * P for v in tz]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--P", type=int, required=True)
