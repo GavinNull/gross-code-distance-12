@@ -1,8 +1,9 @@
 """E-040 certificate CNF for class T(P) (see experiments/E-040-min-period.yaml) and a set of bulk witness patterns.
 
 Variables: one-hot CNOT times e[s][l][v]: side s in {X, Z}, label l = A1..B3, X in [0, P-3] (normalised min tX = 0),
-Z in [0, 2P-4] (span <= P-3, min tZ <= P-1; every legal schedule is equivalent to one of these by a global time
-shift and a relabelling of the Z instances).
+Z in [-2P+4, 2P-6] with floor((tX[A1] - tZ[B1]) / P) = 0 (Z instance labelling fixed) and span <= P-3.  Every legal
+schedule is equivalent to exactly one such vector (global time shift + relabelling of the Z instances), and the raw
+floors (hence every pattern's truth value) depend only on the order type.
 Legality: exactly-one; X / Z times distinct; min tX = 0; Z span <= P-3, min tZ <= P-1; on every data qubit the 6 CNOT
 times distinct mod P (L: X Ai vs Z Bj, R: X Bj vs Z Ai); determinism floor((tX[Ai]-tZ[Bj])/P) = floor((tX[Bj]-tZ[Ai])/P).
 Pattern k (sector X: hook side X, readers Z; sector Z: swapped), with comparison literals lt(a, b, c) <=> t_a < t_b + c:
@@ -31,7 +32,7 @@ class Enc:
         self.P = P
         self.nv = 0
         self.cl = []
-        self.D = {"X": list(range(0, P - 2)), "Z": list(range(0, 2 * P - 3))}
+        self.D = {"X": list(range(0, P - 2)), "Z": list(range(-2 * P + 4, 2 * P - 5))}
         self.e = {}
         for s in "XZ":
             for l in range(6):
@@ -62,7 +63,9 @@ class Enc:
                     for v in D[s]:
                         self.cl.append([-e[(s, l, v)], -e[(s, l2, v)]])
         self.cl.append([e[("X", l, 0)] for l in range(6)])
-        self.cl.append([e[("Z", l, v)] for l in range(6) for v in D["Z"] if v <= P - 1])
+        # Z labelling: tX[A1] - P < tZ[B1] <= tX[A1]
+        self.cl.append([self.lt(("Z", 3), ("X", 0), 1)])
+        self.cl.append([-self.lt(("Z", 3), ("X", 0), -P + 1)])
         for l in range(6):
             for l2 in range(6):
                 if l == l2:
@@ -80,7 +83,7 @@ class Enc:
                                 self.cl.append([-e[("X", a, u)], -e[("Z", b, w)]])
         for i in range(3):
             for j in range(3):
-                for k in (-2, -1, 0, 1):
+                for k in range(-4, 5):
                     x = self.lt(("X", AL[i]), ("Z", BL[j]), k * P)
                     y = self.lt(("X", BL[j]), ("Z", AL[i]), k * P)
                     self.cl.append([-x, y])
@@ -170,7 +173,7 @@ class Enc:
                 for m in S:
                     q = int(TH[c][m])
                     for c2, b2 in readers[q]:
-                        for k in (-2, -1, 0, 1):
+                        for k in range(-4, 4):
                             lit = self.AND(-self.lt((hk, m), (rk, b2), k * P), self.lt((hk, m), (rk, b2), (k + 1) * P))
                             if lit != -self.TRUE:
                                 add((c2, j + k + 1), lit)
@@ -213,15 +216,24 @@ def main():
     ap.add_argument("--P", type=int, required=True)
     ap.add_argument("--wit", nargs="*", default=[])
     ap.add_argument("--out", required=True)
+    ap.add_argument("--shifts", default="0",
+                    help="hook-instance shifts j -> j + delta added per pattern: one circuit has several normal forms "
+                         "whose Z-instance labelling relative to X differs (same signature, raw G shifted)")
     a = ap.parse_args()
     C = MOD[a.code]
     E = Enc(a.P)
     nleg = len(E.cl)
     pats = load_patterns(a.wit)
+    shifts = [int(v) for v in a.shifts.split(",")]
+    npat = 0
     for sector, f in pats:
-        E.pattern(sector, f, C)
-    E.write(a.out, [f"E-040 T({a.P}) {a.code} patterns={len(pats)} legality_clauses={nleg}"])
-    print(json.dumps({"vars": E.nv, "clauses": len(E.cl), "patterns": len(pats), "legal_clauses": nleg}))
+        for d in shifts:
+            g = [(x[0], x[1], x[2], x[3] + d) if x[0] == "h" else x for x in f]
+            E.pattern(sector, g, C)
+            npat += 1
+    E.write(a.out, [f"E-040 T({a.P}) {a.code} patterns={len(pats)} shifts={a.shifts} legality_clauses={nleg}"])
+    print(json.dumps({"vars": E.nv, "clauses": len(E.cl), "patterns": len(pats), "with_shifts": npat,
+                      "legal_clauses": nleg}))
 
 
 if __name__ == "__main__":
