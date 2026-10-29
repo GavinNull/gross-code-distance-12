@@ -1,0 +1,48 @@
+id: E-040-min-period
+title: Minimum period of a translation-invariant single-ancilla syndrome circuit reaching full circuit distance ([[90,8,10]] target 10, gross [[144,12,12]] target 12); best d_circ at period 8
+owner: experimenter
+date: 2026-10-29
+hypothesis: >
+  STATE items 16/17: u11 (gross) and c11 ([[90]]) reach d_circ = d at period 11; IBM's depth-8 circuits (period 8)
+  have d_circ 10 / 8.  Earlier exclusions are restricted: E-030 48/48 bulk UNSAT at P <= 10 only for the four
+  d_ext = 8 uniform order classes of [[90]] (frame model); E-032 only X = Z = A1A2A3B3B1B2 for gross (P = 8, 9 w10
+  only, P = 10).  Question: is period 11 optimal in the full translation-invariant class (any CNOT order), and what is
+  the best d_circ at period 8?
+class: >
+  T(P): every X check uses the same CNOT times tX[label] (labels A1 A2 A3 B1 B2 B3; instance k at +kP), every Z check
+  the same tZ[label]; one ancilla per check, prep layer before its first CNOT, measurement layer after its last, next
+  prep >= P after the previous prep (=> each side's 6 CNOT times distinct, span <= P - 3); every qubit at most one
+  operation per layer; the 6 CNOTs on a data qubit distinct mod P; deterministic (equal round offset on both shared
+  qubits of every overlapping X/Z pair); wrap-around (pipelining) allowed; prep/meas times otherwise free; any CNOT
+  order on each side (the order is the time order); SD6 noise, CNOT template of the evaluator.
+reasoning: >
+  Under SD6 the bulk fault model of a T(P) circuit depends only on its signature (sigma_X, sigma_Z, G) with
+  G[i][j] = floor((tX[Ai] - tZ[Bj]) / P) (= floor((tX[Bj] - tZ[Ai]) / P) by determinism): data X errors have 3 cut
+  slots per period (between the 3 Z reads), hooks insert X at the X-CNOT times, Z-ancilla errors are measurement flips;
+  only X-CNOT vs Z-read comparisons on the same data qubit matter.  The overlap structure (each X check meets 9 Z checks,
+  one L qubit via (Ai, Bj) and one R qubit via (Bj, Ai)) is identical for both codes, so the signature sets are code
+  independent.  Counted before writing this file (only enumeration, no distance computation): P = 8: 22,608 legal
+  time vectors, 17,424 signatures; P = 9: 784,944 / 67,536; P = 10 being counted.  So a complete per-signature
+  classification is feasible.  Plan: (1) own bulk fault model from the signature, validated against stim DEMs of
+  random schedules (mechanism sets in interior rounds); (2) per signature a bulk witness of weight < d found by lifting
+  the order type's minimum-weight extended logicals with extra faults (generalised Lemma 2), witness patterns
+  transferred across signatures (vectorised), exact search only for the uncovered ones; (3) certificate: CNF =
+  legality of the time vector + one clause per witness pattern ("this fault set cancels" is forbidden), CaDiCaL DRAT +
+  drat-trim; every witness also injected in a stim memory circuit (0 detectors, observable flipped); written lemma
+  that the bulk DEM depends only on the signature; (4) survivors (if any) certified for all R as in E-030/E-032
+  (lift + gap argument + injected upper bound); (5) per P the best d_circ.
+plan:
+  1: enumeration of T(8), T(9), T(10) (done for 8, 9), symmetry (X<->Z duality) checks
+  2: bulk model + validation vs stim
+  3: witness finder + transfer, [[90]] P = 8, 9, 10 then gross
+  4: CNF + DRAT, stim injection of every witness pattern, journal
+prediction: >
+  (written after counting signatures only; no witness or distance computed)
+  1) [[90]]: no d_circ = 10 circuit in T(8), T(9), T(10) (c11 optimal in the class): 70%.
+  2) gross: no d_circ = 12 circuit in T(P <= 10) (u11 optimal): 75%.
+  3) best d_circ in T(8): [[90]] = 8 (IBM's value) 55%, = 9 45%; gross = 10 50%, = 11 50%.
+  4) full-distance impossibility certified within budget: P = 8 80%, P = 9 65%, P = 10 50% (each code).
+  5) > 90% of signatures are killed by lifting minimum-weight extended logicals with <= 2 extra faults: 70%.
+budget: {cpu_hours: 120, llm_tokens: 0, num_workers: 8}
+seed: 20261029
+command: "uv run python -m search.experiments.e040.<script> (each command in the journal's reproduction section)"
