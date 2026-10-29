@@ -21,6 +21,7 @@ def main():
     ap.add_argument("--W", type=int, required=True)
     ap.add_argument("--pairs", type=int, default=1)
     ap.add_argument("--kinds", default="XZ")
+    ap.add_argument("--onlypair", type=int, default=0)
     ap.add_argument("--full", type=int, default=1, help="complete anchor window in the lift DFS")
     ap.add_argument("--tag", default="")
     a = ap.parse_args()
@@ -31,7 +32,7 @@ def main():
         rec = {"i": i, "tx": r["tx"], "tz": r["tz"]}
         for kind in a.kinds:
             t0 = time.time()
-            S, f, dext = find(a.code, kind, r, a.P, a.W, a.pairs, full=bool(a.full))
+            S, f, dext = find(a.code, kind, r, a.P, a.W, a.pairs, full=bool(a.full), onlypair=bool(a.onlypair))
             rec[kind] = {"dext": dext, "weight": None if f is None else len(f), "sec": round(time.time() - t0, 1),
                          "faults": None if f is None else to_json(f)}
             if f is not None:

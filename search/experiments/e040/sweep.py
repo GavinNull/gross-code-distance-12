@@ -90,7 +90,7 @@ def pairhook(code, kind, S, real, W, full):
     return None
 
 
-def find(code, kind, row, P, W, pairs=0, full=False):
+def find(code, kind, row, P, W, pairs=0, full=False, onlypair=False):
     """minimum-weight witness found (weight from d_ext up to W), or None."""
     tX, tZ = row["tx"], row["tz"]
     S = Sector(code, kind, tX, tZ, P)
@@ -101,8 +101,10 @@ def find(code, kind, row, P, W, pairs=0, full=False):
         if (OUT / f"list{w}_{code}_{kind}_{MOD[code].name(trep)}.pkl").exists():
             lists[w] = orbit_reps(code, kind, trep, tag=f"list{w}")[1]
     real = realisations(S)
-    f = pairhook(code, kind, S, real, W, True)
-    if f is not None:
+    f = pairhook(code, kind, S, real, W, False)
+    if f is None:
+        f = pairhook(code, kind, S, real, W, True)
+    if f is not None or onlypair:
         return S, f, dext
     for w in range(dext, W + 1):
         for lw in sorted(lists):
@@ -142,12 +144,18 @@ def main():
     ap.add_argument("--max_sec", type=float, default=1e9)
     ap.add_argument("--tag", default="")
     ap.add_argument("--pairs", type=int, default=0)
+    ap.add_argument("--onlypair", type=int, default=0)
+    ap.add_argument("--rows", default="", help="explicit (normalised) rows file instead of all sector signatures")
     ap.add_argument("--full", type=int, default=0, help="complete anchor window in the lift DFS (slower)")
     ap.add_argument("--pool", nargs="*", default=[], help="witness jsonl files tested first (transfer only)")
     a = ap.parse_args()
     t0 = time.time()
-    rows, keys, g = groups(a.P, a.kind)
-    reps = [rows[g[k][0]] for k in keys]
+    if a.rows:
+        reps = json.loads((OUT / a.rows).read_text())
+        keys = [json.dumps([r["tx"], r["tz"]]) for r in reps]
+    else:
+        rows, keys, g = groups(a.P, a.kind)
+        reps = [rows[g[k][0]] for k in keys]
     tH = np.array([hr(r, a.kind)[0] for r in reps], np.int64)
     tR = np.array([hr(r, a.kind)[1] for r in reps], np.int64)
     n = len(keys)
@@ -181,7 +189,7 @@ def main():
             continue
         if time.time() - t0 > a.max_sec:
             break
-        S, f, dext = find(a.code, a.kind, reps[i], a.P, a.W, a.pairs, full=bool(a.full))
+        S, f, dext = find(a.code, a.kind, reps[i], a.P, a.W, a.pairs, full=bool(a.full), onlypair=bool(a.onlypair))
         nfind += 1
         if f is None:
             cover[i] = -2
