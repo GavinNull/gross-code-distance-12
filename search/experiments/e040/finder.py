@@ -42,7 +42,7 @@ def linecost(rs):
     return sum(rs[i + 1] - rs[i] for i in range(0, len(rs), 2))
 
 
-def lift(S: Sector, real, x, e, arange=3):
+def lift(S: Sector, real, x, e, arange=3, full=False):
     cols = [real[k] for k in x]
     n = len(cols)
     touch = []
@@ -93,6 +93,10 @@ def lift(S: Sector, real, x, e, arange=3):
                             for t in range(-e, e + 1):
                                 anc.add(r + t - dr)
             anchors = sorted(anc) if anc else list(range(-arange, arange + 1))
+            if full:
+                lo = min((min(v) for v in rounds.values() if v), default=0)
+                hi = max((max(v) for v in rounds.values() if v), default=0)
+                anchors = list(range(lo - arange - 2, hi + arange + 3))
         for tpl, ds in cols[i]:
             for a in anchors:
                 add(ds, a, 1)
