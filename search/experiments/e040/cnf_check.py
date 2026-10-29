@@ -18,7 +18,8 @@ from search.experiments.e040 import vec
 from search.experiments.e040.bulk import Sector
 from search.experiments.e040.cnf import Enc
 from search.experiments.e040.codes import MOD, OUT
-from search.experiments.e040.enum import legal_mask, side_configs
+from search.experiments.e040.enum import legal_mask, norm_row, side_configs
+from search.experiments.e040.sweep import load_rows
 
 
 def times_of(E, model):
@@ -47,13 +48,14 @@ def legal_check(P):
             TZ = X + s
             mk = legal_mask(tx, TZ, P)
             for z in TZ[mk]:
-                ref.add((tuple(int(v) for v in tx), tuple(int(v) for v in z)))
+                a, b = norm_row([int(v) for v in tx], [int(v) for v in z], P)
+                ref.add((tuple(a), tuple(b)))
     print(json.dumps({"P": P, "cnf_models": len(got), "enum_vectors": len(ref), "equal": got == ref}))
 
 
 def pat_check(P, code, sector, wpath, n, seed=1):
     C = MOD[code]
-    rows = json.loads((OUT / f"sigs_P{P}.json").read_text())
+    rows = load_rows(P)
     pats = [[tuple(x) for x in json.loads(l)["faults"]] for l in open(wpath)]
     rng = random.Random(seed)
     E = Enc(P)
