@@ -52,6 +52,44 @@ def hr(row, kind):
     return (row["tx"], row["tz"]) if kind == "X" else (row["tz"], row["tx"])
 
 
+_PL = {}
+
+
+def pairhook(code, kind, S, real, W, full):
+    """lemma F / F' family: one hook on check 0 whose data set D is a suffix of the order, plus the data columns of
+    L xor D for a weight-d logical L containing the hook's (or its complement's) qubits (pairlog_*.json)."""
+    key = (code, kind)
+    if key not in _PL:
+        pth = OUT / f"pairlog_{code}_{kind}.json"
+        _PL[key] = json.loads(pth.read_text()) if pth.exists() else {}
+    if not _PL[key]:
+        return None
+    H, L = S.H, S.L
+
+    def k_of(qs):
+        v = np.zeros(S.NQ, np.uint8)
+        v[list(qs)] = 1
+        return (H @ v % 2).astype(np.uint8).tobytes() + (L @ v % 2).astype(np.uint8).tobytes()
+
+    supp = {int(S.TH[0][m]) for m in range(6)}
+    cands = []
+    for Sx in S.suffixes():
+        Dh = {int(S.TH[0][m]) for m in Sx}
+        for lab in (Sx, frozenset(range(6)) - Sx):
+            for Lq in _PL[key].get("".join(map(str, sorted(lab))), []):
+                for base in (set(Lq), set(Lq) ^ supp):
+                    rest = base ^ Dh
+                    x = [k_of(Dh)] + [k_of([q]) for q in sorted(rest)]
+                    if len(x) <= W and len(set(x)) == len(x) and all(k in real for k in x):
+                        cands.append(x)
+    cands.sort(key=len)
+    for x in cands:
+        f = lift(S, real, x, W - len(x), full=full)
+        if f is not None:
+            return f
+    return None
+
+
 def find(code, kind, row, P, W, pairs=0, full=False):
     """minimum-weight witness found (weight from d_ext up to W), or None."""
     tX, tZ = row["tx"], row["tz"]
@@ -63,6 +101,9 @@ def find(code, kind, row, P, W, pairs=0, full=False):
         if (OUT / f"list{w}_{code}_{kind}_{MOD[code].name(trep)}.pkl").exists():
             lists[w] = orbit_reps(code, kind, trep, tag=f"list{w}")[1]
     real = realisations(S)
+    f = pairhook(code, kind, S, real, W, True)
+    if f is not None:
+        return S, f, dext
     for w in range(dext, W + 1):
         for lw in sorted(lists):
             if lw > w:
