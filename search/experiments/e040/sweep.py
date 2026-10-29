@@ -52,7 +52,7 @@ def hr(row, kind):
     return (row["tx"], row["tz"]) if kind == "X" else (row["tz"], row["tx"])
 
 
-def find(code, kind, row, P, W, pairs=0):
+def find(code, kind, row, P, W, pairs=0, full=False):
     """minimum-weight witness found (weight from d_ext up to W), or None."""
     tX, tZ = row["tx"], row["tz"]
     S = Sector(code, kind, tX, tZ, P)
@@ -68,7 +68,7 @@ def find(code, kind, row, P, W, pairs=0):
             if lw > w:
                 break
             for x in lists[lw]:
-                f = lift(S, real, x, w - len(x))
+                f = lift(S, real, x, w - len(x), full=full)
                 if f is not None:
                     return S, f, dext
     if pairs:
@@ -82,7 +82,7 @@ def find(code, kind, row, P, W, pairs=0):
                     cx = set().union(*(tc[k] for k in x))
                     for j in real:
                         if tc[j] & cx:
-                            f = lift(S, real, list(x) + [j, j], w - len(x) - 2)
+                            f = lift(S, real, list(x) + [j, j], w - len(x) - 2, full=full)
                             if f is not None:
                                 return S, f, dext
     return S, None, dext
@@ -101,6 +101,7 @@ def main():
     ap.add_argument("--max_sec", type=float, default=1e9)
     ap.add_argument("--tag", default="")
     ap.add_argument("--pairs", type=int, default=0)
+    ap.add_argument("--full", type=int, default=0, help="complete anchor window in the lift DFS (slower)")
     ap.add_argument("--pool", nargs="*", default=[], help="witness jsonl files tested first (transfer only)")
     a = ap.parse_args()
     t0 = time.time()
@@ -139,7 +140,7 @@ def main():
             continue
         if time.time() - t0 > a.max_sec:
             break
-        S, f, dext = find(a.code, a.kind, reps[i], a.P, a.W, a.pairs)
+        S, f, dext = find(a.code, a.kind, reps[i], a.P, a.W, a.pairs, full=bool(a.full))
         nfind += 1
         if f is None:
             cover[i] = -2
