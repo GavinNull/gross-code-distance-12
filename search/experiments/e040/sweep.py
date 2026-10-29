@@ -18,6 +18,7 @@ import numpy as np
 from search.experiments.e040 import vec
 from search.experiments.e040.bulk import Sector
 from search.experiments.e040.codes import MOD, OUT
+from search.experiments.e040.enum import norm_row
 from search.experiments.e040.finder import lift, realisations
 from search.experiments.e040.lists import orbit_reps, type_rep
 
@@ -31,8 +32,15 @@ def sector_key(row, kind):
     return (tuple(oh), rk(orr, (0, 1, 2)), rk(orr, (3, 4, 5)), tuple(row["G"]))
 
 
-def groups(P, kind):
+def load_rows(P):
     rows = json.loads((OUT / f"sigs_P{P}.json").read_text())
+    for r in rows:
+        r["tx"], r["tz"] = norm_row(r["tx"], r["tz"], P)
+    return rows
+
+
+def groups(P, kind):
+    rows = load_rows(P)
     g = {}
     for i, r in enumerate(rows):
         g.setdefault(sector_key(r, kind), []).append(i)
@@ -44,7 +52,7 @@ def hr(row, kind):
     return (row["tx"], row["tz"]) if kind == "X" else (row["tz"], row["tx"])
 
 
-def find(code, kind, row, P, W):
+def find(code, kind, row, P, W, pairs=0):
     """minimum-weight witness found (weight from d_ext up to W), or None."""
     tX, tZ = row["tx"], row["tz"]
     S = Sector(code, kind, tX, tZ, P)
@@ -63,6 +71,20 @@ def find(code, kind, row, P, W):
                 f = lift(S, real, x, w - len(x))
                 if f is not None:
                     return S, f, dext
+    if pairs:
+        # generalised Lemma 2 with one cancelling pair: x + [j, j] (j any column whose realisations meet x's checks)
+        tc = {k: {c for _, ds in real[k] for c, _ in ds} for k in real}
+        for w in range(dext + 2, W + 1):
+            for lw in sorted(lists):
+                if lw > w - 2:
+                    break
+                for x in lists[lw]:
+                    cx = set().union(*(tc[k] for k in x))
+                    for j in real:
+                        if tc[j] & cx:
+                            f = lift(S, real, list(x) + [j, j], w - len(x) - 2)
+                            if f is not None:
+                                return S, f, dext
     return S, None, dext
 
 
@@ -78,6 +100,8 @@ def main():
     ap.add_argument("--W", type=int, required=True)
     ap.add_argument("--max_sec", type=float, default=1e9)
     ap.add_argument("--tag", default="")
+    ap.add_argument("--pairs", type=int, default=0)
+    ap.add_argument("--pool", nargs="*", default=[], help="witness jsonl files tested first (transfer only)")
     a = ap.parse_args()
     t0 = time.time()
     rows, keys, g = groups(a.P, a.kind)
@@ -93,12 +117,29 @@ def main():
     fw = open(OUT / f"{tag}_witnesses.jsonl", "w")
     S0 = Sector(a.code, a.kind, reps[0]["tx"], reps[0]["tz"], a.P)
     nfind = 0
+    for pf in a.pool:
+        for l in open(pf):
+            w = json.loads(l)
+            if w["weight"] > a.W:
+                continue
+            f = [tuple(frozenset(y) if isinstance(y, list) else y for y in x) for x in w["faults"]]
+            m = vec.test(S0, f, tH, tR, a.P)
+            newly = m & ((cover == -1) | ((cover >= 0) & (wt > len(f))))
+            if not newly.any():
+                continue
+            k = len(wits)
+            wits.append(f)
+            cover[newly] = k
+            wt[newly] = len(f)
+            fw.write(json.dumps({"k": k, "found_on": int(np.flatnonzero(m)[0]), "weight": len(f), "dext": w.get("dext"),
+                                 "covers": int(newly.sum()), "faults": to_json(f), "from_pool": pf}) + "\n")
+    print(json.dumps({"pool_witnesses": len(wits), "covered": int((cover >= 0).sum()), "n": n}), flush=True)
     for i in range(n):
         if cover[i] >= 0:
             continue
         if time.time() - t0 > a.max_sec:
             break
-        S, f, dext = find(a.code, a.kind, reps[i], a.P, a.W)
+        S, f, dext = find(a.code, a.kind, reps[i], a.P, a.W, a.pairs)
         nfind += 1
         if f is None:
             cover[i] = -2
