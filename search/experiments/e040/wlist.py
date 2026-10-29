@@ -21,6 +21,7 @@ def main():
     ap.add_argument("--type", required=True)
     ap.add_argument("--w", type=int, required=True)
     ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--split", type=int, default=1)
     a = ap.parse_args()
     C = MOD[a.code]
     from search.experiments.e032.dext import hooks_first
@@ -29,7 +30,7 @@ def main():
     orb, reps, nh = hooks_first(E)
     t0 = time.time()
     log = []
-    s, n, c = C.dfs(E, a.w, stopfirst=0, workers=a.workers, cases=range(nh), orbit=orb, reps=reps, log=log)
+    s, n, c = C.dfs(E, a.w, stopfirst=0, workers=a.workers, split=a.split, cases=range(nh), orbit=orb, reps=reps, log=log)
     trunc = any(int(l.split("found=")[1].split()[0]) >= 100000 for l in log)
     s = [S for S in s if len(S) == a.w]
     allS = C.expand(E, s)
