@@ -1,0 +1,38 @@
+id: E-041-bb18-p9
+title: Period-9 pipelined single-ancilla schedule for Kunlun [[18,4,4]] reaching d_circ = 4 (W9; also Mg8)
+owner: experimenter
+date: 2026-10-31
+hypothesis: >
+  Theory C (research/theory/2026-10-29-C-bb18-pipelined.md) reduced the open pipelined classes of E-039 to two maximal
+  ones: W9 (period 9, separate reset and measurement layers, each check's 6 CNOTs inside 7 consecutive layers, per-check
+  offsets) and Mg8 (period 8, merged measure+reset layer, 6 CNOTs inside 7 consecutive layers).  W8 is in W9 and in Mg8,
+  Mg7 is in Mg8.  E-039 evidence: W9 U_X is satisfiable for HH/HHM/DDH (only DHH/HHH weight-3 witnesses remain).
+  Hypothesis: W9 (and possibly Mg8) contains a schedule with bulk d_circ = 4 (both bases), i.e. Kunlun's own period
+  (7 CZ layers + prep + meas) reaches distance 4 on the same chip.
+classes: >
+  As E-039 / theory C (lemma 2): only CNOT times matter in the bulk; W(P): span of each check's 6 CNOT times <= P - 3;
+  Mg(P): span <= P - 2; data-qubit CNOTs distinct mod P; determinism parity as E-038; 14 measured checks, 84 couplers,
+  one ancilla per check, no flags, same schedule every round.
+plan:
+  1: fast exact bulk weight<=3 witness counter (numba), validated against e038.model.bulk_min on random schedules
+  2: local search (SA / tabu) on legal schedules minimising #weight<=3 witnesses; starts: N8 with one layer deleted
+     (W9-legal after wrap), Kunlun N7, E-039 SAT models / SA bests, random; up to 6 parallel chains
+  3: complete static CNF (HH, HHM, DDH, DHH, HHH; both bases) for W9 and Mg8 -> any SAT model is a bulk d = 4 schedule
+     (no CEGAR); used for SAT-LNS around the best local-search states (free 2-5 checks, fix the rest) and for cubes over
+     prep offsets with symmetry breaking (time shift fixed; code/chip symmetries and time reversal only as lex hints)
+  4: if found: legality + chip check, any-R certification (theory B Theorem 5 window conditions / bulk argument +
+     finite boundary), independent direct DEM search for small R (e036_audit / e038_audit code), weight-4 witness
+     injection, LER vs Kunlun and bb18_n8_d4 (E-036 Tab. S1 noise mapping, x1 and x0.1, same BP-OSD, Jeffreys CI)
+  5: if search looks exhausted: cube-and-conquer UNSAT with DRAT for W9 / Mg8
+prediction: >
+  (written before any solving in this experiment)
+  1) W9 contains a bulk d_circ = 4 schedule: 40%.  Found within budget: 30%.
+  2) Mg8 contains one: 35%.  Found within budget: 25%.
+  3) W9 proven impossible (verified DRAT) within budget: 8%; Mg8: 8%.
+  4) The complete static 5-type CNF for W9 has <= 15 M clauses and builds in <= 2 CPU h: 60%.
+  5) Local search reaches a state with <= 3 weight-3 bulk witnesses (both bases): 50%.
+  6) If a W9 d = 4 schedule is found: per-round block LER vs Kunlun at the paper noise (x1) within 0.9-1.1: 60%;
+     better by >= 10% at x0.1 in both bases: 45%.
+budget: {cpu_hours: 100, llm_tokens: 0, num_workers: 8}
+seed: 20261031
+command: "uv run python -m search.experiments.e041.<script> (each command in the journal's reproduction section)"
