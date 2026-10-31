@@ -33,6 +33,8 @@ def main():
     ap.add_argument("--shuffle", type=int, default=None)
     ap.add_argument("--hours", type=float, default=10)
     ap.add_argument("--starts", default=None, help="fix all 14 window starts (comma list, values -1..P-1 mod P)")
+    ap.add_argument("--share", action="store_true",
+                    help="also harvest witness patterns of every model in rcegar_<tag>_models.jsonl (shared by runs)")
     ap.add_argument("--C", type=int, default=8, help="reversal constant for *R ansatz")
     ap.add_argument("--sym", default=None, help="symmetric ansatz (sym.py): p, s1, s2, pR, s1R, s2R")
     a = ap.parse_args()
@@ -74,6 +76,35 @@ def main():
     s = Solver(name=a.solver, bootstrap_with=cl)
     ptr = len(E.cl)
     it = 0
+    seen = 0
+    mpath = f"{OUT}/rcegar_{a.tag}_models.jsonl"
+
+    def harvest():
+        nonlocal seen
+        if not (a.share and os.path.exists(mpath)):
+            return 0
+        from search.experiments.e038.model import Sched
+        lines = open(mpath).read().splitlines()
+        n = 0
+        for line in lines[seen:]:
+            try:
+                sch2 = Sched.from_json(json.loads(line)["sched"])
+            except Exception:
+                break
+            seen += 1
+            _, wits2 = bulk_min(sch2, 3, W=6, want_all=True, limit=2000)
+            for b2, tags2 in wits2:
+                pat2 = pattern_of(b2, tags2)
+                if pat2 in pats:
+                    continue
+                pats.add(pat2)
+                n += 1
+                for c in PE.clauses(pat2):
+                    E.add(c)
+        return n
+    nh = harvest()
+    if nh:
+        w({"harvested_at_start": nh, "models_seen": seen})
     while time.time() - t0 < a.hours * 3600:
         for c in E.cl[ptr:]:
             s.add_clause(c)
@@ -112,9 +143,10 @@ def main():
                 E.add(c)
         if new == 0:
             raise RuntimeError("no new pattern")
-        with open(f"{OUT}/rcegar_{a.tag}_models.jsonl", "a") as fm:
+        with open(mpath, "a") as fm:
             fm.write(json.dumps({"it": it, "nwit": len(wits), "sched": sch.to_json()}) + "\n")
-        w({"it": it, "w": wmin, "nwit": len(wits), "new": new, "types": types, "solve_sec": round(tsolve, 1),
+        nh = harvest()
+        w({"it": it, "w": wmin, "nwit": len(wits), "new": new, "harvested": nh, "patterns": len(pats), "types": types, "solve_sec": round(tsolve, 1),
            "sec": round(time.time() - t0, 1), "starts": [sch.pi[k] for k in E.ks]})
         it += 1
         if it % 20 == 0 and not nosave:
