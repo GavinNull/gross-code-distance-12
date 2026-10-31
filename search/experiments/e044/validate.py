@@ -9,7 +9,8 @@ import json
 import numpy as np
 from scipy.stats import beta
 
-from search.experiments.e044.analysis import PL, q
+from search.experiments.e044.analysis import q
+from search.experiments.e044.crossover import PLshot
 from search.experiments.e044.common import OUT
 
 DIRECT = {
@@ -49,13 +50,13 @@ def main(tags=None):
     for (c, b, m, p), src in DIRECT.items():
         f = sum(x[0] for x in src.values()); n = sum(x[1] for x in src.values())
         try:
-            s = PL(c, b, m, p, "lo", tags=tags)
-            h = PL(c, b, m, p, "hi", tags=tags)
+            s, info = PLshot(c, b, m, p, "fit")
+            h, _ = PLshot(c, b, m, p, "data")
         except Exception as e:  # no stratified data yet
             continue
         r = dict(circ=c, basis=b, model=m, p=p, direct=[f, n, f / n, beta.ppf(.025, f + .5, n - f + .5),
                                                         beta.ppf(.975, f + .5, n - f + .5)],
-                 strat_lo=q(s), strat_hi=q(h), ratio_direct_over_strat=f / n / np.median(s), sources=src)
+                 strat_fit=q(s), strat_data=q(h), fit={k: v for k, v in (info or {}).items() if k != "cov"}, ratio_direct_over_strat=f / n / np.median(s), sources=src)
         if len(src) > 1:   # heterogeneity of the direct runs (chi-square on Poisson counts)
             from scipy.stats import chi2
             rate = f / n
