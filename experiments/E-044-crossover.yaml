@@ -1,0 +1,63 @@
+id: E-044-crossover
+title: Crossover p* below which the full-distance circuits (gross g10 / u11, [[90]] c11) have a lower per-round LER than IBM's depth-8 circuits under SD6 (lam = 1 and lam = 0); IBM gross Z-basis count anomaly
+owner: experimenter
+date: 2026-10-31
+hypothesis: >
+  STATE 17/18/27: under SD6 lam = 1 the period-10/11 full-distance circuits lose to IBM depth 8 by 7-39x at
+  p = 2e-3..3e-3 (BP-OSD); at lam = 0 c11 wins at every sampled p and u11 is comparable.  Distance 12 vs 10 (10 vs 8)
+  must win as p -> 0; the question is where.  Direct sampling cannot reach the p where IBM's per-round LER is
+  1e-7..1e-6, so a fixed-fault-count (stratified / subset) estimator is used and validated against direct sinter
+  data where both exist.
+design:
+  circuits: "gross R = 12: g10 (e040/g10_d12_spec.json), u11 (e032/u11_spec.json), ibm (e026 spec 'ibm'); [[90]] R = 10: c11 (e030/c11_spec.json), ibm90 (e030 spec 'ibm')"
+  noise: "e026b.noisy_from lam1 (== evaluator sd6) and lam0; Z and X bases separately; eps_round = sum over bases of 1 - (1 - P_L)^(1/R)"
+  decoder: "BP-OSD, IBM parameters (e026.common.IBM_BPOSD) via stimbposd.BPOSD (the object sinter compiles). Relay-BP not run (budget)."
+  exact_part: >
+    (1) Minimum-weight undetected logicals per round, per basis, from exact enumerations on the full SD6 DEM with
+    72 (gross) / 45 ([[90]]) spatial translations, per-round = N(R+1) - N(R): existing lists (E-033 ibm W10 R1-3,
+    u11 W12 Z R1-2 / X R1; E-030 c11 W10 R2-4, ibm90 W8 R1-5) re-read and re-verified on the DEM; new g10 W12
+    enumerations (mitmsearch, look 3) at R = 1 both bases and R = 2 if the R = 1 time allows (<= 8 CPU h total
+    for g10 enumeration).  For each list and lam: N_d, the probability-weighted undetected term
+    A_d = sum_L prod_{j in L} q_j / p^d (exact, union form), and the ideal-decoder half-weight term
+    A_t = sum_L e_t(q_L) / p^t (t = d/2, ties counted 1/2) as in E-033.  Next weight only where cheap (ibm W11 /
+    ibm90 W9 at R = 1, 2, decided by a Knuth estimate <= 1 CPU h each).
+  stratified_part: >
+    (2) P_L(p) = sum_k P_p(K = k) f_k, K = number of fired DEM mechanisms (exact Poisson-binomial), f_k = BP-OSD
+    failure probability given exactly k fired mechanisms, sampled exactly from the conditional law (tilted
+    Bernoulli + rejection), decoder priors at p_dec = 1e-3 (sensitivity: paired decodes of the same samples with
+    p_dec = 2e-3 and 5e-4 on pilot strata).  Phase A pilot: every k on a grid, fixed n per k (same for all
+    circuits of a code family).  Phase B: shot allocation per k fixed from the pilot by the rule
+    n_k prop. to max_p P_p(K = k) sqrt(fhat_k) / P_Lhat(p) over p in {2e-3, 1e-3, 7e-4, 5e-4}, fhat_k from a
+    monotone fit of the pilot, scaled to the per-task CPU allotment; all samples kept, no stopping on failures.
+    Strata below the lowest sampled k: f_k in [0, f_{kmin}] (monotone in k assumed, stated).  CIs: Jeffreys
+    Beta posterior per stratum, Monte Carlo through the sum.  Validation: P_L(2e-3) (and 3e-3 for lam0) vs direct
+    sinter counts of E-033 / E-030 / E-040 audit / this experiment.
+  crossover: >
+    (3) p* = largest p below which ratio(full / ibm) < 1, with the CI from the joint posterior draws; if the
+    ratio's upper CI stays > 1 down to the lowest resolvable p, report "no crossover above p_min" and give the
+    extrapolated estimate separately and labelled as extrapolation.
+  anomaly: >
+    (4) IBM gross Z, lam1, p = 2e-3: E-033 15/45481 vs E-040 audit 2/60000 (same circuit text). Check identity of
+    circuit, DEM and decoder via sinter strong_id (done before writing this file: both strong_ids reproduce from
+    the regenerated tasks, circuits and DEMs byte-identical); then a new preset-shot sinter run (100k shots,
+    identical task) + the stratified estimate as a third and fourth independent measurement.
+reasoning: >
+  At p ~ 1e-3 the mean number of fired mechanisms per R = 12 shot is ~12-19, so the low-p behaviour is governed by
+  f_k at k ~ 5-15, which direct sampling at that p wastes almost every shot on.  The undetected-logical term
+  N_d prod q is a rigorous lower bound on any decoder's failure, but it is O(p^d) and will be many orders below the
+  measured LER; the decoder-relevant leading term is O(p^{d/2}).  Both are reported, clearly labelled.
+prediction: >
+  (written after reading prior journals/audits and checking strong_ids; before any new failure count)
+  1) Stratified P_L(2e-3) agrees with direct sinter within the 95% CIs for every circuit/basis with direct data: 80%.
+  2) lam1, g10 vs ibm gross: no crossover above 1e-3 (85%); p* in [1e-4, 7e-4] (50%).
+  3) lam1, u11 vs ibm: p* below g10's p* (75%).
+  4) lam1, c11 vs ibm90: no crossover above 1e-3 (85%); p* in [1e-4, 7e-4] (50%).
+  5) lam0: c11 below ibm90 at every p <= 3e-3 (90%); g10 below ibm gross at every p <= 2e-3 (65%).
+  6) f_k insensitive to p_dec within a factor 1.3 between 5e-4 and 2e-3 (60%).
+  7) Anomaly: the new 100k-shot run gives a Z rate between the two (fluctuation, 55%); E-033 rate reproduced (25%);
+     audit rate reproduced (20%).
+  8) g10 W12 per-round count (Z) within a factor 3 of u11's 163488 (50%).
+  9) Undetected-logical term < 1e-6 of the measured P_L at every p >= 5e-4 (95%).
+budget: {cpu_hours: 50, llm_tokens: 0, num_workers: 2}
+seed: 20261031
+command: "uv run python -m search.experiments.e044.<script> (each command in the journal's reproduction section)"
