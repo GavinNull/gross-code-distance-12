@@ -1,0 +1,39 @@
+id: E-043-table
+title: Complete Table I (best d_circ in the translation-invariant class T(P), P = 8..11) for [[90,8,10]] and gross [[144,12,12]]
+owner: experimenter
+date: 2026-10-31
+hypothesis: >
+  Audited bulk upper bounds (STATE 27/28): [[90]] T(8) <= 8, T(9) <= 9, T(10) <= 9, T(11) = 10 (c11); gross T(8) <= 11
+  (= 11, g8_d11), T(9) <= 11, T(10) = 12 (g10_d12).  Open cells: gross T(9) (is 11 attained for all R?), [[90]] T(9),
+  T(10) (is 9 attained?), and whether IBM's [[90]] depth-8 circuit lies in T(8) with d_circ = 8 for all R certified by
+  our own tools (the 8 in Table I so far rests on IBM's own Tesseract/MaxSAT number at their round count).
+class: same T(P) as E-040 (experiments/E-040-min-period.yaml).
+reasoning: >
+  E-040's sweeps give, per sector signature, an upper bound on the bulk minimum witness weight (sound, incomplete
+  finder + transfer).  A circuit can attain the bound only if BOTH sectors have no witness below it.  Plan:
+  (1) re-score every signature of T(9), T(10) ([[90]]) and T(9) (gross) on both sectors with all of E-040's witness
+  pools (vectorised transfer), giving candidates whose best known witness equals the bound on both sectors;
+  (2) on candidates, try harder to kill below the bound (finder with complete anchor window, one cancelling pair);
+  (3) survivors with d_ext >= target - 2 on both sides: certify for all R with theory B's audited Theorem 5 at target
+  t <= d_ext + 2 (window conditions, no zero-image hook, bulk non-liftability of weight d_ext (+ <= t-1-d_ext flips) and,
+  if t = d_ext + 2, weight d_ext + 1 lists, all with the theory-B auditor's CP-SAT solver and own mitmsearch list
+  enumeration), cross-checked by direct DEM search at small R, and the upper bound by weight-t injection (bulk witness
+  placed in finite R + direct finds at small R).  IBM [[90]]: membership in T(8) checked from its spec (translation
+  invariance, span, determinism), lower bound by d_ext (Lemma 1) or Theorem 5 at t = 8, upper bound by injection.
+  (4) if no candidate survives: a CNF (E-040 cnf.py, legality + witness clauses at weight <= bound - 1) with DRAT
+  proves the bound is not attained.
+plan:
+  1: IBM [[90]] membership + certification (cheap)
+  2: re-scoring of all signatures, candidate lists
+  3: kill attempts on candidates, then certification of the best survivor per cell (or DRAT if none survives)
+  4: reference points (IBM, Fig. 12, u11, c11, g10, g8) for every cell; journal
+prediction: >
+  (written after reading E-040's sweep histograms only; no new computation)
+  1) IBM's [[90]] depth-8 circuit is in T(8) and our tools certify d_circ = 8 for all R, both bases: 85%.
+  2) gross T(9) contains a circuit with d_circ = 11 for all R: 60%.
+  3) [[90]] T(9) contains a circuit with d_circ = 9: 55%; T(10): 70%.
+  4) every open cell is decided (attained-and-certified or DRAT-not-attained) within the budget: 60%.
+  5) where attained, certification goes through Theorem 5 at t <= d_ext + 2 (no new proof technique needed): 75%.
+budget: {cpu_hours: 60, llm_tokens: 0, num_workers: 2}
+seed: 20261031
+command: "uv run python -m search.experiments.e043.<script> (each command in the journal's reproduction section)"
