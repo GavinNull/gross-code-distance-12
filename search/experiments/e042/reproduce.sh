@@ -10,10 +10,11 @@ set -eu
 cd "$(dirname "$0")/../../.."
 O=results/E-042-g10-cert
 PB=$O/pb
-mkdir -p $O/bin $PB/counts
+L=$PB/lists   # list JSONs in a directory of their own (macOS names are case-insensitive: g10_X_w10.json = g10_X_W10.json)
+mkdir -p $O/bin $PB/counts $PB/lists $PB/certs
 [ -x $O/bin/pbdfs ] || cc -O2 -Wall -o $O/bin/pbdfs search/experiments/e034/pbdfs.c
 blocks() {   # kind W -> block files
-  if [ "$2" -ge 11 ]; then echo "$PB/g10_$1_w10.json $PB/g10_$1_w11.json"; else echo "$PB/g10_$1_w10.json"; fi
+  if [ "$2" -ge 11 ]; then echo "$L/g10_$1_w10.json $L/g10_$1_w11.json"; else echo "$L/g10_$1_w10.json"; fi
 }
 case "$1" in
 rstar)    # R* = 13, window conditions, existence conditions; model == DEM signature sets at R* (audited dem_check)
@@ -25,7 +26,7 @@ lift)     # 2 x 125 batches, every list item, R = 13
 ctl)      # positive control: segmented timing, same orders: every batch SAT
   env PYTHONPATH=. uv run python -m search.experiments.e042.lift ctl 13 $O/lift/ctl > $O/lift/ctl.log 2>&1 ;;
 export)
-  for k in X Z; do uv run python -m search.experiments.e042.pbbuild export $k $PB; done ;;
+  for k in X Z; do uv run python -m search.experiments.e042.pbbuild export $k $L; done ;;
 count)    # count-only search (no proof), kind W
   uv run python -m search.experiments.e042.pbbuild build $2 $3 $PB/counts/g10_$2_W$3 --blocks $(blocks $2 $3) > $PB/counts/g10_$2_W$3.build.log
   /usr/bin/time -p $O/bin/pbdfs $PB/counts/g10_$2_W$3.inst > $PB/counts/g10_$2_W$3.log 2>&1 ;;
@@ -33,7 +34,7 @@ planted)  # blocking test: drop the orbit of block #200 (weight 10); the search 
   uv run python -m search.experiments.e042.pbbuild build $2 10 $PB/counts/g10_$2_W10_drop200 --blocks $(blocks $2 10) --drop-block 200 > $PB/counts/g10_$2_W10_drop200.build.log
   /usr/bin/time -p $O/bin/pbdfs $PB/counts/g10_$2_W10_drop200.inst > $PB/counts/g10_$2_W10_drop200.log 2>&1 ;;
 cert)     # VeriPB 3 certificate, proof streamed (never stored), kind W
-  uv run python search/experiments/e042/certify_pb.py g10_$2_W$3 g10 $2 $3 --out $PB --stream --cachemax 1000000 \
+  uv run python search/experiments/e042/certify_pb.py g10_$2_W$3 g10 $2 $3 --out $PB/certs --stream --cachemax 1000000 \
     --blocks $(blocks $2 $3) ;;
 all)
   sh "$0" rstar; sh "$0" export; sh "$0" lift; sh "$0" ctl
