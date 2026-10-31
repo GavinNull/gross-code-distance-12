@@ -1,0 +1,48 @@
+id: E-042-g10-cert
+title: Certificates for the period-10 gross circuit g10_d12 (VeriPB list completeness + DRAT/LRAT bulk-lift refutation)
+owner: experimenter
+date: 2026-10-31
+hypothesis: >
+  STATE item 27 (E-040 + audit): search/experiments/e040/g10_d12_spec.json has d_circ = 12 for every R and both
+  bases, via Theorem 4 of outline_P (theory B Theorem 5): d_ext = 10, complete lists w10 = 3,204 and w11 = 121,104
+  per basis, zero bulk lifts (w10 with <= 1 readout flip, w11 with none), window conditions, no zero-image hooks.
+  None of these infeasibility claims is certified yet.  PI (2026-10-31): bring g10 to the u11/c11 standard.
+  (1) VeriPB 3 certificates for d_ext >= 10 and list completeness, both sides, with the E-031/E-034 encoding (native
+  parity rows with binary auxiliaries, translation orbit split inside the proof by red steps, pbdfs -F flush, proof
+  streamed).  (2) DRAT (drat-trim) + LRAT core (cake_lpr) certificates that no list item lifts.  Route chosen to
+  match the paper (Theorem 4 = bulk): a short lemma (bulk compression, written out in the journal) shows that, under
+  the window conditions, any bulk lift of an item with at most 11 faults can be shifted into the finite circuit at a
+  single round count R* computed from the per-fault index spread; so "no lift in the evaluator's SD6 DEM at R*"
+  (E-031 lift encoding, every list item, no orbit reduction) implies "no bulk lift", which is exactly the hypothesis
+  of Theorem 4.  No minimality constraints or symmetry breaking outside the proofs.
+constraints: >
+  <= 2 worker processes (a VeriPB stream = pbdfs + veripb counts as 2, so it runs alone); kill only own PIDs; no
+  downloads (tools already built: VeriPB 3.0.2, CaDiCaL 3.0.1, drat-trim, cake_lpr; tools/VERSIONS.txt); uv run only.
+plan:
+  - R* lemma: per-fault index spread of g10 from the stim circuit (finite read times extended periodically),
+    window conditions (Wb)(Wt), writer-instance existence conditions; model = DEM signature sets at R* (audited
+    theory-B dem_check)
+  - lift DRAT at R* both bases, all 3,204 (+ <= 1 zero-image term) and 121,104 items, batches by selectors;
+    positive control (segmented control circuit of the same order class, must be SAT)
+  - VeriPB: count-only W=10 (blocked 3,204) per side, then W=10 certificates, then W=11 (blocked 3,204 + 121,104)
+    if the measured cost fits; planted test (drop one orbit) count-only
+  - reproduction script, sha256 / sizes / times in results/E-042-g10-cert/
+commands:
+  all: sh search/experiments/e042/reproduce.sh
+predictions: >
+  (written before any E-042 computation)
+  1) Index spread per fault <= 1 for every data error, hook and flip under the evaluator unroll (70%), giving
+     R* = 13; window conditions hold (99%, audited).  Model = DEM signature sets at R* (97%).
+  2) Lift at R*: every batch UNSAT, drat-trim VERIFIED and cake_lpr VERIFIED UNSAT (97%); 5-15 CPU h total (60%).
+     Positive control SAT (95%).
+  3) count-only W=10 (3,204 blocked): 3e8-1e9 nodes per side (60%) (u11: 2.66e8); no logical found (99%).
+  4) W=10 certificates both sides within ~8 CPU h (65%).  W=11: 3e9-1e10 nodes per side (60%) (u11: 2.1e9);
+     both W=11 certificates within the remaining budget (35%); if not, the report gives the largest certified part
+     (W=10 both sides = d_ext and w10 list, W=11 one side) and the measured scaling.
+  5) The X- and Z-side certificates are needed separately (no use of an X<->Z isomorphism outside the proof).
+budget:
+  cpu_hours: 60
+  workers: 2
+  llm_tokens: 0
+results: results/E-042-g10-cert/
+journal: research/journal/2026-10-31-E-042-g10-cert.md
