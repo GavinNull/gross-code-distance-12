@@ -1,4 +1,11 @@
-"""Check the circuit tables of paper/draft.tex against the schedule specs.
+"""Spec helpers (CODES, type_patterns) and the table check of revision O6 of paper/draft.tex.
+
+Revision P: the tables of draft.tex are checked by paper/scripts/circuits_P.py --check, which
+imports CODES and type_patterns from this module. The O6 table check below runs only if the O6
+tables (labels tab:circuit, tab:c16, tab:circA-C) are present; on revision P it reports that
+and exits 0.
+
+Revision O6 check:
 
 - Table I (tab:circuit): period-11 gross circuit (search/experiments/e032/u11_spec.json) and
   period-11 [[90,8,10]] circuit (search/experiments/e030/c11_spec.json); one row per check type.
@@ -132,5 +139,11 @@ def check_class_tables():
     return bad
 
 
+O6_LABELS = ("tab:circuit", "tab:c16", "tab:circA", "tab:circB", "tab:circC")
+
 if __name__ == "__main__":
+    if not all("\\label{%s}" % lab in TEX for lab in O6_LABELS):
+        print("draft.tex has no revision-O6 circuit tables; nothing to check here.\n"
+              "Revision P tables: PYTHONPATH=.:tests uv run python paper/scripts/circuits_P.py --check")
+        sys.exit(0)
     sys.exit(1 if (check_type_table() + check_class_tables()) else 0)

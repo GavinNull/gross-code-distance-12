@@ -8,6 +8,19 @@
     For every column of the logical we record its realisations; for the two hooks we record the reader indices at
     the two private readers and the term pair (A_i, B_j) of each edge.
 
+Required inputs (paths relative to the repository root):
+  from the data package (results/ is not in git):
+    results/E-032-gross-short-period/w10_X_all_A1A2A3B3B1B2.pkl
+        the 144 weight-10 X-type extended logicals of u11 (pickle with key "keys"); panel (b) uses list item 0
+        and asserts the 144 x holonomy-2 histogram.
+  from the repository:
+    search/experiments/e032/u11_spec.json      schedule spec of u11
+    paper/figures/circuits_P.json             delta matrices for panel (a); regenerate it with
+                                               paper/scripts/circuits_P.py, which in turn needs the data-package
+                                               directories results/E-040-audit-circ and results/E-043-audit
+    search/theory/B_audit/                     audited bulk (staircase) model
+Output: paper/figures/fig1_P_data.json (read by paper/scripts/fig1_P.py).
+
 Usage (repository root):  PYTHONPATH=.:tests uv run python paper/scripts/fig1_P_data.py
 """
 from __future__ import annotations

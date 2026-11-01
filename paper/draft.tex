@@ -39,19 +39,18 @@
 
 \begin{abstract}
 Single-ancilla syndrome-extraction circuits for the gross code $\code{144,12,12}$ and the
-$\code{90,8,10}$ bivariate-bicycle code lose circuit distance unless the CNOTs of
-overlapping $X$ and $Z$ checks are interleaved, but how short a distance-preserving
-circuit can be has remained open. We answer this for translation-invariant circuits, in
-which all checks of one type share a CNOT timing repeated with period $P$. Under
-circuit-level depolarizing noise, the minimum period at which the circuit distance equals
-the code distance is 10 for the gross code and 11 for $\code{90,8,10}$, and we determine
-the best circuit distance at every shorter period. The circuits work for every number of
-rounds; the certified impossibility results hold for sufficiently many rounds. Interleaving acts through an integer cochain of round offsets: a circuit can
-be re-timed into a non-interleaved one exactly when this cochain is a coboundary, and a
-light logical of the extended code is blocked when difference constraints along its hooks
-form a negative cycle. Under standard idle noise the extra idle steps make the
-full-distance circuits worse than IBM's depth-8 circuits at all directly resolvable error
-rates.
+$\code{90,8,10}$ bivariate-bicycle code lose circuit distance unless overlapping $X$ and
+$Z$ checks are interleaved; how short a distance-preserving circuit can be was open. For
+translation-invariant circuits, in which all checks of one type share a CNOT timing
+repeated with period $P$, under circuit-level depolarizing noise, the shortest period
+preserving the code distance is 10 for the gross code and 11 for $\code{90,8,10}$, and we
+find the best circuit distance at every shorter period. The circuits work for every number
+of rounds, the impossibility results for sufficiently many. Interleaving acts through an
+integer cochain of round offsets: a circuit can be re-timed into a non-interleaved one
+exactly when this cochain is a coboundary, and a light extended-code logical is blocked
+when difference constraints along its hooks form a negative cycle. The price is idling:
+under standard idle noise the full-distance circuits are worse than IBM's depth-8
+circuits at all directly resolvable error rates.
 \end{abstract}
 
 \maketitle
@@ -75,11 +74,14 @@ $Z$-type CNOTs or vice versa, has $\dcirc\le\dext$ (their Cor.~1). For the gross
 every choice of CNOT orders gives $\dext\le11$, so non-interleaved circuits are capped at
 11 (their Prop.~4, by a numerical search over orders), and uniformly tiled ones at 10
 (Prop.~5); for $\code{90,8,10}$ every choice of orders gives $\dext\le8$
-(SM~\ref{sm:earlier})\cl{L-22}. IBM's depth-8 circuits have circuit distance 10 and
-8~\cite{Bravyi2024,Tesseract2025,Crocker2026}, for every $R$ (Table~\ref{tab:periods}). Interleaved circuits can do better, and
+(SM~\ref{sm:earlier})\cl{L-22}. IBM's depth-8 circuits have circuit distance at most 10 and
+8~\cite{Bravyi2024}, values confirmed for fixed numbers of
+rounds~\cite{Tesseract2025,Crocker2026}; we show that they are exact for every number of
+rounds (Table~\ref{tab:periods}). Interleaved circuits can do better, and
 circuits of period 11 reach the full distance of both codes (Table~\ref{tab:periods}).
 Known lower bounds on syndrome-circuit depth concern only the correctness of a single
-round: depth 6 is impossible and 7 is optimal for these codes~\cite{Li2025parity,Zhang2026ASC}.
+round: depth 6 is impossible and 7 is optimal for these
+codes~\cite{Li2025parity,Zhang2026ASC,DurazoRocha2026}.
 Nothing was known about how short an interleaved circuit can be when it must also
 preserve distance, nor why interleaving helps at all.
 
@@ -107,7 +109,7 @@ depth~\cite{Hirai2026}. Hooks aligned with minimum-weight logicals cost distance
 surface code~\cite{Dennis2002}, and check-dependent CNOT orders are the usual
 remedy~\cite{TomitaSvore,KishonyFowler,Strikis2026}. For overlapping $X$ and $Z$ checks a
 single round is correct only if an even number of shared qubits see the $X$ CNOT
-first~\cite{Li2025parity,Zhang2026ASC}; $\delta$ is the integer, multi-round refinement of
+first~\cite{Li2025parity,Zhang2026ASC,DurazoRocha2026}; $\delta$ is the integer, multi-round refinement of
 this $\mathbb Z_2$ parity\cl{L-21}.
 
 % ---------------------------------------------------------------------------
@@ -296,7 +298,8 @@ errors or several hooks lifting a light extended logical, cover every legal timi
 of $\T(8)$ and $\T(9)$ for both codes and of $\T(10)$ for $\code{90,8,10}$, with weights
 11 (gross) and 8, 9, 9. Each pattern's residual is a nontrivial logical, and each is
 confirmed by injection into the memory circuit. Coverage is certified twice: the
-satisfiability encodings are refuted with DRAT proofs checked by drat-trim, and an
+satisfiability encodings are refuted by CaDiCaL~\cite{CaDiCaL2024} with DRAT proofs checked
+by drat-trim~\cite{DRATtrim2014}, and an
 exhaustive check without SAT runs over all canonical timing vectors. In sampled cases the
 witnesses are already undetected for $R\ge2$ (SM~\ref{sm:p910})\cl{L-2,L-15}.
 
@@ -310,8 +313,8 @@ of weight $\le11$ for $R=1$, 2, 3 in both bases\cl{L-3}. $c_{11}$ is treated in 
 ($\dext=8$, lists of 585 and 16,830), and a second proof combines exact lifts for
 $R\le25$ with a gap argument (End Matter)\cl{L-5}. Every infeasibility claim used in the
 proofs for $g_{10}$, $c_{11}$ and the impossibility results is accompanied by a checked
-certificate (VeriPB for $\dext$ and list completeness, DRAT with LRAT cores checked by
-cake\_lpr for the lifts); the encodings are generated by our code and cross-checked against
+certificate (VeriPB~\cite{Bogaerts2023,GochtNordstrom2021} for $\dext$ and list
+completeness, DRAT with LRAT cores checked by cake\_lpr~\cite{Tan2021cakelpr} for the lifts); the encodings are generated by our code and cross-checked against
 independent implementations, and the reductions are the mathematical arguments given here,
 whose premises were verified computationally\cl{L-15}. The remaining circuits of
 Table~\ref{tab:periods} satisfy the criterion with $t\le\dext+2$ by two independent solvers
@@ -398,9 +401,15 @@ arXiv:2603.05481 (v2, 2026).
 search-based decoder for quantum error correction, arXiv:2503.10988 (v2, 2025).
 \bibitem{Crocker2026} C.~Crocker, The gross code's syndrome circuit has circuit-level
 distance 10: an exhaustive lower bound, Zenodo (2026), doi:10.5281/zenodo.23452754.
-\bibitem{Li2025parity} G.~Li \emph{et al.}, A parity obstruction to degree-optimal
-syndrome extraction in bivariate bicycle codes, arXiv:2509.26494 (v4, 2026).
-\bibitem{Zhang2026ASC} Zhang \emph{et al.}, arXiv:2603.21499 (2026).
+\bibitem{Li2025parity} G.~Li, Y.~Gan, Z.~Wu, X.~Zhang, Z.~Zhang, and J.~Liu, A parity
+obstruction to degree-optimal syndrome extraction in bivariate bicycle codes,
+arXiv:2509.26494 (v4, 2026).
+\bibitem{Zhang2026ASC} K.~Zhang, D.~Gao, Z.~Yang, R.~Zhou, F.~Liu, Z.~Ji, and J.~Chen,
+Optimal compilation of syndrome extraction circuits for general quantum LDPC codes,
+arXiv:2603.21499 (2026).
+\bibitem{DurazoRocha2026} E.~Durazo Rocha, O.~\AA.~Mostad, H.-Y.~Lin, and E.~Rosnes,
+Local automorphism-aware syndrome compilation for general quantum LDPC codes,
+arXiv:2609.40319 (2026).
 \bibitem{ManesClaes} A.~G.~Manes and J.~Claes, Distance-preserving stabilizer
 measurements in hypergraph product codes, Quantum \textbf{9}, 1618 (2025),
 arXiv:2308.15520.
@@ -410,7 +419,7 @@ algorithms for quantum codes and circuits, arXiv:2603.22532 (v2, 2026).
 Ultra-high-distance quantum memories from amplified qLDPC codes,
 arXiv:2609.37231 (2026).
 \bibitem{Ghosh2026} S.~Ghosh, H.~Boche, and A.~Tanggara, Fault tolerance of quantum
-circuits with tensor networks and symplectic geometry, arXiv:2610.03429 (2026).
+circuits with tensor networks and symplectic geometry, arXiv:2610.03429 (v3, 2026).
 \bibitem{ShawTerhal2025} M.~H.~Shaw and B.~M.~Terhal, Lowering connectivity
 requirements for bivariate bicycle codes using morphing circuits, Phys.\ Rev.\
 Lett.\ \textbf{134}, 090602 (2025), arXiv:2407.16336.
@@ -434,11 +443,31 @@ avoiding hook errors with a single auxiliary per plaquette, arXiv:2603.28852 (20
 A fault-tolerant honeycomb memory, Quantum \textbf{5}, 605 (2021), arXiv:2108.10457.
 \bibitem{Gidney2021stim} C.~Gidney, Stim: a fast stabilizer circuit simulator,
 Quantum \textbf{5}, 497 (2021), arXiv:2103.02202.
+\bibitem{CaDiCaL2024} A.~Biere, T.~Faller, K.~Fazekas, M.~Fleury, N.~Froleyks, and
+F.~Pollitt, CaDiCaL 2.0, in \emph{Computer Aided Verification (CAV 2024)} (Springer, Cham,
+2024), pp.~133--152, doi:10.1007/978-3-031-65627-9\_7.
+\bibitem{DRATtrim2014} N.~Wetzler, M.~J.~H.~Heule, and W.~A.~Hunt, Jr., DRAT-trim:
+Efficient checking and trimming using expressive clausal proofs, in \emph{Theory and
+Applications of Satisfiability Testing (SAT 2014)} (Springer, Cham, 2014), pp.~422--429,
+doi:10.1007/978-3-319-09284-3\_31.
+\bibitem{Bogaerts2023} B.~Bogaerts, S.~Gocht, C.~McCreesh, and J.~Nordstr\"om, Certified
+dominance and symmetry breaking for combinatorial optimisation, J.\ Artif.\ Intell.\ Res.\
+\textbf{77} (2023), doi:10.1613/jair.1.14296.
+\bibitem{GochtNordstrom2021} S.~Gocht and J.~Nordstr\"om, Certifying parity reasoning
+efficiently using pseudo-Boolean proofs, Proc.\ AAAI Conf.\ Artif.\ Intell.\ \textbf{35},
+3768 (2021), doi:10.1609/aaai.v35i5.16494.
+\bibitem{Tan2021cakelpr} Y.~K.~Tan, M.~J.~H.~Heule, and M.~O.~Myreen, cake\_lpr: Verified
+propagation redundancy checking in CakeML, in \emph{Tools and Algorithms for the
+Construction and Analysis of Systems (TACAS 2021)}, Lecture Notes in Computer Science
+Vol.~12652 (Springer, Cham, 2021), pp.~223--241, doi:10.1007/978-3-030-72013-1\_12.
 \bibitem{SM} See Supplemental Material at [URL will be inserted by publisher] for the
 class $\T(P)$, the staircase model, the cochains of all circuits, the proofs of the
 impossibility results and of the attaining circuits, the certificates, the logical error
 rates, the neutral-atom noise model, a transfer example and earlier constructions, which
-includes Refs.~\cite{Bravyi2024,Strikis2026,Gidney2021honeycomb,Gidney2021stim}.
+includes Refs.~\cite{Bravyi2024,Strikis2026,Xu2023,Gidney2021honeycomb,Gidney2021stim,CaDiCaL2024,DRATtrim2014,Bogaerts2023,GochtNordstrom2021,Tan2021cakelpr,Viszlai2026,Evered2023,Bluvstein2024,Bluvstein2025,Muniz2024,Radnaev2025,Tsai2025}.
+\bibitem{Viszlai2026} J.~Viszlai, W.~Yang, S.~F.~Lin, J.~Liu, N.~Nottingham,
+J.~M.~Baker, and F.~T.~Chong, qSIEVE: Efficient qLDPC memory via systolic movement in
+atom arrays, ACM Trans.\ Quantum Comput.\ \textbf{7}, 9 (2026), arXiv:2311.16980.
 \bibitem{Evered2023} S.~J.~Evered, D.~Bluvstein, M.~Kalinowski, S.~Ebadi, T.~Manovitz,
 H.~Zhou, S.~H.~Li, A.~A.~Geim, T.~T.~Wang, N.~Maskara, H.~Levine, G.~Semeghini,
 M.~Greiner, V.~Vuleti\'c, and M.~D.~Lukin, High-fidelity parallel entangling gates on a
@@ -446,20 +475,18 @@ neutral atom quantum computer, Nature \textbf{622}, 268 (2023), arXiv:2304.05420
 \bibitem{Bluvstein2024} D.~Bluvstein \emph{et al.}, Logical quantum processor based on
 reconfigurable atom arrays, Nature \textbf{626}, 58 (2024),
 doi:10.1038/s41586-023-06927-3, arXiv:2312.03982.
+\bibitem{Bluvstein2025} D.~Bluvstein \emph{et al.}, A fault-tolerant neutral-atom
+architecture for universal quantum computation, Nature \textbf{649}, 39 (2026),
+arXiv:2506.20661.
 \bibitem{Muniz2024} J.~A.~Muniz \emph{et al.}, High-fidelity universal gates in the
-$^{171}$Yb ground state nuclear spin qubit, arXiv:2411.11708 (v2, 2024).
+$^{171}$Yb ground-state nuclear-spin qubit, PRX Quantum \textbf{6}, 020334 (2025),
+arXiv:2411.11708.
 \bibitem{Radnaev2025} A.~G.~Radnaev \emph{et al.}, Universal neutral-atom quantum
 computer with individual optical addressing and nondestructive readout, PRX Quantum
 \textbf{6}, 030334 (2025), arXiv:2408.08288.
 \bibitem{Tsai2025} R.~B.-S.~Tsai, X.~Sun, A.~L.~Shaw, R.~Finkelstein, and M.~Endres,
 Benchmarking and fidelity response theory of high-fidelity Rydberg entangling gates,
 PRX Quantum \textbf{6}, 010331 (2025), arXiv:2407.20184.
-\bibitem{Viszlai2026} J.~Viszlai, W.~Yang, S.~F.~Lin, J.~Liu, N.~Nottingham,
-J.~M.~Baker, and F.~T.~Chong, qSIEVE: Efficient qLDPC memory via systolic movement in
-atom arrays, ACM Trans.\ Quantum Comput.\ \textbf{7}, 9 (2026), arXiv:2311.16980.
-\bibitem{Bluvstein2025} D.~Bluvstein \emph{et al.}, A fault-tolerant neutral-atom
-architecture for universal quantum computation, Nature \textbf{649}, 39 (2026),
-arXiv:2506.20661.
 \end{thebibliography}
 
 % ===========================================================================
@@ -544,10 +571,10 @@ data error. If instance $R_0$ of every reading check reads after the last layer 
 $R_0$-round circuit, an undetected logical of that circuit stays undetected with the same
 logical effect at every $R\ge R_0$: the data error after the last fault is unchanged, every
 later comparison sees the same syndrome, and the final readout agrees. This condition is
-independent of $R$ and holds for $g_9$, $b_9$, $b_{10}$ and IBM's circuits, so their $R=1$
-witnesses of weight 11, 9, 9, 10 and 8 bound $\dcirc$ for every $R$; for $g_{10}$, $u_{11}$
-and $c_{11}$ a weight-$d$ data logical applied after initialisation suffices, and for $g_8$
-weight-11 witnesses were verified for $R$ up to 30 and exist in the bulk\cl{L-23}.
+independent of $R$ and holds for $g_8$, $g_9$, $b_9$, $b_{10}$ and IBM's circuits, so their
+$R=1$ witnesses of weight 11, 11, 9, 9, 10 and 8 bound $\dcirc$ for every $R$; for $g_{10}$,
+$u_{11}$ and $c_{11}$ a weight-$d$ data logical applied after initialisation
+suffices\cl{L-4,L-23}.
 
 \emph{Period lemma.} A signature is realisable at period $P$ iff the integer system
 $x_{\pi(i+1)}-x_{\pi(i)}\ge1$, $x_{\pi(6)}-x_{\pi(1)}\le P-3$ for both orders and
@@ -833,7 +860,7 @@ bases), and the upper bound.}
 \begin{tabular}{lcllll}
 circuit & $\dext$ & lists, none realised in the bulk & direct search & upper bound & $\dcirc$\\
 \hline
-$g_8$ & 9/9 & $w_9$ 432 (+f), $w_{10}$ 17,136 & $R\le3$ & weight-11 witnesses, $R\le30$, and bulk & 11\\
+$g_8$ & 9/9 & $w_9$ 432 (+f), $w_{10}$ 17,136 & $R\le3$ & $R=1$ witness, persistence & 11\\
 $g_9$ & 9/9 & $w_9$ 360 (+f), $w_{10}$ 13,788 & $R\le3$ & $R=1$ witness, persistence & 11\\
 $g_{10}$ & 10/10 & $w_{10}$ 3,204 (+f), $w_{11}$ 121,104 & $R\le3$ & weight-12 data logical & 12\\
 $u_{11}$ & 10/10 & $w_{10}$ 144 (+f), $w_{11}$ 7,344 & $R\le2$ & weight-12 data logical & 12\\
@@ -865,17 +892,20 @@ meet-in-the-middle table. A minimum-weight logical has no proper undetected subs
 absence of solutions up to weight $W$ means $\dcirc>W$ at that $R$. It also finds the $R=1$
 witnesses.
 
-\emph{Upper bounds.} For $g_8$ weight-11 undetected logicals were found and verified
-mechanism by mechanism for $R=1$--6, 8, 10, 12, 16, 20, 30 in both bases, and exist in the
-bulk. For $g_9$, $b_9$, $b_{10}$ and IBM's circuits the $R=1$ witnesses persist (End Matter);
-replaying them in stim for $R$ up to 30, at the start and shifted by two rounds, triggers no
-detector and flips the observable, while removing any one fault triggers a detector.
+\emph{Upper bounds.} For $g_8$, $g_9$, $b_9$, $b_{10}$ and IBM's circuits the $R=1$
+witnesses persist (End Matter): the start offsets do not depend on $R$, and instance 1 of
+every reading check reads after the last layer of the one-round circuit. Replaying the
+witnesses of $g_9$, $b_9$, $b_{10}$ and IBM's circuits in stim for $R$ up to 30, at the start
+and shifted by two rounds, triggers no detector and flips the observable, while removing any
+one fault triggers a detector. For $g_8$, weight-11 undetected logicals found independently
+at $R=1$--6, 8, 10, 12, 16, 20 and 30 were verified mechanism by mechanism in both bases.
 
 % ---------------------------------------------------------------------------
 \section{Certificates}\label{sm:certs}\cl{L-15,L-25}
-VeriPB proofs are accepted only with the verdict ``s VERIFIED UNSATISFIABLE''; DRAT proofs
-are checked with drat-trim and their LRAT cores with the formally verified checker
-cake\_lpr. Lift instances are combined into batches by a selector disjunction, so that
+VeriPB~\cite{Bogaerts2023,GochtNordstrom2021} proofs are accepted only with the verdict
+``s VERIFIED UNSATISFIABLE''; DRAT proofs, produced by CaDiCaL~\cite{CaDiCaL2024}, are
+checked with drat-trim~\cite{DRATtrim2014} and their LRAT cores with the formally verified
+checker cake\_lpr~\cite{Tan2021cakelpr}. Lift instances are combined into batches by a selector disjunction, so that
 unsatisfiability of a batch implies that of each member.
 
 \emph{Impossibility results.} Five DRAT proofs (\ref{sm:p910}); regenerated formulas are
