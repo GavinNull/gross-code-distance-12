@@ -1,0 +1,587 @@
+[
+ {
+  "name": "ibmg",
+  "code": "gross",
+  "spec": "search/experiments/e033/ibm_gross_spec.json",
+  "label": "IBM depth 8",
+  "period": 8,
+  "in_T": true,
+  "not_T_reason": "",
+  "direct_Rmax": 3,
+  "direct_lower": 10,
+  "direct_witness": 10,
+  "audit": "results/E-043-audit/direct.jsonl",
+  "dcirc": 10,
+  "dext": {
+   "Z": 9,
+   "X": 8
+  },
+  "timing": {
+   "X": {
+    "reset": 7,
+    "order": "A2B2B1B3A1A3",
+    "steps": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "meas": 6
+   },
+   "Z": {
+    "reset": 6,
+    "order": "A1A3B1B2B3A2",
+    "steps": [
+     7,
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "meas": 5
+   }
+  },
+  "delta": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    1,
+    1,
+    1
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "fig12",
+  "code": "gross",
+  "spec": "results/E-021-gross-new-orders/fig12_spec.json",
+  "label": "SBB Fig. 12",
+  "period": 8,
+  "in_T": false,
+  "not_T_reason": "checks of one type do not share one timing",
+  "dcirc": 11,
+  "dext": {
+   "Z": 11,
+   "X": 11
+  },
+  "audit": "research/audits/2026-10-05 (E-014); SBB Prop. 3, Cor. 1"
+ },
+ {
+  "name": "g8",
+  "code": "gross",
+  "spec": "search/experiments/e040/g8_d11_spec.json",
+  "label": "$g_8$",
+  "period": 8,
+  "in_T": true,
+  "not_T_reason": "",
+  "dcirc": 11,
+  "audit": "research/audits/2026-10-30-E-040-circuits.md",
+  "direct_Rmax": 3,
+  "direct_lower": 11,
+  "direct_witness": 11,
+  "dext": {
+   "Z": 9,
+   "X": 9
+  },
+  "timing": {
+   "X": {
+    "reset": 7,
+    "order": "A2A1B2B3B1A3",
+    "steps": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "meas": 6
+   },
+   "Z": {
+    "reset": 0,
+    "order": "A3B1B3B2A1A2",
+    "steps": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "meas": 7
+   }
+  },
+  "delta": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    2,
+    2,
+    2
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "g9",
+  "code": "gross",
+  "spec": "search/experiments/e043/g9_d11_spec.json",
+  "label": "$g_9$",
+  "period": 9,
+  "in_T": true,
+  "not_T_reason": "",
+  "direct_Rmax": 3,
+  "direct_lower": 11,
+  "direct_witness": 11,
+  "audit": "results/E-043-audit/direct.jsonl",
+  "dcirc": 11,
+  "dext": {
+   "Z": 9,
+   "X": 9
+  },
+  "timing": {
+   "X": {
+    "reset": 8,
+    "order": "A1B1A2A3B2B3",
+    "steps": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     6
+    ],
+    "meas": 7
+   },
+   "Z": {
+    "reset": 7,
+    "order": "B3B2A3A2B1A1",
+    "steps": [
+     8,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "meas": 6
+   }
+  },
+  "delta": [
+   [
+    0,
+    0,
+    1
+   ],
+   [
+    0,
+    1,
+    1
+   ],
+   [
+    0,
+    1,
+    1
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "g10",
+  "code": "gross",
+  "spec": "search/experiments/e040/g10_d12_spec.json",
+  "label": "$g_{10}$",
+  "period": 10,
+  "in_T": true,
+  "not_T_reason": "",
+  "dcirc": 12,
+  "audit": "research/audits/2026-10-30-E-040-circuits.md; 2026-11-01-E-042.md",
+  "direct_Rmax": 3,
+  "direct_lower": 12,
+  "direct_witness": 12,
+  "dext": {
+   "X": 10,
+   "Z": 10
+  },
+  "timing": {
+   "X": {
+    "reset": 9,
+    "order": "A1A2B1A3B2B3",
+    "steps": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     7
+    ],
+    "meas": 8
+   },
+   "Z": {
+    "reset": 8,
+    "order": "B3B2A3B1A2A1",
+    "steps": [
+     9,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "meas": 7
+   }
+  },
+  "delta": [
+   [
+    0,
+    0,
+    1
+   ],
+   [
+    0,
+    0,
+    1
+   ],
+   [
+    0,
+    1,
+    1
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "u11",
+  "code": "gross",
+  "spec": "search/experiments/e032/u11_spec.json",
+  "label": "$u_{11}$",
+  "period": 11,
+  "in_T": true,
+  "not_T_reason": "",
+  "dcirc": 12,
+  "dext": {
+   "Z": 10,
+   "X": 10
+  },
+  "audit": "research/audits/2026-10-22-E-032.md; 2026-10-29-theoryB.md",
+  "timing": {
+   "X": {
+    "reset": 0,
+    "order": "A2A1A3B3B2B1",
+    "steps": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     9
+    ],
+    "meas": 10
+   },
+   "Z": {
+    "reset": 10,
+    "order": "B1B2B3A3A1A2",
+    "steps": [
+     0,
+     4,
+     5,
+     6,
+     7,
+     8
+    ],
+    "meas": 9
+   }
+  },
+  "delta": [
+   [
+    0,
+    -1,
+    -1
+   ],
+   [
+    0,
+    -1,
+    -1
+   ],
+   [
+    0,
+    -1,
+    -1
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "ibm90",
+  "code": "bb90",
+  "spec": "search/experiments/e030/ibm90_spec.json",
+  "label": "IBM depth 8",
+  "period": 8,
+  "in_T": true,
+  "not_T_reason": "",
+  "direct_Rmax": 4,
+  "direct_lower": 8,
+  "direct_witness": 8,
+  "audit": "results/E-043-audit/direct.jsonl",
+  "dcirc": 8,
+  "dext": {
+   "Z": 7,
+   "X": 6
+  },
+  "timing": {
+   "X": {
+    "reset": 7,
+    "order": "A2B2B1B3A1A3",
+    "steps": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "meas": 6
+   },
+   "Z": {
+    "reset": 6,
+    "order": "A1A3B1B2B3A2",
+    "steps": [
+     7,
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "meas": 5
+   }
+  },
+  "delta": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    1,
+    1,
+    1
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "b9",
+  "code": "bb90",
+  "spec": "search/experiments/e043/b9_d9_spec.json",
+  "label": "$b_9$",
+  "period": 9,
+  "in_T": true,
+  "not_T_reason": "",
+  "direct_Rmax": 4,
+  "direct_lower": 9,
+  "direct_witness": 9,
+  "audit": "results/E-043-audit/direct.jsonl",
+  "dcirc": 9,
+  "dext": {
+   "Z": 7,
+   "X": 7
+  },
+  "timing": {
+   "X": {
+    "reset": 8,
+    "order": "A1A2B2B3A3B1",
+    "steps": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "meas": 7
+   },
+   "Z": {
+    "reset": 0,
+    "order": "B1A3B2B3A2A1",
+    "steps": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     7
+    ],
+    "meas": 8
+   }
+  },
+  "delta": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    2,
+    1,
+    1
+   ],
+   [
+    2,
+    2,
+    2
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "b10",
+  "code": "bb90",
+  "spec": "search/experiments/e043/b10_d9_spec.json",
+  "label": "$b_{10}$",
+  "period": 10,
+  "in_T": true,
+  "not_T_reason": "",
+  "direct_Rmax": 4,
+  "direct_lower": 9,
+  "direct_witness": 9,
+  "audit": "results/E-043-audit/direct.jsonl",
+  "dcirc": 9,
+  "dext": {
+   "Z": 7,
+   "X": 7
+  },
+  "timing": {
+   "X": {
+    "reset": 9,
+    "order": "A1A2B2A3B3B1",
+    "steps": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     7
+    ],
+    "meas": 8
+   },
+   "Z": {
+    "reset": 8,
+    "order": "B1B3A3B2A1A2",
+    "steps": [
+     9,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "meas": 7
+   }
+  },
+  "delta": [
+   [
+    1,
+    0,
+    0
+   ],
+   [
+    1,
+    0,
+    0
+   ],
+   [
+    1,
+    0,
+    1
+   ]
+  ],
+  "delta_coboundary": false
+ },
+ {
+  "name": "c11",
+  "code": "bb90",
+  "spec": "search/experiments/e030/c11_spec.json",
+  "label": "$c_{11}$",
+  "period": 11,
+  "in_T": true,
+  "not_T_reason": "",
+  "dcirc": 10,
+  "dext": {
+   "Z": 8,
+   "X": 8
+  },
+  "audit": "research/audits/2026-10-22-E-030.md; 2026-10-29-theoryB.md",
+  "timing": {
+   "X": {
+    "reset": 0,
+    "order": "B1B3B2A3A1A2",
+    "steps": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     9
+    ],
+    "meas": 10
+   },
+   "Z": {
+    "reset": 10,
+    "order": "A2A1A3B2B3B1",
+    "steps": [
+     0,
+     4,
+     5,
+     6,
+     7,
+     8
+    ],
+    "meas": 9
+   }
+  },
+  "delta": [
+   [
+    -1,
+    -1,
+    -1
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    -1,
+    -1,
+    -1
+   ]
+  ],
+  "delta_coboundary": false
+ }
+]

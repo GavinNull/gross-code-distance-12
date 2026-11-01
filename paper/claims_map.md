@@ -1,3 +1,55 @@
+# Claims map for `paper/draft.tex`
+
+## Revision P (2026-11-01): minimum period in the class T(P) (outline `paper/outline_P.md`, approved)
+
+Tags `\cl{L-n}` in the source (not rendered). Ledger numbers L-1..L-21 follow outline_P §10; L-22..L-25 are new.
+Tables I, II, S1 and the δ table S3 are checked against the specs by
+`PYTHONPATH=.:tests uv run python paper/scripts/circuits_P.py --check` (reads specs + `results/E-040-audit-circ`,
+`results/E-043-audit`); Fig. 1 data from `paper/scripts/fig1_P_data.py` (audited B_audit bulk model; asserts the
+audit's 144×holonomy-2 histogram and the X45/X59–Z58/Z60 example).
+
+| tag | claim as written | STATE | audit | wording limits honoured |
+|---|---|---|---|---|
+| L-1 | Definition of T(P) (one timing per type, span ≤ P−3, distinct mod P, determinism, arbitrary orders, wrap); (v) necessary; T(P) empty for P<8; IBM circuits in T(8); counts 22,608/784,944/10,271,304 vectors, 17,424/67,536/267,984 signatures; canonical form | 28, 29 | 2026-10-30-E-040-impossibility §1, §5; 2026-10-31-E-043 §1 | SD6 + CNOT template; outside scope stated once in Discussion |
+| L-2 | [[90]] T(8) ≤ 8, T(9), T(10) ≤ 9; gross T(8), T(9) ≤ 11 | 28 | E-040-impossibility §4, §6, §7 | "for every sufficiently large number of rounds"; "in sampled cases already for R ≥ 2"; certified by DRAT + SAT-free exhaustive check |
+| L-3 | g10 (P=10) d_circ = 12 every R, both bases; Thm 4 with t = 12 = d_ext+2; 3,204/121,104; direct DEM R = 1–3; weight-12 data logical | 27, 31 | 2026-10-30-E-040-circuits §1–4, §9; 2026-11-01-E-042 | distance only; LER in Cost |
+| L-4 | g8 (P=8) d_circ = 11 every R; ties Fig. 12, one above IBM | 27 | E-040-circuits §3–5, §9 | never "record"; t = 11 ≤ d_ext+2 stated as target t |
+| L-5 | c11 (P=11) d_circ = 10 every R; Thm 4 route + certified finite-R (R ≤ 25) + gap argument (R'_8 = 22, R'_9 = 25) | 17, 19, 20, 26 | 2026-10-22-E-030 §1–2; 2026-10-29-theoryB §5; 2026-10-23-E-034 | c11 certificates = older route (E-042 audit §4) |
+| L-6 | IBM [[90]] depth 8 in T(8), d_circ = 8 every R | 29 | 2026-10-31-E-043 | upper bound via R=1 witness + persistence |
+| L-7 | IBM gross depth 8 in T(8), d_circ = 10 every R | 23, 29 | 2026-10-26-E-037; E-043 | generalised from R ≤ 12 by E-043 |
+| L-8 | SBB Fig. 12: period 8, d_circ = 11 every R, not in T | 3, 27 | 2026-10-05 E-014; E-040-circuits §5 | combined with SBB Prop. 3 / Cor. 1 |
+| L-9 | Fig. 1(b): u11 Z, list 0, hooks X45 (len 4), X59 (len 2), private readers Z58, Z60, holonomy 2; all 144 have holonomy-2 two-hook certificates | 26 | 2026-10-29-theoryB §4 | only u11 used for the cycle; g10/g8 explicitly said to need exact solving (SM S5) |
+| L-10 | Prop. 2 (|Q| = 2; coboundary ⇔ re-timable; bulk d_circ ≤ d_ext; constant δ in the memory-circuit labelling ⇒ every R = SBB Cor. 1; T: coboundary ⇔ nine entries equal) | 26 | theoryB §2 (items 2 and corrections 1–4) | bulk; finite R only for constant δ |
+| L-11 | non-coboundary δ necessary (bulk) for d_circ > d_ext, not sufficient for d = d_circ (IBM gross, twist on A2) | 26 | theoryB §2 corr. 3–4 | never "d_circ = d_ext" for IBM |
+| L-12 | Lemma 3 (pair obstruction) in T, bulk; pair table 60/60; every T(8) signature has a flat pair hook (exhaustive); explicit witnesses for all 22,608 vectors; non-interleaved circuit in T ⇒ all hooks flat | 28 | E-040-impossibility §5 (Lemma F, table (iii), Thm 1) | **restricted to "within T"** (see open item W-3); SBB Prop. 4 sentence in restricted form |
+| L-13 | Thm 4 criterion: t ≤ d, t ≤ d_ext+2, window conditions, no zero-image hooks; window lemma inclusion only; windows fail for 61/80 random schedule-bases | 26, 27, 29 | theoryB §3–4; E-040-circuits §8.2; E-043 §5.3 | general d ≥ d_ext+3 listed as open |
+| L-14 | Cor. 5 negative cycles / two-hook certificate; "makes SBB's qualitative mechanism decidable" | 26 | theoryB §4; lit 2026-10-30-theory-novelty §2 | phrasing from lit note |
+| L-15 | Certificates: impossibility = 5 DRAT + SAT-free exhaustive; g10 = 4 VeriPB + 250 DRAT/LRAT batches at R* = 13 via compression lemma; c11/u11 older routes | 19, 20, 28, 31 | E-040-impossibility §4; E-042 §4; E-034 | sentence "every infeasibility claim used in the proofs for g10, c11 and the impossibility results is accompanied by a checked certificate" + qualifiers; never "all computational inputs"; other Table I circuits stated as uncertified |
+| L-16 | Period lemma; u11 chain of 8 ⇒ P_min = 11; same for c11; their signatures absent at P = 8–10 | 28 | E-040-impossibility §5 (lemma P) | within their own signatures only |
+| L-17 | Cost λ=1 BP-OSD: gross full-distance worse than IBM ≈5–10× at 2e-3, ≥ ≈1.5 down to 1.5e-3; g10 ≈2.3× below u11 at 2e-3; [[90]] c11 worse at all p ≥ 1e-3; crossover below 1e-3 unresolved (≈1e-3 to < 1e-4 or none); 23/24 failures BP-OSD output less likely; exact counts 315/540, 144/288, 24507 | 27, 32 | 2026-11-01-E-044 §7 (three tiers); E-040-circuits §7 | no p* as result; no "ML decoder would move the crossover"; counts structural only |
+| L-18 | λ=0: c11 below ibm90 at every sampled p 1.2e-3 (0.51 [0.31, 0.83], BP-OSD, direct) to 5e-3 (both decoders from 2e-3; 0.52 [0.44, 0.62] at 3e-3); λ=0.1 indistinguishable; λ=1 worse 6–9 / 9–17 | 17, 32 | E-030 §3; E-044 §4, App. B | never "beats IBM" without λ = 0 |
+| L-19 | Neutral atoms (one main-text sentence + SM S10): c11 0.40–0.82 under sequential moves + no error on unpaired atoms; reversal with p_CZ/2 on unpaired + simultaneous moves (2.41) | 21 | 2026-10-24-E-035 §5 | both assumptions in the same sentence; gross not reported |
+| L-20 | [[108,8,10]] u11 template: d_circ = 10 any R; template fails on [[90]] (45 lifts); c11 = template after block exchange + relabel | 26 | theoryB §6–7 | example only |
+| L-21 | Novelty framing: Li et al. 2509.26494 Z2 parity of which δ is the integer multi-round refinement; depth bounds concern correctness only (2509.26494, 2603.21499) | — | lit 2026-10-30-theory-novelty | citations as prescribed |
+| L-22 | [[90]]: every assignment of orders has d_ext ≤ 8 ⇒ non-interleaved ≤ 8 (SM S13) | 14 | 2026-10-15-E-028 | DRAT certified, SBB Cor. 1 |
+| L-23 | Table I completed: g9 (P=9) 11; b9, b10 (P=9, 10) 9; upper bounds via R=1 witness + persistence (unroll starts R-independent + (Wt)) | 29 | 2026-10-31-E-043 §1–4, §6 | **not** "by Lemma 4 (window lemma)"; persistence used for g9, b9, b10, IBM only |
+| L-24 | Staircase model: every SD6 fault component = one model fault (table S2); model signatures = DEM signatures | 26 | theoryB §1 | correspondence table written out as the audit required |
+| L-25 | Compression lemma for g10 (span ≤ 1 per fault in memory-circuit labelling; single component; R* = 13; 248,616 instances) | 31 | 2026-11-01-E-042 §1–2, §4 | labelling dependence stated |
+
+### Wording not covered verbatim by an audit (for the lead to check)
+
+- W-1 Abstract/intro: "Single-ancilla … circuits for the gross code and [[90,8,10]] lose circuit distance unless … interleaved" (combines SBB Prop. 4 with L-22).
+- W-2 Cost: "so at these error rates the comparison is between circuit–decoder pairs rather than distances" (own paraphrase of E-044 §5/§7; audit's own sentence was "the cost reflects BP-OSD rather than the circuit distance").
+- W-3 Lemma 3 remark: "A non-interleaved circuit in T has constant δ, so all its hooks are flat and Lemma 3 gives d_circ ≤ d−1 directly; within T this is the mechanism behind SBB's Prop. 4, there obtained by numerical search." Restricted to T as ledger L-12 requires; the general (non-translation-invariant) statement remains unaudited and is not made.
+- W-4 g8 upper bound "for every R": E-040-circuits audit CONFIRMED every R from witnesses at R = 1–6, 8, 10, 12, 16, 20, 30 plus bulk weight 11; the persistence argument was not applied to g8 in any audit, and the paper does not apply it.
+- W-5 Window-condition coverage in SM S5: "checked for R = 1, 2, 3 for every circuit, and up to R = 12 or 20 for most" (E-043: R ≤ 12 for its five circuits; E-042: R ≤ 20 for g10; E-040/theoryB: R ≤ 3 for g8, u11, c11).
+- W-6 Proposition 2 proof sketch "(c) … all these faults lie in one round" is the audit's argument (theoryB §2 corr. 2) in my words.
+- W-7 Discussion open questions (per-check timings, merged measure–reset, d ≥ d_ext+3 and window necessity, decoder-resolved crossover, analytic P = 9, 10) are framing, not claims.
+- W-8 SM S11 "the per-round undetected terms lie many orders of magnitude below the measured rates" — E-044 §7 says "十几个数量级"; I wrote "many".
+
+### History
+Revisions up to O6 below are superseded (headline was the two period-11 circuits).
+
 # Claims map for `paper/draft.tex` (revision d, 2026-10-12: headline = STATE item 13 / cs_P18_H24; items 10, 12 also used)
 
 **Revision O6 (2026-10-24).** Final reference verification (`research/literature/2026-10-24-final-reference-verification.md`):
