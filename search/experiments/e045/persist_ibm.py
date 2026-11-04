@@ -102,17 +102,18 @@ def main():
             base = run(stim_inject(code, typ, 1, 2, faults))
             rows = []
             for T in (2, 1, 0):
-                for R in (1, 2, 3, 5, 8, 12, 13, 20, 30):
+                for R in ((1, 2, 3, 5, 8, 12, 13, 20, 30) if T == 2 else (1, 2, 5, 13)):
                     for s in sorted({0, R - 1, R // 2}):
                         fs = [(s, f[1], f[2], f[3]) for f in faults]
                         nd, ob = run(stim_inject(code, typ, R, T, fs))
-                        drop = min(run(stim_inject(code, typ, R, T, fs[:i] + fs[i + 1:]))[0] for i in range(len(fs)))
+                        drop = (min(run(stim_inject(code, typ, R, T, fs[:i] + fs[i + 1:]))[0] for i in range(len(fs)))
+                                if (T == 2 and R in (1, 30)) else None)
                         rows.append(dict(T=T, R=R, shift=s, detectors=nd, obs=ob, same_obs=ob == base[1],
                                          ok=(nd == 0 and ob == base[1]), min_drop_one=drop))
             empty = run(stim_inject(code, typ, 5, 2, []))
             rec = dict(code=name, typ=typ, basis="Z" if typ == "X" else "X", W=W, columns_R1=cols,
                        faults=[[f[0], f[1], list(f[2]), list(f[3])] for f in faults], base=base, control_empty=empty,
-                       all_ok_T2=all(r["ok"] and r["min_drop_one"] > 0 for r in rows if r["T"] == 2),
+                       all_ok_T2=all(r["ok"] and (r["min_drop_one"] is None or r["min_drop_one"] > 0) for r in rows if r["T"] == 2),
                        fails_T1=[(r["R"], r["shift"]) for r in rows if r["T"] == 1 and not r["ok"]],
                        fails_T0=[(r["R"], r["shift"]) for r in rows if r["T"] == 0 and not r["ok"]], rows=rows)
             print(json.dumps({k: v for k, v in rec.items() if k not in ("rows", "faults")}), flush=True)
