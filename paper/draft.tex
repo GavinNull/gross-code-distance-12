@@ -574,7 +574,10 @@ later comparison sees the same syndrome, and the final readout agrees. This cond
 independent of $R$ and holds for $g_8$, $g_9$, $b_9$, $b_{10}$ and IBM's circuits, so their
 $R=1$ witnesses of weight 11, 11, 9, 9, 10 and 8 bound $\dcirc$ for every $R$; for $g_{10}$,
 $u_{11}$ and $c_{11}$ a weight-$d$ data logical applied after initialisation
-suffices\cl{L-4,L-23}.
+suffices\cl{L-4,L-23}. More generally, for translation-invariant schedules in which all
+checks of each type share one preparation time, the detector error model of $R$ rounds
+embeds into that of $R+1$ rounds, in place or delayed by one period, so the circuit distance
+is non-increasing in $R$; we know of no schedule whose circuit distance increases with $R$.
 
 \emph{Period lemma.} A signature is realisable at period $P$ iff the integer system
 $x_{\pi(i+1)}-x_{\pi(i)}\ge1$, $x_{\pi(6)}-x_{\pi(1)}\le P-3$ for both orders and
@@ -935,6 +938,19 @@ arguments whose premises were verified computationally. The other circuits of Ta
 not certified; they rest on two independent solvers and the direct search.
 
 % ---------------------------------------------------------------------------
+\emph{IBM's depth-8 gross circuit in other fault models.} For the CZ-compiled,
+SI1000-noise versions of IBM's gross-code circuit distributed with the Tesseract
+decoder~\cite{Tesseract2025} ($r=12$, both memory bases), the circuit distance is 10: after
+projection onto the memory-basis detectors, which can only lower the distance, a
+VeriPB-checked certificate excludes undetectable logicals of weight $\le9$, a weight-10
+undetectable logical is verified on the unprojected circuit, and the projected detector error
+model coincides, up to a relabelling of checks, with our SD6 model of the same schedule at
+$R=12$. In our re-implementation of the single-fault model of IBM's decoder (R noisy cycles
+followed by two noiseless ones)~\cite{Bravyi2024,Crocker2026}, the circuit distance is 10 for
+the gross code and 8 for $\code{108,8,10}$ for every $R\ge1$ in both bases; a written
+time-translation argument, whose premises we check by exact computation, reduces arbitrary
+$R$ to the certified range $R\le11$ (resp.\ $R\le9$).
+
 \section{Logical error rates}\label{sm:ler}\cl{L-17,L-18}
 \emph{Setup.} All circuits are noised by the same SD6 implementation with $p_{\rm
 idle}=\lambda p$; both bases are sampled separately and added. BP-OSD (min-sum, 10,000
