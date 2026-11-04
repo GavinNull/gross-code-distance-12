@@ -1,0 +1,47 @@
+id: E-045-crocker
+title: Crocker's questions - certify the CZ-compiled Tesseract gross DEMs; IBM 12+2 model d_circ for every R; does any wrapping single-ancilla circuit gain distance with R?
+owner: experimenter
+date: 2026-11-04
+context: >
+  C. Crocker (Zenodo doi:10.5281/zenodo.23452754, release_circ_gross.zip) asked us to certify the CZ-compiled Tesseract
+  versions of IBM's gross circuit (circuits/tesseract/bb144_{Z,X}.stim) and noted that in IBM's 12+2 fault model nobody
+  has a lower bound above R = 12.  PI approved downloading that one zip.  The zip is data only: never executed,
+  imported or sourced; downloaded and extracted in a new empty scratch directory outside the project tree.
+parts:
+  A: >
+    Verify the two circuit files' sha256 (Z 9df52f6c..., X 0fb85d45...), build their DEMs with our own stim code
+    (expected 67752 / 67824 errors, 1728 detectors), reimplement the dem_canon.py fingerprint in our code and compare
+    (0a221c46... / ed1c9192...), project onto the memory-basis detectors (expected 8784 columns, 936 detectors) and
+    certify "no undetectable logical of weight <= 9" with the E-037 VeriPB pipeline (minimality constraints and
+    in-formula translation symmetry breaking, premises re-checked on the new DEM), both bases; weight-10 witness
+    replayed in stim on the full (unprojected) circuit.
+  B: >
+    IBM decoder_setup.py model (our E-037 reconstruction, R noisy + T noiseless cycles): d_circ = 10 (gross) / 8
+    ([[108]]) for EVERY R, both bases.  Lower bound by a direct time-shift + end-inclusion + connected-compression
+    argument reducing any weight <= d-1 undetectable logical to some R' <= R* where E-037 holds VeriPB certificates
+    (R <= 12 gross, R <= 10 [[108]]); premises checked computationally (end condition by an exact eventual-periodicity
+    check of the noiseless frame dynamics, for T = 0, 1, 2).  Upper bound by an R = 1 witness + the same inclusion
+    lemma, replayed in stim at several R.  Independent check of Crocker's R -> R+1 mechanism inclusion
+    (R = 1..14, 16, 18) for T = 2, and its failure for T = 0, 1.
+  C: >
+    Search project circuits (wrapping single-ancilla, SD6) for d_circ increasing with R at small R, e.g. where (Wt)
+    fails (ctl_p10 X basis); exact DEM search at R = 1..3 (4).
+prediction: >
+  (written before downloading anything or running any computation)
+  A1) both circuit sha256 match and our DEM counts equal 67752/67824 errors and 1728 detectors: 85%.
+  A2) our reimplemented fingerprint equals Crocker's on both files: 55% (canonicalisation details are easy to miss).
+  A3) projected DEMs have 8784 columns / 936 detectors: 80%; they are isomorphic (detector relabelling) to our SD6
+      ibm_depth8 R = 12 DEMs: 45%.
+  A4) VeriPB certifies weight <= 9 UNSAT in both bases within budget: 75%; weight-10 witness replays: 90%.
+  B1) the IBM model with T = 2 trailing cycles satisfies the end-inclusion condition (cycle-0 fault columns are
+      independent of R) and fails it for T = 0 and T = 1: 80%.
+  B2) compression gives R* <= 12 for gross weight <= 9 (so no new certificates are needed): 65%.
+  B3) Crocker's inclusion check R -> R+1 reproduces for T = 2: 90%.
+  C1) no project circuit we test shows d_circ strictly increasing with R at small R: 60% (the boundary can only
+      remove liftable configurations, and theory B found finite <= bulk in every tested case, but R = 1 vs 2
+      differences such as Kunlun Z w2+1 flip show the first rounds can differ).
+budget: {cpu_hours: 60, llm_tokens: 0, num_workers: 6}
+seed: 20261104
+download: release_circ_gross.zip only, from the Zenodo record of doi:10.5281/zenodo.23452754, into
+  /private/tmp/claude-501/-Users-ephemeral/51035684-bfaf-4743-b8e1-678c08dbe16b/scratchpad/crocker_zip/ (size and sha256 in the journal)
+command: "uv run python -m search.experiments.e045.<script> (each command in the journal's reproduction section)"
