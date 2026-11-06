@@ -27,7 +27,8 @@ if "--R" in args:
     i = args.index("--R"); Rarg = parse_range(args[i + 1]); args = args[:i] + args[i + 2:]
 names = args or ["u11", "c11", "c12", "c13"]
 WFILE = {"gross": ("upper_bound_weight12.json", 12, [1, 2, 3, 6, 10, 31]),
-         "bb90": ("bb90_upper_bound_weight10.json", 10, [1, 2, 5, 11, 25])}
+         "bb90": ("bb90_upper_bound_weight10.json", 10, [1, 2, 5, 11, 25]),
+         "g10": ("upper_bound_weight12.json", 12, [1, 2, 3, 6, 10, 13])}
 V = Verdict()
 err = {"Z": "X_ERROR", "X": "Z_ERROR"}
 checked = set()

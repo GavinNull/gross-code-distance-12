@@ -143,8 +143,12 @@ def main():
     if a.cmd == "list":
         for n in names:
             r = recs[n]
-            if r.get("proof_sha256") is None:
+            if r.get("proof_sha256") is None and r.get("proof_gz_sha256") is None:
                 print(f"{n:14s} {r['statement']}  (no run recorded)")
+                continue
+            if r.get("proof_sha256") is None:
+                print(f"{n:14s} {r['statement']}; {r['search']['nodes']:.3g} nodes, proof {r['proof_gz_bytes'] / 1e9:.3g} "
+                      f"GB compressed, pbdfs -F {r['cachemax']}")
                 continue
             print(f"{n:14s} {r['statement']}; {r['search']['nodes']:.3g} nodes, proof {r['proof_bytes'] / 1e9:.3g} GB, "
                   f"VeriPB {r['veripb']['cpu_s']:.0f} s, pbdfs -F {r['cachemax']}")

@@ -1,0 +1,44 @@
+== code/tclass/check_circuits.py
+PASS g10 (P = 10): X A1A2B1A3B2B3 steps 0,1,2,3,4,7 span 7; Z B3B2A3B1A2A1 steps 9,2,3,4,5,6 span 7; distinct mod P True; deterministic True; delta = [[0, 0, 1], [0, 0, 1], [0, 1, 1]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS c11 (P = 11): X B1B3B2A3A1A2 steps 1,2,3,4,5,9 span 8; Z A2A1A3B2B3B1 steps 0,4,5,6,7,8 span 8; distinct mod P True; deterministic True; delta = [[-1, -1, -1], [0, 0, 0], [-1, -1, -1]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS ibm_gross (P = 8): X A2B2B1B3A1A3 steps 0,1,2,3,4,5 span 5; Z A1A3B1B2B3A2 steps 7,0,1,2,3,4 span 5; distinct mod P True; deterministic True; delta = [[1, 1, 1], [0, 0, 0], [1, 1, 1]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS g8 (P = 8): X A2A1B2B3B1A3 steps 0,1,2,3,4,5 span 5; Z A3B1B3B2A1A2 steps 1,2,3,4,5,6 span 5; distinct mod P True; deterministic True; delta = [[1, 1, 1], [1, 1, 1], [2, 2, 2]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS g9 (P = 9): X A1B1A2A3B2B3 steps 0,1,2,3,4,6 span 6; Z B3B2A3A2B1A1 steps 8,1,2,3,4,5 span 6; distinct mod P True; deterministic True; delta = [[0, 0, 1], [0, 1, 1], [0, 1, 1]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS u11 (P = 11): X A2A1A3B3B2B1 steps 1,2,3,4,5,9 span 8; Z B1B2B3A3A1A2 steps 0,4,5,6,7,8 span 8; distinct mod P True; deterministic True; delta = [[0, -1, -1], [0, -1, -1], [0, -1, -1]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS ibm90 (P = 8): X A2B2B1B3A1A3 steps 0,1,2,3,4,5 span 5; Z A1A3B1B2B3A2 steps 7,0,1,2,3,4 span 5; distinct mod P True; deterministic True; delta = [[1, 1, 1], [0, 0, 0], [1, 1, 1]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS b9 (P = 9): X A1A2B2B3A3B1 steps 0,2,3,4,5,6 span 6; Z B1A3B2B3A2A1 steps 1,2,3,4,5,7 span 6; distinct mod P True; deterministic True; delta = [[1, 1, 1], [2, 1, 1], [2, 2, 2]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+PASS b10 (P = 10): X A1A2B2A3B3B1 steps 0,1,2,3,4,7 span 7; Z B1B3A3B2A1A2 steps 9,2,3,4,5,6 span 7; distinct mod P True; deterministic True; delta = [[1, 0, 0], [1, 0, 0], [1, 0, 1]] (G - delta = -1); legal, noiseless R = 1, 2 detectors silent
+== code/tclass/check_certs.py cnf bb90_P8_X gross_P8_X
+PASS bb90_P8_X patterns 482, vars 32869, clauses 155497 regenerated sha256 = record = shipped
+PASS gross_P8_X patterns 599, vars 45014, clauses 204194 regenerated sha256 = record = shipped
+== code/tclass/cover.py bb90_P8_X --out tclass_run_quick
+PASS {"name": "bb90_P8_X", "legal_vectors": 22608, "tested": 22608, "signature_representatives": false, "patterns": 482, "patterns_used": 482, "max_weight_used": 8, "uncovered": 0, "residual_not_nontrivial_logical": [], "sec": 2.7}
+== code/tclass/cover.py gross_P8_X --out tclass_run_quick
+PASS {"name": "gross_P8_X", "legal_vectors": 22608, "tested": 22608, "signature_representatives": false, "patterns": 599, "patterns_used": 599, "max_weight_used": 11, "uncovered": 0, "residual_not_nontrivial_logical": [], "sec": 2.9}
+== code/p11/inject_upper_bound.py g10 --R 1,2
+PASS  witness upper_bound_weight12.json Z basis: weight 12, commutes with HZ, flips logical rows [0, 1, 4]
+PASS  witness upper_bound_weight12.json X basis: weight 12, commutes with HX, flips logical rows [0, 1, 2]
+PASS  [g10] Z basis R=1: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
+PASS  [g10] Z basis R=2: weight-12 injection fires no detector, flips observables [0, 1, 4]; omitting any one flip is detected (12/12)
+PASS  [g10] X basis R=1: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
+PASS  [g10] X basis R=2: weight-12 injection fires no detector, flips observables [0, 1, 2]; omitting any one flip is detected (12/12)
+== code/tclass/persist.py --R 1,2,5
+PASS bb90_ibm_depth8 Z weight 8: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS ibm_gross_depth8 Z weight 10: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS bb90_b9 Z weight 9: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS bb90_b10 Z weight 9: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS g9 Z weight 11: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS bb90_ibm_depth8 X weight 8: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS ibm_gross_depth8 X weight 10: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS bb90_b9 X weight 9: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS bb90_b10 X weight 9: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+PASS g9 X weight 11: 4/4 (R, shift) cases undetected with the recorded logical effect, every single-fault removal detected
+== code/veripb/certify.py opb g10_Z_W10 g10_X_W10 --out tclass_run_quick/veripb
+PASS  g10_Z_W10: OPB and search input rebuilt from the data files, sha256 = record = shipped g10_Z_W10.opb.gz (g10, Z-basis memory: no extended logical of weight <= 10 other than the 3204 listed (d_ext >= 10))
+PASS  g10_X_W10: OPB and search input rebuilt from the data files, sha256 = record = shipped g10_X_W10.opb.gz (g10, X-basis memory: no extended logical of weight <= 10 other than the 3204 listed (d_ext >= 10))
+== code/tclass/check_certs.py drat tclass_run_quick/drat bb90_P8_X
+PASS bb90_P8_X UNSAT drat-trim VERIFIED cake_lpr VERIFIED UNSAT DRAT sha256 = record
+== code/proofs/ext_lift_certs.py g10 13 tclass_run_quick/ext_lift --batches 0
+PASS g10_Z_R13_s0of125 995 instances, 3335339 clauses: UNSAT drat-trim VERIFIED cake_lpr VERIFIED UNSAT cnf sha256 = record, proof = record
+PASS g10_X_R13_s0of125 995 instances, 3336237 clauses: UNSAT drat-trim VERIFIED cake_lpr VERIFIED UNSAT cnf sha256 = record, proof = record
+PASS extended-lift certificates g10, R = 13, bases Z X: every batch UNSAT with a verified proof, CNF sha256 = record

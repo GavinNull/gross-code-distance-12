@@ -42,8 +42,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 EXTFILE = {"fig12": "extended_code_{b}_memory.json", "bb90": "bb90_extended_code_{b}_memory.json",
-           "u11": "u11_extended_code_{b}_memory.json"}
-CODEFILE = {"fig12": "gross_code.json", "bb90": "bb90_code.json", "u11": "gross_code.json"}
+           "u11": "u11_extended_code_{b}_memory.json", "g10": "g10_extended_code_{b}_memory.json"}
+CODEFILE = {"fig12": "gross_code.json", "bb90": "bb90_code.json", "u11": "gross_code.json", "g10": "gross_code.json"}
 
 
 # ----------------------------------------------------------------------------------------------- sources

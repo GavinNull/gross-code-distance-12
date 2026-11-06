@@ -1,5 +1,5 @@
 #!/bin/sh
-# Quick reproduction (about 13 CPU minutes with all optional tools).
+# Quick reproduction (about 18 CPU minutes with all optional tools; the version 3.0 checks were run individually on the reference machine, see README section 0).
 # Version 1 part (gross circuits A, B, C and Fig. 12; [[90,8,10]] c16): circuit checks, lift R = 1..3 (circuit A, both
 # bases) with the Fig. 12 positive control, gap-argument premises, weight-12 injection, a sample of the weight-11
 # witnesses and of the certificates, byte-identical regeneration of two certificates, three lift implementations
@@ -16,6 +16,10 @@
 # tables recomputed from the shipped statistics; with requirements-ler.txt also six sampled tasks rebuilt (sinter task
 # hash = record) and one ratio re-sampled (code/ler/sample_one.py, about 3 CPU minutes).
 # Every check prints PASS or FAIL (SKIP: optional tool absent); the last line is ALL PASS or SOME CHECKS FAILED.
+# Version 3.0 part (class T(P)): circuit checks of Table I, two impossibility CNFs regenerated (sha256 = record) and
+# checked without SAT over all period-8 timing vectors, the g10 weight-12 injection, the persistence witnesses, two g10
+# OPB files rebuilt; with the proof tools one impossibility DRAT proof regenerated (hash = record) and one g10 lift
+# batch per basis regenerated, refuted and checked.
 # Usage: sh run_quick.sh      (PYTHON = interpreter of the environment with requirements.txt; default python)
 cd "$(dirname "$0")"
 PYTHON=${PYTHON:-python}
@@ -90,5 +94,20 @@ if "$PYTHON" -c "import sinter, stimbposd, relay_bp" 2> /dev/null; then
   run code/ler/sample_one.py --workers 2
 else
   echo "SKIP  logical-error-rate sampling: optional dependencies not installed (requirements-ler.txt)"
+fi
+# ---- version 3.0: the class T(P) (Theorem 1 of the present paper; README section 0)
+/bin/rm -rf tclass_run_quick
+run code/tclass/check_circuits.py
+run code/tclass/check_certs.py cnf bb90_P8_X gross_P8_X
+run code/tclass/cover.py bb90_P8_X --out tclass_run_quick
+run code/tclass/cover.py gross_P8_X --out tclass_run_quick
+run code/p11/inject_upper_bound.py g10 --R 1,2
+run code/tclass/persist.py --R 1,2,5
+run code/veripb/certify.py opb g10_Z_W10 g10_X_W10 --out tclass_run_quick/veripb
+if [ -x "$CADICAL" ] && [ -x "$DRAT_TRIM" ]; then
+  run code/tclass/check_certs.py drat tclass_run_quick/drat bb90_P8_X
+  run code/proofs/ext_lift_certs.py g10 13 tclass_run_quick/ext_lift --batches 0
+else
+  echo "SKIP  class-T(P) DRAT checks: proof tools not found"
 fi
 [ "$FAIL" -eq 0 ] && echo "ALL PASS" || { echo "SOME CHECKS FAILED"; exit 1; }

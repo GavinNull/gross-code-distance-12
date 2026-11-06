@@ -1,48 +1,110 @@
-# Data and verification code: interleaving recovers the full circuit distance of the gross and [[90,8,10]] bivariate-bicycle codes
+# Data and verification code: minimum period of distance-preserving syndrome extraction for bivariate-bicycle codes
 
-Version 2.0.  This data set accompanies the paper *Interleaving recovers the full circuit distance of the gross and
-[[90,8,10]] bivariate-bicycle codes* ([arXiv identifier — to be added]).  It contains the circuit specifications, the
-codes, the extended codes and the complete lists of the lightest extended logicals used in the lift computations,
-the witnesses of every upper bound, the certificates of every infeasibility claim used in the proofs (VeriPB and DRAT
-/ LRAT proofs, or their SHA-256 hashes with the scripts that regenerate them, and the checker logs), the sampling
-statistics of the logical-error-rate comparisons, and standalone scripts that reproduce the computer-checked steps of
+Version 3.0.  This data set accompanies the paper *Minimum period of distance-preserving syndrome extraction for
+bivariate-bicycle codes* ([arXiv identifier — to be added]).  Within the class T(P) of translation-invariant
+single-ancilla syndrome circuits of period P (all checks of one type share one CNOT timing), under SD6 noise, the
+shortest period with circuit distance equal to the code distance is 10 for the gross code `[[144,12,12]]` and 11 for
+`[[90,8,10]]`; Table I of the paper gives the best circuit distance at every shorter period:
 
-* **Theorem 1** (main text; SM S3): the period-11 single-ancilla circuit u11 of the gross code `[[144,12,12]]` has
-  `d_circ = 12` under SD6 noise, both memory bases, every number of rounds `R`;
-* **Theorem 2** (main text; SM S4): the period-11 circuit c11 of `[[90,8,10]]` has `d_circ = 10`, both bases, every
-  `R`; the same holds for the non-wrapping period-12 circuit c12 and for the period-16 circuit c16 (and for c13, a
-  period-13 variant of c16 that is not discussed in the paper); for every
-  assignment of per-check CNOT orders the X-side extended code of `[[90,8,10]]` has a logical of weight `<= 8` (DRAT
-  proof), so every non-interleaved circuit has `d_circ <= 8`;
-* **Corollary 1** (SM S9, S10): Fig. 12 of Strikis, Browne and Beverland (SBB, arXiv:2603.05481) has `d_circ = 11`,
-  and retimings of Fig. 12 that keep its orders cannot reach 12 (Table S5);
-* the **direct searches** on the full detector error model without the extended code (SM S5);
-* the **certificates** (SM S6, S18);
-* the **logical error rates** under SD6 with rescaled idle noise (SM S7) and in a neutral-atom model (SM S8);
-* the earlier gross circuits A, B (period 18) and C (period 21) with `d_circ = 12` (SM S11–S16) and the idle-noise
-  study of SM S17 (circuits A, B, C are kept as history; the headline circuits are u11 and c11).
+| P | gross: best `d_circ` in T(P) (circuits) | `[[90,8,10]]`: best `d_circ` in T(P) (circuits) |
+|---|---|---|
+| 8 | 11 (g8; IBM's depth-8 circuit: 10) | 8 (IBM's depth-8 circuit) |
+| 9 | 11 (g9) | 9 (b9) |
+| 10 | 12 (g10) | 9 (b10) |
+| 11 | 12 (u11) | 10 (c11) |
+
+The data set contains the circuit specifications, the extended codes and complete lists of the light extended logicals
+of every circuit of Table I, the fault patterns and CNF certificates of the impossibility results, the certificates of
+g10 and c11 (VeriPB and DRAT / LRAT proofs, or their SHA-256 hashes with the scripts that regenerate them, and the
+checker logs), the upper-bound witnesses, the logical-error-rate statistics, and standalone scripts that reproduce the
+computer-checked steps.  Section 0 describes everything added for this version; sections 1–7 describe the parts
+inherited from versions 1.1 and 2.0, which are used unchanged by the present paper (c11, u11, IBM's circuits, the
+`[[90,8,10]]` non-interleaved bound, SBB's Fig. 12, the logical error rates, the neutral-atom model).
 
 Licence: data CC BY 4.0, code MIT (see `LICENSE`).  Citation: see `CITATION.cff` (placeholders until publication).
 
-**Section numbers** follow the current paper: SM S1 notation and noise, S2 proof of Lemma 1, S3 the period-11 gross
-circuit, S4 the `[[90,8,10]]` code and its circuits, S5 direct search, S6 certificates, S7 logical error rates, S8
-neutral-atom model, S9 Fig. 12 and its retimings, S10 the extended code of Fig. 12 (`d_ext = 11`, 4224 logicals), S11
-invariance of the extended code, S12 circuits A, B, C, S13 lift for A, B, C, S14 round reduction for A, B, C, S15 upper
-bound for A, B, C, S16 search and optimality, S17 idle noise, S18 verification and data, S19 the morphing end-cycle
-code.  Lemma 1 = reduction (images of undetected faults form an extended logical), Lemma 2 = light logicals (weight
-`d_ext` and `d_ext + 1`).  Tables: Table I (main text, the two period-11 circuits), Table S1 (c16), S2–S4 (neutral
-atoms), S5 (retimings of Fig. 12), S6–S8 (circuits A, B, C), S9–S10 (idle noise).  Descriptions inside a few data
-files written for version 1 use older numbers: in `data/circuits/p8_colour_symmetric_944.json.gz` "SM S10" is the
-present S16; in the descriptions and comment headers of `certificates/*/` the optimality and Table S3 statements are
-the present S16 and Table S5.
+**Paper numbering (revision of version 3.0).** Main text: Theorem 1 (optimal periods), Proposition 2 (round-offset
+cochain), Lemma 3 (pair obstruction), Theorem 4 (lifting criterion), Corollary 5 (negative cycles); Table I (best
+`d_circ` per period), Table II (timings of g10 and c11), Fig. 1; End Matter.  SM: S1 notation and noise, S2 staircase
+model (Table S1), S3 the class T(P) (Table S2: counts), S4 cochains (Table S3), S5 the criterion in practice, S6 period
+8, S7 periods 9 and 10, S8 attaining circuits (Tables S4 timings, S5 lists and bounds), S9 certificates, S10 logical
+error rates, S11 neutral-atom model (Tables S6, S7), S12 transfer example, S13 earlier constructions, S14 verification
+and data.  **Sections 1–7 below were written for version 2.0 and use that paper's numbering** (Theorem 1 = u11,
+Theorem 2 = c11, SM S1–S19 of the earlier paper); the correspondence for the parts still used: earlier Theorem 2 / SM
+S4 (c11) = present S8, S9 "c11 and u11" and End Matter "Gap argument for c11"; earlier SM S4 "every choice of orders
+has d_ext <= 8" = present S13; earlier SM S7 / S8 = present S10 / S11; earlier SM S9, S10 (Fig. 12) = present S13.
 
-**What is new in version 2.0**: the period-11 circuits u11 and c11 (and c12, c13), the u11 extended code and its
-complete lists, the extended-lift scripts for every circuit of the template (`code/p11/`), the any-`R` premises, the
-injections, the second direct DEM search (`code/p11/direct.py`), the VeriPB certificates of `d_ext` and of the
-completeness of every list used (`certificates/veripb/`, `code/veripb/`), the DRAT certificates of every lift instance
-of u11 (`R <= 31`), c11 (`R <= 25`), c12, c13, c16 (`R <= 12`) (`certificates/proofs/lift_*.jsonl`,
-`code/proofs/ext_lift_certs.py`), the logical-error-rate data and the neutral-atom noise model (`data/ler/`,
-`code/ler/`).  Everything of version 1.1 is kept.
+**What is new in version 3.0**: the circuits g10, g8, g9, b9, b10 (`data/circuits/`); the extended codes and complete
+lists of the light extended logicals of g10, g8, g9, b9, b10 and IBM's two depth-8 circuits; the class-T(P) code
+(`code/tclass/`: enumeration, bulk model, CNF encoder, SAT-free coverage check, certificate checks, circuit checks,
+persistence replay); the fault patterns (`data/period_class/`) and the five CNF certificates with records and checker
+logs (`certificates/period_class/`); for g10 the four VeriPB records (`certificates/veripb/records.jsonl`, OPB files and
+logs), the 250 DRAT / LRAT records of the lift at `R* = 13` (`certificates/proofs/lift_g10.jsonl`), the premises of the
+compression lemma (`certificates/proofs/g10_rstar_premises.json`); the R = 1 witnesses of the upper bounds
+(`witnesses/persistence_R1.json`).  Everything of version 2.0 is kept.
+
+---------------------------------------------------------------------------------------------------------------------
+
+## 0. Version 3.0: the class T(P) (Theorem 1 of the present paper)
+
+All commands are run from the package root with the environment of section 1 (`python` = that interpreter).
+
+### 0.1 Files
+
+| file | content | paper |
+|---|---|---|
+| `data/circuits/g10.json` | g10, gross, period 10: `d_circ = 12`, every `R`, both bases | Table II, Theorem 1 |
+| `data/circuits/g8.json`, `g9.json` | gross, periods 8 and 9: `d_circ = 11` | Table I, Table S4 |
+| `data/circuits/bb90_b9.json`, `bb90_b10.json` | `[[90,8,10]]`, periods 9 and 10: `d_circ = 9` | Table I, Table S4 |
+| `data/circuits/u11.json`, `bb90_c11.json`, `ibm_gross_depth8.json`, `bb90_ibm_depth8.json` | (version 2.0) u11, c11, IBM's circuits | Tables I, II, S4 |
+| `data/extended_code/{g10,g8,g9,bb90_b9,bb90_b10,ibm_gross_depth8,bb90_ibm_depth8}_extended_code_{Z,X}_memory.json` | the extended code of each circuit and memory basis (format of section 3; g10 with orbits under the 72 translations) | S5, S8 |
+| `data/logicals/{tag}_weight{w}_logicals_{Z,X}_memory.json` | complete lists of the extended logicals used by Theorem 4: g10 `w10` 3204, `w11` 121104; g8 `w9` 432, `w10` 17136; g9 360, 13788; b9 `w7` 135, `w8` 5175; b10 225, 5535; IBM gross Z `w9` 360, X `w8` 288, `w9` 7728; IBM `[[90,8,10]]` Z `w7` 315, X `w6` 270, `w7` 4320 (per basis unless stated) | Table S5 |
+| `data/period_class/{bb90_P8_X,bb90_P9_X,bb90_P10_X,gross_P8_X,gross_P9_Z}_patterns.jsonl.gz` | the fault patterns of the five impossibility results (482, 856, 1718, 599, 1186); fault format of `code/tclass/bulk.py`: `["d", qubit, reader label, instance]`, `["h", check, suffix labels, instance]`, `["m", check, instance]` (sector X = Z-basis memory) | S7 |
+| `certificates/period_class/NAME.cnf.gz`, `records.jsonl`, `logs/` | the five CNFs, their sha256, the DRAT proof hash and size, verdicts, CPU times; `logs/`: CaDiCaL, drat-trim, cake_lpr logs of the package re-run | S7, S9 |
+| `certificates/veripb/g10_{Z,X}_W{10,11}.opb.gz`, records `g10_*` in `records.jsonl`, `logs/g10_*` | VeriPB: `d_ext >= 10` and completeness of the weight-10 and weight-11 lists of g10, both bases | End Matter, S9 |
+| `certificates/proofs/lift_g10.jsonl`, `lift_instance_order.json` (key `g10`) | the 2 x 125 lift batches of g10 at `R* = 13` (every list item, no symmetry reduction): CNF / DRAT / LRAT sha256, CaDiCaL, drat-trim, cake_lpr verdicts | End Matter, S9 |
+| `certificates/proofs/g10_rstar_premises.json` | premises of the compression lemma for g10 (fault index spread, window conditions, `R* = 13`) | End Matter, S9 |
+| `witnesses/persistence_R1.json` | the R = 1 undetected logicals of g9, b9, b10 and IBM's circuits (weights 11, 9, 9, 10, 8), both bases | End Matter, S8 |
+| `witnesses/upper_bound_weight12.json` | (version 2.0) the weight-12 data logicals, also the upper bound for g10 | S8 |
+
+### 0.2 Commands
+
+| command | checks | CPU (reference machine) |
+|---|---|---|
+| `python code/tclass/check_circuits.py` | the nine circuits of Table I: T(P) membership, timings = Tables II and S4, determinism, distinct steps mod P, `delta` = Table S3 up to a constant, noiseless circuits silent | 10 s |
+| `python code/tclass/enumerate.py P OUT` (P = 8, 9, 10) | canonical legal timing vectors and signatures: 22608 / 17424, 784944 / 67536, 10271304 / 267984 (Table S2) | 1 s, 10 s, 4 min |
+| `python code/tclass/check_certs.py cnf` | each CNF regenerated from its pattern file by `code/tclass/cnf.py`: sha256 = record = shipped | 3 min |
+| `python code/tclass/check_certs.py drat OUT` | CaDiCaL 3.0.1 + drat-trim (+ cake_lpr) on the five CNFs; DRAT proof sha256 = record (on the reference machine: all five identical, all verified) | about 40 min, 2 GB disk |
+| `python code/tclass/cover.py NAME [--sig] --out OUT` | SAT-free check: every pattern's residual is a nontrivial logical, and every canonical legal timing vector is covered by a pattern (bulk model of `bulk.py`, written independently of the CNF encoder) | P = 8: 3 s; P = 9: 4–5 min; P = 10 `--sig`: 3 min; P = 10 all vectors: 2.6 h |
+| `python code/proofs/ext_lift_certs.py g10 13 OUT --workers 4` | the 250 g10 lift batches regenerated (CNF sha256 = record), refuted by CaDiCaL, checked by drat-trim and cake_lpr | about 4 h (`--cnf-only`: CNFs only, about 1.5 h; `--batches 0,1`: two batches per basis) |
+| `python code/veripb/certify.py opb g10_Z_W10 g10_X_W10 g10_Z_W11 g10_X_W11` | OPB and search input rebuilt from the data files, sha256 = record = shipped | 12 min |
+| `python code/veripb/certify.py check g10_Z_W10` (etc.) | regenerate the proof stream with `pbdfs.c` and check it with VeriPB 3 (new proof hash is reported; the recorded runs kept only the hash of a compressed copy) | W = 10: about 1.3 h each; W = 11: 8–9 h each, memory as for the u11 weight-11 proofs (section 5) |
+| `python code/p11/inject_upper_bound.py g10` | weight-12 data logicals in g10, `R = 1, 2, 3, 6, 10, 13`, both bases | 1 min |
+| `python code/tclass/persist.py` | the R = 1 witnesses replayed in stim for `R` up to 30, at the start and shifted by two rounds; removing any one fault is detected | 3 min |
+
+### 0.3 Proof structure and what the package certifies
+
+* **Impossibility (Theorem 1, upper bounds on `d_circ` for sufficiently many rounds).**  Each CNF encodes the canonical
+  legal timing vectors of T(P) and one clause per pattern forbidding the timings under which the pattern is an undetected
+  logical in the bulk; UNSAT means every legal circuit has a pattern of weight at most the bound.  Certified by DRAT
+  (drat-trim; cake_lpr in the package re-run).  Independently, `cover.py` checks coverage without SAT over all
+  canonical vectors with a separately written bulk model, and checks that every pattern's residual is a nontrivial
+  logical (the CNF does not encode this).  Only time shift and Z-instance relabelling are used as symmetry reductions.
+* **g10 (`d_circ = 12` for every `R`).**  `d_ext = 10` and list completeness: VeriPB.  Lift at `R* = 13` of every
+  weight-10 list item (with at most one zero-image fault) and every weight-11 item: DRAT + LRAT (cake_lpr).  The
+  reduction from every `R` to `R* = 13` is the compression lemma (End Matter) with the premises of
+  `g10_rstar_premises.json`; the upper bound is the weight-12 injection.
+* **c11** (version 2.0 data): VeriPB for `d_ext` and lists, DRAT for the lifts `R <= 25`, gap argument (sections 3–5).
+* **g8, g9, b9, b10, IBM's circuits: not certified.**  Their lower bounds rest on Theorem 4 decided by two independent
+  solvers (one for g8) and on direct searches of the detector error model for small `R`; the lists are shipped, the
+  solvers are not (section 7).  Their upper bounds are the R = 1 witnesses with the persistence argument; `persist.py`
+  replays them.
+
+All CNF and OPB files of this section were regenerated by the package from its data files and are byte-identical to
+the certified runs (the CNF comment lines were neutralised; CaDiCaL ignores comments, and the five impossibility DRAT
+proofs regenerated from the package CNFs have the recorded hashes).  The g10 lift batches carry the hash of the
+package CNF in `cnf_sha256` and that of the certified run's CNF (identical except for the comment line) in
+`source_cnf_sha256`.
 
 ---------------------------------------------------------------------------------------------------------------------
 
@@ -60,13 +122,13 @@ uv pip install --python .venv/bin/python -r requirements-ler.txt      # optional
 #   (or: python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt -r requirements-ler.txt)
 sh code/proofs/build_tools.sh                    # optional: CaDiCaL, drat-trim, cake_lpr
 sh code/veripb/build_veripb.sh                   # optional: VeriPB 3
-PYTHON=.venv/bin/python sh run_quick.sh          # about 13 CPU minutes (with all optional tools)
+PYTHON=.venv/bin/python sh run_quick.sh          # about 18 CPU minutes (with all optional tools)
 PYTHON=.venv/bin/python P=4 sh run_full.sh       # see section 6 for the parts and their CPU times
 ```
 
 All scripts are run from the package root.  Every check prints a line starting with `PASS` or `FAIL` (`SKIP` for a
 check whose optional tool is absent); the drivers end with `ALL PASS` or `SOME CHECKS FAILED` (exit code 1).
-`expected_output_quick.txt` is the output of `run_quick.sh` on the reference machine (with all optional tools).
+`expected_output_quick.txt` is the output of `run_quick.sh` of version 2.0 on the reference machine (with all optional tools); `expected_output_quick_v3.txt` is the output of the version 3.0 checks added to `run_quick.sh`.
 
 Pinned versions (`requirements.txt`, also `pyproject.toml`): stim 1.16.0, numpy 2.2.6, ortools 9.15.6755 (CP-SAT),
 python-sat 1.9.dev15 (CaDiCaL 1.5.3, Glucose 4, MiniSat 2.2), with their dependencies pinned; `requirements-ler.txt`:
@@ -424,8 +486,8 @@ were longer.
 | `code/p11/direct.py run u11 Z 1 11` / `u11 X 1 11` | NONE, 12 root cases, 1.06e10 / 1.12e10 nodes | 10 / 8 min |
 | `code/p11/direct.py run u11_control_p10 Z 1 11` | FOUND (weight 11, re-verified) | 6.5 min |
 | `code/dcirc/run.py one c11 Z 12 9` (and the other logs of `logs/dcirc/`) | NONE, node count = reference | see `code/dcirc/reference_runs.tsv` (c11 `R = 12`: 9–15 min) |
-| `code/veripb/check_opb.py` | 20 `PASS` lines | 16 s |
-| `code/veripb/certify.py opb all` | 20 `PASS` lines (OPB and search input rebuilt, sha256 = record = shipped) | 2 min |
+| `code/veripb/check_opb.py` | 24 `PASS` lines (20 of version 2.0, 4 of g10) | 16 s (with g10: a few min) |
+| `code/veripb/certify.py opb all` | 24 `PASS` lines (OPB and search input rebuilt, sha256 = record = shipped) | 2 min (with g10: about 15 min) |
 | `code/veripb/certify.py check NAME` | `PASS ... 's VERIFIED UNSATISFIABLE' yes, exit code 0 ...` | see the VeriPB table (section 5); u11 W = 10: 1 h, W = 11: 7–11 h, 18–40 GB |
 | `code/proofs/ext_lift_certs.py u11 1-4 OUT` | 40 batches + 1 summary `PASS`, CNF (and DRAT) sha256 = record | 5 min |
 | `code/proofs/ext_lift_certs.py u11 1-31 OUT --workers 4` / `c11 1-25` / `c12`, `c13`, `c16 1-12` | one `PASS` per batch (632 / 986 / 310 each) | about 5 / 6 / 1.5 h each (tools, from the records) plus CNF generation |
@@ -476,3 +538,20 @@ one in 70"); the exact enumeration of the weight-10 logicals of IBM's gross circ
 u11 (SM S7; counts stated in the paper); the leading-order estimates; the idle-noise study of the period-18 circuit (SM
 S17); the morphing end-cycle code (SM S19); the DRAT proofs larger than the shipping limit and every VeriPB proof
 (identified by SHA-256, regenerated by the scripts); the checker logs of the lift batches named in section 3 (b).
+
+**Version 3.0 (present paper).**  The class T(P) is the class of Definition 1 (one CNOT timing per check type, reset
+and measurement in separate steps, single ancilla, SD6 noise); per-check timings, merged measure-and-reset steps,
+several ancillas and other noise models are outside it.  The impossibility results are bulk statements (sufficiently
+many rounds); in sampled cases the patterns are already undetected for `R >= 2` (SM S7), which the package does not
+re-check.  That the CNFs encode the stated question rests on the definitions in `code/tclass/cnf.py` and is checked
+independently by `code/tclass/cover.py`; that the bulk model equals the SD6 detector error model was checked in the
+certified runs on random signatures and is not repeated here (the circuit-level replays of `persist.py` and of the
+weight-12 injection use stim directly).  Not included: the searches that found the circuits and the patterns; the
+bulk solvers (CP-SAT and Bellman–Ford) and the direct searches of the detector error model for g8, g9, b9, b10 and
+IBM's circuits (these circuits are not certified; their lists are shipped); the scripts that computed the premises of
+the g10 compression lemma (the values are in `certificates/proofs/g10_rstar_premises.json`); the injections of every
+pattern into the memory circuit (SM S7); the DRAT proofs of the impossibility results (25–470 MB; regenerated
+byte-identically by `code/tclass/check_certs.py drat`), the g10 lift proofs and the g10 VeriPB proofs (identified by
+hash; regenerated by the scripts); the g8 upper-bound witnesses (`R = 1`–30, found by direct search and verified
+mechanism by mechanism in the certified runs); the cross-validation with the Tesseract circuits and the 12+2 fault
+model of IBM's decoder (SM S9, last paragraph).

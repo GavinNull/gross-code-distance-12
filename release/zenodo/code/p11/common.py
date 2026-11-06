@@ -9,6 +9,9 @@ length 5, 4, 3, 2, 1, keeping the first occurrence of each (H s, L s).
 
 family "gross": data/extended_code/u11_extended_code_{Z,X}_memory.json (360 columns, 5 orbits of the 72
     translations), lists data/logicals/u11_weight{10,11}_logicals_{Z,X}_memory.json (144 and 7344), d_ext = 10.
+family "g10":   (version 3.0) the period-10 gross circuit g10: data/extended_code/g10_extended_code_{Z,X}_memory.json
+    (360 columns, 5 orbits), lists data/logicals/g10_weight{10,11}_logicals_{Z,X}_memory.json (3204 and 121104),
+    d_ext = 10; used by code/proofs/ext_lift_certs.py g10 13.
 family "bb90":  data/extended_code/bb90_extended_code_{Z,X}_memory.json (225 columns, 5 orbits of the 45
     translations), lists data/logicals/bb90_weight{8,9}_logicals_{Z,X}_memory.json (585 and 16830), d_ext = 8.
 Every circuit of a family has exactly the column set of its family's data file (checked by check_circuits.py and
@@ -41,12 +44,15 @@ CIRCUITS_P11 = {
     "c16": ("bb90", "bb90_c16.json"),
     "u16": ("bb90", "bb90_u16.json"),
     "s16": ("bb90", "bb90_s16.json"),
+    "g10": ("g10", "g10.json"),
 }
 FAMILY = {
     "gross": dict(dext=10, l=12, m=6, ext="u11_extended_code_{b}_memory.json",
                   lists="u11_weight{w}_logicals_{b}_memory.json", counts={10: 144, 11: 7344}, n_group=72),
     "bb90": dict(dext=8, l=15, m=3, ext="bb90_extended_code_{b}_memory.json",
                  lists="bb90_weight{w}_logicals_{b}_memory.json", counts={8: 585, 9: 16830}, n_group=45),
+    "g10": dict(dext=10, l=12, m=6, ext="g10_extended_code_{b}_memory.json",
+                lists="g10_weight{w}_logicals_{b}_memory.json", counts={10: 3204, 11: 121104}, n_group=72),
 }
 
 
@@ -59,7 +65,7 @@ def circuit(name: str):
 
 
 def load_code(family: str):
-    if family == "gross":
+    if family in ("gross", "g10"):
         return load_gross()
     from bb90 import bbcode
     return bbcode.load_code()

@@ -9,6 +9,7 @@ find zenodo -name __pycache__ -type d -prune -exec /bin/rm -r {} +
 find zenodo -name .DS_Store -exec /bin/rm {} +
 for d in zenodo/dext_run zenodo/full_run zenodo/proof_run_quick zenodo/dcirc_run zenodo/dcirc_run_quick zenodo/p11_direct_run \
          zenodo/p11_direct_run_quick zenodo/veripb_run zenodo/veripb_run_quick zenodo/ext_lift_run_quick zenodo/tools zenodo/.venv \
+         zenodo/tclass_run zenodo/tclass_run_quick \
          zenodo/uv.lock; do [ -e "$d" ] && /bin/rm -r "$d"; done
 PAT='E-0[0-9][0-9]|audit|results/|search/experiments|(^|[^a-z])research/|qec-ai|ephemeral|/Users/|/private/|/tmp/|experimenter|lead agent|claims_map|STATE\.md|decisions\.md|hypotheses\.md|evaluators?\b|2026-10-[0-9]|Desktop|\.claude|worktree|PI approved|rustup'
 bad=0

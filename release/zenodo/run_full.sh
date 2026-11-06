@@ -16,6 +16,10 @@
 #   with VeriPB (VERIPB; skipped with NO_VERIPB=1): every VeriPB certificate regenerated, checked and compared with its
 #     hash, except the two weight-11 u11 certificates unless VERIPB_ALL=1 (about 18 CPU h more, 18-40 GB of memory)
 #                                                                                                (about 3.5 CPU h)
+#   version 3.0 (class T(P)): circuit checks, class enumeration, the five impossibility CNFs regenerated and checked
+#     without SAT (P = 10 over all 10,271,304 vectors: 2.6 CPU h), injections and persistence witnesses (about 3.5 CPU
+#     h); with the proof tools the five DRAT proofs regenerated (hash = record) and the 250 g10 lift batches
+#     (about 0.7 + 4 CPU h); the g10 VeriPB certificates are covered by the VeriPB part (weight 11 only with VERIPB_ALL=1)
 # Usage: P=4 sh run_full.sh       (PYTHON = interpreter of the environment with requirements.txt; default python)
 cd "$(dirname "$0")"
 PYTHON=${PYTHON:-python}; P=${P:-4}
@@ -110,5 +114,19 @@ if [ "${NO_VERIPB:-0}" != 1 ] && [ -x "$VERIPB" ]; then
   else run code/veripb/certify.py check --max-nodes 1e9 --out "$OUT/veripb"; fi
 elif [ "${NO_VERIPB:-0}" != 1 ]; then
   echo "SKIP  VeriPB certificates: VeriPB not found (sh code/veripb/build_veripb.sh, or set VERIPB)"
+fi
+# ---- version 3.0: the class T(P) (README section 0)
+mkdir -p "$OUT/tclass"
+run code/tclass/check_circuits.py
+for p in 8 9 10; do run code/tclass/enumerate.py $p "$OUT/tclass"; done
+run code/tclass/check_certs.py cnf
+for n in bb90_P8_X bb90_P9_X gross_P8_X gross_P9_Z; do run code/tclass/cover.py $n --out "$OUT/tclass"; done
+run code/tclass/cover.py bb90_P10_X --out "$OUT/tclass"
+run code/p11/inject_upper_bound.py g10
+run code/tclass/persist.py
+if [ "${NO_PROOFS:-0}" != 1 ]; then
+  run code/tclass/check_certs.py drat "$OUT/tclass/drat"
+  /bin/rm -rf "$OUT/ext_lift_g10"
+  run code/proofs/ext_lift_certs.py g10 13 "$OUT/ext_lift_g10" --workers "$P"
 fi
 [ "$FAIL" -eq 0 ] && echo "ALL PASS" || { echo "SOME CHECKS FAILED"; exit 1; }

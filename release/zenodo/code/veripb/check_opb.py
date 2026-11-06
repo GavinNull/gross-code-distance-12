@@ -34,8 +34,8 @@ from common_cli import Verdict                    # noqa: E402
 DATA = ROOT / "data"
 CERT = ROOT / "certificates" / "veripb"
 EXTFILE = {"fig12": "extended_code_{b}_memory.json", "bb90": "bb90_extended_code_{b}_memory.json",
-           "u11": "u11_extended_code_{b}_memory.json"}
-CODEFILE = {"fig12": "gross_code.json", "bb90": "bb90_code.json", "u11": "gross_code.json"}
+           "u11": "u11_extended_code_{b}_memory.json", "g10": "g10_extended_code_{b}_memory.json"}
+CODEFILE = {"fig12": "gross_code.json", "bb90": "bb90_code.json", "u11": "gross_code.json", "g10": "gross_code.json"}
 
 
 def rank2(M):

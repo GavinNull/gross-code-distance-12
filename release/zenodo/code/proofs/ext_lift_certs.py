@@ -45,7 +45,7 @@ from lift_cnf import Builder, write               # noqa: E402
 ROOT = HERE.parents[1]
 PROOFS = ROOT / "certificates" / "proofs"
 RECFILE = {"u11": "lift_u11.jsonl", "c11": "lift_c11.jsonl", "c12": "lift_c12.jsonl", "c13": "lift_c13.jsonl",
-           "c16": "lift_c16.jsonl", "u11_control_p10": "lift_controls.jsonl", "u16": "lift_controls.jsonl"}
+           "c16": "lift_c16.jsonl", "g10": "lift_g10.jsonl", "u11_control_p10": "lift_controls.jsonl", "u16": "lift_controls.jsonl"}
 
 
 def parse_range(s):
