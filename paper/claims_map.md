@@ -362,3 +362,10 @@ to the [[120,8,12]] of 2601.09911 (SM "Other BB codes").
 Revision b/c (2026-10-10): the entry for arXiv:2606.30592 added in revision b was removed again in revision c
 (unverified; lead decision). All must-cite references of that note (2308.07915, 2603.05481, 2506.03094, 2407.16336,
 2605.21898, 2604.09797, 2608.19917, 2603.22532) are cited in the revised main text.
+
+
+## Update 2026-11-06 (audit research/audits/2026-11-06-paperP-leftovers.md)
+- L-17 (LER factor vs IBM at 2e-3): about 6 (g10) and 14 (u11) times IBM's 2.4e-5 per round; '5–10' withdrawn.
+- C51 / Fig. 12 re-timings: all 50 DRAT certificates (25 full + 25 len2only) re-solved and drat-trim verified; the len2only gap is closed.
+- c11 direct DEM search: audited range R = 1 both bases (this audit) and R ≤ 2 X basis (theoryB audit); paper table changed from 'R ≤ 12'.
+- Neutral-atom readout scattering note corrected (cur doubled for 1 ms wait; proj one 500 µs image).

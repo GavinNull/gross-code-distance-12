@@ -316,7 +316,7 @@ the period-11 one. $\square$
 The extra steps of the period are idle steps: two per ancilla and round for $g_{10}$, three
 for $c_{11}$. Under SD6 with idle noise and BP-OSD decoding, the full-distance circuits have
 a higher per-round logical error rate than IBM's depth-8 circuits throughout the directly
-resolvable range: for the gross code by a factor of about 5--10 at $p=2\times10^{-3}$ and
+resolvable range: for the gross code by a factor of about 6 ($g_{10}$) to 14 ($u_{11}$) at $p=2\times10^{-3}$ and
 at least about 1.5 down to $p=1.5\times10^{-3}$ ($g_{10}$ itself is about 2.3 times below
 $u_{11}$ at $2\times10^{-3}$), and for $\code{90,8,10}$ at all $p\ge10^{-3}$. Where, below
 $10^{-3}$, they would overtake IBM's circuits depends on the smallest number of faults at
@@ -835,7 +835,7 @@ IBM gross & 9/8 & $Z$: $w_9$ 360; $X$: $w_8$ 288 (+f), $w_9$ 7,728 & $R\le3$ & $
 IBM $\code{90,8,10}$ & 7/6 & $Z$: $w_7$ 315; $X$: $w_6$ 270 (+f), $w_7$ 4,320 & $R\le4$ & $R=1$ witness, persistence & 8\\
 $b_9$ & 7/7 & $w_7$ 135 (+f), $w_8$ 5,175 & $R\le4$ & $R=1$ witness, persistence & 9\\
 $b_{10}$ & 7/7 & $w_7$ 225 (+f), $w_8$ 5,535 & $R\le4$ & $R=1$ witness, persistence & 9\\
-$c_{11}$ & 8/8 & $w_8$ 585 (+f), $w_9$ 16,830 & $R\le12$ & weight-10 data logical & 10\\
+$c_{11}$ & 8/8 & $w_8$ 585 (+f), $w_9$ 16,830 & $R=1$ ($X$: $R\le2$) & weight-10 data logical & 10\\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
@@ -926,7 +926,7 @@ measured rates. (ii) Measured, by direct sampling or by stratified sampling at f
 number $k$ requiring at most monotonicity of the failure probability $f_k$ in $k$: at
 $\lambda=1$, $p=2\times10^{-3}$, BP-OSD, $g_{10}$ and $u_{11}$ have per-round rates
 $1.45\times10^{-4}$ [0.81, 2.40]$\times10^{-4}$ and $3.39\times10^{-4}$ [2.34,
-4.76]$\times10^{-4}$, about 5--10 times IBM's; the ratio to IBM stays above about 1.5 down to
+4.76]$\times10^{-4}$, about 6 and 14 times IBM's $2.4\times10^{-5}$ (direct counts, $1.6\times10^{-4}$ per $Z$ shot of 12 rounds); the ratio to IBM stays above about 1.5 down to
 $1.5\times10^{-3}$ for every smooth form of $f_k$ we tried; $c_{11}$ is worse than IBM's
 $\code{90,8,10}$ circuit at all $p\ge10^{-3}$ (monotonicity bound). At $\lambda=0$, $c_{11}$
 over IBM is 0.51 [0.31, 0.83] at $1.2\times10^{-3}$ (direct counts, 32 failures in
@@ -981,7 +981,7 @@ transfer & $1\times10^{-3}$ & $1\times10^{-3}$ & $\lesssim$0.1\% per transfer~\c
 $T_2$ & 1 s & 10 s & cur~\cite{Bluvstein2024,Bluvstein2025}; proj is an assumption, as in~\cite{Xu2023,Viszlai2026}\\
 time per move & 200 $\mu$s & 200 $\mu$s & \cite{Bluvstein2024}\\
 readout wait & 1 ms & 0 & cur~\cite{Bluvstein2024}; proj: pipelined with the next moves~\cite{Xu2023}, assumes a second ancilla set\\
-readout scattering & $6.8\times10^{-4}$ & $3.4\times10^{-4}$ & 0.034\% per 500 $\mu$s image~\cite{Bluvstein2024}, applied for 1 ms\\
+readout scattering & $6.8\times10^{-4}$ & $3.4\times10^{-4}$ & 0.034\% per 500 $\mu$s image~\cite{Bluvstein2024}, per mid-circuit readout; cur: doubled for the 1 ms readout wait; proj: one image\\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
