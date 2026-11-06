@@ -43,7 +43,7 @@ t = strip_comments(tex)
 assert "\\showclaimtagsfalse" in t
 t = t.replace("\\newif\\ifshowclaimtags \\showclaimtagsfalse\n", "")
 t = re.sub(r"\\newcommand\{\\cl\}\[1\]\{\\ifshowclaimtags.*?\\fi\}\n", "", t)
-t = re.sub(r"\\cl\{[0-9,\s]*\}", "", t)
+t = re.sub(r"\\cl\{[A-Za-z0-9,\s-]*\}", "", t)
 assert "\\cl{" not in t and "showclaimtags" not in t, "claim tag left"
 # collapse runs of blank lines
 t = re.sub(r"\n{3,}", "\n\n", t)
