@@ -2,7 +2,7 @@
 
 **Current version: revision P of the paper** (this repository, `main`). It supersedes Release
 [v2.0](https://github.com/GavinNull/gross-code-distance-12/releases/tag/v2.0) (period-11 circuits) and v1.0 (period
-18); a release with the paper PDF, arXiv source and data/reproduction package for this revision is in preparation.
+18). **Release [v3.0](https://github.com/GavinNull/gross-code-distance-12/releases/tag/v3.0)**: paper PDF, arXiv source and data/reproduction package v3.0 for this revision.
 
 > **Guancheng Pan**, *Minimum period of distance-preserving syndrome extraction for bivariate-bicycle codes* (2026), arXiv:[to appear].
 
